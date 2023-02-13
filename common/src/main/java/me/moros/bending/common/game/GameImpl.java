@@ -44,11 +44,11 @@ import me.moros.bending.api.user.BendingPlayer;
 import me.moros.bending.api.util.BendingEffect;
 import me.moros.bending.api.util.Tasker;
 import me.moros.bending.api.util.TextUtil;
-import me.moros.bending.common.BendingPlugin;
+import me.moros.bending.common.Bending;
 import me.moros.bending.common.storage.StorageFactory;
 
 public final class GameImpl implements Game {
-  private final BendingPlugin plugin;
+  private final Bending plugin;
   private final ConfigProcessor configProcessor;
   private final BendingStorage storage;
 
@@ -59,7 +59,7 @@ public final class GameImpl implements Game {
 
   private final Collection<TemporalManager<?, ?>> temporal;
 
-  public GameImpl(BendingPlugin plugin) {
+  public GameImpl(Bending plugin) {
     this.plugin = plugin;
     this.configProcessor = plugin.configManager().processor();
     this.storage = new StorageFactory(plugin).createInstance();

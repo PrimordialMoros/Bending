@@ -27,7 +27,7 @@ import me.moros.bending.common.locale.TranslationManager;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 
-public interface BendingPlugin {
+public interface Bending {
   String author();
 
   String version();

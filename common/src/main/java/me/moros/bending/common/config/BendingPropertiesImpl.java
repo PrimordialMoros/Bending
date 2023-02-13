@@ -39,7 +39,7 @@ public final class BendingPropertiesImpl extends Configurable implements Bending
   private double moonModifier = Holder.DEFAULTS.moonModifier();
   private double sunModifier = Holder.DEFAULTS.sunModifier();
 
-  private boolean generateLight = BendingProperties.super.canGenerateLight();
+  private boolean generateLight = Holder.DEFAULTS.canGenerateLight();
 
   @Override
   public List<String> path() {

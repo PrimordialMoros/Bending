@@ -18,6 +18,6 @@
  */
 
 /**
- * Defines adapters for utilizing NMS and packets.
+ * Provides Bending events and bus.
  */
 package me.moros.bending.api.event;

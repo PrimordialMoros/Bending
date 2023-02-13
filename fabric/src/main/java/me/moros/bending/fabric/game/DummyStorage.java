@@ -35,8 +35,7 @@ final class DummyStorage implements BendingStorage {
   }
 
   @Override
-  public boolean init() {
-    return true; // TODO false?
+  public void init() {
   }
 
   @Override

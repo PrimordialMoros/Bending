@@ -26,7 +26,7 @@ import java.util.List;
 
 import me.moros.bending.api.config.Configurable;
 import me.moros.bending.api.storage.BendingStorage;
-import me.moros.bending.common.BendingPlugin;
+import me.moros.bending.common.Bending;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.bending.common.storage.file.loader.Loader;
 import me.moros.storage.Builder;
@@ -40,7 +40,7 @@ import org.spongepowered.configurate.serialize.SerializationException;
  * Factory class that constructs and returns a Hikari-based database storage for Bending.
  * @see BendingStorage
  */
-public record StorageFactory(BendingPlugin plugin) {
+public record StorageFactory(Bending plugin) {
   private StorageEngine parseEngine() {
     var def = StorageEngine.H2;
     var node = plugin.configManager().config().node("storage", "engine");

@@ -57,8 +57,7 @@ final class FileStorage extends AbstractStorage {
   }
 
   @Override
-  public boolean init() {
-    return true;
+  public void init() {
   }
 
   @Override

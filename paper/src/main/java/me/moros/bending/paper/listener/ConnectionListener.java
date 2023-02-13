@@ -32,7 +32,7 @@ import me.moros.bending.api.game.Game;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.user.profile.PlayerBenderProfile;
-import me.moros.bending.common.BendingPlugin;
+import me.moros.bending.common.Bending;
 import me.moros.bending.paper.platform.entity.BukkitPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -42,9 +42,9 @@ import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-public record ConnectionListener(Game game, BendingPlugin plugin,
+public record ConnectionListener(Game game, Bending plugin,
                                  AsyncLoadingCache<UUID, PlayerBenderProfile> profileCache) implements Listener {
-  public ConnectionListener(Game game, BendingPlugin plugin) {
+  public ConnectionListener(Game game, Bending plugin) {
     this(game, plugin, createCache(game));
   }
 

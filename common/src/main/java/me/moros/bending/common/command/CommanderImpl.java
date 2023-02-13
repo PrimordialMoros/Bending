@@ -34,7 +34,7 @@ import cloud.commandframework.minecraft.extras.MinecraftExceptionHandler;
 import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.BendingPlayer;
-import me.moros.bending.common.BendingPlugin;
+import me.moros.bending.common.Bending;
 import me.moros.bending.common.command.commands.BindCommand;
 import me.moros.bending.common.command.commands.BoardCommand;
 import me.moros.bending.common.command.commands.ElementCommand;
@@ -49,7 +49,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
 
 record CommanderImpl<C extends Audience>(CommandManager<C> manager, Class<? extends C> playerType,
-                                         BendingPlugin plugin) implements Commander<C> {
+                                         Bending plugin) implements Commander<C> {
   @Override
   public void init() {
     registerExceptionHandler();

@@ -33,7 +33,7 @@ import me.moros.bending.api.game.Game;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.user.profile.PlayerBenderProfile;
-import me.moros.bending.common.BendingPlugin;
+import me.moros.bending.common.Bending;
 import me.moros.bending.common.util.Initializer;
 import me.moros.bending.fabric.mixin.accessor.ServerLoginPacketListenerImplAccess;
 import me.moros.bending.fabric.platform.ScoreboardUtil;
@@ -49,10 +49,10 @@ import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 
 public final class ConnectionListener implements FabricListener, Initializer {
   private final Supplier<Game> gameSupplier;
-  private final BendingPlugin plugin;
+  private final Bending plugin;
   private final AsyncLoadingCache<UUID, PlayerBenderProfile> profileCache;
 
-  public ConnectionListener(Supplier<Game> gameSupplier, BendingPlugin plugin) {
+  public ConnectionListener(Supplier<Game> gameSupplier, Bending plugin) {
     this.gameSupplier = gameSupplier;
     this.plugin = plugin;
     this.profileCache = Caffeine.newBuilder().maximumSize(100).expireAfterWrite(Duration.ofMinutes(2))

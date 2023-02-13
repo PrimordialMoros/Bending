@@ -32,7 +32,7 @@ public record ReloadCommand<C extends Audience>(Commander<C> commander) implemen
   public void init() {
     Builder<C> builder = commander().rootBuilder();
     commander().register(builder.literal("reload")
-      .meta(CommandMeta.DESCRIPTION, "Reloads the plugin and its config")
+      .meta(CommandMeta.DESCRIPTION, "Reloads the plugin")
       .permission(CommandPermissions.RELOAD)
       .handler(c -> onReload(c.getSender()))
     );

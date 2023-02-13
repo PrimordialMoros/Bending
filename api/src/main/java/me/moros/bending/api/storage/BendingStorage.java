@@ -33,7 +33,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Handles all Storage tasks and their concurrency.
  */
 public interface BendingStorage extends Closeable {
-  boolean init();
+  void init();
 
   /**
    * Tries to load the bender profile for the user identified by the given uuid.

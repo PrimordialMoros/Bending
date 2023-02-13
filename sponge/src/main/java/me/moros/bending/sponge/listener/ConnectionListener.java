@@ -32,7 +32,7 @@ import me.moros.bending.api.game.Game;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.user.profile.PlayerBenderProfile;
-import me.moros.bending.common.BendingPlugin;
+import me.moros.bending.common.Bending;
 import me.moros.bending.sponge.platform.entity.SpongePlayer;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
@@ -42,10 +42,10 @@ import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.util.Tristate;
 
 public class ConnectionListener extends SpongeListener {
-  private final BendingPlugin plugin;
+  private final Bending plugin;
   private final AsyncLoadingCache<UUID, PlayerBenderProfile> profileCache;
 
-  public ConnectionListener(Game game, BendingPlugin plugin) {
+  public ConnectionListener(Game game, Bending plugin) {
     super(game);
     this.plugin = plugin;
     this.profileCache = Caffeine.newBuilder().maximumSize(100).expireAfterWrite(Duration.ofMinutes(2))

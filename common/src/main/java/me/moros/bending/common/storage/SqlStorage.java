@@ -19,7 +19,6 @@
 
 package me.moros.bending.common.storage;
 
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.sql.ResultSet;
@@ -46,7 +45,7 @@ import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.profile.BenderProfile;
 import me.moros.bending.api.user.profile.Identifiable;
 import me.moros.bending.api.user.profile.PlayerBenderProfile;
-import me.moros.bending.common.BendingPlugin;
+import me.moros.bending.common.Bending;
 import me.moros.bending.common.storage.sql.SqlQueries;
 import me.moros.storage.SqlStreamReader;
 import me.moros.storage.StorageDataSource;
@@ -63,11 +62,11 @@ import org.jdbi.v3.core.statement.StatementContext;
 final class SqlStorage extends AbstractStorage {
   private final BiMap<AbilityDescription, Integer> abilityMap;
 
-  private final BendingPlugin plugin;
+  private final Bending plugin;
   private final StorageDataSource dataSource;
   private final Jdbi DB;
 
-  SqlStorage(BendingPlugin plugin, StorageDataSource dataSource) {
+  SqlStorage(Bending plugin, StorageDataSource dataSource) {
     super(dataSource.logger());
     this.plugin = plugin;
     this.dataSource = dataSource;
@@ -79,16 +78,10 @@ final class SqlStorage extends AbstractStorage {
   }
 
   @Override
-  public boolean init() {
+  public void init() {
     if (!tableExists("bending_players")) {
-      Collection<String> statements;
-      String path = Path.of("schema", dataSource.type().realName() + ".sql").toString();
-      try (InputStream stream = plugin.resource(path)) {
-        statements = SqlStreamReader.parseQueries(stream);
-      } catch (Exception e) {
-        logError(e);
-        return false;
-      }
+      String path = Path.of("bending", "bending/schema", dataSource.type().realName() + ".sql").toString();
+      Collection<String> statements = SqlStreamReader.parseQueries(plugin.resource(path));
       DB.useHandle(handle -> {
         Batch batch = handle.createBatch();
         statements.forEach(batch::add);
@@ -96,7 +89,6 @@ final class SqlStorage extends AbstractStorage {
       });
     }
     createAbilities();
-    return true;
   }
 
   @Override

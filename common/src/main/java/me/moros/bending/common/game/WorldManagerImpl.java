@@ -33,7 +33,7 @@ import me.moros.bending.api.game.WorldManager;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.KeyUtil;
-import me.moros.bending.common.BendingPlugin;
+import me.moros.bending.common.Bending;
 import me.moros.bending.common.config.ConfigManager;
 import net.kyori.adventure.key.Key;
 import org.slf4j.Logger;
@@ -45,7 +45,7 @@ public final class WorldManagerImpl implements WorldManager {
   private final Map<Key, ManagerPair> worlds;
   private final Set<Key> disabled;
 
-  WorldManagerImpl(BendingPlugin plugin) {
+  WorldManagerImpl(Bending plugin) {
     this.logger = plugin.logger();
     worlds = new ConcurrentHashMap<>();
     disabled = ConcurrentHashMap.newKeySet();

@@ -28,7 +28,7 @@ import me.moros.bending.api.config.BendingProperties;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.util.Tasker;
-import me.moros.bending.common.BendingPluginBase;
+import me.moros.bending.common.AbstractBending;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.config.BendingPropertiesImpl;
 import me.moros.bending.common.config.ConfigManager;
@@ -52,7 +52,7 @@ import org.bukkit.plugin.ServicePriority;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 
-final class PaperBending extends BendingPluginBase<BendingBootstrap> {
+final class PaperBending extends AbstractBending<BendingBootstrap> {
   PaperBending(BendingBootstrap parent, Path dir, Logger logger) {
     super(parent, dir, logger);
   }

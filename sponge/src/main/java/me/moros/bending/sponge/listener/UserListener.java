@@ -38,7 +38,7 @@ import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.api.util.metadata.BlockInteraction;
 import me.moros.bending.api.util.metadata.EntityInteraction;
 import me.moros.bending.api.util.metadata.Metadata;
-import me.moros.bending.common.BendingPlugin;
+import me.moros.bending.common.Bending;
 import me.moros.bending.common.ability.earth.EarthGlove;
 import me.moros.bending.common.ability.earth.MetalCable;
 import me.moros.bending.sponge.platform.AbilityDamageSource;
@@ -93,9 +93,9 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.LocatableBlock;
 
 public class UserListener extends SpongeListener {
-  private final BendingPlugin plugin;
+  private final Bending plugin;
 
-  public UserListener(Game game, BendingPlugin plugin) {
+  public UserListener(Game game, Bending plugin) {
     super(game);
     this.plugin = plugin;
   }

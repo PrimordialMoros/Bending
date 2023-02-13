@@ -4,14 +4,13 @@ plugins {
     alias(libs.plugins.jmh)
 }
 
-version = "3.0.0-SNAPSHOT"
+version = "3.0.0"
 
 dependencies {
     api(libs.math.core)
+    api(libs.tasker.core)
     compileOnlyApi(libs.slf4j.api)
     compileOnlyApi(libs.adventure.api)
-    compileOnlyApi(libs.tasker.core)
-    compileOnly(libs.storage)
     compileOnly(libs.caffeine)
     compileOnly(libs.eventbus)
     compileOnly(libs.configurate.core)

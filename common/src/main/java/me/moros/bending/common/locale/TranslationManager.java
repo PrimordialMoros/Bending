@@ -54,6 +54,8 @@ import org.slf4j.Logger;
  * @see Message
  */
 public final class TranslationManager implements Iterable<Locale> {
+  private static final String PATH = "bending.lang.messages_en";
+
   private final Logger logger;
   private final Set<Locale> installed = ConcurrentHashMap.newKeySet();
   private final Path translationsDirectory;
@@ -75,7 +77,7 @@ public final class TranslationManager implements Iterable<Locale> {
 
     loadCustom();
 
-    ResourceBundle bundle = ResourceBundle.getBundle("lang.bending", Message.DEFAULT_LOCALE, UTF8ResourceBundleControl.get());
+    ResourceBundle bundle = ResourceBundle.getBundle(PATH, Message.DEFAULT_LOCALE, UTF8ResourceBundleControl.get());
     registry.registerAll(Message.DEFAULT_LOCALE, bundle, false);
 
     loadFromRegistry();

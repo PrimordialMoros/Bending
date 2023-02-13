@@ -28,7 +28,7 @@ import me.moros.bending.api.game.Game;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.util.Tasker;
 import me.moros.bending.api.util.metadata.Metadata;
-import me.moros.bending.common.BendingPluginBase;
+import me.moros.bending.common.AbstractBending;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.util.ReflectionUtil;
 import me.moros.bending.sponge.gui.ElementMenu;
@@ -62,7 +62,7 @@ import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 @Plugin("bending")
-public final class SpongeBending extends BendingPluginBase<PluginContainer> {
+public final class SpongeBending extends AbstractBending<PluginContainer> {
   @Inject
   public SpongeBending(PluginContainer container, @ConfigDir(sharedRoot = false) Path dir, Metrics.Factory metricsFactory) {
     super(container, dir, LoggerFactory.getLogger("bending"));

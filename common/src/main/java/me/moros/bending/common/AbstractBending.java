@@ -31,11 +31,12 @@ import me.moros.bending.common.config.BendingPropertiesImpl;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.bending.common.game.GameImpl;
 import me.moros.bending.common.locale.TranslationManager;
+import me.moros.bending.common.util.GameProviderUtil;
 import me.moros.bending.common.util.ReflectionUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 
-public abstract class BendingPluginBase<T> implements BendingPlugin, PluginLifecycle {
+public abstract class AbstractBending<T> implements Bending {
   protected final T parent;
 
   private final Path path;
@@ -46,7 +47,7 @@ public abstract class BendingPluginBase<T> implements BendingPlugin, PluginLifec
 
   protected Game game;
 
-  protected BendingPluginBase(T parent, Path dir, Logger logger) {
+  protected AbstractBending(T parent, Path dir, Logger logger) {
     this.parent = parent;
     this.path = dir;
     this.logger = logger;
@@ -56,8 +57,7 @@ public abstract class BendingPluginBase<T> implements BendingPlugin, PluginLifec
     new AbilityInitializer().init();
   }
 
-  @Override
-  public void load() {
+  protected void load() {
     game = new GameImpl(this);
     GameProviderUtil.registerProvider(game);
   }
@@ -69,8 +69,7 @@ public abstract class BendingPluginBase<T> implements BendingPlugin, PluginLifec
     }
   }
 
-  @Override
-  public void disable() {
+  protected void disable() {
     if (game != null) {
       game.cleanup();
       EventBus.INSTANCE.shutdown();

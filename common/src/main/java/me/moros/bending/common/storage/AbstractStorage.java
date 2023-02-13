@@ -31,7 +31,7 @@ import me.moros.bending.api.util.Tasker;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 
-public abstract class AbstractStorage implements BendingStorage {
+abstract class AbstractStorage implements BendingStorage {
   protected final Logger logger;
 
   protected AbstractStorage(Logger logger) {

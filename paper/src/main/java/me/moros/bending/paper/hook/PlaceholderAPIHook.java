@@ -22,7 +22,7 @@ package me.moros.bending.paper.hook;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
-import me.moros.bending.common.BendingPlugin;
+import me.moros.bending.common.Bending;
 import me.moros.bending.common.placeholder.PlaceholderProvider;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -32,11 +32,11 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class PlaceholderAPIHook extends PlaceholderExpansion {
-  private final BendingPlugin plugin;
+  private final Bending plugin;
   private final PlaceholderProvider provider;
   private final LegacyComponentSerializer serializer;
 
-  public PlaceholderAPIHook(BendingPlugin plugin) {
+  public PlaceholderAPIHook(Bending plugin) {
     this.plugin = plugin;
     this.provider = PlaceholderProvider.defaultBuilder().build();
     this.serializer = LegacyComponentSerializer.legacyAmpersand().toBuilder().hexColors().build();

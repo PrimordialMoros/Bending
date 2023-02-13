@@ -17,7 +17,7 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.common;
+package me.moros.bending.common.util;
 
 import java.lang.reflect.Method;
 

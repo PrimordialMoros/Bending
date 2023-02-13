@@ -21,12 +21,12 @@ package me.moros.bending.common.command;
 
 import cloud.commandframework.Command.Builder;
 import cloud.commandframework.CommandManager;
-import me.moros.bending.common.BendingPlugin;
+import me.moros.bending.common.Bending;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
 
 public interface Commander<C> extends Initializer {
-  BendingPlugin plugin();
+  Bending plugin();
 
   Class<? extends C> playerType();
 
@@ -36,7 +36,7 @@ public interface Commander<C> extends Initializer {
 
   void register(Builder<C> builder);
 
-  static <C extends Audience> Commander<C> create(CommandManager<C> manager, Class<? extends C> playerType, BendingPlugin plugin) {
+  static <C extends Audience> Commander<C> create(CommandManager<C> manager, Class<? extends C> playerType, Bending plugin) {
     return new CommanderImpl<>(manager, playerType, plugin);
   }
 }

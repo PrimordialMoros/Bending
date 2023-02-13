@@ -31,9 +31,9 @@ import cloud.commandframework.fabric.FabricServerCommandManager;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.util.Tasker;
-import me.moros.bending.common.BendingPluginBase;
-import me.moros.bending.common.GameProviderUtil;
+import me.moros.bending.common.AbstractBending;
 import me.moros.bending.common.command.Commander;
+import me.moros.bending.common.util.GameProviderUtil;
 import me.moros.bending.common.util.Initializer;
 import me.moros.bending.common.util.ReflectionUtil;
 import me.moros.bending.fabric.game.DummyGame;
@@ -60,7 +60,7 @@ import net.fabricmc.loader.api.metadata.Person;
 import net.minecraft.server.MinecraftServer;
 import org.slf4j.LoggerFactory;
 
-final class FabricBending extends BendingPluginBase<ModContainer> {
+final class FabricBending extends AbstractBending<ModContainer> {
   private LoadPhase phase = LoadPhase.FIRST;
   private final Collection<Initializer> listeners;
   private final AtomicBoolean exiting = new AtomicBoolean();

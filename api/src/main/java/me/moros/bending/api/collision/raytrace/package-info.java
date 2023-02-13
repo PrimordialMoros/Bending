@@ -18,6 +18,6 @@
  */
 
 /**
- * Provides classes and interfaces for modelling ray trace results.
+ * Provides classes and interfaces for modelling raytracing.
  */
 package me.moros.bending.api.collision.raytrace;
