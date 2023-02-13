@@ -76,13 +76,15 @@ public record FabricWorld(ServerLevel handle) implements World {
   @Override
   public AABB blockBounds(int x, int y, int z) {
     var b = at(x, y, z);
-    var shape = b.getShape(handle(), new BlockPos(x, y, z));
-    if (!shape.isEmpty()) {
-      var box = shape.bounds();
-      if (box.getSize() > 0) {
-        Vector3d min = Vector3d.of(x + box.minX, y + box.minY, z + box.minZ);
-        Vector3d max = Vector3d.of(x + box.maxX, y + box.maxY, z + box.maxZ);
-        return new AABB(min, max);
+    if (PlatformAdapter.fromFabricData(b).type().isCollidable()) {
+      var shape = b.getShape(handle(), new BlockPos(x, y, z));
+      if (!shape.isEmpty()) {
+        var box = shape.bounds();
+        if (box.getSize() > 0) {
+          Vector3d min = Vector3d.of(x + box.minX, y + box.minY, z + box.minZ);
+          Vector3d max = Vector3d.of(x + box.maxX, y + box.maxY, z + box.maxZ);
+          return new AABB(min, max);
+        }
       }
     }
     return AABB.dummy();
