@@ -110,6 +110,6 @@ jmh = { id = "me.champeau.jmh", version = "0.6.8" }
 checker = { id = "org.checkerframework", version = "0.6.23" }
 shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
 fabric-loom = { id = "fabric-loom", version.ref = "fabric-loom" }
-userdev = { id = "io.papermc.paperweight.userdev", version = "1.5.0" }
+userdev = { id = "io.papermc.paperweight.userdev", version = "1.5.1" }
 sponge = { id = "org.spongepowered.gradle.plugin", version = "2.1.1" }
 vanilla = { id = "org.spongepowered.gradle.vanilla", version.ref = "vanilla-gradle" }
