@@ -21,7 +21,7 @@ tasks {
         archiveClassifier.set("")
         archiveBaseName.set(project.name)
         from("$rootDir/LICENSE") {
-            rename { "${rootProject.name.toUpperCase()}_${it}" }
+            rename { "${rootProject.name.uppercase()}_${it}" }
         }
         dependencies {
             reloc("org.bstats", "bstats")
@@ -41,9 +41,9 @@ tasks {
     val copyJar = register("copyJar", CopyFile::class) {
         fileToCopy.set(platformExt.productionJar)
         destination.set(platformExt.productionJar.flatMap { rootProject.layout.buildDirectory.file(it.asFile.name) })
+        dependsOn(jar)
     }
     assemble {
         dependsOn(copyJar)
     }
 }
-

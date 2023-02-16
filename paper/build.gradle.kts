@@ -13,9 +13,8 @@ repositories {
 
 dependencies {
     bendingImplementation(projects.bendingCommon)
-    project.project(":bending-paper:adapters").subprojects.forEach {
-        bendingImplementation(project(it.path, "reobf"))
-    }
+    bendingImplementation(projects.adapterV119R1)
+    bendingImplementation(projects.adapterV119R2)
     bendingImplementation(libs.math.bukkit)
     bendingImplementation(libs.tasker.bukkit)
     bendingImplementation(libs.bstats.bukkit)

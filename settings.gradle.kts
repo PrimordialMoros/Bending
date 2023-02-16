@@ -9,19 +9,18 @@ pluginManagement {
 }
 rootProject.name = "bending"
 
-setupSubproject("api")
-setupSubproject("common")
-setupSubproject("nms")
-setupSubproject("fabric")
-setupSubproject("paper")
-setupSubproject("sponge")
+setupSubproject("bending-api", "api")
+setupSubproject("bending-common", "common")
+setupSubproject("bending-nms", "nms")
+setupSubproject("bending-fabric", "fabric")
+setupSubproject("bending-paper", "paper")
+setupSubproject("bending-sponge", "sponge")
 file("paper/adapters").listFiles { _, name -> name.startsWith("adapter-") }?.forEach {
-    include("bending-paper:adapters:${it.name}")
+    setupSubproject(it.name, it.path)
 }
 //include("code-generator")
 
-fun setupSubproject(name: String) {
-    val moduleName = "${rootProject.name}-$name"
-    include(moduleName)
-    project(":$moduleName").projectDir = file(name)
+fun setupSubproject(name: String, dir: String) {
+    include(name)
+    project(":$name").projectDir = file(dir)
 }
