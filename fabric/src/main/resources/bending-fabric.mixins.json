@@ -19,6 +19,7 @@
     "block.FrostedIceBlockMixin",
     "block.IceBlockMixin",
     "block.PistonBaseBlockMixin",
+    "block.SpreadingSnowyDirtBlockMixin",
     "entity.EntityMixin",
     "entity.FallingBlockEntityMixin",
     "entity.ItemEntityMixin",
