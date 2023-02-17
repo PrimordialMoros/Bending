@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
-import me.moros.bending.api.ability.Ability.SpoutAbility;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.AbilityInstance;
 import me.moros.bending.api.ability.Activation;
@@ -48,6 +47,7 @@ import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.api.util.material.WaterMaterials;
+import me.moros.bending.common.ability.SpoutAbility;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;

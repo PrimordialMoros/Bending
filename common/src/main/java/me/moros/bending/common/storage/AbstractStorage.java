@@ -28,8 +28,8 @@ import me.moros.bending.api.user.profile.BenderProfile;
 import me.moros.bending.api.user.profile.Identifiable;
 import me.moros.bending.api.user.profile.PlayerBenderProfile;
 import me.moros.bending.api.util.Tasker;
+import me.moros.bending.common.logging.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.slf4j.Logger;
 
 abstract class AbstractStorage implements BendingStorage {
   protected final Logger logger;

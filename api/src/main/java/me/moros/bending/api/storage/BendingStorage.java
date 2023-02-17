@@ -19,7 +19,6 @@
 
 package me.moros.bending.api.storage;
 
-import java.io.Closeable;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -32,8 +31,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * Handles all Storage tasks and their concurrency.
  */
-public interface BendingStorage extends Closeable {
+public interface BendingStorage {
   void init();
+
+  void close();
 
   /**
    * Tries to load the bender profile for the user identified by the given uuid.
@@ -78,7 +79,4 @@ public interface BendingStorage extends Closeable {
    * @param preset the preset to delete
    */
   void deletePresetAsync(Identifiable user, Preset preset);
-
-  @Override
-  void close();
 }

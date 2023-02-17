@@ -20,7 +20,6 @@
 package me.moros.bending.fabric.platform;
 
 import java.util.Optional;
-import java.util.function.IntSupplier;
 
 import me.moros.bending.api.ability.element.ElementHandler;
 import me.moros.bending.api.adapter.NativeAdapter;
@@ -42,13 +41,11 @@ import net.minecraft.server.MinecraftServer;
 public class FabricPlatform implements Platform, PlatformFactory {
   private final MinecraftServer server;
   private final NativeAdapter adapter;
-  private final IntSupplier tickSupplier;
 
   public FabricPlatform(MinecraftServer server) {
     new FabricRegistryInitializer().init();
     this.server = server;
     this.adapter = new NativeAdapterImpl(server);
-    this.tickSupplier = server::getTickCount;
   }
 
   @Override
@@ -69,11 +66,6 @@ public class FabricPlatform implements Platform, PlatformFactory {
   @Override
   public NativeAdapter nativeAdapter() {
     return adapter;
-  }
-
-  @Override
-  public int currentTick() {
-    return tickSupplier.getAsInt();
   }
 
   @Override

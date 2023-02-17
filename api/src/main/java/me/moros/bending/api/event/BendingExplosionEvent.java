@@ -20,31 +20,15 @@
 package me.moros.bending.api.event;
 
 import java.util.Collection;
-import java.util.Set;
 
-import me.moros.bending.api.event.base.AbstractCancellableUserEvent;
 import me.moros.bending.api.platform.block.Block;
-import me.moros.bending.api.user.User;
 import me.moros.math.Position;
 
 /**
  * Called when a bending ability causes an explosion.
  */
-public class BendingExplosionEvent extends AbstractCancellableUserEvent {
-  private final Position center;
-  private final Collection<Block> affectedBlocks;
+public interface BendingExplosionEvent extends AbilityEvent, Cancellable {
+  Position center();
 
-  protected BendingExplosionEvent(User user, Position center, Collection<Block> affectedBlocks) {
-    super(user);
-    this.center = center;
-    this.affectedBlocks = Set.copyOf(affectedBlocks);
-  }
-
-  public Position center() {
-    return center;
-  }
-
-  public Collection<Block> affectedBlocks() {
-    return affectedBlocks;
-  }
+  Collection<Block> affectedBlocks();
 }

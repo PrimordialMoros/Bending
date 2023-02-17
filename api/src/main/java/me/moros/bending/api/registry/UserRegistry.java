@@ -22,7 +22,6 @@ package me.moros.bending.api.registry;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import me.moros.bending.api.event.EventBus;
 import me.moros.bending.api.registry.SimpleRegistry.SimpleMutableRegistry;
 import me.moros.bending.api.user.BendingPlayer;
 import me.moros.bending.api.user.User;
@@ -39,7 +38,7 @@ public final class UserRegistry extends SimpleMutableRegistry<UUID, User> {
   @Override
   public boolean register(User user) {
     if (super.register(user)) {
-      EventBus.INSTANCE.postUserRegisterEvent(user);
+      user.game().eventBus().postUserRegisterEvent(user);
       return true;
     }
     return false;

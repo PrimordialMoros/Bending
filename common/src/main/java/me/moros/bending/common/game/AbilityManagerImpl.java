@@ -40,8 +40,8 @@ import me.moros.bending.api.ability.Updatable;
 import me.moros.bending.api.game.AbilityManager;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
+import me.moros.bending.common.logging.Logger;
 import net.kyori.adventure.key.Key;
-import org.slf4j.Logger;
 
 public class AbilityManagerImpl implements AbilityManager {
   private final Logger logger;

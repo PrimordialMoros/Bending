@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.nio.file.Path;
 
 import me.moros.bending.api.config.BendingProperties;
-import me.moros.bending.api.event.EventBus;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.util.Tasker;
 import me.moros.bending.common.ability.AbilityInitializer;
@@ -32,10 +31,10 @@ import me.moros.bending.common.config.ConfigManager;
 import me.moros.bending.common.game.GameImpl;
 import me.moros.bending.common.loader.AddonLoader;
 import me.moros.bending.common.locale.TranslationManager;
+import me.moros.bending.common.logging.Logger;
 import me.moros.bending.common.util.GameProviderUtil;
 import me.moros.bending.common.util.ReflectionUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.slf4j.Logger;
 
 public abstract class AbstractBending<T> implements Bending {
   protected final T parent;
@@ -78,7 +77,7 @@ public abstract class AbstractBending<T> implements Bending {
     if (game != null) {
       addonLoader.unloadAll();
       game.cleanup();
-      EventBus.INSTANCE.shutdown();
+      game.eventBus().shutdown();
       configManager().close();
       Tasker.sync().shutdown();
       Tasker.async().shutdown();

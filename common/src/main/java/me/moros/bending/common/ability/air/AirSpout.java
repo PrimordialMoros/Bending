@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import me.moros.bending.api.ability.Ability.SpoutAbility;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.AbilityInstance;
 import me.moros.bending.api.ability.Activation;
@@ -37,6 +36,7 @@ import me.moros.bending.api.platform.sound.SoundEffect;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
+import me.moros.bending.common.ability.SpoutAbility;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;

@@ -32,13 +32,12 @@ import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemBuilder;
 import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.user.BendingPlayer;
+import me.moros.bending.common.logging.Logger;
 import me.moros.bending.paper.adapter.AdapterLoader;
 import me.moros.bending.paper.adapter.NativeAdapterImpl;
 import me.moros.bending.paper.gui.BoardImpl;
 import me.moros.bending.paper.gui.ElementMenu;
 import me.moros.bending.paper.platform.item.BukkitItemBuilder;
-import org.bukkit.Bukkit;
-import org.slf4j.Logger;
 
 public class BukkitPlatform implements Platform, PlatformFactory {
   private final NativeAdapter adapter;
@@ -68,11 +67,6 @@ public class BukkitPlatform implements Platform, PlatformFactory {
   @Override
   public NativeAdapter nativeAdapter() {
     return adapter;
-  }
-
-  @Override
-  public int currentTick() {
-    return Bukkit.getCurrentTick();
   }
 
   @Override

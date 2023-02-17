@@ -19,48 +19,28 @@
 
 package me.moros.bending.api.event;
 
-import java.util.Objects;
-
-import me.moros.bending.api.ability.AbilityDescription;
-import me.moros.bending.api.event.base.AbstractCancellableAbilityEvent;
 import me.moros.bending.api.platform.entity.LivingEntity;
-import me.moros.bending.api.user.User;
 import me.moros.math.Vector3d;
 
 /**
  * Called when an ability attempts to alter the velocity of a LivingEntity.
  */
-public class VelocityEvent extends AbstractCancellableAbilityEvent {
-  private final LivingEntity target;
-  private Vector3d velocity;
-
-  protected VelocityEvent(User user, LivingEntity target, AbilityDescription desc, Vector3d velocity) {
-    super(user, desc);
-    this.target = target;
-    this.velocity = velocity;
-  }
-
+public interface VelocityEvent extends AbilityEvent, Cancellable {
   /**
    * Provides the target whose velocity is being changed.
    * @return the LivingEntity target
    */
-  public LivingEntity target() {
-    return target;
-  }
+  LivingEntity target();
 
   /**
    * Provides the new velocity that will be applied to the target.
    * @return the new velocity
    */
-  public Vector3d velocity() {
-    return velocity;
-  }
+  Vector3d velocity();
 
   /**
    * Sets the new velocity that will be applied to the target.
    * @param velocity the velocity to apply
    */
-  public void velocity(Vector3d velocity) {
-    this.velocity = Objects.requireNonNull(velocity);
-  }
+  void velocity(Vector3d velocity);
 }

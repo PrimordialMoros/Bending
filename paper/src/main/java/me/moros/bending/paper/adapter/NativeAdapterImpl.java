@@ -21,8 +21,8 @@ package me.moros.bending.paper.adapter;
 
 import me.moros.bending.api.adapter.NativeAdapter;
 import me.moros.bending.api.collision.raytrace.BlockRayTrace;
-import me.moros.bending.api.collision.raytrace.CompositeRayTrace;
 import me.moros.bending.api.collision.raytrace.Context;
+import me.moros.bending.api.collision.raytrace.RayTrace;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.world.World;
 import me.moros.bending.paper.platform.world.BukkitWorld;
@@ -45,11 +45,11 @@ public final class NativeAdapterImpl implements NativeAdapter {
     var mode = context.ignoreLiquids() ? FluidCollisionMode.NEVER : FluidCollisionMode.ALWAYS;
     var result = handle.rayTraceBlocks(loc, dir, context.range(), mode, context.ignorePassable());
     if (result == null || result.getHitBlock() == null) {
-      return CompositeRayTrace.miss(context.endPoint());
+      return RayTrace.miss(context.endPoint());
     }
     var pos = result.getHitPosition();
     Vector3d point = Vector3d.of(pos.getX(), pos.getY(), pos.getZ());
     Block block = world.blockAt(result.getHitBlock().getX(), result.getHitBlock().getY(), result.getHitBlock().getZ());
-    return CompositeRayTrace.hit(point, block);
+    return RayTrace.hit(point, block);
   }
 }

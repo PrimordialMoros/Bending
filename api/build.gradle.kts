@@ -11,8 +11,6 @@ dependencies {
     api(libs.tasker.core)
     compileOnlyApi(libs.adventure.api)
     compileOnly(libs.caffeine)
-    compileOnly(libs.eventbus)
-    compileOnly(libs.configurate.core)
 }
 
 sourceSets {

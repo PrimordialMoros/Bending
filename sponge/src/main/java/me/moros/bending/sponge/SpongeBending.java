@@ -46,7 +46,6 @@ import me.moros.bending.sponge.platform.SpongePlatform;
 import me.moros.tasker.executor.CompositeExecutor;
 import me.moros.tasker.sponge.SpongeExecutor;
 import org.bstats.sponge.Metrics;
-import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.data.DataRegistration;
@@ -65,7 +64,7 @@ import org.spongepowered.plugin.builtin.jvm.Plugin;
 public final class SpongeBending extends AbstractBending<PluginContainer> {
   @Inject
   public SpongeBending(PluginContainer container, @ConfigDir(sharedRoot = false) Path dir, Metrics.Factory metricsFactory) {
-    super(container, dir, LoggerFactory.getLogger("bending"));
+    super(container, dir, new LoggerImpl(container.logger()));
     metricsFactory.make(8717);
 
     SpongeCommandManager<CommandSender> manager = new SpongeCommandManager<>(

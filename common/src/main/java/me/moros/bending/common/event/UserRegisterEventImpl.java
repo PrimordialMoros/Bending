@@ -17,24 +17,14 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.event.base;
+package me.moros.bending.common.event;
 
-import me.moros.bending.api.ability.AbilityDescription;
+import me.moros.bending.api.event.UserEvent;
 import me.moros.bending.api.user.User;
+import me.moros.bending.common.event.base.AbstractUserEvent;
 
-/**
- * Called when a user's ability cooldown has expired.
- */
-public abstract class AbstractAbilityEvent extends AbstractUserEvent implements AbilityEvent {
-  private final AbilityDescription desc;
-
-  protected AbstractAbilityEvent(User user, AbilityDescription desc) {
+public class UserRegisterEventImpl extends AbstractUserEvent implements UserEvent {
+  public UserRegisterEventImpl(User user) {
     super(user);
-    this.desc = desc;
-  }
-
-  @Override
-  public AbilityDescription ability() {
-    return desc;
   }
 }

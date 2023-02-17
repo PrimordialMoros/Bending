@@ -26,7 +26,6 @@ import java.util.concurrent.CompletableFuture;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.preset.Preset;
 import me.moros.bending.api.ability.preset.PresetCreateResult;
-import me.moros.bending.api.event.EventBus;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.gui.Board;
 import me.moros.bending.api.platform.Platform;
@@ -121,7 +120,7 @@ public final class BendingPlayer extends BendingUser implements PresetUser, Dele
     if (preset.id() > 0 || presets.contains(preset) || presets.stream().map(Preset::name).anyMatch(n::equalsIgnoreCase)) {
       return CompletableFuture.completedFuture(PresetCreateResult.EXISTS);
     }
-    if (n.isEmpty() || !EventBus.INSTANCE.postPresetCreateEvent(this, preset)) {
+    if (n.isEmpty() || !game().eventBus().postPresetCreateEvent(this, preset)) {
       return CompletableFuture.completedFuture(PresetCreateResult.CANCELLED);
     }
     return game().storage().savePresetAsync(Identifiable.of(internalId, uuid()), preset).thenApply(id -> {

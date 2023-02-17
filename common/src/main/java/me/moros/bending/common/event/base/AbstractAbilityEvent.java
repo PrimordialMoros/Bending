@@ -17,21 +17,25 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.event;
+package me.moros.bending.common.event.base;
 
-import java.util.function.Consumer;
+import me.moros.bending.api.ability.AbilityDescription;
+import me.moros.bending.api.event.AbilityEvent;
+import me.moros.bending.api.user.User;
 
-import net.kyori.event.EventSubscriber;
-import org.checkerframework.checker.nullness.qual.NonNull;
+/**
+ * Called when a user's ability cooldown has expired.
+ */
+public abstract class AbstractAbilityEvent extends AbstractUserEvent implements AbilityEvent {
+  private final AbilityDescription desc;
 
-record EventSubscriberImpl<E>(Consumer<E> consumer, int postOrder) implements EventSubscriber<E> {
-  @Override
-  public void on(@NonNull E event) {
-    consumer.accept(event);
+  protected AbstractAbilityEvent(User user, AbilityDescription desc) {
+    super(user);
+    this.desc = desc;
   }
 
   @Override
-  public boolean acceptsCancelled() {
-    return false;
+  public AbilityDescription ability() {
+    return desc;
   }
 }

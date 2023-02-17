@@ -20,15 +20,17 @@
 package me.moros.bending.fabric.game;
 
 import me.moros.bending.api.config.ConfigProcessor;
+import me.moros.bending.api.event.EventBus;
 import me.moros.bending.api.game.ActivationController;
 import me.moros.bending.api.game.FlightManager;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.game.WorldManager;
 import me.moros.bending.api.storage.BendingStorage;
 
-public record DummyGame(BendingStorage storage, FlightManager flightManager, WorldManager worldManager,
+public record DummyGame(EventBus eventBus, BendingStorage storage, FlightManager flightManager,
+                        WorldManager worldManager,
                         ActivationController activationController, ConfigProcessor configProcessor) implements Game {
-  public static final Game INSTANCE = new DummyGame(DummyStorage.INSTANCE, DummyFlightManager.INSTANCE,
+  public static final Game INSTANCE = new DummyGame(DummyEventBus.INSTANCE, DummyStorage.INSTANCE, DummyFlightManager.INSTANCE,
     DummyWorldManager.INSTANCE, DummyActivationController.INSTANCE, DummyConfigProcessor.INSTANCE);
 
   @Override

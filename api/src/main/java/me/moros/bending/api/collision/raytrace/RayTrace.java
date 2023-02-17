@@ -19,10 +19,31 @@
 
 package me.moros.bending.api.collision.raytrace;
 
+import java.util.Objects;
+
+import me.moros.bending.api.platform.block.Block;
+import me.moros.bending.api.platform.entity.Entity;
 import me.moros.math.Vector3d;
 
 public interface RayTrace {
   Vector3d position();
 
   boolean hit();
+
+  static CompositeRayTrace miss(Vector3d position) {
+    Objects.requireNonNull(position);
+    return new RayTraceImpl(position, null, null);
+  }
+
+  static CompositeRayTrace hit(Vector3d position, Block block) {
+    Objects.requireNonNull(position);
+    Objects.requireNonNull(block);
+    return new RayTraceImpl(position, block, null);
+  }
+
+  static CompositeRayTrace hit(Vector3d position, Entity entity) {
+    Objects.requireNonNull(position);
+    Objects.requireNonNull(entity);
+    return new RayTraceImpl(position, null, entity);
+  }
 }

@@ -29,7 +29,6 @@ import com.github.benmanes.caffeine.cache.Scheduler;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.DamageSource;
 import me.moros.bending.api.event.BendingDamageEvent;
-import me.moros.bending.api.event.EventBus;
 import me.moros.bending.api.user.User;
 import org.bukkit.EntityEffect;
 import org.bukkit.GameMode;
@@ -70,7 +69,7 @@ public final class DamageUtil {
     }
     LivingEntity targetEntity = (LivingEntity) target;
     var platformEntity = PlatformAdapter.fromBukkitEntity(targetEntity);
-    BendingDamageEvent event = EventBus.INSTANCE.postAbilityDamageEvent(source, desc, platformEntity, damage);
+    BendingDamageEvent event = source.game().eventBus().postAbilityDamageEvent(source, desc, platformEntity, damage);
     double dmg = event.damage();
     if (event.cancelled() || dmg <= 0) {
       return false;

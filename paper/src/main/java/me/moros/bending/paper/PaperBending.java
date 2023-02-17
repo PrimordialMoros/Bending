@@ -32,6 +32,7 @@ import me.moros.bending.common.AbstractBending;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.config.BendingPropertiesImpl;
 import me.moros.bending.common.config.ConfigManager;
+import me.moros.bending.common.logging.Logger;
 import me.moros.bending.common.util.ReflectionUtil;
 import me.moros.bending.paper.hook.LuckPermsHook;
 import me.moros.bending.paper.hook.PlaceholderAPIHook;
@@ -50,7 +51,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.ServicePriority;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.slf4j.Logger;
 
 final class PaperBending extends AbstractBending<BendingBootstrap> {
   PaperBending(BendingBootstrap parent, Path dir, Logger logger) {

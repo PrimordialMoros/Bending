@@ -26,7 +26,6 @@ import java.util.function.Supplier;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.event.BendingDamageEvent;
-import me.moros.bending.api.event.EventBus;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.item.Inventory;
@@ -92,7 +91,7 @@ public class FabricLivingEntity extends FabricEntity implements LivingEntity {
 
   @Override
   public boolean damage(double damage, User source, AbilityDescription desc) {
-    BendingDamageEvent event = EventBus.INSTANCE.postAbilityDamageEvent(source, desc, this, damage);
+    BendingDamageEvent event = source.game().eventBus().postAbilityDamageEvent(source, desc, this, damage);
     double dmg = event.damage();
     if (event.cancelled() || dmg <= 0) {
       return false;

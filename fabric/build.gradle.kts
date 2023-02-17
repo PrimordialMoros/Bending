@@ -25,9 +25,7 @@ dependencies {
     bendingImplementation(projects.bendingCommon)
     bendingImplementation(projects.bendingNms)
     bendingImplementation(libs.tasker.fabric)
-    bendingImplementation(libs.bundles.configurate) {
-        exclude(module = "gson")
-    }
+    bendingImplementation(libs.bundles.configurate) { exclude(module = "gson") }
     bendingImplementation(libs.h2)
 }
 

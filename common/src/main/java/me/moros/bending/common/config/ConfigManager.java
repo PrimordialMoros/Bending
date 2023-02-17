@@ -26,7 +26,7 @@ import java.util.function.Supplier;
 
 import me.moros.bending.api.config.ConfigProcessor;
 import me.moros.bending.api.config.Configurable;
-import org.slf4j.Logger;
+import me.moros.bending.common.logging.Logger;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.reference.ConfigurationReference;

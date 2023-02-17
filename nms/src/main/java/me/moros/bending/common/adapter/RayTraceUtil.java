@@ -22,8 +22,8 @@ package me.moros.bending.common.adapter;
 import java.util.function.Function;
 
 import me.moros.bending.api.collision.raytrace.BlockRayTrace;
-import me.moros.bending.api.collision.raytrace.CompositeRayTrace;
 import me.moros.bending.api.collision.raytrace.Context;
+import me.moros.bending.api.collision.raytrace.RayTrace;
 import me.moros.bending.api.platform.world.World;
 import me.moros.math.Vector3d;
 import net.minecraft.core.BlockPos;
@@ -55,7 +55,7 @@ final class RayTraceUtil {
     Fluid ccf = context.ignoreLiquids() ? Fluid.NONE : Fluid.ANY;
     ClipContext clipContext = new ClipContext(context, startPos, endPos, ccb, ccf);
 
-    return traverseBlocks(level, clipContext, CompositeRayTrace.miss(e), hitFactory(world));
+    return traverseBlocks(level, clipContext, RayTrace.miss(e), hitFactory(world));
   }
 
   private static BlockRayTrace traverseBlocks(ServerLevel level, ClipContext context, BlockRayTrace miss, Function<BlockHitResult, BlockRayTrace> hitFactory) {
@@ -148,7 +148,7 @@ final class RayTraceUtil {
       var l = result.getLocation();
       var p = result.getBlockPos();
       var b = new me.moros.bending.api.platform.block.Block(w, p.getX(), p.getY(), p.getZ());
-      return CompositeRayTrace.hit(Vector3d.of(l.x(), l.y(), l.z()), b);
+      return RayTrace.hit(Vector3d.of(l.x(), l.y(), l.z()), b);
     };
   }
 

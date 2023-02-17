@@ -23,14 +23,11 @@ import java.io.Serializable;
 import java.util.List;
 
 import me.moros.bending.api.ability.Ability;
-import org.spongepowered.configurate.CommentedConfigurationNode;
 
 /**
  * This is an abstract class that defines a serializable config.
  */
 public abstract class Configurable implements Serializable {
-  private transient CommentedConfigurationNode node;
-
   protected Configurable() {
   }
 
@@ -47,13 +44,5 @@ public abstract class Configurable implements Serializable {
    */
   public boolean external() {
     return false;
-  }
-
-  CommentedConfigurationNode node() {
-    return node;
-  }
-
-  void setNode(CommentedConfigurationNode node) {
-    this.node = node;
   }
 }

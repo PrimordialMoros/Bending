@@ -27,6 +27,7 @@ import java.util.function.Predicate;
 import me.moros.bending.api.collision.geometry.AABB;
 import me.moros.bending.api.collision.raytrace.CompositeRayTrace;
 import me.moros.bending.api.collision.raytrace.Context;
+import me.moros.bending.api.collision.raytrace.RayTrace;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.block.Lockable;
@@ -172,10 +173,10 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
       }
     }
     if (nearestHitEntity == null) {
-      return CompositeRayTrace.miss(context.endPoint());
+      return RayTrace.miss(context.endPoint());
     }
     var pos = nearestHitResult.getHitPosition();
-    return CompositeRayTrace.hit(Vector3d.of(pos.getX(), pos.getY(), pos.getZ()), nearestHitEntity);
+    return RayTrace.hit(Vector3d.of(pos.getX(), pos.getY(), pos.getZ()), nearestHitEntity);
   }
 
   @Override

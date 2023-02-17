@@ -25,7 +25,6 @@ import me.moros.bending.api.ability.Ability;
 import me.moros.bending.api.collision.geometry.Ray;
 import me.moros.bending.api.collision.raytrace.Context;
 import me.moros.bending.api.collision.raytrace.ContextBuilder;
-import me.moros.bending.api.event.EventBus;
 import me.moros.bending.api.event.VelocityEvent;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.item.Inventory;
@@ -55,7 +54,8 @@ public interface LivingEntity extends Entity {
 
   @Override
   default boolean applyVelocity(Ability ability, Vector3d velocity) {
-    VelocityEvent event = EventBus.INSTANCE.postVelocityEvent(ability.user(), this, ability.description(), velocity);
+    var eventBus = ability.user().game().eventBus();
+    VelocityEvent event = eventBus.postVelocityEvent(ability.user(), this, ability.description(), velocity);
     if (!event.cancelled()) {
       velocity(velocity);
       return true;

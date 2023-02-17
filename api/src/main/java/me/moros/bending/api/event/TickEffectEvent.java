@@ -19,58 +19,34 @@
 
 package me.moros.bending.api.event;
 
-import me.moros.bending.api.event.base.AbstractCancellableUserEvent;
 import me.moros.bending.api.platform.entity.Entity;
-import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.BendingEffect;
 
 /**
  * Called when a {@link BendingEffect} is applied to a target.
  */
-public class TickEffectEvent extends AbstractCancellableUserEvent {
-  private final Entity target;
-  private final BendingEffect type;
-
-  private int duration;
-
-  protected TickEffectEvent(User user, Entity target, int duration, BendingEffect type) {
-    super(user);
-    this.target = target;
-    this.duration = duration;
-    this.type = type;
-  }
-
+public interface TickEffectEvent extends UserEvent, Cancellable {
   /**
    * Provides the target this bending effect applies to.
    * @return the target entity
    */
-  public Entity target() {
-    return target;
-  }
+  Entity target();
 
   /**
    * Provides the duration of the effect in ticks.
    * @return how long the action limit will last
    */
-  public int duration() {
-    return duration;
-  }
+  int duration();
 
   /**
    * Sets the duration of the effect in ticks.
    * @param duration the new duration, must be positive
    */
-  public void duration(int duration) {
-    if (duration > 0) {
-      this.duration = duration;
-    }
-  }
+  void duration(int duration);
 
   /**
    * Provides the type of bending effect that is being applied.
    * @return the effect type
    */
-  public BendingEffect type() {
-    return type;
-  }
+  BendingEffect type();
 }

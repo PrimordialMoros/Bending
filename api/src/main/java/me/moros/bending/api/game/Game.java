@@ -20,6 +20,7 @@
 package me.moros.bending.api.game;
 
 import me.moros.bending.api.config.ConfigProcessor;
+import me.moros.bending.api.event.EventBus;
 import me.moros.bending.api.storage.BendingStorage;
 import net.kyori.adventure.key.Key;
 
@@ -30,6 +31,8 @@ public interface Game {
   void reload();
 
   void cleanup();
+
+  EventBus eventBus();
 
   BendingStorage storage();
 

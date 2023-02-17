@@ -22,7 +22,6 @@ package me.moros.bending.api.user;
 import java.util.Set;
 
 import me.moros.bending.api.ability.element.Element;
-import me.moros.bending.api.event.ElementChangeEvent;
 
 /**
  * Represents a user that has a set of {@link Element}.
@@ -42,21 +41,21 @@ public interface ElementUser {
   boolean hasElement(Element element);
 
   /**
-   * Attempt to add the specified element to the user. Calls an {@link ElementChangeEvent}.
+   * Attempt to add the specified element to the user. Calls an {@link ElementChangeEventImpl}.
    * @param element the element to add
    * @return true if the element was added successfully, false otherwise
    */
   boolean addElement(Element element);
 
   /**
-   * Attempt to remove the specified element from the user. Calls an {@link ElementChangeEvent}.
+   * Attempt to remove the specified element from the user. Calls an {@link ElementChangeEventImpl}.
    * @param element the element to remove
    * @return true if the element was removed successfully, false otherwise
    */
   boolean removeElement(Element element);
 
   /**
-   * Attempt to choose the specified element. Calls an {@link ElementChangeEvent}.
+   * Attempt to choose the specified element. Calls an {@link ElementChangeEventImpl}.
    * @param element the element to choose
    * @return true if the element was chosen successfully, false otherwise
    */

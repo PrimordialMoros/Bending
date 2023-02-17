@@ -17,7 +17,23 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.event.base;
+package me.moros.bending.common.event;
 
-public interface BendingEvent {
+import me.moros.bending.api.ability.preset.Preset;
+import me.moros.bending.api.event.PresetCreateEvent;
+import me.moros.bending.api.user.User;
+import me.moros.bending.common.event.base.AbstractCancellableUserEvent;
+
+public class PresetCreateEventImpl extends AbstractCancellableUserEvent implements PresetCreateEvent {
+  private final Preset preset;
+
+  public PresetCreateEventImpl(User user, Preset preset) {
+    super(user);
+    this.preset = preset;
+  }
+
+  @Override
+  public Preset preset() {
+    return preset;
+  }
 }

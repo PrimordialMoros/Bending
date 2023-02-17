@@ -19,14 +19,8 @@
 
 package me.moros.bending.api.event;
 
-import me.moros.bending.api.event.base.AbstractUserEvent;
-import me.moros.bending.api.user.User;
-
 /**
  * Called when a user has successfully been registered.
  */
-public class UserRegisterEvent extends AbstractUserEvent {
-  protected UserRegisterEvent(User user) {
-    super(user);
-  }
+public interface UserRegisterEvent extends UserEvent {
 }

@@ -44,6 +44,4 @@ public interface Platform {
   boolean hasNativeSupport();
 
   NativeAdapter nativeAdapter();
-
-  int currentTick();
 }

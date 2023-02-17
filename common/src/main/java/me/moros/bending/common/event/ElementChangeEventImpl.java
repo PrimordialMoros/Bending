@@ -17,20 +17,32 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.event.base;
+package me.moros.bending.common.event;
 
+import me.moros.bending.api.ability.element.Element;
+import me.moros.bending.api.event.ElementChangeEvent;
+import me.moros.bending.api.event.UserEvent;
 import me.moros.bending.api.user.User;
-import net.kyori.event.AbstractCancellable;
+import me.moros.bending.common.event.base.AbstractCancellableUserEvent;
 
-public abstract class AbstractCancellableUserEvent extends AbstractCancellable implements UserEvent {
-  private final User user;
+public class ElementChangeEventImpl extends AbstractCancellableUserEvent implements UserEvent, ElementChangeEvent {
+  private final Element element;
+  private final ElementAction action;
 
-  protected AbstractCancellableUserEvent(User user) {
-    this.user = user;
+  public ElementChangeEventImpl(User user, Element element, ElementAction action) {
+    super(user);
+    this.element = element;
+    this.action = action;
   }
 
   @Override
-  public User user() {
-    return user;
+  public Element element() {
+    return element;
   }
+
+  @Override
+  public ElementAction type() {
+    return action;
+  }
+
 }

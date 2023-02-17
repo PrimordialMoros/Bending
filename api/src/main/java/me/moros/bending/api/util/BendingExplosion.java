@@ -31,7 +31,6 @@ import me.moros.bending.api.collision.geometry.Collider;
 import me.moros.bending.api.collision.geometry.Sphere;
 import me.moros.bending.api.config.BendingProperties;
 import me.moros.bending.api.event.BendingExplosionEvent;
-import me.moros.bending.api.event.EventBus;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.particle.Particle;
 import me.moros.bending.api.platform.sound.SoundEffect;
@@ -109,7 +108,7 @@ public final class BendingExplosion {
     Predicate<Block> predicate = b -> !MaterialUtil.isAir(b) && !MaterialUtil.isUnbreakable(b) && !b.type().isLiquid();
     Collection<Block> blocks = breakBlocks ? world.nearbyBlocks(center, size, predicate) : new ArrayList<>();
 
-    if (EventBus.INSTANCE.postExplosionEvent(user, center, blocks).cancelled()) {
+    if (user.game().eventBus().postExplosionEvent(user, desc, center, blocks).cancelled()) {
       return false;
     }
 

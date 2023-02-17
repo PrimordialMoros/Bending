@@ -21,7 +21,6 @@ package me.moros.bending.api.config;
 
 import me.moros.bending.api.ability.Ability;
 import me.moros.bending.api.config.attribute.AttributeModifier;
-import org.spongepowered.configurate.CommentedConfigurationNode;
 
 /**
  * Processes {@link Configurable}s by applying attribute modifiers.
@@ -39,8 +38,4 @@ public interface ConfigProcessor {
    * @return the modified config
    */
   <T extends Configurable> T calculate(Ability ability, T config);
-
-  default void setNode(Configurable configurable, CommentedConfigurationNode node) {
-    configurable.setNode(node);
-  }
 }

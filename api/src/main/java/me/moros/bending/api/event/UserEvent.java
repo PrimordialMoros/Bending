@@ -17,7 +17,7 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.event.base;
+package me.moros.bending.api.event;
 
 import me.moros.bending.api.user.User;
 

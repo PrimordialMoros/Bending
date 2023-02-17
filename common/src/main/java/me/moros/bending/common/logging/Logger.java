@@ -17,17 +17,22 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.event.base;
+package me.moros.bending.common.logging;
 
-import me.moros.bending.api.ability.AbilityDescription;
+public interface Logger {
+  void debug(String msg);
 
-/**
- * Represents an event that that is relevant to a specific ability.
- */
-public interface AbilityEvent extends UserEvent {
-  /**
-   * Provides the ability that this event is related to.
-   * @return the relevant ability
-   */
-  AbilityDescription ability();
+  void debug(String msg, Throwable t);
+
+  void info(String msg);
+
+  void info(String msg, Throwable t);
+
+  void warn(String msg);
+
+  void warn(String msg, Throwable t);
+
+  void error(String msg);
+
+  void error(String msg, Throwable t);
 }

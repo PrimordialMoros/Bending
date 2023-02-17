@@ -35,8 +35,8 @@ import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.KeyUtil;
 import me.moros.bending.common.Bending;
 import me.moros.bending.common.config.ConfigManager;
+import me.moros.bending.common.logging.Logger;
 import net.kyori.adventure.key.Key;
-import org.slf4j.Logger;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 

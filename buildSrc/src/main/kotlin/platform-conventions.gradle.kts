@@ -30,10 +30,8 @@ tasks {
             reloc("com.github.benmanes.caffeine", "caffeine")
             reloc("com.zaxxer.hikari", "hikari")
             reloc("org.jdbi", "jdbi")
-            reloc("com.mysql", "mysql")
             reloc("org.mariadb", "mariadb")
             reloc("org.postgresql", "postgresql")
-            reloc("org.sqlite", "sqlite")
             reloc("org.h2", "h2")
             reloc("org.hsqldb", "hsqldb")
         }

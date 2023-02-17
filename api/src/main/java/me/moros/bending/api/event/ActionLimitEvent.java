@@ -19,47 +19,29 @@
 
 package me.moros.bending.api.event;
 
-import me.moros.bending.api.event.base.AbstractCancellableUserEvent;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.temporal.ActionLimiter;
-import me.moros.bending.api.user.User;
 
 /**
  * Called when a user attempts to limit the actions of a target through bending.
  * @see ActionLimiter
  */
-public class ActionLimitEvent extends AbstractCancellableUserEvent {
-  private final LivingEntity target;
-
-  private long duration;
-
-  protected ActionLimitEvent(User user, LivingEntity target, long duration) {
-    super(user);
-    this.target = target;
-    this.duration = duration;
-  }
-
+public interface ActionLimitEvent extends UserEvent, Cancellable {
   /**
    * Provides the entity that is affected by the {@link ActionLimiter}
    * @return the target entity
    */
-  public LivingEntity target() {
-    return target;
-  }
+  LivingEntity target();
 
   /**
    * Provides the duration of the restriction in milliseconds.
    * @return how long the action limit will last
    */
-  public long duration() {
-    return duration;
-  }
+  long duration();
 
   /**
    * Sets the duration of the restriction in milliseconds.
    * @param duration the new duration
    */
-  public void duration(long duration) {
-    this.duration = duration;
-  }
+  void duration(long duration);
 }

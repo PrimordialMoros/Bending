@@ -19,15 +19,8 @@
 
 package me.moros.bending.api.event;
 
-import me.moros.bending.api.ability.AbilityDescription;
-import me.moros.bending.api.event.base.AbstractAbilityEvent;
-import me.moros.bending.api.user.User;
-
 /**
  * Called when a user has successfully activated an ability.
  */
-public class AbilityActivationEvent extends AbstractAbilityEvent {
-  protected AbilityActivationEvent(User user, AbilityDescription desc) {
-    super(user, desc);
-  }
+public interface AbilityActivationEvent extends AbilityEvent {
 }

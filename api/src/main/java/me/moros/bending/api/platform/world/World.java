@@ -26,6 +26,7 @@ import java.util.function.Predicate;
 import me.moros.bending.api.collision.raytrace.BlockRayTrace;
 import me.moros.bending.api.collision.raytrace.CompositeRayTrace;
 import me.moros.bending.api.collision.raytrace.Context;
+import me.moros.bending.api.collision.raytrace.RayTrace;
 import me.moros.bending.api.platform.Direction;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.block.Block;
@@ -92,7 +93,7 @@ public interface World extends Keyed, ForwardingAudience, BlockGetter, BlockSett
         return entityResult;
       }
     }
-    return CompositeRayTrace.hit(blockResult.position(), block);
+    return RayTrace.hit(blockResult.position(), block);
   }
 
   @Override

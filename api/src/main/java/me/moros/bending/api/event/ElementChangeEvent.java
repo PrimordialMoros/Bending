@@ -20,43 +20,27 @@
 package me.moros.bending.api.event;
 
 import me.moros.bending.api.ability.element.Element;
-import me.moros.bending.api.event.base.AbstractCancellableUserEvent;
-import me.moros.bending.api.event.base.UserEvent;
-import me.moros.bending.api.user.User;
 
 /**
  * Called when a user's elements are being changed.
  */
-public class ElementChangeEvent extends AbstractCancellableUserEvent implements UserEvent {
-  private final Element element;
-  private final ElementAction action;
-
-  protected ElementChangeEvent(User user, Element element, ElementAction action) {
-    super(user);
-    this.element = element;
-    this.action = action;
-  }
-
+public interface ElementChangeEvent extends UserEvent, Cancellable {
   /**
    * Provide the element associated with the change.
    * @return the element
    */
-  public Element element() {
-    return element;
-  }
+  Element element();
 
   /**
    * Provides the type of change for this event.
    * @return the type of element change
    */
-  public ElementAction type() {
-    return action;
-  }
+  ElementAction type();
 
   /**
    * Represents a type of element change.
    */
-  public enum ElementAction {
+  enum ElementAction {
     /**
      * One element is selected and all others are removed.
      */

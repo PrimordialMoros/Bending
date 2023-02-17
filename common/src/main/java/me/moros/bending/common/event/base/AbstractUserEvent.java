@@ -17,8 +17,9 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.event.base;
+package me.moros.bending.common.event.base;
 
+import me.moros.bending.api.event.UserEvent;
 import me.moros.bending.api.user.User;
 
 /**
@@ -27,7 +28,7 @@ import me.moros.bending.api.user.User;
 public abstract class AbstractUserEvent implements UserEvent {
   private final User user;
 
-  protected AbstractUserEvent(User user) {
+  public AbstractUserEvent(User user) {
     this.user = user;
   }
 

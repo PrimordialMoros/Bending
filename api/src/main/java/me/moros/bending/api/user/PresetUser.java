@@ -24,7 +24,6 @@ import java.util.concurrent.CompletableFuture;
 
 import me.moros.bending.api.ability.preset.Preset;
 import me.moros.bending.api.ability.preset.PresetCreateResult;
-import me.moros.bending.api.event.PresetCreateEvent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -45,7 +44,7 @@ public interface PresetUser {
   @Nullable Preset presetByName(String name);
 
   /**
-   * Attempt to add the specified preset to the user. Calls a {@link PresetCreateEvent}.
+   * Attempt to add the specified preset to the user. Calls a {@link PresetCreateEventImpl}.
    * @param preset the preset to add
    * @return future with the result
    */

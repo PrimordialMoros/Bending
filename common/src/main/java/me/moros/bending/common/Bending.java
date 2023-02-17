@@ -24,8 +24,8 @@ import java.nio.file.Path;
 
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.bending.common.locale.TranslationManager;
+import me.moros.bending.common.logging.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.slf4j.Logger;
 
 public interface Bending {
   String author();

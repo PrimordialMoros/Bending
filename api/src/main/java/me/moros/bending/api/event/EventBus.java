@@ -26,7 +26,6 @@ import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.preset.Preset;
 import me.moros.bending.api.event.ElementChangeEvent.ElementAction;
-import me.moros.bending.api.event.base.BendingEvent;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.LivingEntity;
@@ -34,29 +33,16 @@ import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.BendingEffect;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.key.Key;
-import net.kyori.event.PostResult;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * The event bus is responsible for posting bending events.
  */
-public enum EventBus {
-  INSTANCE;
-
-  private final net.kyori.event.EventBus<BendingEvent> eventBus;
-  private boolean closed = false;
-
-  EventBus() {
-    this.eventBus = net.kyori.event.EventBus.create(BendingEvent.class);
-  }
-
+public interface EventBus {
   /**
-   * Close this event bus and stop sendi
+   * Close this event bus preventing any further events from being posted.
    */
-  public void shutdown() {
-    this.eventBus.unsubscribeIf(x -> true);
-    this.closed = true;
-  }
+  void shutdown();
 
   /**
    * Registers the given subscriber to receive events.
@@ -65,7 +51,7 @@ public enum EventBus {
    * @param <T> the event type
    * @see #subscribe(Class, Consumer, int)
    */
-  public <T extends BendingEvent> void subscribe(Class<T> event, Consumer<? super T> subscriber) {
+  default <T extends BendingEvent> void subscribe(Class<T> event, Consumer<? super T> subscriber) {
     subscribe(event, subscriber, 0);
   }
 
@@ -76,34 +62,27 @@ public enum EventBus {
    * @param priority the subscriber's priority, default priority is 0
    * @param <T> the event type
    */
-  public <T extends BendingEvent> void subscribe(Class<T> event, Consumer<? super T> subscriber, int priority) {
-    if (!closed) {
-      eventBus.subscribe(event, new EventSubscriberImpl<>(subscriber, priority));
-    }
-  }
+  <T extends BendingEvent> void subscribe(Class<T> event, Consumer<? super T> subscriber, int priority);
 
-  private <T extends BendingEvent> PostResult post(T event) {
-    if (closed) {
-      throw new IllegalStateException("Eventbus has been terminated, cannot post new events!");
-    }
-    return eventBus.post(event);
-  }
+  /**
+   * Post an event.
+   * @param event the event to post
+   * @param <T> the type of event
+   * @return true if the event was successfully posted, false otherwise
+   */
+  <T extends BendingEvent> boolean post(T event);
 
   /**
    * Posts a new {@link RegistryLockEvent}.
    * @param keys the RegistryKeys of all Registries that are going to be locked
    */
-  public void postRegistryLockEvent(Collection<Key> keys) {
-    post(new RegistryLockEvent(keys));
-  }
+  void postRegistryLockEvent(Collection<Key> keys);
 
   /**
    * Posts a new {@link UserRegisterEvent}.
    * @param user the user that was registered
    */
-  public void postUserRegisterEvent(User user) {
-    post(new UserRegisterEvent(user));
-  }
+  void postUserRegisterEvent(User user);
 
   /**
    * Posts a new {@link CooldownChangeEvent.Add}.
@@ -112,27 +91,21 @@ public enum EventBus {
    * @param duration the duration of the cooldown in milliseconds
    * @return true if the event was executed and was not cancelled, false otherwise
    */
-  public boolean postCooldownAddEvent(User user, AbilityDescription desc, long duration) {
-    return post(new CooldownChangeEvent.Add(user, desc, duration)).wasSuccessful();
-  }
+  boolean postCooldownAddEvent(User user, AbilityDescription desc, long duration);
 
   /**
    * Posts a new {@link CooldownChangeEvent.Remove}.
    * @param user the relevant user
    * @param desc the ability whose cooldown has expired
    */
-  public void postCooldownRemoveEvent(User user, AbilityDescription desc) {
-    post(new CooldownChangeEvent.Remove(user, desc));
-  }
+  void postCooldownRemoveEvent(User user, AbilityDescription desc);
 
   /**
    * Posts a new {@link AbilityActivationEvent}.
    * @param user the user who attempts to activate the ability
    * @param desc the ability that is being activated
    */
-  public void postAbilityActivationEvent(User user, AbilityDescription desc) {
-    post(new AbilityActivationEvent(user, desc));
-  }
+  void postAbilityActivationEvent(User user, AbilityDescription desc);
 
   /**
    * Posts a new {@link ElementChangeEvent}.
@@ -141,9 +114,7 @@ public enum EventBus {
    * @param type the type of element change
    * @return true if the event was executed and was not cancelled, false otherwise
    */
-  public boolean postElementChangeEvent(User user, Element element, ElementAction type) {
-    return post(new ElementChangeEvent(user, element, type)).wasSuccessful();
-  }
+  boolean postElementChangeEvent(User user, Element element, ElementAction type);
 
   /**
    * Posts a new {@link BindChangeEvent.Single}.
@@ -152,9 +123,7 @@ public enum EventBus {
    * @param desc the ability that is bound or cleared (null)
    * @return true if the event was executed and was not cancelled, false otherwise
    */
-  public boolean postSingleBindChangeEvent(User user, int slot, @Nullable AbilityDescription desc) {
-    return post(new BindChangeEvent.Single(user, slot, desc)).wasSuccessful();
-  }
+  boolean postSingleBindChangeEvent(User user, int slot, @Nullable AbilityDescription desc);
 
   /**
    * Posts a new {@link BindChangeEvent.Multi}.
@@ -162,9 +131,7 @@ public enum EventBus {
    * @param preset the preset that is bound
    * @return true if the event was executed and was not cancelled, false otherwise
    */
-  public boolean postMultiBindChangeEvent(User user, Preset preset) {
-    return post(new BindChangeEvent.Multi(user, preset)).wasSuccessful();
-  }
+  boolean postMultiBindChangeEvent(User user, Preset preset);
 
   /**
    * Posts a new {@link PresetCreateEvent}.
@@ -172,9 +139,7 @@ public enum EventBus {
    * @param preset the preset that is being created
    * @return true if the event was executed and was not cancelled, false otherwise
    */
-  public boolean postPresetCreateEvent(User user, Preset preset) {
-    return !preset.isEmpty() && post(new PresetCreateEvent(user, preset)).wasSuccessful();
-  }
+  boolean postPresetCreateEvent(User user, Preset preset);
 
   /**
    * Posts a new {@link TickEffectEvent}.
@@ -184,11 +149,7 @@ public enum EventBus {
    * @param type the type of bending effect that is being applied
    * @return the event after it was posted
    */
-  public TickEffectEvent postTickEffectEvent(User source, Entity target, int duration, BendingEffect type) {
-    TickEffectEvent event = new TickEffectEvent(source, target, duration, type);
-    post(event);
-    return event;
-  }
+  TickEffectEvent postTickEffectEvent(User source, Entity target, int duration, BendingEffect type);
 
   /**
    * Posts a new {@link BendingDamageEvent}.
@@ -198,24 +159,17 @@ public enum EventBus {
    * @param damage the amount of damage
    * @return the event after it was posted
    */
-  public BendingDamageEvent postAbilityDamageEvent(User source, AbilityDescription desc, LivingEntity target, double damage) {
-    BendingDamageEvent event = new BendingDamageEvent(source, desc, target, damage);
-    post(event);
-    return event;
-  }
+  BendingDamageEvent postAbilityDamageEvent(User source, AbilityDescription desc, LivingEntity target, double damage);
 
   /**
    * Posts a new {@link BendingExplosionEvent}.
    * @param source the user causing the explosion
+   * @param desc the ability causing the explosion
    * @param center the epicenter of the explosion
    * @param blocks the blocks that are being exploded
    * @return the event after it was posted
    */
-  public BendingExplosionEvent postExplosionEvent(User source, Vector3d center, Collection<Block> blocks) {
-    BendingExplosionEvent event = new BendingExplosionEvent(source, center, blocks);
-    post(event);
-    return event;
-  }
+  BendingExplosionEvent postExplosionEvent(User source, AbilityDescription desc, Vector3d center, Collection<Block> blocks);
 
   /**
    * Posts a new {@link ActionLimitEvent}.
@@ -224,11 +178,7 @@ public enum EventBus {
    * @param duration the duration of the restriction in milliseconds
    * @return the event after it was posted
    */
-  public ActionLimitEvent postActionLimitEvent(User source, LivingEntity target, long duration) {
-    ActionLimitEvent event = new ActionLimitEvent(source, target, duration);
-    post(event);
-    return event;
-  }
+  ActionLimitEvent postActionLimitEvent(User source, LivingEntity target, long duration);
 
   /**
    * Posts a new {@link VelocityEvent}.
@@ -238,9 +188,5 @@ public enum EventBus {
    * @param velocity the new velocity to be applied
    * @return the event after it was posted
    */
-  public VelocityEvent postVelocityEvent(User source, LivingEntity target, AbilityDescription desc, Vector3d velocity) {
-    VelocityEvent event = new VelocityEvent(source, target, desc, velocity);
-    post(event);
-    return event;
-  }
+  VelocityEvent postVelocityEvent(User source, LivingEntity target, AbilityDescription desc, Vector3d velocity);
 }

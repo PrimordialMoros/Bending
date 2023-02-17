@@ -33,6 +33,7 @@ import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.util.Tasker;
 import me.moros.bending.common.AbstractBending;
 import me.moros.bending.common.command.Commander;
+import me.moros.bending.common.logging.Slf4jLogger;
 import me.moros.bending.common.util.GameProviderUtil;
 import me.moros.bending.common.util.Initializer;
 import me.moros.bending.common.util.ReflectionUtil;
@@ -66,7 +67,7 @@ final class FabricBending extends AbstractBending<ModContainer> {
   private final AtomicBoolean exiting = new AtomicBoolean();
 
   FabricBending(ModContainer container, Path path) {
-    super(container, path, LoggerFactory.getLogger(container.getMetadata().getName()));
+    super(container, path, new Slf4jLogger(LoggerFactory.getLogger(container.getMetadata().getName())));
 
     ReflectionUtil.injectStatic(Tasker.class, CompositeExecutor.of(new FabricExecutor()));
     ReflectionUtil.injectStatic(AbilityDamageSource.class, translationManager());

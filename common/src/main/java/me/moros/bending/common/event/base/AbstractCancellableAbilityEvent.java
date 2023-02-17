@@ -17,9 +17,10 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.event.base;
+package me.moros.bending.common.event.base;
 
 import me.moros.bending.api.ability.AbilityDescription;
+import me.moros.bending.api.event.AbilityEvent;
 import me.moros.bending.api.user.User;
 
 public abstract class AbstractCancellableAbilityEvent extends AbstractCancellableUserEvent implements AbilityEvent {

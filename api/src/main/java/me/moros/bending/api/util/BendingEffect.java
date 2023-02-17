@@ -22,7 +22,6 @@ package me.moros.bending.api.util;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import me.moros.bending.api.event.EventBus;
 import me.moros.bending.api.event.TickEffectEvent;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.EntityUtil;
@@ -84,7 +83,7 @@ public enum BendingEffect {
     if (ticks <= 0) {
       return;
     }
-    TickEffectEvent event = EventBus.INSTANCE.postTickEffectEvent(source, entity, ticks, this);
+    TickEffectEvent event = source.game().eventBus().postTickEffectEvent(source, entity, ticks, this);
     int duration = event.duration();
     if (event.cancelled() || duration <= 0) {
       return;

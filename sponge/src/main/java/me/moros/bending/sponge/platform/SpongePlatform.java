@@ -36,7 +36,6 @@ import me.moros.bending.sponge.adapter.NativeAdapterImpl;
 import me.moros.bending.sponge.gui.BoardImpl;
 import me.moros.bending.sponge.gui.ElementMenu;
 import me.moros.bending.sponge.platform.item.SpongeItemBuilder;
-import org.spongepowered.api.Sponge;
 
 public class SpongePlatform implements Platform, PlatformFactory {
   private final NativeAdapter adapter;
@@ -64,11 +63,6 @@ public class SpongePlatform implements Platform, PlatformFactory {
   @Override
   public NativeAdapter nativeAdapter() {
     return adapter;
-  }
-
-  @Override
-  public int currentTick() {
-    return (int) Sponge.server().runningTimeTicks().ticks();
   }
 
   @Override

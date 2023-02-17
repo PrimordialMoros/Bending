@@ -27,6 +27,7 @@ import java.util.function.Predicate;
 import me.moros.bending.api.collision.geometry.AABB;
 import me.moros.bending.api.collision.raytrace.CompositeRayTrace;
 import me.moros.bending.api.collision.raytrace.Context;
+import me.moros.bending.api.collision.raytrace.RayTrace;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.block.Lockable;
@@ -180,7 +181,7 @@ public record FabricWorld(ServerLevel handle) implements World {
         }
       }
     }
-    return result == null ? CompositeRayTrace.miss(context.endPoint()) : CompositeRayTrace.hit(resPos, result);
+    return result == null ? RayTrace.miss(context.endPoint()) : RayTrace.hit(resPos, result);
   }
 
   @Override

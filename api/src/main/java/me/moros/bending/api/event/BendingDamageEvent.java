@@ -19,33 +19,15 @@
 
 package me.moros.bending.api.event;
 
-import me.moros.bending.api.ability.AbilityDescription;
-import me.moros.bending.api.event.base.AbstractCancellableAbilityEvent;
 import me.moros.bending.api.platform.entity.LivingEntity;
-import me.moros.bending.api.user.User;
 
 /**
  * Called when a bending ability damages an entity.
  */
-public class BendingDamageEvent extends AbstractCancellableAbilityEvent {
-  private final LivingEntity target;
-  private double damage;
+public interface BendingDamageEvent extends AbilityEvent, Cancellable {
+  LivingEntity target();
 
-  protected BendingDamageEvent(User user, AbilityDescription desc, LivingEntity target, double damage) {
-    super(user, desc);
-    this.target = target;
-    this.damage = damage;
-  }
+  double damage();
 
-  public LivingEntity target() {
-    return target;
-  }
-
-  public double damage() {
-    return damage;
-  }
-
-  public void damage(double damage) {
-    this.damage = damage;
-  }
+  void damage(double damage);
 }

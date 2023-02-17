@@ -31,7 +31,6 @@ import java.util.function.Consumer;
 import me.moros.bending.api.ability.Ability;
 import me.moros.bending.api.ability.DamageSource;
 import me.moros.bending.api.platform.Direction;
-import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
@@ -80,7 +79,7 @@ public final class TempBlock extends Temporary {
     if (snapshots.size() > 1) {
       Iterator<TempBlockState> it = snapshots.iterator();
       it.next(); // ignore original snapshot
-      int tick = Platform.instance().currentTick();
+      int tick = wheel.currentTick();
       while (it.hasNext()) {
         if (tick > it.next().expirationTicks) {
           it.remove();
@@ -92,7 +91,7 @@ public final class TempBlock extends Temporary {
   private TempBlockState cleanStatesReverse() {
     TempBlockState toRevert = Objects.requireNonNull(snapshots.pollLast());
     Iterator<TempBlockState> it = snapshots.descendingIterator();
-    int tick = Platform.instance().currentTick();
+    int tick = wheel.currentTick();
     while (it.hasNext()) {
       TempBlockState next = it.next();
       if (tick >= next.expirationTicks) {
@@ -210,7 +209,7 @@ public final class TempBlock extends Temporary {
 
     private TempBlockState(Block block, int ticks, Builder builder) {
       super(block, builder.bendable, builder.weak, builder.source);
-      this.expirationTicks = Platform.instance().currentTick() + ticks;
+      this.expirationTicks = wheel.currentTick() + ticks;
     }
   }
 

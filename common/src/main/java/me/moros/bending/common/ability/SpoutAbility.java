@@ -17,17 +17,11 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.collision.raytrace;
+package me.moros.bending.common.ability;
 
-import me.moros.bending.api.platform.block.Block;
-import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.ability.Ability;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
-record CompositeRayTraceImpl(Vector3d position, @Nullable Block block,
-                             @Nullable Entity entity) implements CompositeRayTrace {
-  @Override
-  public boolean hit() {
-    return block != null || entity != null;
-  }
+public interface SpoutAbility extends Ability {
+  void handleMovement(Vector3d velocity);
 }

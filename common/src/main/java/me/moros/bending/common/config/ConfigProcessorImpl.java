@@ -33,7 +33,7 @@ import me.moros.bending.api.config.attribute.AttributeModifier;
 import me.moros.bending.api.config.attribute.Modifiable;
 import me.moros.bending.api.config.attribute.ModifierOperation;
 import me.moros.bending.api.user.User;
-import org.slf4j.Logger;
+import me.moros.bending.common.logging.Logger;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.reference.ConfigurationReference;
 import org.spongepowered.configurate.serialize.SerializationException;
@@ -58,11 +58,8 @@ record ConfigProcessorImpl(Logger logger,
   @SuppressWarnings("unchecked")
   <T extends Configurable> T get(T def) {
     CommentedConfigurationNode node = root.node().node(def.path());
-    setNode(def, node);
     try {
-      T result = (T) node.get(def.getClass(), def);
-      setNode(result, node);
-      return result;
+      return (T) node.get(def.getClass(), def);
     } catch (SerializationException e) {
       throw new RuntimeException(e);
     }

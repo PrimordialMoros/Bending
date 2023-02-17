@@ -45,11 +45,13 @@ import me.moros.bending.api.util.BendingEffect;
 import me.moros.bending.api.util.Tasker;
 import me.moros.bending.api.util.TextUtil;
 import me.moros.bending.common.Bending;
+import me.moros.bending.common.event.EventBusImpl;
 import me.moros.bending.common.storage.StorageFactory;
 
 public final class GameImpl implements Game {
   private final Bending plugin;
   private final ConfigProcessor configProcessor;
+  private final EventBus eventBus;
   private final BendingStorage storage;
 
   private final FlightManager flightManager;
@@ -62,6 +64,7 @@ public final class GameImpl implements Game {
   public GameImpl(Bending plugin) {
     this.plugin = plugin;
     this.configProcessor = plugin.configManager().processor();
+    this.eventBus = new EventBusImpl();
     this.storage = new StorageFactory(plugin).createInstance();
 
     flightManager = new FlightManagerImpl();
@@ -92,7 +95,7 @@ public final class GameImpl implements Game {
 
   private void lockRegistries() {
     var keys = Registries.keys().toList();
-    EventBus.INSTANCE.postRegistryLockEvent(keys);
+    eventBus.postRegistryLockEvent(keys);
     keys.stream().map(Registries::get).forEach(Registry::lock);
   }
 
@@ -125,6 +128,11 @@ public final class GameImpl implements Game {
   private Collection<TemporalManager<?, ?>> initTemporary() {
     return List.of(Cooldown.MANAGER, TempLight.MANAGER, TempEntity.MANAGER,
       ActionLimiter.MANAGER, TempArmor.MANAGER, TempBlock.MANAGER);
+  }
+
+  @Override
+  public EventBus eventBus() {
+    return eventBus;
   }
 
   @Override

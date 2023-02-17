@@ -27,12 +27,10 @@ import java.util.Set;
 import java.util.UUID;
 
 import me.moros.bending.api.ability.Ability;
-import me.moros.bending.api.ability.Ability.SpoutAbility;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.Activation;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.collision.geometry.AABB;
-import me.moros.bending.api.event.EventBus;
 import me.moros.bending.api.game.ActivationController;
 import me.moros.bending.api.game.SequenceManager;
 import me.moros.bending.api.platform.block.Block;
@@ -47,6 +45,7 @@ import me.moros.bending.api.temporal.TempBlock;
 import me.moros.bending.api.user.BendingPlayer;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.BendingEffect;
+import me.moros.bending.common.ability.SpoutAbility;
 import me.moros.bending.common.ability.air.AirBlast;
 import me.moros.bending.common.ability.air.AirScooter;
 import me.moros.bending.common.ability.air.Tornado;
@@ -92,7 +91,7 @@ public final class ActivationControllerImpl implements ActivationController {
       Ability ability = desc.createAbility();
       if (ability.activate(user, method)) {
         user.game().abilityManager(user.worldKey()).addAbility(user, ability);
-        EventBus.INSTANCE.postAbilityActivationEvent(user, desc);
+        user.game().eventBus().postAbilityActivationEvent(user, desc);
         return ability;
       }
     }

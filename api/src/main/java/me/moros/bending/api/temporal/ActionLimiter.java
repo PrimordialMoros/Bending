@@ -34,7 +34,6 @@ import java.util.UUID;
 import me.moros.bending.api.ability.ActionType;
 import me.moros.bending.api.ability.Updatable.UpdateResult;
 import me.moros.bending.api.event.ActionLimitEvent;
-import me.moros.bending.api.event.EventBus;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.user.User;
@@ -142,7 +141,7 @@ public final class ActionLimiter extends Temporary {
       if (isLimited(target.uuid())) {
         return Optional.empty();
       }
-      ActionLimitEvent event = EventBus.INSTANCE.postActionLimitEvent(source, target, duration);
+      ActionLimitEvent event = source.game().eventBus().postActionLimitEvent(source, target, duration);
       if (event.cancelled() || event.duration() <= 0) {
         return Optional.empty();
       }

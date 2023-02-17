@@ -23,12 +23,12 @@ import java.util.function.Function;
 
 import me.moros.bending.api.adapter.NativeAdapter;
 import me.moros.bending.api.platform.block.BlockState;
+import me.moros.bending.common.logging.Logger;
 import me.moros.bending.common.util.ReflectionUtil;
 import me.moros.bending.paper.platform.PlatformAdapter;
 import org.bukkit.Bukkit;
 import org.bukkit.block.data.BlockData;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.slf4j.Logger;
 
 public final class AdapterLoader {
   private AdapterLoader() {

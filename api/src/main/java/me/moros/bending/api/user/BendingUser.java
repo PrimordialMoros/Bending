@@ -34,7 +34,6 @@ import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.preset.Preset;
 import me.moros.bending.api.config.attribute.AttributeModifier;
 import me.moros.bending.api.event.ElementChangeEvent.ElementAction;
-import me.moros.bending.api.event.EventBus;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.gui.Board;
 import me.moros.bending.api.platform.entity.LivingEntity;
@@ -105,7 +104,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
 
   @Override
   public boolean addElement(Element element) {
-    if (!hasElement(element) && EventBus.INSTANCE.postElementChangeEvent(this, element, ElementAction.ADD)) {
+    if (!hasElement(element) && game().eventBus().postElementChangeEvent(this, element, ElementAction.ADD)) {
       elements.add(element);
       validatePassives();
       return true;
@@ -115,7 +114,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
 
   @Override
   public boolean removeElement(Element element) {
-    if (hasElement(element) && EventBus.INSTANCE.postElementChangeEvent(this, element, ElementAction.REMOVE)) {
+    if (hasElement(element) && game().eventBus().postElementChangeEvent(this, element, ElementAction.REMOVE)) {
       elements.remove(element);
       validateAbilities();
       validateSlots();
@@ -127,7 +126,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
 
   @Override
   public boolean chooseElement(Element element) {
-    if (EventBus.INSTANCE.postElementChangeEvent(this, element, ElementAction.CHOOSE)) {
+    if (game().eventBus().postElementChangeEvent(this, element, ElementAction.CHOOSE)) {
       elements.clear();
       elements.add(element);
       validateAbilities();
@@ -154,7 +153,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
 
   @Override
   public boolean bindPreset(Preset preset) {
-    if (EventBus.INSTANCE.postMultiBindChangeEvent(this, preset)) {
+    if (game().eventBus().postMultiBindChangeEvent(this, preset)) {
       Preset oldBinds = createPresetFromSlots("");
       preset.copyTo(slots);
       validateSlots();
@@ -178,7 +177,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
     if (slot < 1 || slot > 9) {
       return;
     }
-    if (EventBus.INSTANCE.postSingleBindChangeEvent(this, slot, desc)) {
+    if (game().eventBus().postSingleBindChangeEvent(this, slot, desc)) {
       slots[slot - 1] = desc;
       board().updateAll();
     }
@@ -208,7 +207,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
 
   @Override
   public boolean addCooldown(AbilityDescription desc, long duration) {
-    if (duration > 0 && EventBus.INSTANCE.postCooldownAddEvent(this, desc, duration)) {
+    if (duration > 0 && game().eventBus().postCooldownAddEvent(this, desc, duration)) {
       Cooldown.of(this, desc, () -> removeCooldown(desc), duration);
       updateBoard(desc, true);
       return true;
@@ -219,7 +218,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
   private void removeCooldown(AbilityDescription desc) {
     if (valid()) { // Ensure user is valid before processing
       updateBoard(desc, false);
-      EventBus.INSTANCE.postCooldownRemoveEvent(this, desc);
+      game().eventBus().postCooldownRemoveEvent(this, desc);
     }
   }
 

@@ -30,7 +30,6 @@ dependencies {
     bendingImplementation(libs.cloud.minecraft) { isTransitive = false }
     bendingImplementation(libs.cloud.sponge)
     bendingImplementation(libs.bundles.drivers.nonstandard) { isTransitive = false }
-    bendingImplementation(libs.bundles.slf4j)
     compileOnly(variantOf(libs.sponge.common) { classifier("dev") })
     compileOnly(libs.sponge.mixin)
 }
@@ -39,7 +38,6 @@ tasks {
     shadowJar {
         archiveBaseName.set("${project.name}-mc${libs.versions.minecraft.get()}")
         dependencies {
-            reloc("org.slf4j", "slf4j")
             reloc("cloud.commandframework", "cloudframework")
             exclude(dependency("io.leangen.geantyref:geantyref"))
         }

@@ -40,13 +40,13 @@ import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.locale.Translation;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.util.KeyUtil;
+import me.moros.bending.common.logging.Logger;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.TranslationRegistry;
 import net.kyori.adventure.translation.Translator;
 import net.kyori.adventure.util.UTF8ResourceBundleControl;
-import org.slf4j.Logger;
 
 /**
  * TranslationManager loads localized strings and adds them to a {@link TranslationRegistry} that can be used

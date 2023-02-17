@@ -20,25 +20,14 @@
 package me.moros.bending.api.event;
 
 import me.moros.bending.api.ability.preset.Preset;
-import me.moros.bending.api.event.base.AbstractCancellableUserEvent;
-import me.moros.bending.api.user.User;
 
 /**
  * Called when a user is attempting to create a {@link Preset}.
  */
-public class PresetCreateEvent extends AbstractCancellableUserEvent {
-  private final Preset preset;
-
-  protected PresetCreateEvent(User user, Preset preset) {
-    super(user);
-    this.preset = preset;
-  }
-
+public interface PresetCreateEvent extends UserEvent, Cancellable {
   /**
    * Provides the preset that is being created.
    * @return the preset
    */
-  public Preset preset() {
-    return preset;
-  }
+  Preset preset();
 }
