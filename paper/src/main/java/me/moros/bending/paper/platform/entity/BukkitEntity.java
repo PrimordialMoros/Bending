@@ -98,7 +98,8 @@ public class BukkitEntity implements Entity {
 
   @Override
   public Vector3d location() {
-    return Vector3d.from(handle().getLocation());
+    var loc = handle().getLocation();
+    return Vector3d.of(loc.getX(), loc.getY(), loc.getZ());
   }
 
   @Override
@@ -112,12 +113,14 @@ public class BukkitEntity implements Entity {
 
   @Override
   public Vector3d velocity() {
-    return Vector3d.from(handle().getVelocity());
+    var vel = handle().getVelocity();
+    return Vector3d.of(vel.getX(), vel.getY(), vel.getZ());
   }
 
   @Override
   public void velocity(Vector3d velocity) {
-    handle().setVelocity(velocity.clampVelocity().to(Vector.class));
+    var vel = velocity.clampVelocity();
+    handle().setVelocity(new Vector(vel.x(), vel.y(), vel.z()));
   }
 
   @Override
@@ -222,7 +225,8 @@ public class BukkitEntity implements Entity {
 
   @Override
   public boolean teleport(Position position) {
-    return handle().teleport(position.to(Location.class, handle().getWorld()));
+    var w = handle().getWorld();
+    return handle().teleport(new Location(w, position.x(), position.y(), position.z()));
   }
 
   @Override

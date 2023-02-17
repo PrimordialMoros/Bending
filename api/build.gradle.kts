@@ -9,7 +9,6 @@ version = "3.1.0-SNAPSHOT"
 dependencies {
     api(libs.math.core)
     api(libs.tasker.core)
-    compileOnlyApi(libs.slf4j.api)
     compileOnlyApi(libs.adventure.api)
     compileOnly(libs.caffeine)
     compileOnly(libs.eventbus)

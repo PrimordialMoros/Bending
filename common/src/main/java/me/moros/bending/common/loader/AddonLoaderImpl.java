@@ -17,30 +17,24 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.registry;
+package me.moros.bending.common.loader;
 
-import java.util.function.Function;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.ServiceLoader;
+import java.util.ServiceLoader.Provider;
+import java.util.stream.Collectors;
 
-public class DefaultedRegistry<K, V> extends SimpleRegistry<K, V> {
-  private final Function<K, V> factory;
+import me.moros.bending.api.addon.Addon;
 
-  protected DefaultedRegistry(String namespace, Function<V, K> inverseMapper, Function<String, K> keyMapper, Function<K, V> factory) {
-    super(namespace, inverseMapper, keyMapper);
-    this.factory = factory;
+record AddonLoaderImpl(AddonClassLoader loader, Collection<Addon> addons) implements AddonLoader {
+  AddonLoaderImpl(AddonClassLoader loader) {
+    this(loader, ServiceLoader.load(Addon.class, loader).stream().map(Provider::get).collect(Collectors.toSet()));
   }
 
   @Override
-  public V get(K key) {
-    var result = super.get(key);
-    if (result == null) {
-      result = factory.apply(key);
-      register(result);
-    }
-    return result;
-  }
-
-  @Override
-  public void lock() {
-    throw new UnsupportedOperationException("Cannot lock defaulted registry");
+  public Iterator<Addon> iterator() {
+    return Collections.unmodifiableCollection(addons).iterator();
   }
 }

@@ -36,14 +36,12 @@ import me.moros.bending.sponge.adapter.NativeAdapterImpl;
 import me.moros.bending.sponge.gui.BoardImpl;
 import me.moros.bending.sponge.gui.ElementMenu;
 import me.moros.bending.sponge.platform.item.SpongeItemBuilder;
-import me.moros.math.sponge.SpongeMathAdapter;
 import org.spongepowered.api.Sponge;
 
 public class SpongePlatform implements Platform, PlatformFactory {
   private final NativeAdapter adapter;
 
   public SpongePlatform() {
-    SpongeMathAdapter.register();
     new SpongeRegistryInitializer().init();
     this.adapter = new NativeAdapterImpl();
   }

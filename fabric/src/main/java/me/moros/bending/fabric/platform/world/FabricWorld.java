@@ -117,7 +117,9 @@ public record FabricWorld(ServerLevel handle) implements World {
 
   @Override
   public List<Entity> nearbyEntities(AABB box, Predicate<Entity> predicate, int limit) {
-    net.minecraft.world.phys.AABB aabb = new net.minecraft.world.phys.AABB(box.min.to(Vec3.class), box.max.to(Vec3.class));
+    var min = new Vec3(box.min.x(), box.min.y(), box.min.z());
+    var max = new Vec3(box.min.x(), box.max.y(), box.max.z());
+    net.minecraft.world.phys.AABB aabb = new net.minecraft.world.phys.AABB(min, max);
     List<Entity> entities = new ArrayList<>();
     for (var vanillaEntity : handle().getEntities(null, aabb)) {
       Entity entity = PlatformAdapter.fromFabricEntity(vanillaEntity);

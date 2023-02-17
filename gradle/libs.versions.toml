@@ -1,8 +1,6 @@
 [versions]
 math = "2.0.0-SNAPSHOT"
-math-fabric = "1.19.3-2.0.0-SNAPSHOT"
 tasker = "1.0.0-SNAPSHOT"
-tasker-fabric = "1.19.3-1.0.0-SNAPSHOT"
 adventure = "4.11.0"
 adventure-fabric = "5.6.1"
 configurate = "4.1.2"
@@ -20,18 +18,14 @@ shadow = "7.1.2"
 vanilla-gradle = "0.2.1-SNAPSHOT"
 
 [libraries]
-storage = { module = "me.moros:storage", version = "3.1.0" }
+storage = { module = "me.moros:storage", version = "3.2.0-SNAPSHOT" }
 
 math-core = { module = "me.moros:math-core", version.ref = "math" }
-math-bukkit = { module = "me.moros:math-bukkit", version.ref = "math" }
-math-sponge = { module = "me.moros:math-sponge", version.ref = "math" }
-math-fabric = { module = "me.moros:math-fabric", version.ref = "math-fabric" }
-math-minestom = { module = "me.moros:math-minestom", version.ref = "math" }
 
 tasker-core = { module = "me.moros:tasker-core", version.ref = "tasker" }
 tasker-bukkit = { module = "me.moros:tasker-bukkit", version.ref = "tasker" }
 tasker-sponge = { module = "me.moros:tasker-sponge", version.ref = "tasker" }
-tasker-fabric = { module = "me.moros:tasker-fabric", version.ref = "tasker-fabric" }
+tasker-fabric = { module = "me.moros:tasker-fabric", version.ref = "tasker" }
 tasker-minestom = { module = "me.moros:tasker-minestom", version.ref = "tasker" }
 
 javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }

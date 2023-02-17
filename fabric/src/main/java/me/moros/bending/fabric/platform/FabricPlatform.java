@@ -37,7 +37,6 @@ import me.moros.bending.fabric.adapter.NativeAdapterImpl;
 import me.moros.bending.fabric.gui.BoardImpl;
 import me.moros.bending.fabric.gui.ElementMenu;
 import me.moros.bending.fabric.platform.item.FabricItemBuilder;
-import me.moros.math.fabric.FabricMathAdapter;
 import net.minecraft.server.MinecraftServer;
 
 public class FabricPlatform implements Platform, PlatformFactory {
@@ -46,7 +45,6 @@ public class FabricPlatform implements Platform, PlatformFactory {
   private final IntSupplier tickSupplier;
 
   public FabricPlatform(MinecraftServer server) {
-    FabricMathAdapter.register();
     new FabricRegistryInitializer().init();
     this.server = server;
     this.adapter = new NativeAdapterImpl(server);

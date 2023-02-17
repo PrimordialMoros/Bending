@@ -37,7 +37,6 @@ import me.moros.bending.paper.adapter.NativeAdapterImpl;
 import me.moros.bending.paper.gui.BoardImpl;
 import me.moros.bending.paper.gui.ElementMenu;
 import me.moros.bending.paper.platform.item.BukkitItemBuilder;
-import me.moros.math.bukkit.BukkitMathAdapter;
 import org.bukkit.Bukkit;
 import org.slf4j.Logger;
 
@@ -46,7 +45,6 @@ public class BukkitPlatform implements Platform, PlatformFactory {
   private final boolean hasNativeSupport;
 
   public BukkitPlatform(Logger logger) {
-    BukkitMathAdapter.register();
     new BukkitRegistryInitializer().init();
     this.adapter = AdapterLoader.loadAdapter(logger);
     this.hasNativeSupport = adapter == NativeAdapterImpl.DUMMY;

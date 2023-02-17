@@ -15,7 +15,6 @@ dependencies {
     bendingImplementation(projects.bendingCommon)
     bendingImplementation(projects.adapterV119R1)
     bendingImplementation(projects.adapterV119R2)
-    bendingImplementation(libs.math.bukkit)
     bendingImplementation(libs.tasker.bukkit)
     bendingImplementation(libs.bstats.bukkit)
     bendingImplementation(libs.cloud.minecraft) { isTransitive = false }

@@ -25,7 +25,6 @@ minecraft {
 dependencies {
     bendingImplementation(projects.bendingCommon)
     bendingImplementation(projects.bendingNms)
-    bendingImplementation(libs.math.sponge)
     bendingImplementation(libs.tasker.sponge)
     bendingImplementation(libs.bstats.sponge)
     bendingImplementation(libs.cloud.minecraft) { isTransitive = false }

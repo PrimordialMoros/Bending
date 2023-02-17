@@ -433,8 +433,8 @@ public record UserListener(Game game, Bending plugin) implements Listener, Bukki
             Block b = event.getClickedBlock();
             var block = b == null ? null : PlatformAdapter.fromBukkitBlock(b);
             if (block != null) {
-              Location loc = event.getInteractionPoint();
-              Vector3d point = loc == null ? null : Vector3d.from(loc);
+              Location pos = event.getInteractionPoint();
+              Vector3d point = pos == null ? null : Vector3d.of(pos.getX(), pos.getY(), pos.getZ());
               user.store().add(BlockInteraction.KEY, new BlockInteraction(block, point));
             }
             game.activationController().onUserInteract(user, null, block);
@@ -470,7 +470,8 @@ public record UserListener(Game game, Bending plugin) implements Listener, Bukki
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent event) {
-    onPlayerInteractEntity(event, Vector3d.from(event.getClickedPosition()));
+    var pos = event.getClickedPosition();
+    onPlayerInteractEntity(event, Vector3d.of(pos.getX(), pos.getY(), pos.getZ()));
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

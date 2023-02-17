@@ -138,15 +138,15 @@ public interface World extends Keyed, ForwardingAudience, BlockGetter, BlockSett
    */
   boolean isNight();
 
-  default Entity dropItem(Position position, ItemSnapshot item) {
-    return dropItem(position, item, true);
+  default Entity dropItem(Position pos, ItemSnapshot item) {
+    return dropItem(pos, item, true);
   }
 
-  Entity dropItem(Position position, ItemSnapshot item, boolean canPickup);
+  Entity dropItem(Position pos, ItemSnapshot item, boolean canPickup);
 
-  Entity createFallingBlock(Position center, BlockState state, boolean gravity);
+  Entity createFallingBlock(Position pos, BlockState state, boolean gravity);
 
-  Entity createArmorStand(Position center, Item type, boolean gravity);
+  Entity createArmorStand(Position pos, Item type, boolean gravity);
 
   default int lightLevel(Position position) {
     return lightLevel(position.blockX(), position.blockY(), position.blockZ());

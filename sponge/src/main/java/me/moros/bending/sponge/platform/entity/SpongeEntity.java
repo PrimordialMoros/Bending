@@ -95,22 +95,26 @@ public class SpongeEntity implements Entity {
 
   @Override
   public Vector3d location() {
-    return Vector3d.from(handle().serverLocation());
+    var loc = handle().serverLocation();
+    return Vector3d.of(loc.x(), loc.y(), loc.z());
   }
 
   @Override
   public Vector3d direction() {
-    return Vector3d.from(handle().direction());
+    var dir = handle().direction();
+    return Vector3d.of(dir.x(), dir.y(), dir.z());
   }
 
   @Override
   public Vector3d velocity() {
-    return Vector3d.from(handle().velocity().get());
+    var vel = handle().velocity().get();
+    return Vector3d.of(vel.x(), vel.y(), vel.z());
   }
 
   @Override
   public void velocity(Vector3d velocity) {
-    handle().offer(Keys.VELOCITY, velocity.clampVelocity().to(org.spongepowered.math.vector.Vector3d.class));
+    var vel = velocity.clampVelocity();
+    handle().offer(Keys.VELOCITY, org.spongepowered.math.vector.Vector3d.from(vel.x(), vel.y(), vel.z()));
   }
 
   @Override
@@ -215,7 +219,8 @@ public class SpongeEntity implements Entity {
 
   @Override
   public boolean teleport(Position position) {
-    return handle().setPosition(position.to(org.spongepowered.math.vector.Vector3d.class));
+    var vec = org.spongepowered.math.vector.Vector3d.from(position.x(), position.y(), position.z());
+    return handle().setPosition(vec);
   }
 
   @Override

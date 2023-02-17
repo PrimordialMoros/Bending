@@ -30,6 +30,7 @@ import me.moros.bending.common.ability.AbilityInitializer;
 import me.moros.bending.common.config.BendingPropertiesImpl;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.bending.common.game.GameImpl;
+import me.moros.bending.common.loader.AddonLoader;
 import me.moros.bending.common.locale.TranslationManager;
 import me.moros.bending.common.util.GameProviderUtil;
 import me.moros.bending.common.util.ReflectionUtil;
@@ -42,6 +43,7 @@ public abstract class AbstractBending<T> implements Bending {
   private final Path path;
   private final Logger logger;
 
+  private final AddonLoader addonLoader;
   private final ConfigManager configManager;
   private final TranslationManager translationManager;
 
@@ -51,15 +53,18 @@ public abstract class AbstractBending<T> implements Bending {
     this.parent = parent;
     this.path = dir;
     this.logger = logger;
+    this.addonLoader = AddonLoader.create(dir, getClass().getClassLoader());
     this.configManager = new ConfigManager(logger, dir);
     this.translationManager = new TranslationManager(logger, dir);
     ReflectionUtil.injectStatic(BendingProperties.Holder.class, ConfigManager.load(BendingPropertiesImpl::new));
     new AbilityInitializer().init();
+    addonLoader.loadAll();
   }
 
   protected void load() {
     game = new GameImpl(this);
     GameProviderUtil.registerProvider(game);
+    addonLoader.enableAll(game);
   }
 
   @Override
@@ -71,6 +76,7 @@ public abstract class AbstractBending<T> implements Bending {
 
   protected void disable() {
     if (game != null) {
+      addonLoader.unloadAll();
       game.cleanup();
       EventBus.INSTANCE.shutdown();
       configManager().close();

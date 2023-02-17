@@ -171,7 +171,8 @@ public class SpongeLivingEntity extends SpongeEntity implements LivingEntity {
   @Override
   public Entity shootArrow(Position origin, Vector3d direction, double power) {
     var w = handle().world();
-    var arrow = w.createEntity(EntityTypes.ARROW, origin.to(org.spongepowered.math.vector.Vector3d.class));
+    var vec = org.spongepowered.math.vector.Vector3d.from(origin.x(), origin.y(), origin.z());
+    var arrow = w.createEntity(EntityTypes.ARROW, vec);
     ((net.minecraft.world.entity.projectile.Arrow) arrow).shoot(direction.x(), direction.y(), direction.z(), (float) power, 0);
     arrow.offer(Keys.SHOOTER, handle());
     arrow.offer(Keys.IS_GRAVITY_AFFECTED, false);

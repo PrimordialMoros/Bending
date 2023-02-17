@@ -106,7 +106,9 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
 
   @Override
   public List<Entity> nearbyEntities(AABB box, Predicate<Entity> predicate, int limit) {
-    BoundingBox bb = BoundingBox.of(box.min.to(Vector.class), box.max.to(Vector.class));
+    var min = new Vector(box.min.x(), box.min.y(), box.min.z());
+    var max = new Vector(box.max.x(), box.max.y(), box.max.z());
+    BoundingBox bb = BoundingBox.of(min, max);
     List<Entity> entities = new ArrayList<>();
     for (var bukkitEntity : handle().getNearbyEntities(bb)) {
       Entity entity = PlatformAdapter.fromBukkitEntity(bukkitEntity);
@@ -147,8 +149,8 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
 
   @Override
   public CompositeRayTrace rayTraceEntities(Context context, double range) {
-    var start = context.origin().to(Vector.class);
-    var dir = context.dir().to(Vector.class);
+    var start = new Vector(context.origin().x(), context.origin().y(), context.origin().z());
+    var dir = new Vector(context.dir().x(), context.dir().y(), context.dir().z());
     AABB box = AABB.fromRay(context.origin(), context.dir(), context.raySize());
     BoundingBox bb = new BoundingBox(box.min.x(), box.min.y(), box.min.z(), box.max.x(), box.max.y(), box.max.z());
     Entity nearestHitEntity = null;
@@ -172,7 +174,8 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
     if (nearestHitEntity == null) {
       return CompositeRayTrace.miss(context.endPoint());
     }
-    return CompositeRayTrace.hit(Vector3d.from(nearestHitResult.getHitPosition()), nearestHitEntity);
+    var pos = nearestHitResult.getHitPosition();
+    return CompositeRayTrace.hit(Vector3d.of(pos.getX(), pos.getY(), pos.getZ()), nearestHitEntity);
   }
 
   @Override
@@ -191,26 +194,29 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
   }
 
   @Override
-  public Entity dropItem(Position position, ItemSnapshot item, boolean canPickup) {
-    var droppedItem = handle().dropItem(position.to(Location.class, handle()), PlatformAdapter.toBukkitItem(item));
+  public Entity dropItem(Position pos, ItemSnapshot item, boolean canPickup) {
+    var loc = new Location(handle(), pos.x(), pos.y(), pos.z());
+    var droppedItem = handle().dropItem(loc, PlatformAdapter.toBukkitItem(item));
     droppedItem.setCanMobPickup(canPickup);
     droppedItem.setCanPlayerPickup(canPickup);
     return PlatformAdapter.fromBukkitEntity(droppedItem);
   }
 
   @Override
-  public Entity createFallingBlock(Position center, BlockState state, boolean gravity) {
+  public Entity createFallingBlock(Position pos, BlockState state, boolean gravity) {
+    var loc = new Location(handle(), pos.x(), pos.y(), pos.z());
     var data = PlatformAdapter.toBukkitData(state);
-    var bukkitEntity = handle().spawnFallingBlock(center.to(Location.class, handle()), data);
+    var bukkitEntity = handle().spawnFallingBlock(loc, data);
     bukkitEntity.setGravity(gravity);
     bukkitEntity.setDropItem(false);
     return PlatformAdapter.fromBukkitEntity(bukkitEntity);
   }
 
   @Override
-  public Entity createArmorStand(Position center, Item type, boolean gravity) {
+  public Entity createArmorStand(Position pos, Item type, boolean gravity) {
+    var loc = new Location(handle(), pos.x(), pos.y(), pos.z());
     var item = PlatformAdapter.toBukkitItem(type);
-    var bukkitEntity = handle().spawn(center.to(Location.class, handle()), ArmorStand.class, as -> {
+    var bukkitEntity = handle().spawn(loc, ArmorStand.class, as -> {
       as.setInvulnerable(true);
       as.setVisible(false);
       as.setGravity(gravity);

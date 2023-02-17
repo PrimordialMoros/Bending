@@ -389,7 +389,8 @@ public class UserListener extends SpongeListener {
     User user = Registries.BENDERS.get(entity.uniqueId());
     if (user != null) {
       var target = PlatformAdapter.fromSpongeEntity(event.entity());
-      user.store().add(EntityInteraction.KEY, new EntityInteraction(target, Vector3d.from(event.interactionPoint())));
+      var point = event.interactionPoint();
+      user.store().add(EntityInteraction.KEY, new EntityInteraction(target, Vector3d.of(point.x(), point.y(), point.z())));
       game.activationController().onUserInteract(user, target, null);
     }
   }
@@ -404,7 +405,8 @@ public class UserListener extends SpongeListener {
       var loc = event.block().location().orElse(null);
       if (loc != null && event instanceof InteractBlockEvent.Secondary secondary) {
         var target = PlatformAdapter.fromSpongeWorld(loc.world()).blockAt(loc.blockX(), loc.blockY(), loc.blockZ());
-        user.store().add(BlockInteraction.KEY, new BlockInteraction(target, Vector3d.from(secondary.interactionPoint())));
+        var point = secondary.interactionPoint();
+        user.store().add(BlockInteraction.KEY, new BlockInteraction(target, Vector3d.of(point.x(), point.y(), point.z())));
         game.activationController().onUserInteract(user, null, target);
       } else if (event instanceof InteractBlockEvent.Primary.Start) {
         game.activationController().onUserSwing(user);

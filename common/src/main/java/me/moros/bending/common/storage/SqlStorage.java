@@ -67,7 +67,7 @@ final class SqlStorage extends AbstractStorage {
   private final Jdbi DB;
 
   SqlStorage(Bending plugin, StorageDataSource dataSource) {
-    super(dataSource.logger());
+    super(plugin.logger());
     this.plugin = plugin;
     this.dataSource = dataSource;
     this.DB = Jdbi.create(this.dataSource.source());

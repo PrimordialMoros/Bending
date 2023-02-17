@@ -17,30 +17,33 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.registry;
+package me.moros.bending.common.loader;
 
-import java.util.function.Function;
+import java.nio.file.Path;
 
-public class DefaultedRegistry<K, V> extends SimpleRegistry<K, V> {
-  private final Function<K, V> factory;
+import me.moros.bending.api.addon.Addon;
+import me.moros.bending.api.game.Game;
 
-  protected DefaultedRegistry(String namespace, Function<V, K> inverseMapper, Function<String, K> keyMapper, Function<K, V> factory) {
-    super(namespace, inverseMapper, keyMapper);
-    this.factory = factory;
-  }
-
-  @Override
-  public V get(K key) {
-    var result = super.get(key);
-    if (result == null) {
-      result = factory.apply(key);
-      register(result);
+public interface AddonLoader extends Iterable<Addon> {
+  default void loadAll() {
+    for (var addon : this) {
+      addon.load();
     }
-    return result;
   }
 
-  @Override
-  public void lock() {
-    throw new UnsupportedOperationException("Cannot lock defaulted registry");
+  default void enableAll(Game game) {
+    for (var addon : this) {
+      addon.enable(game);
+    }
+  }
+
+  default void unloadAll() {
+    for (var addon : this) {
+      addon.unload();
+    }
+  }
+
+  static AddonLoader create(Path dir, ClassLoader parent) {
+    return new AddonLoaderImpl(new AddonClassLoader(parent).loadJars(dir.resolve("addons")));
   }
 }

@@ -1,0 +1,55 @@
+module me.moros.bending {
+  exports me.moros.bending.api;
+  exports me.moros.bending.api.ability;
+  exports me.moros.bending.api.ability.common;
+  exports me.moros.bending.api.ability.common.basic;
+  exports me.moros.bending.api.ability.element;
+  exports me.moros.bending.api.ability.preset;
+  exports me.moros.bending.api.ability.state;
+  exports me.moros.bending.api.adapter;
+  exports me.moros.bending.api.addon;
+  exports me.moros.bending.api.collision;
+  exports me.moros.bending.api.collision.geometry;
+  exports me.moros.bending.api.collision.raytrace;
+  exports me.moros.bending.api.config;
+  exports me.moros.bending.api.config.attribute;
+  exports me.moros.bending.api.event;
+  exports me.moros.bending.api.event.base;
+  exports me.moros.bending.api.game;
+  exports me.moros.bending.api.gui;
+  exports me.moros.bending.api.locale;
+  exports me.moros.bending.api.platform;
+  exports me.moros.bending.api.platform.block;
+  exports me.moros.bending.api.platform.damage;
+  exports me.moros.bending.api.platform.entity;
+  exports me.moros.bending.api.platform.entity.player;
+  exports me.moros.bending.api.platform.item;
+  exports me.moros.bending.api.platform.particle;
+  exports me.moros.bending.api.platform.potion;
+  exports me.moros.bending.api.platform.property;
+  exports me.moros.bending.api.platform.sound;
+  exports me.moros.bending.api.platform.world;
+  exports me.moros.bending.api.protection;
+  exports me.moros.bending.api.registry;
+  exports me.moros.bending.api.storage;
+  exports me.moros.bending.api.temporal;
+  exports me.moros.bending.api.user;
+  exports me.moros.bending.api.user.profile;
+  exports me.moros.bending.api.util;
+  exports me.moros.bending.api.util.data;
+  exports me.moros.bending.api.util.functional;
+  exports me.moros.bending.api.util.material;
+  exports me.moros.bending.api.util.metadata;
+
+  uses me.moros.bending.api.addon.Addon;
+
+  requires transitive me.moros.tasker;
+  requires transitive me.moros.math;
+  requires static org.checkerframework.checker.qual;
+  requires static com.github.benmanes.caffeine;
+  requires static org.spongepowered.configurate;
+  requires static net.kyori.event;
+  requires static net.kyori.examination.api;
+  requires static transitive net.kyori.adventure;
+  requires static transitive net.kyori.adventure.key;
+}

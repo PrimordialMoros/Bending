@@ -40,14 +40,15 @@ public final class NativeAdapterImpl implements NativeAdapter {
   @Override
   public BlockRayTrace rayTraceBlocks(World world, Context context) {
     var handle = ((BukkitWorld) world).handle();
-    var loc = context.origin().to(Location.class, handle);
-    var dir = context.dir().to(Vector.class);
+    var loc = new Location(handle, context.origin().x(), context.origin().y(), context.origin().z());
+    var dir = new Vector(context.dir().x(), context.dir().y(), context.dir().z());
     var mode = context.ignoreLiquids() ? FluidCollisionMode.NEVER : FluidCollisionMode.ALWAYS;
     var result = handle.rayTraceBlocks(loc, dir, context.range(), mode, context.ignorePassable());
     if (result == null || result.getHitBlock() == null) {
       return CompositeRayTrace.miss(context.endPoint());
     }
-    Vector3d point = Vector3d.from(result.getHitPosition());
+    var pos = result.getHitPosition();
+    Vector3d point = Vector3d.of(pos.getX(), pos.getY(), pos.getZ());
     Block block = world.blockAt(result.getHitBlock().getX(), result.getHitBlock().getY(), result.getHitBlock().getZ());
     return CompositeRayTrace.hit(point, block);
   }

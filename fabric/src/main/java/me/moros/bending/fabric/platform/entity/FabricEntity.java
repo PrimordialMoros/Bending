@@ -99,7 +99,8 @@ public class FabricEntity implements Entity {
 
   @Override
   public Vector3d location() {
-    return Vector3d.from(handle().position());
+    var pos = handle().position();
+    return Vector3d.of(pos.x(), pos.y(), pos.z());
   }
 
   @Override
@@ -112,7 +113,8 @@ public class FabricEntity implements Entity {
 
   @Override
   public Vector3d velocity() {
-    return Vector3d.from(handle().getDeltaMovement());
+    var vel = handle().getDeltaMovement();
+    return Vector3d.of(vel.x(), vel.y(), vel.z());
   }
 
   @Override

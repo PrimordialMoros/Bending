@@ -39,7 +39,7 @@ public final class ParticleMapper {
     var spongeParticle = Sponge.game().registry(RegistryTypes.PARTICLE_TYPE).value(PlatformAdapter.rsk(p.key()));
     if (spongeParticle != null) {
       var data = context.data();
-      var offset = context.offset().to(Vector3d.class);
+      var offset = Vector3d.from(context.offset().x(), context.offset().y(), context.offset().z());
       var builder = ParticleEffect.builder().type(spongeParticle);
       if (context.count() <= 0) {
         builder.quantity(1).velocity(offset);

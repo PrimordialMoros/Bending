@@ -156,8 +156,8 @@ public class BukkitLivingEntity extends BukkitEntity implements LivingEntity {
   @Override
   public Entity shootArrow(Position origin, Vector3d direction, double power) {
     var w = handle().getWorld();
-    var loc = origin.to(Location.class, w);
-    var arrow = w.spawnArrow(loc, direction.to(Vector.class), (float) power, 0);
+    var loc = new Location(w, origin.x(), origin.y(), origin.z());
+    var arrow = w.spawnArrow(loc, new Vector(direction.x(), direction.y(), direction.z()), (float) power, 0);
     arrow.setShooter(handle());
     arrow.setGravity(false);
     arrow.setInvulnerable(true);

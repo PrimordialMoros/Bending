@@ -116,8 +116,8 @@ public record SpongeWorld(ServerWorld handle) implements World {
 
   @Override
   public List<Entity> nearbyEntities(AABB box, Predicate<Entity> predicate, int limit) {
-    var min = box.min.to(org.spongepowered.math.vector.Vector3d.class);
-    var max = box.max.to(org.spongepowered.math.vector.Vector3d.class);
+    var min = org.spongepowered.math.vector.Vector3d.from(box.min.x(), box.min.y(), box.min.z());
+    var max = org.spongepowered.math.vector.Vector3d.from(box.max.x(), box.max.y(), box.max.z());
     org.spongepowered.api.util.AABB aabb = org.spongepowered.api.util.AABB.of(min, max);
     List<Entity> entities = new ArrayList<>();
     for (var spongeEntity : handle().entities(aabb)) {
@@ -151,7 +151,8 @@ public record SpongeWorld(ServerWorld handle) implements World {
   public <T> void spawnParticle(ParticleContext<T> context) {
     var effect = ParticleMapper.mapParticleEffect(context);
     if (effect != null) {
-      handle().spawnParticles(effect, context.position().to(org.spongepowered.math.vector.Vector3d.class), 128);
+      var vec = org.spongepowered.math.vector.Vector3d.from(context.position().x(), context.position().y(), context.position().z());
+      handle().spawnParticles(effect, vec, 128);
     }
   }
 
@@ -199,8 +200,8 @@ public record SpongeWorld(ServerWorld handle) implements World {
   }
 
   @Override
-  public Entity dropItem(Position position, ItemSnapshot item, boolean canPickup) {
-    var vec = position.to(org.spongepowered.math.vector.Vector3d.class);
+  public Entity dropItem(Position pos, ItemSnapshot item, boolean canPickup) {
+    var vec = org.spongepowered.math.vector.Vector3d.from(pos.x(), pos.y(), pos.z());
     Item droppedItem = handle().createEntity(EntityTypes.ITEM, vec);
     droppedItem.item().set(PlatformAdapter.toSpongeItemSnapshot(item));
     droppedItem.offer(Keys.INFINITE_PICKUP_DELAY, true);
@@ -209,9 +210,9 @@ public record SpongeWorld(ServerWorld handle) implements World {
   }
 
   @Override
-  public Entity createFallingBlock(Position center, BlockState state, boolean gravity) {
+  public Entity createFallingBlock(Position pos, BlockState state, boolean gravity) {
     var data = (net.minecraft.world.level.block.state.BlockState) PlatformAdapter.toSpongeData(state);
-    var fabricEntity = FallingBlockEntityAccess.bending$create(nms(), center.x(), center.y(), center.z(), data);
+    var fabricEntity = FallingBlockEntityAccess.bending$create(nms(), pos.x(), pos.y(), pos.z(), data);
     fabricEntity.time = 1; // Is this needed?
     fabricEntity.setNoGravity(!gravity);
     fabricEntity.dropItem = false;
@@ -221,8 +222,9 @@ public record SpongeWorld(ServerWorld handle) implements World {
   }
 
   @Override
-  public Entity createArmorStand(Position center, me.moros.bending.api.platform.item.Item type, boolean gravity) {
-    var spongeEntity = handle().createEntity(EntityTypes.ARMOR_STAND, center.to(org.spongepowered.math.vector.Vector3d.class));
+  public Entity createArmorStand(Position pos, me.moros.bending.api.platform.item.Item type, boolean gravity) {
+    var vec = org.spongepowered.math.vector.Vector3d.from(pos.x(), pos.y(), pos.z());
+    var spongeEntity = handle().createEntity(EntityTypes.ARMOR_STAND, vec);
     spongeEntity.offer(Keys.INVULNERABLE, true);
     spongeEntity.offer(Keys.IS_INVISIBLE, true);
     spongeEntity.offer(Keys.IS_GRAVITY_AFFECTED, gravity);

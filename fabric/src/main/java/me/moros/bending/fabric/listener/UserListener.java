@@ -178,7 +178,8 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
     if (hand == InteractionHand.MAIN_HAND && !world.isClientSide && playerEntity instanceof ServerPlayer player) {
       var pos = blockHitResult.getBlockPos();
       var block = PlatformAdapter.fromFabricWorld(player.getLevel()).blockAt(pos.getX(), pos.getY(), pos.getZ());
-      Vector3d point = Vector3d.from(blockHitResult.getLocation());
+      var loc = blockHitResult.getLocation();
+      Vector3d point = Vector3d.of(loc.x(), loc.y(), loc.z());
       return onUserInteract(player, null, new BlockInteraction(block, point));
     }
     return InteractionResult.PASS;
@@ -195,7 +196,13 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
   private InteractionResult onRightClickEntity(Player playerEntity, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
     if (hand == InteractionHand.MAIN_HAND && !world.isClientSide && playerEntity instanceof ServerPlayer player) {
       var target = PlatformAdapter.fromFabricEntity(entity);
-      Vector3d point = hitResult == null ? null : Vector3d.from(hitResult.getLocation());
+      Vector3d point;
+      if (hitResult == null) {
+        point = null;
+      } else {
+        var loc = hitResult.getLocation();
+        point = Vector3d.of(loc.x(), loc.y(), loc.z());
+      }
       return onUserInteract(player, new EntityInteraction(target, point), null);
     }
     return InteractionResult.PASS;
