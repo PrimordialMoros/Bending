@@ -134,7 +134,7 @@ public final class BendingExplosion {
       }
     }
 
-    return CollisionUtil.handle(user, new Sphere(center, size), entity -> {
+    return CollisionUtil.handle(user, Sphere.of(center, size), entity -> {
       Vector3d entityCenter = entity.center();
       double distance = center.distance(entityCenter);
       double distanceFactor = (distance <= halfSize) ? 1 : (1 - (distance - halfSize) / size);

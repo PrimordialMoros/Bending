@@ -148,7 +148,7 @@ public class AirBlast extends AbilityInstance {
     Vector3d direction = target.subtract(origin).normalize();
     removalPolicy = Policies.builder().build();
     user.addCooldown(description(), userConfig.cooldown);
-    stream = new AirStream(new Ray(origin, direction.multiply(userConfig.range)));
+    stream = new AirStream(Ray.of(origin, direction.multiply(userConfig.range)));
   }
 
   @Override
@@ -189,7 +189,7 @@ public class AirBlast extends AbilityInstance {
         SoundEffect.AIR.play(user.world(), location);
       }
       // Handle user separately from the general entity collision.
-      if (selectedOrigin && user.bounds().intersects(new Sphere(location, 2))) {
+      if (selectedOrigin && user.bounds().intersects(Sphere.of(location, 2))) {
         onEntityHit(user);
       }
     }
@@ -203,7 +203,7 @@ public class AirBlast extends AbilityInstance {
         return false;
       }
 
-      Vector3d push = ray.direction.normalize();
+      Vector3d push = ray.direction().normalize();
       if (!isUser) {
         // Cap vertical push
         push = push.withY(FastMath.clamp(push.y(), -0.3, 0.3));

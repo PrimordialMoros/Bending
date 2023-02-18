@@ -85,11 +85,11 @@ public class Blaze extends AbilityInstance {
     if (cone) {
       double deltaAngle = Math.PI / (3 * range);
       VectorUtil.createArc(dir, Vector3d.PLUS_J, deltaAngle, FastMath.ceil(range / 1.5)).forEach(v ->
-        streams.add(new FireStream(new Ray(origin, v.multiply(range))))
+        streams.add(new FireStream(Ray.of(origin, v.multiply(range))))
       );
     } else {
       VectorUtil.circle(dir, Vector3d.PLUS_J, FastMath.ceil(6 * range)).forEach(v ->
-        streams.add(new FireStream(new Ray(origin, v.multiply(range))))
+        streams.add(new FireStream(Ray.of(origin, v.multiply(range))))
       );
     }
 

@@ -105,7 +105,7 @@ public class FireBreath extends AbilityInstance {
       return UpdateResult.REMOVE;
     }
     Vector3d offset = Vector3d.of(0, -0.1, 0);
-    Ray ray = new Ray(user.eyeLocation().add(offset), user.direction().multiply(userConfig.range));
+    Ray ray = Ray.of(user.eyeLocation().add(offset), user.direction().multiply(userConfig.range));
     streams.add(new FireStream(ray));
     return streams.update();
   }
@@ -136,7 +136,7 @@ public class FireBreath extends AbilityInstance {
     @Override
     public void render() {
       double offset = 0.2 * distanceTravelled;
-      collider = new Sphere(location, collisionRadius + offset);
+      collider = Sphere.of(location, collisionRadius + offset);
       ParticleBuilder.fire(user, location).count(FastMath.ceil(0.75 * distanceTravelled))
         .offset(offset).extra(0.02).spawn(user.world());
       TempLight.builder(++ticks).build(user.world().blockAt(location));

@@ -19,41 +19,52 @@
 
 package me.moros.bending.api.collision.geometry;
 
-import me.moros.math.FastMath;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 
-/**
- * Ray with origin and direction.
- */
-public sealed interface Ray extends Collider permits RayImpl {
-  Ray ZERO = of(Vector3d.ZERO, Vector3d.ZERO);
+final class AABBDummy implements AABB {
+  static final AABB INSTANCE = new AABBDummy();
 
-  Vector3d direction();
-
-  Vector3d inv();
-
-  @Override
-  default Ray at(Position point) {
-    return of(point.toVector3d(), direction());
+  private AABBDummy() {
   }
 
   @Override
-  default Vector3d halfExtents() {
-    return direction().multiply(0.5);
+  public Vector3d min() {
+    return Vector3d.ZERO;
   }
 
   @Override
-  default boolean contains(Vector3d point) {
-    double lengthSq = direction().lengthSq();
-    if (lengthSq == 0) {
-      return position().distanceSq(point) <= EPSILON;
-    }
-    double t = FastMath.clamp(point.subtract(position()).dot(direction()) / lengthSq, 0, 1);
-    return position().add(direction().multiply(t)).distanceSq(point) <= EPSILON;
+  public Vector3d max() {
+    return Vector3d.ZERO;
   }
 
-  static Ray of(Vector3d origin, Vector3d direction) {
-    return new RayImpl(origin, direction);
+  @Override
+  public AABB grow(Vector3d diff) {
+    return this;
+  }
+
+  @Override
+  public boolean intersects(Collider other) {
+    return false;
+  }
+
+  @Override
+  public Vector3d position() {
+    return Vector3d.ZERO;
+  }
+
+  @Override
+  public AABB at(Position point) {
+    return this;
+  }
+
+  @Override
+  public Vector3d halfExtents() {
+    return Vector3d.ZERO;
+  }
+
+  @Override
+  public boolean contains(Vector3d point) {
+    return false;
   }
 }

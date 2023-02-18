@@ -146,7 +146,7 @@ public class Combustion extends AbilityInstance implements Explosive {
     Particle.LARGE_SMOKE.builder(center).extra(0.2).count(20).offset(1).spawn(user.world());
     Particle.FIREWORK.builder(center).extra(0.2).count(20).offset(1).spawn(user.world());
 
-    Ray ray = new Ray(center, user.direction());
+    Ray ray = Ray.of(center, user.direction());
     FragileStructure.tryDamageStructure(user.world().nearbyBlocks(center, size), 0, ray);
 
     BendingExplosion.builder()

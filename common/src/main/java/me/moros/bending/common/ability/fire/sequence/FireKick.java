@@ -78,7 +78,7 @@ public class FireKick extends AbilityInstance {
     Vector3d dir = user.direction();
     Vector3d rotateAxis = dir.cross(Vector3d.PLUS_J).normalize().cross(dir);
     VectorUtil.createArc(direction, rotateAxis, Math.PI / 30, 11).forEach(
-      v -> streams.add(new FireStream(new Ray(origin, v.multiply(userConfig.range))))
+      v -> streams.add(new FireStream(Ray.of(origin, v.multiply(userConfig.range))))
     );
     removalPolicy = Policies.builder().build();
     user.addCooldown(description(), userConfig.cooldown);
@@ -141,7 +141,7 @@ public class FireKick extends AbilityInstance {
 
     @Override
     public boolean onBlockHit(Block block) {
-      FragileStructure.tryDamageStructure(block, 3, new Ray(location, ray.direction));
+      FragileStructure.tryDamageStructure(block, 3, Ray.of(location, ray.direction()));
       return true;
     }
   }

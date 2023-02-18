@@ -50,14 +50,14 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
   protected AbstractWheel(User user, Ray ray, double radius, double speed) {
     this.user = user;
     this.ray = ray;
-    this.location = ray.origin;
+    this.location = ray.position();
     this.radius = radius;
-    this.dir = ray.direction.normalize().multiply(speed);
-    box = new AABB(Vector3d.of(-radius, -radius, -radius), Vector3d.of(radius, radius, radius));
-    AABB bounds = new AABB(Vector3d.of(-0.15, -radius, -radius), Vector3d.of(0.15, radius, radius));
+    this.dir = ray.direction().normalize().multiply(speed);
+    box = AABB.of(Vector3d.of(-radius, -radius, -radius), Vector3d.of(radius, radius, radius));
+    AABB bounds = AABB.of(Vector3d.of(-0.15, -radius, -radius), Vector3d.of(0.15, radius, radius));
     double angle = Math.toRadians(user.yaw());
-    OBB obb = new OBB(bounds, Vector3d.PLUS_J, angle);
-    collider = new Disk(obb, new Sphere(radius));
+    OBB obb = OBB.of(bounds, Vector3d.PLUS_J, angle);
+    collider = Disk.of(obb, Sphere.of(radius));
   }
 
   @Override
@@ -105,10 +105,10 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
     for (Block block : nearbyBlocks) {
       AABB blockBounds = block.bounds();
       if (blockBounds.intersects(checkCollider)) {
-        if (blockBounds.min.y() > topY) { // Collision on the top part
+        if (blockBounds.min().y() > topY) { // Collision on the top part
           return false;
         }
-        double resolution = blockBounds.max.y() - bottomY;
+        double resolution = blockBounds.max().y() - bottomY;
         if (Math.abs(resolution) > radius + 0.1) {
           return false;
         } else {

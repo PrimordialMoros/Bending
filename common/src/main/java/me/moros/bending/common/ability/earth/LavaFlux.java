@@ -130,7 +130,7 @@ public class LavaFlux extends AbilityInstance {
     Vector3d center = user.location().center();
     Vector3d dir = user.direction().withY(0).normalize().multiply(userConfig.range + 2);
 
-    line = new Line(new Ray(center, dir), 70);
+    line = new Line(Ray.of(center, dir), 70);
     // First update in same tick to only apply cooldown if line is valid
     if (line.update() == UpdateResult.REMOVE) {
       return false;

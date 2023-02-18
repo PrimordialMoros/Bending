@@ -96,7 +96,7 @@ public class Catapult extends AbilityInstance {
   private @Nullable Block getBase() {
     Vector3d center = user.location();
     AABB entityBounds = user.bounds().grow(Vector3d.of(0, 0.2, 0));
-    AABB floorBounds = new AABB(Vector3d.of(-1, -0.5, -1), Vector3d.of(1, 0, 1)).at(center);
+    AABB floorBounds = AABB.of(Vector3d.of(-1, -0.5, -1), Vector3d.of(1, 0, 1)).at(center);
     return user.world().nearbyBlocks(floorBounds, b -> entityBounds.intersects(b.bounds())).stream()
       .filter(this::isValidBlock)
       .min(Comparator.comparingDouble(b -> b.center().distanceSq(center)))
@@ -145,7 +145,7 @@ public class Catapult extends AbilityInstance {
     Vector3d origin = user.location().add(0, 0.5, 0);
     SoundEffect.EARTH.play(user.world(), origin);
     data.asParticle(origin).count(16).offset(0.4).spawn(user.world());
-    CollisionUtil.handle(user, new Sphere(origin, 1.5), entity -> {
+    CollisionUtil.handle(user, Sphere.of(origin, 1.5), entity -> {
       BendingEffect.FIRE_TICK.reset(entity);
       entity.applyVelocity(this, push);
       return true;

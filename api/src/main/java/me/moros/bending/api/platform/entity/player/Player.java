@@ -47,7 +47,7 @@ public interface Player extends LivingEntity {
   @Override
   default boolean isOnGround() {
     AABB entityBounds = bounds().grow(Vector3d.of(0, 0.05, 0));
-    AABB floorBounds = new AABB(Vector3d.of(-1, -0.1, -1), Vector3d.of(1, 0.1, 1)).at(location());
+    AABB floorBounds = AABB.of(Vector3d.of(-1, -0.1, -1), Vector3d.of(1, 0.1, 1)).at(location());
     for (Block block : world().nearbyBlocks(floorBounds, b -> b.type().isCollidable())) {
       if (entityBounds.intersects(block.bounds())) {
         return true;

@@ -81,7 +81,7 @@ public record FabricWorld(ServerLevel handle) implements World {
         if (box.getSize() > 0) {
           Vector3d min = Vector3d.of(x + box.minX, y + box.minY, z + box.minZ);
           Vector3d max = Vector3d.of(x + box.maxX, y + box.maxY, z + box.maxZ);
-          return new AABB(min, max);
+          return AABB.of(min, max);
         }
       }
     }
@@ -115,8 +115,8 @@ public record FabricWorld(ServerLevel handle) implements World {
 
   @Override
   public List<Entity> nearbyEntities(AABB box, Predicate<Entity> predicate, int limit) {
-    var min = new Vec3(box.min.x(), box.min.y(), box.min.z());
-    var max = new Vec3(box.max.x(), box.max.y(), box.max.z());
+    var min = new Vec3(box.min().x(), box.min().y(), box.min().z());
+    var max = new Vec3(box.max().x(), box.max().y(), box.max().z());
     net.minecraft.world.phys.AABB aabb = new net.minecraft.world.phys.AABB(min, max);
     List<Entity> entities = new ArrayList<>();
     for (var vanillaEntity : handle().getEntities(null, aabb)) {
@@ -164,7 +164,7 @@ public record FabricWorld(ServerLevel handle) implements World {
     var dir = context.dir().normalize().multiply(range);
     var endPoint = context.origin().add(dir);
     var box = AABB.fromRay(context.origin(), dir, context.raySize());
-    var aabb = new net.minecraft.world.phys.AABB(box.min.x(), box.min.y(), box.min.z(), box.max.x(), box.max.y(), box.max.z());
+    var aabb = new net.minecraft.world.phys.AABB(box.min().x(), box.min().y(), box.min().z(), box.max().x(), box.max().y(), box.max().z());
     var vec3d1 = new Vec3(context.origin().x(), context.origin().y(), context.origin().z());
     var vec3d2 = new Vec3(endPoint.x(), endPoint.y(), endPoint.z());
     for (var fabricEntity : handle().getEntities(null, aabb)) {

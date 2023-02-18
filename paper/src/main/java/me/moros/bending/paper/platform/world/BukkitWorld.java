@@ -73,7 +73,7 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
     }
     Vector3d min = Vector3d.of(box.getMinX(), box.getMinY(), box.getMinZ());
     Vector3d max = Vector3d.of(box.getMaxX(), box.getMaxY(), box.getMaxZ());
-    return new AABB(min, max);
+    return AABB.of(min, max);
   }
 
   @Override
@@ -104,8 +104,8 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
 
   @Override
   public List<Entity> nearbyEntities(AABB box, Predicate<Entity> predicate, int limit) {
-    var min = new Vector(box.min.x(), box.min.y(), box.min.z());
-    var max = new Vector(box.max.x(), box.max.y(), box.max.z());
+    var min = new Vector(box.min().x(), box.min().y(), box.min().z());
+    var max = new Vector(box.max().x(), box.max().y(), box.max().z());
     BoundingBox bb = BoundingBox.of(min, max);
     List<Entity> entities = new ArrayList<>();
     for (var bukkitEntity : handle().getNearbyEntities(bb)) {
@@ -150,7 +150,7 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
     var start = new Vector(context.origin().x(), context.origin().y(), context.origin().z());
     var dir = new Vector(context.dir().x(), context.dir().y(), context.dir().z());
     AABB box = AABB.fromRay(context.origin(), context.dir(), context.raySize());
-    BoundingBox bb = new BoundingBox(box.min.x(), box.min.y(), box.min.z(), box.max.x(), box.max.y(), box.max.z());
+    BoundingBox bb = new BoundingBox(box.min().x(), box.min().y(), box.min().z(), box.max().x(), box.max().y(), box.max().z());
     Entity nearestHitEntity = null;
     RayTraceResult nearestHitResult = null;
     double nearestDistanceSq = Double.MAX_VALUE;

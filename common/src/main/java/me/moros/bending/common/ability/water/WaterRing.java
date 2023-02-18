@@ -248,7 +248,7 @@ public class WaterRing extends AbilityInstance {
     }
 
     if (userConfig.affectEntities) {
-      CollisionUtil.handle(user, new Sphere(user.eyeLocation(), radius + 2), this::checkCollisions, false);
+      CollisionUtil.handle(user, Sphere.of(user.eyeLocation(), radius + 2), this::checkCollisions, false);
     }
 
     shards.removeIf(shard -> shard.update() == UpdateResult.REMOVE);
@@ -331,7 +331,7 @@ public class WaterRing extends AbilityInstance {
       nextShardTime = time + userConfig.shardCooldown;
       Vector3d origin = getClosestRingBlock().toVector3d();
       Vector3d lookingDir = user.direction().multiply(userConfig.shardRange + radius);
-      shards.add(new IceShard(new Ray(origin, lookingDir)));
+      shards.add(new IceShard(Ray.of(origin, lookingDir)));
     }
   }
 

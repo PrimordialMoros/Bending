@@ -218,7 +218,7 @@ public class Torrent extends AbilityInstance {
 
     @Override
     public void onBlockHit(Block block) {
-      Ray ray = new Ray(block.center(), direction);
+      Ray ray = Ray.of(block.center(), direction);
       if (clicked) {
         if (freeze()) {
           FragileStructure.tryDamageStructure(block, 8, ray);

@@ -56,7 +56,7 @@ public class HydroSink extends AbilityInstance {
       return false;
     }
     AABB entityBounds = user.bounds().grow(Vector3d.of(0, 0.2, 0));
-    AABB floorBounds = new AABB(Vector3d.of(-1, -0.5, -1), Vector3d.of(1, 0, 1)).at(user.location());
+    AABB floorBounds = AABB.of(Vector3d.of(-1, -0.5, -1), Vector3d.of(1, 0, 1)).at(user.location());
     return user.world().nearbyBlocks(floorBounds, b -> entityBounds.intersects(b.bounds()))
       .stream().anyMatch(WaterMaterials::isWaterBendable);
   }

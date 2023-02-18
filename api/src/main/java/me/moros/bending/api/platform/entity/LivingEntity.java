@@ -64,11 +64,11 @@ public interface LivingEntity extends Entity {
   }
 
   default Ray ray() {
-    return new Ray(eyeLocation(), direction());
+    return Ray.of(eyeLocation(), direction());
   }
 
   default Ray ray(double range) {
-    return new Ray(eyeLocation(), direction().multiply(range));
+    return Ray.of(eyeLocation(), direction().multiply(range));
   }
 
   default boolean sneaking() {

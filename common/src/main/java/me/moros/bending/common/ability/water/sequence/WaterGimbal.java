@@ -311,7 +311,7 @@ public class WaterGimbal extends AbilityInstance {
 
     @Override
     public void onBlockHit(Block block) {
-      FragileStructure.tryDamageStructure(block, 3, new Ray(block.center(), direction));
+      FragileStructure.tryDamageStructure(block, 3, Ray.of(block.center(), direction));
     }
   }
 

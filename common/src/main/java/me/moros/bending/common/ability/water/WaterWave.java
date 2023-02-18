@@ -113,7 +113,7 @@ public class WaterWave extends AbilityInstance {
     }
     scheduleRevert(toRevert);
     if (ice) {
-      CollisionUtil.handle(user, new Sphere(center, userConfig.radius), this::onEntityHit);
+      CollisionUtil.handle(user, Sphere.of(center, userConfig.radius), this::onEntityHit);
     }
     return UpdateResult.CONTINUE;
   }

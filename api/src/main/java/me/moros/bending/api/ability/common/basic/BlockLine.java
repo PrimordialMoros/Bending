@@ -52,9 +52,9 @@ public abstract class BlockLine extends MovementResolver implements Updatable {
     super(user.world());
     this.user = user;
     this.ray = ray;
-    this.maxRange = ray.direction.length();
-    dir = ray.direction.withY(0).normalize();
-    this.location = ray.origin;
+    this.maxRange = ray.direction().length();
+    dir = ray.direction().withY(0).normalize();
+    this.location = ray.position();
     Collection<Vector2i> vectors = new ArrayList<>();
     GridIterator.create(location, dir, FastMath.ceil(maxRange))
       .forEachRemaining(b -> vectors.add(new Vector2i(b.blockX(), b.blockZ())));
@@ -85,7 +85,7 @@ public abstract class BlockLine extends MovementResolver implements Updatable {
     location = resolved.point();
     Block block = user.world().blockAt(location);
 
-    if (location.distanceSq(ray.origin) > maxRange * maxRange) {
+    if (location.distanceSq(ray.position()) > maxRange * maxRange) {
       return UpdateResult.REMOVE;
     }
 

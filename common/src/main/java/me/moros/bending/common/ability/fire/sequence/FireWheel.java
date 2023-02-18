@@ -76,7 +76,7 @@ public class FireWheel extends AbilityInstance {
       return false;
     }
 
-    wheel = new Wheel(new Ray(location, direction));
+    wheel = new Wheel(Ray.of(location, direction));
     if (!wheel.resolveMovement()) {
       return false;
     }
@@ -118,8 +118,8 @@ public class FireWheel extends AbilityInstance {
 
     @Override
     public void render() {
-      Vector3d rotateAxis = Vector3d.PLUS_J.cross(this.ray.direction);
-      VectorUtil.circle(this.ray.direction.multiply(this.radius), rotateAxis, 36).forEach(v ->
+      Vector3d rotateAxis = Vector3d.PLUS_J.cross(this.ray.direction());
+      VectorUtil.circle(this.ray.direction().multiply(this.radius), rotateAxis, 36).forEach(v ->
         ParticleBuilder.fire(user, location.add(v)).extra(0.01).spawn(user.world())
       );
     }

@@ -19,38 +19,7 @@
 
 package me.moros.bending.api.collision.geometry;
 
-import me.moros.math.Position;
 import me.moros.math.Vector3d;
 
-/**
- * Combination of {@link OBB} and {@link Sphere} to simulate a disk collider.
- */
-public sealed interface Disk extends Collider permits DiskImpl {
-  OBB obb();
-
-  Sphere sphere();
-
-  @Override
-  default Vector3d position() {
-    return sphere().position();
-  }
-
-  @Override
-  default Disk at(Position point) {
-    return of(obb().at(point), sphere().at(point));
-  }
-
-  @Override
-  default Vector3d halfExtents() {
-    return obb().halfExtents();
-  }
-
-  @Override
-  default boolean contains(Vector3d point) {
-    return sphere().contains(point) && obb().contains(point);
-  }
-
-  static Disk of(OBB obb, Sphere sphere) {
-    return new DiskImpl(obb, sphere);
-  }
+record SphereImpl(Vector3d position, double radius) implements Sphere {
 }

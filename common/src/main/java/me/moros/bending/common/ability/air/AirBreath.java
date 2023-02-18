@@ -96,7 +96,7 @@ public class AirBreath extends AbilityInstance {
     }
     user.remainingAir(Math.max(-20, user.remainingAir() - 5));
     Vector3d offset = Vector3d.of(0, -0.1, 0);
-    Ray ray = new Ray(user.eyeLocation().add(offset), user.direction().multiply(userConfig.range));
+    Ray ray = Ray.of(user.eyeLocation().add(offset), user.direction().multiply(userConfig.range));
     streams.add(new AirStream(ray));
     return streams.update();
   }
@@ -126,7 +126,7 @@ public class AirBreath extends AbilityInstance {
     @Override
     public void render() {
       double offset = 0.15 * distanceTravelled;
-      collider = new Sphere(location, collisionRadius + offset);
+      collider = Sphere.of(location, collisionRadius + offset);
       Block block = user.world().blockAt(location);
       if (MaterialUtil.isWater(block)) {
         ParticleBuilder.bubble(block).spawn(user.world());
@@ -144,7 +144,7 @@ public class AirBreath extends AbilityInstance {
 
     @Override
     public boolean onEntityHit(Entity entity) {
-      entity.applyVelocity(AirBreath.this, ray.direction.normalize().multiply(userConfig.knockback));
+      entity.applyVelocity(AirBreath.this, ray.direction().normalize().multiply(userConfig.knockback));
       BendingEffect.FIRE_TICK.reset(entity);
       if (entity instanceof LivingEntity livingEntity) {
         livingEntity.remainingAir(Math.min(livingEntity.airCapacity(), livingEntity.remainingAir() + 1));

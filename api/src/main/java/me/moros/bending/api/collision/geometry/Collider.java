@@ -25,7 +25,7 @@ import me.moros.math.Vector3d;
 /**
  * Represents a collider.
  */
-public interface Collider {
+public sealed interface Collider permits AABB, Disk, OBB, Ray, Sphere {
   double EPSILON = 0.01;
 
   /**

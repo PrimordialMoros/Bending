@@ -176,7 +176,7 @@ public class WaterManipulation extends AbilityInstance {
       if (dist * dist < minSq || center.distanceSq(user.eyeLocation()) > maxSq) {
         continue;
       }
-      Collider selectSphere = new Sphere(center, config.redirectGrabRadius);
+      Collider selectSphere = Sphere.of(center, config.redirectGrabRadius);
       if (selectSphere.intersects(ray)) {
         Vector3d direction = center.subtract(user.eyeLocation());
         double range = Math.min(1, direction.length());
@@ -256,7 +256,7 @@ public class WaterManipulation extends AbilityInstance {
 
     @Override
     public boolean onBlockHit(Block block) {
-      FragileStructure.tryDamageStructure(block, 3, new Ray(center(), direction));
+      FragileStructure.tryDamageStructure(block, 3, Ray.of(center(), direction));
       return true;
     }
   }

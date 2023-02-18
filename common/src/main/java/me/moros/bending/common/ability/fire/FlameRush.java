@@ -144,7 +144,7 @@ public class FlameRush extends AbilityInstance {
     Vector3d origin = user.location().add(0, 1.2, 0);
     Vector3d lookingDir = user.direction().multiply(userConfig.range * factor);
     removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(description())).build();
-    stream = new FireStream(new Ray(origin, lookingDir), factor);
+    stream = new FireStream(Ray.of(origin, lookingDir), factor);
   }
 
   @Override
@@ -207,7 +207,7 @@ public class FlameRush extends AbilityInstance {
       ParticleBuilder.fire(user, spiral2).spawn(user.world());
       Particle.SMOKE.builder(spiral1).spawn(user.world());
       Particle.SMOKE.builder(spiral2).spawn(user.world());
-      collider = new Sphere(location, collisionRadius + 0.7 * radius);
+      collider = Sphere.of(location, collisionRadius + 0.7 * radius);
       TempLight.builder(++ticks).build(user.world().blockAt(location));
     }
 
@@ -237,7 +237,7 @@ public class FlameRush extends AbilityInstance {
 
     @Override
     public boolean onBlockHit(Block block) {
-      FragileStructure.tryDamageStructure(block, FastMath.round(8 * factor), new Ray(location, streamDirection));
+      FragileStructure.tryDamageStructure(block, FastMath.round(8 * factor), Ray.of(location, streamDirection));
       return true;
     }
   }

@@ -105,7 +105,7 @@ public class EarthShards extends AbilityInstance {
       firedShots++;
       Vector3d origin = (i == 0) ? right : left;
       Vector3d dir = VectorUtil.gaussianOffset(target, distance * userConfig.spread).subtract(origin);
-      streams.add(new ShardStream(new Ray(origin, dir)));
+      streams.add(new ShardStream(Ray.of(origin, dir)));
     }
   }
 
@@ -132,8 +132,8 @@ public class EarthShards extends AbilityInstance {
       super(user, ray, userConfig.speed, 0.75);
       canCollide = BlockType::isLiquid;
       renderSteps = FastMath.ceil(userConfig.speed / 0.05);
-      smallDir = ray.direction.normalize().multiply(0.05);
-      Sound.BLOCK_STONE_BREAK.asEffect(1, 2).play(user.world(), ray.origin);
+      smallDir = ray.direction().normalize().multiply(0.05);
+      Sound.BLOCK_STONE_BREAK.asEffect(1, 2).play(user.world(), ray.position());
     }
 
     @Override

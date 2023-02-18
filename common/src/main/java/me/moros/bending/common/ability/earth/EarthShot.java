@@ -346,7 +346,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
         projectile.state().asParticle(center).count(8).offset(1).spawn(user.world());
         Block projected = Context.builder(center, lastVelocity).blocks(user.world()).block();
         if (projected != null) {
-          FragileStructure.tryDamageStructure(projected, mode == Mode.MAGMA ? 6 : 4, new Ray(center, lastVelocity));
+          FragileStructure.tryDamageStructure(projected, mode == Mode.MAGMA ? 6 : 4, Ray.of(center, lastVelocity));
         }
         explode();
       }

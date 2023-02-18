@@ -607,7 +607,7 @@ public class EarthSmash extends AbilityInstance {
       data = new HashMap<>();
       center = centerBlock.center();
       double hr = size / 2.0;
-      preciseBounds = new AABB(Vector3d.of(-hr, -hr, -hr), Vector3d.of(hr, hr, hr));
+      preciseBounds = AABB.of(Vector3d.of(-hr, -hr, -hr), Vector3d.of(hr, hr, hr));
       bounds = preciseBounds.grow(Vector3d.ONE);
       int half = (size - 1) / 2;
       Block temp = centerBlock.offset(Direction.DOWN, half);
@@ -663,7 +663,7 @@ public class EarthSmash extends AbilityInstance {
           iterator.remove();
         }
       }
-      FragileStructure.tryDamageStructure(removed, 4 * removed.size(), new Ray(center, direction));
+      FragileStructure.tryDamageStructure(removed, 4 * removed.size(), Ray.of(center, direction));
       return !data.isEmpty() && originalSize - data.size() <= size;
     }
 

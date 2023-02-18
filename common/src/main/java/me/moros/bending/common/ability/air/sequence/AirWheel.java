@@ -50,7 +50,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class AirWheel extends AbilityInstance {
-  private static final AABB BOUNDS = new AABB(Vector3d.of(-0.4, -2, -2), Vector3d.of(0.4, 2, 2));
+  private static final AABB BOUNDS = AABB.of(Vector3d.of(-0.4, -2, -2), Vector3d.of(0.4, 2, 2));
   private static final Config config = ConfigManager.load(Config::new);
   private static AbilityDescription scooterDesc;
 
@@ -99,7 +99,7 @@ public class AirWheel extends AbilityInstance {
   public UpdateResult update() {
     long time = System.currentTimeMillis();
     center = user.location().add(0, 0.8, 0).add(user.direction().withY(0).multiply(1.2));
-    collider = new Disk(new OBB(BOUNDS, Vector3d.PLUS_J, Math.toRadians(user.yaw())), new Sphere(center, 2));
+    collider = Disk.of(OBB.of(BOUNDS, Vector3d.PLUS_J, Math.toRadians(user.yaw())), Sphere.of(center, 2));
 
     if (time >= nextRenderTime) {
       render();

@@ -190,14 +190,14 @@ public class FireBurst extends AbilityInstance {
         affectedEntities.add(entity);
         entity.damage(userConfig.damage, user, description());
         BendingEffect.FIRE_TICK.apply(user, entity, userConfig.fireTicks);
-        entity.applyVelocity(FireBurst.this, ray.direction.normalize().multiply(0.5));
+        entity.applyVelocity(FireBurst.this, ray.direction().normalize().multiply(0.5));
       }
       return true;
     }
 
     @Override
     public boolean onBlockHit(Block block) {
-      Vector3d reverse = ray.direction.negate();
+      Vector3d reverse = ray.direction().negate();
       WorldUtil.tryLightBlock(block);
       double igniteRadius = 1.5;
       Vector3d standing = user.location().add(0, 0.5, 0);
@@ -213,7 +213,7 @@ public class FireBurst extends AbilityInstance {
             .ability(FireBurst.this).build(b);
         }
       }
-      FragileStructure.tryDamageStructure(block, 4, new Ray(location, ray.direction));
+      FragileStructure.tryDamageStructure(block, 4, Ray.of(location, ray.direction()));
       return true;
     }
   }

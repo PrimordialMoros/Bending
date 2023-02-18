@@ -177,7 +177,7 @@ public class EarthSurf extends AbilityInstance {
       if (++ticks % 4 == 0) {
         Sound.BLOCK_ROOTED_DIRT_FALL.asEffect(0.6F, 0).play(user.world(), center);
       }
-      CollisionUtil.handle(user, new Sphere(center, 1.2), this::onEntityHit, false);
+      CollisionUtil.handle(user, Sphere.of(center, 1.2), this::onEntityHit, false);
     }
 
     @Override

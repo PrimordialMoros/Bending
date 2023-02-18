@@ -67,7 +67,7 @@ public abstract class AbstractSpout extends AbstractFlight implements Updatable,
     flight.flying(distance <= height);
     // Create a bounding box for collision that extends through the spout from the ground to the player.
     Position pos = user.location().floor();
-    collider = new AABB(Vector3d.of(-0.5, -distance, -0.5), Vector3d.of(0.5, 0, 0.5)).at(pos);
+    collider = AABB.of(Vector3d.of(-0.5, -distance, -0.5), Vector3d.of(0.5, 0, 0.5)).at(pos);
     render();
     postRender();
     return UpdateResult.CONTINUE;

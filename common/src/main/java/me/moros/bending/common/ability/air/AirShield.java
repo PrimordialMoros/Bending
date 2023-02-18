@@ -116,7 +116,7 @@ public class AirShield extends AbilityInstance {
       WorldUtil.tryCoolLava(user, b);
       WorldUtil.tryExtinguishFire(user, b);
     }
-    CollisionUtil.handle(user, new Sphere(center, userConfig.radius), this::onEntityHit, false);
+    CollisionUtil.handle(user, Sphere.of(center, userConfig.radius), this::onEntityHit, false);
     return UpdateResult.CONTINUE;
   }
 
@@ -143,7 +143,7 @@ public class AirShield extends AbilityInstance {
 
   @Override
   public Collection<Collider> colliders() {
-    return List.of(new Sphere(center, userConfig.radius));
+    return List.of(Sphere.of(center, userConfig.radius));
   }
 
   @Override

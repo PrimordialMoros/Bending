@@ -56,7 +56,7 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 public class OctopusForm extends AbilityInstance {
   private static final Config config = ConfigManager.load(Config::new);
   private static final double RADIUS = 3.0;
-  private static final AABB TENTACLE_BOX = new AABB(Vector3d.of(-1, 0.0, -1), Vector3d.of(1, 2.5, 1));
+  private static final AABB TENTACLE_BOX = AABB.of(Vector3d.of(-1, 0.0, -1), Vector3d.of(1, 2.5, 1));
 
   private User user;
   private Config userConfig;

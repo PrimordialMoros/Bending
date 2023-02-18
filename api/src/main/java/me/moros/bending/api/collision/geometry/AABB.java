@@ -25,18 +25,17 @@ import me.moros.math.Vector3d;
 /**
  * Axis aligned bounding box.
  */
-public class AABB implements Collider {
-  private static final AABB DUMMY_COLLIDER = new DummyCollider();
-  public static final AABB BLOCK_BOUNDS = new AABB(Vector3d.ZERO, Vector3d.ONE);
-  public static final AABB EXPANDED_BLOCK_BOUNDS = BLOCK_BOUNDS.grow(Vector3d.of(0.4, 0.4, 0.4));
+public sealed interface AABB extends Collider permits AABBImpl, AABBDummy {
+  AABB BLOCK_BOUNDS = of(Vector3d.ZERO, Vector3d.ONE);
+  AABB EXPANDED_BLOCK_BOUNDS = BLOCK_BOUNDS.grow(Vector3d.of(0.4, 0.4, 0.4));
 
-  public final Vector3d min;
-  public final Vector3d max;
+  /**
+   * Get the min
+   * @return the min box component
+   */
+  Vector3d min();
 
-  public AABB(Vector3d min, Vector3d max) {
-    this.min = min;
-    this.max = max;
-  }
+  Vector3d max();
 
   /**
    * Calculate an AABB by expanding this instance by the given amount in each component.
@@ -45,72 +44,47 @@ public class AABB implements Collider {
    * @param diff the amount to expand
    * @return the expanded AABB
    */
-  public AABB grow(Vector3d diff) {
-    return new AABB(min.subtract(diff), max.add(diff));
-  }
-
-  boolean _intersects(AABB other) {
-    return (max.x() > other.min.x() && min.x() < other.max.x() &&
-      max.y() > other.min.y() && min.y() < other.max.y() &&
-      max.z() > other.min.z() && min.z() < other.max.z());
+  default AABB grow(Vector3d diff) {
+    return of(min().subtract(diff), max().add(diff));
   }
 
   @Override
-  public Vector3d position() {
-    return min.add(max.subtract(min).multiply(0.5));
+  default Vector3d position() {
+    return min().add(max().subtract(min()).multiply(0.5));
   }
 
   @Override
-  public AABB at(Position point) {
+  default AABB at(Position point) {
     Vector3d halfExtents = halfExtents();
     Vector3d pos = point.toVector3d();
-    return new AABB(pos.subtract(halfExtents), pos.add(halfExtents));
+    return of(pos.subtract(halfExtents), pos.add(halfExtents));
   }
 
   @Override
-  public Vector3d halfExtents() {
-    return max.subtract(min).multiply(0.5).abs();
+  default Vector3d halfExtents() {
+    return max().subtract(min()).multiply(0.5).abs();
   }
 
   @Override
-  public boolean contains(Vector3d point) {
-    return (point.x() >= min.x() && point.x() <= max.x()) &&
-      (point.y() >= min.y() && point.y() <= max.y()) &&
-      (point.z() >= min.z() && point.z() <= max.z());
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null || getClass() != obj.getClass()) {
-      return false;
-    }
-    AABB other = (AABB) obj;
-    return min.equals(other.min) && max.equals(other.max);
-  }
-
-  @Override
-  public int hashCode() {
-    int result = min.hashCode();
-    result = 31 * result + max.hashCode();
-    return result;
+  default boolean contains(Vector3d point) {
+    return (point.x() >= min().x() && point.x() <= max().x()) &&
+      (point.y() >= min().y() && point.y() <= max().y()) &&
+      (point.z() >= min().z() && point.z() <= max().z());
   }
 
   /**
    * Get a dummy AABB collider.
    * @return a dummy collider
    */
-  public static AABB dummy() {
-    return DUMMY_COLLIDER;
+  static AABB dummy() {
+    return AABBDummy.INSTANCE;
   }
 
-  public static AABB fromRay(Ray ray, double raySize) {
-    return fromRay(ray.origin, ray.direction, raySize);
+  static AABB fromRay(Ray ray, double raySize) {
+    return fromRay(ray.position(), ray.direction(), raySize);
   }
 
-  public static AABB fromRay(Vector3d start, Vector3d dir, double raySize) {
+  static AABB fromRay(Vector3d start, Vector3d dir, double raySize) {
     if (dir.lengthSq() == 0) {
       return dummy();
     }
@@ -121,42 +95,10 @@ public class AABB implements Collider {
     double newMaxX = start.x() + (dir.x() > 0 ? dir.x() : 0) + offset;
     double newMaxY = start.y() + (dir.y() > 0 ? dir.y() : 0) + offset;
     double newMaxZ = start.z() + (dir.z() > 0 ? dir.z() : 0) + offset;
-    return new AABB(Vector3d.of(newMinX, newMinY, newMinZ), Vector3d.of(newMaxX, newMaxY, newMaxZ));
+    return of(Vector3d.of(newMinX, newMinY, newMinZ), Vector3d.of(newMaxX, newMaxY, newMaxZ));
   }
 
-  private static final class DummyCollider extends AABB {
-    private DummyCollider() {
-      super(Vector3d.ZERO, Vector3d.ZERO);
-    }
-
-    @Override
-    public AABB grow(Vector3d diff) {
-      return this;
-    }
-
-    @Override
-    public boolean intersects(Collider other) {
-      return false;
-    }
-
-    @Override
-    public Vector3d position() {
-      return Vector3d.ZERO;
-    }
-
-    @Override
-    public AABB at(Position point) {
-      return this;
-    }
-
-    @Override
-    public Vector3d halfExtents() {
-      return Vector3d.ZERO;
-    }
-
-    @Override
-    public boolean contains(Vector3d point) {
-      return false;
-    }
+  static AABB of(Vector3d min, Vector3d max) {
+    return new AABBImpl(min, max);
   }
 }

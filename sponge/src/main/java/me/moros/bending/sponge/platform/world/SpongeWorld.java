@@ -81,7 +81,7 @@ public record SpongeWorld(ServerWorld handle) implements World {
       if (box.getSize() > 0) {
         Vector3d min = Vector3d.of(x + box.minX, y + box.minY, z + box.minZ);
         Vector3d max = Vector3d.of(x + box.maxX, y + box.maxY, z + box.maxZ);
-        return new AABB(min, max);
+        return AABB.of(min, max);
       }
     }
     return AABB.dummy();
@@ -112,8 +112,8 @@ public record SpongeWorld(ServerWorld handle) implements World {
 
   @Override
   public List<Entity> nearbyEntities(AABB box, Predicate<Entity> predicate, int limit) {
-    var min = org.spongepowered.math.vector.Vector3d.from(box.min.x(), box.min.y(), box.min.z());
-    var max = org.spongepowered.math.vector.Vector3d.from(box.max.x(), box.max.y(), box.max.z());
+    var min = org.spongepowered.math.vector.Vector3d.from(box.min().x(), box.min().y(), box.min().z());
+    var max = org.spongepowered.math.vector.Vector3d.from(box.max().x(), box.max().y(), box.max().z());
     org.spongepowered.api.util.AABB aabb = org.spongepowered.api.util.AABB.of(min, max);
     List<Entity> entities = new ArrayList<>();
     for (var spongeEntity : handle().entities(aabb)) {
@@ -159,9 +159,9 @@ public record SpongeWorld(ServerWorld handle) implements World {
     double minDistSq = Double.MAX_VALUE;
     var dir = context.dir().normalize().multiply(range);
     var box = AABB.fromRay(context.origin(), dir, context.raySize());
-    var size = box.max.subtract(box.min);
+    var size = box.max().subtract(box.min());
     if (size.x() != 0 && size.y() != 0 && size.z() != 0) { // Box has no volume?
-      var aabb = org.spongepowered.api.util.AABB.of(box.min.x(), box.min.y(), box.min.z(), box.max.x(), box.max.y(), box.max.z());
+      var aabb = org.spongepowered.api.util.AABB.of(box.min().x(), box.min().y(), box.min().z(), box.max().x(), box.max().y(), box.max().z());
       var vec3d1 = new Vec3(context.origin().x(), context.origin().y(), context.origin().z());
       var vec3d2 = new Vec3(dir.x(), dir.y(), dir.z());
       for (var spongeEntity : handle().entities(aabb)) {

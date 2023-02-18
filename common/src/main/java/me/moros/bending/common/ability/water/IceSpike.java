@@ -76,7 +76,7 @@ public class IceSpike extends AbilityInstance {
 
     boolean field = method == Activation.SNEAK;
     if (field) {
-      Collider collider = new Sphere(user.location(), userConfig.fieldRadius);
+      Collider collider = Sphere.of(user.location(), userConfig.fieldRadius);
       CollisionUtil.handle(user, collider, this::createPillar, true);
     } else {
       Block source = null;

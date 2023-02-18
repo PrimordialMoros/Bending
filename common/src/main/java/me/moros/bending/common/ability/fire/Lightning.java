@@ -236,7 +236,7 @@ public class Lightning extends AbilityInstance {
 
   private boolean electrocuteAround(@Nullable Entity entity) {
     if (entity != null) {
-      Collider collider = new Sphere(entity.center(), userConfig.radius);
+      Collider collider = Sphere.of(entity.center(), userConfig.radius);
       Collection<Entity> entities = new ArrayList<>();
       CollisionUtil.handle(user, collider, entities::add);
       if (handleRedirection(entities)) {
@@ -283,7 +283,7 @@ public class Lightning extends AbilityInstance {
       return;
     }
     exploded = true;
-    FragileStructure.tryDamageStructure(block, 0, new Ray(center, direction));
+    FragileStructure.tryDamageStructure(block, 0, Ray.of(center, direction));
     BendingExplosion.builder()
       .size(userConfig.explosionRadius)
       .damage(userConfig.explosionDamage)
@@ -296,7 +296,7 @@ public class Lightning extends AbilityInstance {
 
   @Override
   public Collection<Collider> colliders() {
-    return location == null ? List.of() : List.of(new Sphere(location, 0.3));
+    return location == null ? List.of() : List.of(Sphere.of(location, 0.3));
   }
 
   @Override

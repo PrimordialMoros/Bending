@@ -137,12 +137,12 @@ public class Pillar implements Updatable, Iterable<Block> {
     Vector3d zMin = Vector3d.of(-0.5, -0.5, -0.5);
     Vector3d zMax = Vector3d.of(0.5, 0.5, len + 0.5);
     return switch (direction) {
-      case EAST -> new AABB(pos.add(xMin), pos.add(xMax));
-      case WEST -> new AABB(pos.add(xMax.negate()), pos.add(xMin.negate()));
-      case UP -> new AABB(pos.add(yMin), pos.add(yMax));
-      case DOWN -> new AABB(pos.add(yMax.negate()), pos.add(yMin.negate()));
-      case NORTH -> new AABB(pos.add(zMin), pos.add(zMax));
-      case SOUTH -> new AABB(pos.add(zMax.negate()), pos.add(zMin.negate()));
+      case EAST -> AABB.of(pos.add(xMin), pos.add(xMax));
+      case WEST -> AABB.of(pos.add(xMax.negate()), pos.add(xMin.negate()));
+      case UP -> AABB.of(pos.add(yMin), pos.add(yMax));
+      case DOWN -> AABB.of(pos.add(yMax.negate()), pos.add(yMin.negate()));
+      case NORTH -> AABB.of(pos.add(zMin), pos.add(zMax));
+      case SOUTH -> AABB.of(pos.add(zMax.negate()), pos.add(zMin.negate()));
     };
   }
 

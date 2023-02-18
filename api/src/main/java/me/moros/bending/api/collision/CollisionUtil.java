@@ -98,7 +98,7 @@ public final class CollisionUtil {
     Vector3d extents = collider.halfExtents();
     boolean hit = false;
     Predicate<Entity> filter = entityPredicate(user, livingOnly, selfCollision);
-    AABB box = new AABB(collider.position().subtract(extents), collider.position().add(extents));
+    AABB box = AABB.of(collider.position().subtract(extents), collider.position().add(extents));
     for (Entity entity : user.world().nearbyEntities(box, filter)) {
       if (collider.intersects(entity.bounds()) && user.canBuild(entity.block())) {
         boolean result = callback.onEntityHit(entity);

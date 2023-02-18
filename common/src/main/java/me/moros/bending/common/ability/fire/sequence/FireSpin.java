@@ -74,7 +74,7 @@ public class FireSpin extends AbilityInstance {
 
     Vector3d origin = user.location().add(Vector3d.PLUS_J);
     VectorUtil.circle(Vector3d.PLUS_I, Vector3d.PLUS_J, 40).forEach(
-      v -> streams.add(new FireStream(new Ray(origin, v.multiply(userConfig.range))))
+      v -> streams.add(new FireStream(Ray.of(origin, v.multiply(userConfig.range))))
     );
     removalPolicy = Policies.builder().build();
     user.addCooldown(description(), userConfig.cooldown);
@@ -132,14 +132,14 @@ public class FireSpin extends AbilityInstance {
         affectedEntities.add(entity);
         entity.damage(userConfig.damage, user, description());
         BendingEffect.FIRE_TICK.apply(user, entity);
-        entity.applyVelocity(FireSpin.this, ray.direction.normalize().multiply(userConfig.knockback));
+        entity.applyVelocity(FireSpin.this, ray.direction().normalize().multiply(userConfig.knockback));
       }
       return true;
     }
 
     @Override
     public boolean onBlockHit(Block block) {
-      FragileStructure.tryDamageStructure(block, 3, new Ray(location, ray.direction));
+      FragileStructure.tryDamageStructure(block, 3, Ray.of(location, ray.direction()));
       return true;
     }
   }

@@ -143,7 +143,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
     user.addCooldown(description(), cooldown);
     Vector3d origin = user.mainHandSide();
     Vector3d lookingDir = user.direction().multiply(userConfig.range * factor);
-    stream = new FireStream(new Ray(origin, lookingDir));
+    stream = new FireStream(Ray.of(origin, lookingDir));
   }
 
   @Override
@@ -250,13 +250,13 @@ public class FireBlast extends AbilityInstance implements Explosive {
       }
       entity.damage(userConfig.damage * factor, user, description());
       BendingEffect.FIRE_TICK.apply(user, entity, userConfig.fireTicks);
-      entity.applyVelocity(FireBlast.this, ray.direction.normalize().multiply(0.5));
+      entity.applyVelocity(FireBlast.this, ray.direction().normalize().multiply(0.5));
       return true;
     }
 
     @Override
     public boolean onBlockHit(Block block) {
-      Vector3d reverse = ray.direction.negate();
+      Vector3d reverse = ray.direction().negate();
       WorldUtil.tryLightBlock(block);
       Vector3d standing = user.location().add(0, 0.5, 0);
       for (Block b : user.world().nearbyBlocks(location, userConfig.igniteRadius * factor)) {
@@ -271,7 +271,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
             .ability(FireBlast.this).build(b);
         }
       }
-      FragileStructure.tryDamageStructure(block, FastMath.round(4 * factor), new Ray(location, ray.direction));
+      FragileStructure.tryDamageStructure(block, FastMath.round(4 * factor), Ray.of(location, ray.direction()));
       explode();
       return true;
     }

@@ -99,7 +99,7 @@ public class AirBlade extends AbilityInstance {
       origin = wheel.center();
       factor = userConfig.chargeFactor;
       charging = false;
-      blade = new Blade(new Ray(origin, direction), userConfig.speed * factor * 0.5);
+      blade = new Blade(Ray.of(origin, direction), userConfig.speed * factor * 0.5);
       removalPolicy = Policies.builder()
         .add(OutOfRangeRemovalPolicy.of(userConfig.range * factor, origin, () -> blade.location())).build();
       user.addCooldown(description(), userConfig.cooldown);
@@ -150,7 +150,7 @@ public class AirBlade extends AbilityInstance {
       factor += deltaFactor;
     }
     charging = false;
-    blade = new Blade(new Ray(origin, direction));
+    blade = new Blade(Ray.of(origin, direction));
     removalPolicy = Policies.builder()
       .add(OutOfRangeRemovalPolicy.of(userConfig.range * factor, origin, () -> blade.location())).build();
     user.addCooldown(description(), userConfig.cooldown);
@@ -188,8 +188,8 @@ public class AirBlade extends AbilityInstance {
 
     @Override
     public void render() {
-      Vector3d rotateAxis = Vector3d.PLUS_J.cross(this.ray.direction);
-      VectorUtil.circle(this.ray.direction.multiply(this.radius), rotateAxis, 40).forEach(v ->
+      Vector3d rotateAxis = Vector3d.PLUS_J.cross(this.ray.direction());
+      VectorUtil.circle(this.ray.direction().multiply(this.radius), rotateAxis, 40).forEach(v ->
         ParticleBuilder.air(location.add(v)).spawn(user.world())
       );
     }

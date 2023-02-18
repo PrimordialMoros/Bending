@@ -192,7 +192,7 @@ public class AirBurst extends AbilityInstance {
         return false;
       }
 
-      Vector3d push = ray.direction.normalize();
+      Vector3d push = ray.direction().normalize();
       // Cap vertical push
       push = push.withY(FastMath.clamp(push.y(), -0.3, 0.3));
 

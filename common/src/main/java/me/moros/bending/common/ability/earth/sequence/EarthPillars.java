@@ -90,7 +90,7 @@ public class EarthPillars extends AbilityInstance {
     }
 
     predicate = b -> EarthMaterials.isEarthNotLava(user, b);
-    Collider collider = new Sphere(user.location(), userConfig.radius * factor);
+    Collider collider = Sphere.of(user.location(), userConfig.radius * factor);
     CollisionUtil.handle(user, collider, this::createPillar, true);
 
     if (!pillars.isEmpty()) {

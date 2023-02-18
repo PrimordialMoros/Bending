@@ -235,7 +235,7 @@ public class EarthBlast extends AbilityInstance {
 
     @Override
     public boolean onBlockHit(Block block) {
-      FragileStructure.tryDamageStructure(block, 4, new Ray(center(), direction));
+      FragileStructure.tryDamageStructure(block, 4, Ray.of(center(), direction));
       return true;
     }
 

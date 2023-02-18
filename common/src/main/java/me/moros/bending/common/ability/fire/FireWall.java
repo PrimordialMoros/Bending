@@ -107,8 +107,8 @@ public class FireWall extends AbilityInstance {
     currentHeight = 1;
 
     double hw = 0.5 + userConfig.width / 2.0;
-    AABB aabb = new AABB(Vector3d.of(-hw, -0.5, -0.75), Vector3d.of(hw, userConfig.moveMaxHeight, 0.75));
-    collider = new OBB(aabb, Vector3d.PLUS_J, Math.toRadians(user.yaw())).at(center);
+    AABB aabb = AABB.of(Vector3d.of(-hw, -0.5, -0.75), Vector3d.of(hw, userConfig.moveMaxHeight, 0.75));
+    collider = OBB.of(aabb, Vector3d.PLUS_J, Math.toRadians(user.yaw())).at(center);
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(userConfig.duration)).build();
     nextRenderTime = 0;
     user.addCooldown(description(), userConfig.cooldown);

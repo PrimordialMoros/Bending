@@ -104,7 +104,7 @@ public class FrostBreath extends AbilityInstance {
     affectedEntities.clear();
     user.remainingAir(Math.max(-20, user.remainingAir() - 5));
     Vector3d offset = Vector3d.of(0, -0.1, 0);
-    Ray ray = new Ray(user.eyeLocation().add(offset), user.direction().multiply(userConfig.range));
+    Ray ray = Ray.of(user.eyeLocation().add(offset), user.direction().multiply(userConfig.range));
     streams.add(new FrostStream(ray));
     return streams.update();
   }
@@ -134,14 +134,14 @@ public class FrostBreath extends AbilityInstance {
     public void render() {
       distanceTravelled += speed;
       double offset = 0.15 * distanceTravelled;
-      collider = new Sphere(location, collisionRadius + offset);
+      collider = Sphere.of(location, collisionRadius + offset);
       int count = FastMath.ceil(0.75 * distanceTravelled);
       Particle.ITEM_SNOWBALL.builder(location).count(count).offset(offset).extra(0.02).spawn(user.world());
     }
 
     @Override
     public void postRender() {
-      for (Block block : user.world().nearbyBlocks(location, collider.radius)) {
+      for (Block block : user.world().nearbyBlocks(location, collider.radius())) {
         if (!user.canBuild(block)) {
           continue;
         }

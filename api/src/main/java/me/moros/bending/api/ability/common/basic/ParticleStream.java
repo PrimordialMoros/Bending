@@ -60,11 +60,11 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
     this.user = user;
     this.ray = ray;
     this.speed = speed;
-    this.location = ray.origin;
-    this.maxRange = ray.direction.length();
+    this.location = ray.position();
+    this.maxRange = ray.direction().length();
     this.collisionRadius = collisionRadius;
-    this.collider = new Sphere(location, collisionRadius);
-    dir = ray.direction.normalize().multiply(speed);
+    this.collider = Sphere.of(location, collisionRadius);
+    dir = ray.direction().normalize().multiply(speed);
   }
 
   @Override
@@ -84,7 +84,7 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
       Vector3d originalVector = location;
       location = location.add(vector);
       distanceTravelled += speed;
-      if (location.distanceSq(ray.origin) > maxRange * maxRange || !user.canBuild(location)) {
+      if (location.distanceSq(ray.position()) > maxRange * maxRange || !user.canBuild(location)) {
         return UpdateResult.REMOVE;
       }
       if (!validDiagonals(originalVector, vector)) {

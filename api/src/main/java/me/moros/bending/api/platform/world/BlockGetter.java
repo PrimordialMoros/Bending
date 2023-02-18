@@ -145,9 +145,9 @@ public interface BlockGetter {
       return List.of();
     }
     List<Block> blocks = new ArrayList<>();
-    for (double x = box.min.x(); x <= box.max.x(); x++) {
-      for (double y = box.min.y(); y <= box.max.y(); y++) {
-        for (double z = box.min.z(); z <= box.max.z(); z++) {
+    for (double x = box.min().x(); x <= box.max().x(); x++) {
+      for (double y = box.min().y(); y <= box.max().y(); y++) {
+        for (double z = box.min().z(); z <= box.max().z(); z++) {
           Block block = blockAt(FastMath.floor(x), FastMath.floor(y), FastMath.floor(z));
           if (predicate.test(block)) {
             blocks.add(block);

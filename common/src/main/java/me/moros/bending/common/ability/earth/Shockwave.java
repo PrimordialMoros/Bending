@@ -144,7 +144,7 @@ public class Shockwave extends AbilityInstance {
       .map(b -> (Collider) AABB.BLOCK_BOUNDS.grow(OFFSET).at(b))
       .toList();
     if (!colliders.isEmpty()) {
-      CollisionUtil.handle(user, new Sphere(origin, range + 2), this::onEntityHit, false);
+      CollisionUtil.handle(user, Sphere.of(origin, range + 2), this::onEntityHit, false);
     }
     return streams.update();
   }
@@ -183,11 +183,11 @@ public class Shockwave extends AbilityInstance {
     if (cone) {
       double deltaAngle = Math.PI / (3 * range);
       VectorUtil.createArc(dir, Vector3d.PLUS_J, deltaAngle, FastMath.ceil(range / 1.5)).forEach(v ->
-        streams.add(new Ripple(new Ray(origin, v.multiply(range)), 0))
+        streams.add(new Ripple(Ray.of(origin, v.multiply(range)), 0))
       );
     } else {
       VectorUtil.circle(dir, Vector3d.PLUS_J, FastMath.ceil(6 * range)).forEach(v ->
-        streams.add(new Ripple(new Ray(origin, v.multiply(range)), 75))
+        streams.add(new Ripple(Ray.of(origin, v.multiply(range)), 75))
       );
     }
 

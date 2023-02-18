@@ -108,7 +108,7 @@ public class Tornado extends AbilityInstance {
     double height = 2 + factor * (userConfig.height - 2);
     double radius = 2 + factor * (userConfig.radius - 2);
     double rBox = 0.6 * radius;
-    AABB box = new AABB(Vector3d.of(-rBox, 0, -rBox), Vector3d.of(rBox, height, rBox)).at(base);
+    AABB box = AABB.of(Vector3d.of(-rBox, 0, -rBox), Vector3d.of(rBox, height, rBox)).at(base);
     CollisionUtil.handle(user, box, entity -> {
       double dy = entity.location().y() - base.y();
       double r = 0.5 + (radius - 0.5) * dy;

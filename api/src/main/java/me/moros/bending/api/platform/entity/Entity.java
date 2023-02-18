@@ -113,7 +113,7 @@ public interface Entity extends ForwardingAudience.Single, Damageable, DataHolde
     double hw = 0.5 * width();
     Vector3d min = Vector3d.of(pos.x() - hw, pos.y(), pos.z() - hw);
     Vector3d max = Vector3d.of(pos.x() + hw, pos.y() + height(), pos.z() + hw);
-    return new AABB(min, max);
+    return AABB.of(min, max);
   }
 
   /**
@@ -150,7 +150,7 @@ public interface Entity extends ForwardingAudience.Single, Damageable, DataHolde
       }
       AABB checkBounds = check.type().isLiquid() ? AABB.BLOCK_BOUNDS.at(check) : check.bounds();
       if (checkBounds.intersects(entityBounds)) {
-        return Math.max(0, bottomY - checkBounds.max.y());
+        return Math.max(0, bottomY - checkBounds.max().y());
       }
     }
     return maxHeight;

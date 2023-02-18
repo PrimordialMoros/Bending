@@ -61,7 +61,7 @@ public interface EntityAccessor {
    * @see #nearbyEntities(AABB, Predicate, int)
    */
   default List<Entity> nearbyEntities(Vector3d pos, double radius, Predicate<Entity> predicate, int limit) {
-    AABB aabb = new AABB(pos.subtract(radius, radius, radius), pos.add(radius, radius, radius));
+    AABB aabb = AABB.of(pos.subtract(radius, radius, radius), pos.add(radius, radius, radius));
     Predicate<Entity> distPredicate = e -> pos.distanceSq(e.location()) < radius * radius;
     return nearbyEntities(aabb, distPredicate.and(predicate), limit);
   }

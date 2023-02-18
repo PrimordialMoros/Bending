@@ -195,11 +195,11 @@ public class FireShield extends AbilityInstance {
     public void update() {
       location = user.eyeLocation().add(user.direction().multiply(userConfig.diskRange));
       double r = userConfig.diskRadius;
-      AABB aabb = new AABB(Vector3d.of(-r, -r, -1), Vector3d.of(r, r, 1));
+      AABB aabb = AABB.of(Vector3d.of(-r, -r, -1), Vector3d.of(r, r, 1));
       Vector3d right = user.rightSide();
       Rotation rotation = Rotation.from(Vector3d.PLUS_J, Math.toRadians(user.yaw()));
       rotation = rotation.applyTo(Rotation.from(right, Math.toRadians(user.pitch())));
-      disk = new Disk(new OBB(aabb, rotation), new Sphere(userConfig.diskRadius)).at(location);
+      disk = Disk.of(OBB.of(aabb, rotation), Sphere.of(userConfig.diskRadius)).at(location);
     }
 
     @Override
@@ -246,7 +246,7 @@ public class FireShield extends AbilityInstance {
 
     @Override
     public void update() {
-      sphere = new Sphere(center(), userConfig.shieldRadius);
+      sphere = Sphere.of(center(), userConfig.shieldRadius);
     }
 
     @Override

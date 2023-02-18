@@ -206,7 +206,7 @@ public final class ActivationControllerImpl implements ActivationController {
 
   private boolean noSuffocate(LivingEntity e) {
     double f = 0.4 * e.width();
-    AABB box = new AABB(Vector3d.of(-f, -0.05, -f), Vector3d.of(f, 0.05, f)).at(e.eyeLocation());
+    AABB box = AABB.of(Vector3d.of(-f, -0.05, -f), Vector3d.of(f, 0.05, f)).at(e.eyeLocation());
     return e.world().nearbyBlocks(box, this::canSuffocate, 1).isEmpty();
   }
 

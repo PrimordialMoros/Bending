@@ -76,7 +76,7 @@ public class AirPunch extends AbilityInstance {
     user.addCooldown(description(), userConfig.cooldown);
     double length = user.velocity().subtract(user.direction()).length();
     double factor = (length == 0) ? 1 : FastMath.clamp(1 / length, 0.5, 1.5);
-    stream = new AirStream(new Ray(origin, lookingDir), 1.2, factor);
+    stream = new AirStream(Ray.of(origin, lookingDir), 1.2, factor);
     removalPolicy = Policies.builder().build();
     return true;
   }
@@ -130,7 +130,7 @@ public class AirPunch extends AbilityInstance {
     @Override
     public boolean onEntityHit(Entity entity) {
       entity.damage(userConfig.damage * factor, user, description());
-      Vector3d velocity = entity.center().subtract(ray.origin).normalize().multiply(factor);
+      Vector3d velocity = entity.center().subtract(ray.position()).normalize().multiply(factor);
       entity.applyVelocity(AirPunch.this, velocity);
       return true;
     }

@@ -148,7 +148,7 @@ public class MetalCable extends AbilityInstance {
       if (user.sneaking()) {
         entityToMove = attachedEntity.handle();
         Ray ray = user.ray(distance / 2);
-        targetLocation = ray.origin.add(ray.direction);
+        targetLocation = ray.position().add(ray.direction());
       }
     }
     Vector3d direction = targetLocation.subtract(entityToMove.location()).normalize();
@@ -245,7 +245,7 @@ public class MetalCable extends AbilityInstance {
       dir = dir.negate();
       attached = new AttachedBlock(block, block.type());
     }
-    FragileStructure.tryDamageStructure(block, 2, new Ray(location, dir));
+    FragileStructure.tryDamageStructure(block, 2, Ray.of(location, dir));
     hasHit = true;
   }
 
@@ -303,7 +303,7 @@ public class MetalCable extends AbilityInstance {
 
   @Override
   public Collection<Collider> colliders() {
-    return List.of(new Sphere(location, 0.8));
+    return List.of(Sphere.of(location, 0.8));
   }
 
   private interface Attached<T> {

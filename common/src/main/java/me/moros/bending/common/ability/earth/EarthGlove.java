@@ -176,7 +176,7 @@ public class EarthGlove extends AbilityInstance {
 
       updateGloveVelocity(lastVelocity.normalize().multiply(GLOVE_SPEED * factor));
       boolean sneaking = user.sneaking();
-      boolean collided = CollisionUtil.handle(user, new Sphere(location, 0.8), this::onEntityHit, true, false, sneaking);
+      boolean collided = CollisionUtil.handle(user, Sphere.of(location, 0.8), this::onEntityHit, true, false, sneaking);
       if (collided && !grabbed) {
         return UpdateResult.REMOVE;
       }
@@ -275,7 +275,7 @@ public class EarthGlove extends AbilityInstance {
 
   @Override
   public Collection<Collider> colliders() {
-    return (glove == null || returning) ? List.of() : List.of(new Sphere(location, 0.8));
+    return (glove == null || returning) ? List.of() : List.of(Sphere.of(location, 0.8));
   }
 
   public void shatterGlove() {
@@ -291,7 +291,7 @@ public class EarthGlove extends AbilityInstance {
   private static void tryDestroy(User user) {
     Vector3d eyeLoc = user.eyeLocation();
     Vector3d dir = user.direction();
-    CollisionUtil.handle(user, new Sphere(user.eyeLocation(), 8), entity -> {
+    CollisionUtil.handle(user, Sphere.of(user.eyeLocation(), 8), entity -> {
       if (entity.type() == EntityType.ITEM && entity.location().subtract(eyeLoc).angle(dir) < Math.PI / 3) {
         EarthGlove ability = entity.get(GLOVE_KEY).orElse(null);
         if (ability != null && !user.equals(ability.user())) {

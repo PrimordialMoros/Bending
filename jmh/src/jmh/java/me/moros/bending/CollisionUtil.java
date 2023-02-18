@@ -60,12 +60,12 @@ public class CollisionUtil {
         double[] arr = new double[]{1, 1, 1};
         arr[i] = rand.nextDouble(0.5, j);
         Vector3d temp = Vector3d.from(arr);
-        AABB aabb = new AABB(temp.negate(), temp);
+        AABB aabb = AABB.of(temp.negate(), temp);
         double angle = rand.nextDouble(2 * Math.PI);
         Rotation rotation = Rotation.from(AXES[i], angle);
         for (int k = 1; k <= 20; k++) {
           Vector3d center = randomVector(k * 0.5 * j);
-          OBB obb = new OBB(aabb.at(center), rotation);
+          OBB obb = OBB.of(aabb.at(center), rotation);
           UUID uuid = uuids[rand.nextInt(uuids.length)];
           List<Collider> colliders = new ArrayList<>();
           colliders.add(obb);
@@ -78,11 +78,11 @@ public class CollisionUtil {
               int r = rand.nextInt(3);
               Collider collider;
               if (r == 0) {
-                collider = new Sphere(center2, value);
+                collider = Sphere.of(center2, value);
               } else if (r == 1) {
-                collider = new Ray(center2, center3.normalize().multiply(value));
+                collider = Ray.of(center2, center3.normalize().multiply(value));
               } else {
-                collider = new AABB(center2.min(center3), center2.max(center3));
+                collider = AABB.of(center2.min(center3), center2.max(center3));
               }
               colliders.add(collider);
             }

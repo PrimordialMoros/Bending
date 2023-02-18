@@ -107,8 +107,8 @@ public class LavaDisk extends AbilityInstance {
     double r = 1.3;
     location = source.center();
     direction = user.direction();
-    AABB aabb = new AABB(Vector3d.of(-r, -0.3, -r), Vector3d.of(r, 0.3, r));
-    collider = new Disk(new OBB(aabb), new Sphere(r)).at(location);
+    AABB aabb = AABB.of(Vector3d.of(-r, -0.3, -r), Vector3d.of(r, 0.3, r));
+    collider = Disk.of(OBB.of(aabb), Sphere.of(r)).at(location);
     for (Block block : user.world().nearbyBlocks(aabb.at(location))) {
       if (MaterialUtil.isWater(block) || MaterialUtil.isWater(block.offset(Direction.UP))) {
         return false;
@@ -208,7 +208,7 @@ public class LavaDisk extends AbilityInstance {
       return false;
     }
     Block block = user.world().blockAt(position);
-    FragileStructure.tryDamageStructure(block, 0, new Ray(location, direction));
+    FragileStructure.tryDamageStructure(block, 0, Ray.of(location, direction));
     if (!TempBlock.isBendable(block) || !user.canBuild(block)) {
       return false;
     }

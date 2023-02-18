@@ -84,11 +84,10 @@ public final class RayUtil {
     Vector3d center = user.center();
     Vector3d userDIr = user.direction();
     Collection<Ray> rays = new ArrayList<>();
-    double epsilon = 0.001; // Needed for accuracy
-    for (double theta = 0; theta < Math.PI - epsilon; theta += angleStep) {
+    for (double theta = 0; theta < Math.PI - Collider.EPSILON; theta += angleStep) {
       double z = Math.cos(theta);
       double sinTheta = Math.sin(theta);
-      for (double phi = 0; phi < 2 * Math.PI - epsilon; phi += angleStep) {
+      for (double phi = 0; phi < 2 * Math.PI - Collider.EPSILON; phi += angleStep) {
         double x = Math.cos(phi) * sinTheta;
         double y = Math.sin(phi) * sinTheta;
         Vector3d direction = Vector3d.of(x, y, z);
@@ -101,7 +100,7 @@ public final class RayUtil {
             continue;
           }
         }
-        rays.add(new Ray(center, direction.multiply(range)));
+        rays.add(Ray.of(center, direction.multiply(range)));
       }
     }
     return rays;

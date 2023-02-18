@@ -246,7 +246,7 @@ public class EarthLine extends AbilityInstance {
 
     @Override
     protected void onCollision(Vector3d point) {
-      FragileStructure.tryDamageStructure(user.world().blockAt(point), 5, new Ray(location, direction));
+      FragileStructure.tryDamageStructure(user.world().blockAt(point), 5, Ray.of(location, direction));
     }
 
     public void raiseSpikes() {
