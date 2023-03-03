@@ -20,7 +20,6 @@
 package me.moros.bending.common.storage;
 
 import java.nio.ByteBuffer;
-import java.nio.file.Path;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -80,7 +79,7 @@ final class SqlStorage extends AbstractStorage {
   @Override
   public void init() {
     if (!tableExists("bending_players")) {
-      String path = Path.of("bending", "schema", dataSource.type().realName() + ".sql").toString();
+      String path = "bending/schema/" + dataSource.type().realName() + ".sql";
       Collection<String> statements = SqlStreamReader.parseQueries(plugin.resource(path));
       DB.useHandle(handle -> {
         Batch batch = handle.createBatch();

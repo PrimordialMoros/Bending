@@ -89,7 +89,9 @@ public record StorageFactory(Bending plugin) {
         plugin.logger().error(e.getMessage(), e);
         return null;
       }
-      builder.path(parent.resolve("bending" + (storageType == StorageType.SQLITE ? ".db" : "")));
+      // Convert to uri and back to path - needed only for windows compatibility
+      var uri = parent.resolve("bending" + (storageType == StorageType.SQLITE ? ".db" : "")).toUri();
+      builder.path(Path.of(uri));
     }
     StorageDataSource data = builder.build("bending-hikari");
     return data == null ? null : new SqlStorage(plugin, data);
