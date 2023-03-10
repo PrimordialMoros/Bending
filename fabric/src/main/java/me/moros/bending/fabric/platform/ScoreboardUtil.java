@@ -34,17 +34,12 @@ import net.minecraft.world.scores.Objective;
 public class ScoreboardUtil {
   private static final Map<UUID, ServerScoreboard> playerBoards = new HashMap<>();
 
-  public static ServerScoreboard getScoreboard(ServerPlayer player) {
-    ServerScoreboard result = playerBoards.get(player.getUUID());
-    return result != null ? result : player.server.getScoreboard();
-  }
-
   public static void resetScoreboard(ServerPlayer player) {
     setScoreboard(player, player.server.getScoreboard());
   }
 
   public static void setScoreboard(ServerPlayer player, ServerScoreboard scoreboard) {
-    ServerScoreboard previous = getScoreboard(player);
+    ServerScoreboard previous = playerBoards.getOrDefault(player.getUUID(), player.server.getScoreboard());
     if (scoreboard == previous) {
       return;
     }

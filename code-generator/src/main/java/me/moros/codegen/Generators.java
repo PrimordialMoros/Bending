@@ -8,7 +8,7 @@ import java.nio.file.Path;
 public final class Generators {
   private static final Logger LOGGER = System.getLogger("Code Gen Logger");
   private static final String PKG = "me.moros.bending.api.platform.";
-  private static final String VERSION = "1_19_2";
+  private static final String VERSION = "1_19_3";
 
   public static void main(String[] args) {
     if (args.length != 1) {

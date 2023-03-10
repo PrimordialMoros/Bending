@@ -88,7 +88,7 @@ public final class AbilityDescriptionArgument<C extends Audience> extends Comman
           return ArgumentParseResult.failure(new Throwable("Could not find ability " + input));
         }
       }
-      return ArgumentParseResult.failure(new NoInputProvidedException(AbilityDescription.class, commandContext));
+      return ArgumentParseResult.failure(new NoInputProvidedException(Parser.class, commandContext));
     }
 
     @Override
