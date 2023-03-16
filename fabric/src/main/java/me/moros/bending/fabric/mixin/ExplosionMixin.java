@@ -48,7 +48,7 @@ public abstract class ExplosionMixin {
     target = "Lnet/minecraft/world/level/block/state/BlockState;getDrops(Lnet/minecraft/world/level/storage/loot/LootContext$Builder;)Ljava/util/List;"))
   private List<ItemStack> bending$blockDrops(BlockState state, LootContext.Builder builder) {
     var stacks = state.getDrops(builder);
-    var pos = new BlockPos(builder.getParameter(LootContextParams.ORIGIN));
+    var pos = BlockPos.containing(builder.getParameter(LootContextParams.ORIGIN));
     var result = ServerItemEvents.BLOCK_DROP_LOOT.invoker().onDropLoot((ServerLevel) level, pos, stacks);
     if (result.getResult() != InteractionResult.FAIL) {
       return result.getObject();

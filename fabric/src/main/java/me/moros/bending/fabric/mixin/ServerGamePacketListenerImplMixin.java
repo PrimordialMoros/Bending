@@ -25,7 +25,6 @@ import java.util.Set;
 import me.moros.bending.fabric.event.ServerEntityEvents;
 import me.moros.bending.fabric.event.ServerPlayerEvents;
 import me.moros.math.Vector3d;
-import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket.RelativeArgument;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket.Action;
@@ -34,6 +33,7 @@ import net.minecraft.network.protocol.game.ServerboundSwingPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.RelativeMovement;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -47,7 +47,7 @@ public abstract class ServerGamePacketListenerImplMixin {
   public ServerPlayer player;
 
   @Shadow
-  public abstract void teleport(double x, double y, double z, float yaw, float pitch, Set<RelativeArgument> relativeArguments);
+  public abstract void teleport(double x, double y, double z, float yaw, float pitch, Set<RelativeMovement> relativeArguments);
 
   @Inject(method = "handleAnimate", at = @At(value = "INVOKE",
     target = "Lnet/minecraft/server/level/ServerPlayer;resetLastActionTime()V"), cancellable = true)
@@ -104,7 +104,7 @@ public abstract class ServerGamePacketListenerImplMixin {
       double y = from.y();
       double z = from.z();
       this.player.absMoveTo(x, y, z, xRot, yRot);
-      this.teleport(x, y, z, xRot, yRot, EnumSet.of(RelativeArgument.X_ROT, RelativeArgument.Y_ROT));
+      this.teleport(x, y, z, xRot, yRot, EnumSet.of(RelativeMovement.X_ROT, RelativeMovement.Y_ROT));
       ci.cancel();
     }
   }

@@ -26,6 +26,7 @@ import java.util.function.Supplier;
 
 import me.moros.bending.api.ability.ActionType;
 import me.moros.bending.api.ability.Activation;
+import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.registry.Registries;
@@ -65,7 +66,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -322,7 +322,7 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
   }
 
   private InteractionResultHolder<List<ItemStack>> onDropLoot(LivingEntity entity, DamageSource source, List<ItemStack> items) {
-    if (!disabledWorld(entity) && source instanceof AbilityDamageSource s && s.isFire()) {
+    if (!disabledWorld(entity) && source instanceof AbilityDamageSource s && s.ability().element() == Element.FIRE) {
       ListIterator<ItemStack> it = items.listIterator();
       while (it.hasNext()) {
         ItemStack item = it.next();
@@ -351,19 +351,17 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
       return damage;
     }
     var livingEntity = PlatformAdapter.fromFabricEntity(entity);
-    var cause = PlatformAdapter.fromFabricCause(source);
     Vector3d origin = null;
-    if (source instanceof EntityDamageSource entityDamageSource) {
-      var sourceEntity = entityDamageSource.getEntity();
-      if (sourceEntity != null) {
-        if (sourceEntity instanceof Arrow && FabricMetadata.INSTANCE.has(sourceEntity, MetalCable.CABLE_KEY)) {
-          return 0;
-        } else if (ActionLimiter.isLimited(sourceEntity.getUUID(), ActionType.DAMAGE)) {
-          return 0;
-        }
-        origin = PlatformAdapter.fromFabricEntity(sourceEntity).center();
+    var sourceEntity = source.getEntity();
+    if (sourceEntity != null) {
+      if (sourceEntity instanceof Arrow && FabricMetadata.INSTANCE.has(sourceEntity, MetalCable.CABLE_KEY)) {
+        return 0;
+      } else if (ActionLimiter.isLimited(sourceEntity.getUUID(), ActionType.DAMAGE)) {
+        return 0;
       }
+      origin = PlatformAdapter.fromFabricEntity(sourceEntity).center();
     }
+    var cause = PlatformAdapter.fromFabricCause(entity.damageSources(), source);
     return game().activationController().onEntityDamage(livingEntity, cause, damage, origin);
   }
 

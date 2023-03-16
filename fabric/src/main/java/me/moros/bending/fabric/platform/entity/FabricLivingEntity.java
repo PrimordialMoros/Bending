@@ -72,19 +72,20 @@ public class FabricLivingEntity extends FabricEntity implements LivingEntity {
 
   @Override
   public boolean damage(double damage) {
-    return handle().hurt(DamageSource.GENERIC, (float) damage);
+    return handle().hurt(handle().damageSources().generic(), (float) damage);
   }
 
   @Override
   public boolean damage(double damage, Entity source) {
     DamageSource damageSource;
     var entity = PlatformAdapter.toFabricEntity(source);
+    var sources = handle().damageSources();
     if (entity instanceof ServerPlayer player) {
-      damageSource = DamageSource.playerAttack(player);
+      damageSource = sources.playerAttack(player);
     } else if (entity instanceof net.minecraft.world.entity.LivingEntity living) {
-      damageSource = DamageSource.mobAttack(living);
+      damageSource = sources.mobAttack(living);
     } else {
-      damageSource = DamageSource.indirectMobAttack(entity, null);
+      damageSource = sources.mobProjectile(entity, null);
     }
     return handle().hurt(damageSource, (float) damage);
   }

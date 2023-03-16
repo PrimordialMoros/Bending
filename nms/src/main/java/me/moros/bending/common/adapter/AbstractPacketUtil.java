@@ -194,12 +194,12 @@ public abstract class AbstractPacketUtil implements PacketUtil {
   }
 
   protected ClientboundBlockUpdatePacket fakeBlockPacket(Position b, BlockState state) {
-    return new ClientboundBlockUpdatePacket(new BlockPos(b.x(), b.y(), b.z()), state);
+    return new ClientboundBlockUpdatePacket(new BlockPos(b.blockX(), b.blockY(), b.blockZ()), state);
   }
 
   protected ClientboundBlockDestructionPacket fakeBreakPacket(Position b, byte progress) {
     int id = ThreadLocalRandom.current().nextInt(1, Integer.MAX_VALUE);
-    return new ClientboundBlockDestructionPacket(id, new BlockPos(b.x(), b.y(), b.z()), progress);
+    return new ClientboundBlockDestructionPacket(id, new BlockPos(b.blockX(), b.blockY(), b.blockZ()), progress);
   }
 
   protected ClientboundSetEquipmentPacket setupEquipment(int id, Item item) {

@@ -21,7 +21,6 @@ package me.moros.bending.paper.listener;
 
 import java.util.ListIterator;
 import java.util.UUID;
-import java.util.function.Predicate;
 
 import com.destroystokyo.paper.event.player.PlayerJumpEvent;
 import io.papermc.paper.event.entity.EntityInsideBlockEvent;
@@ -52,10 +51,8 @@ import me.moros.bending.paper.platform.DamageUtil;
 import me.moros.bending.paper.platform.PlatformAdapter;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
-import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.bukkit.GameMode;
-import org.bukkit.GameRule;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -87,9 +84,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.scoreboard.Team;
-import org.bukkit.scoreboard.Team.Option;
-import org.bukkit.scoreboard.Team.OptionStatus;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public record UserListener(Game game, Bending plugin) implements Listener, BukkitListener {
@@ -333,35 +327,12 @@ public record UserListener(Game game, Bending plugin) implements Listener, Bukki
     Player player = event.getEntity();
     DamageSource cause = DamageUtil.cachedDamageSource(player.getUniqueId());
     if (cause != null) {
-      Boolean showMessage = player.getWorld().getGameRuleValue(GameRule.SHOW_DEATH_MESSAGES);
-      if (showMessage != null && showMessage) {
-        Predicate<Audience> predicate = x -> true;
-        Team team = player.getScoreboard().getPlayerTeam(player);
-        if (team != null) {
-          OptionStatus status = team.getOption(Option.DEATH_MESSAGE_VISIBILITY);
-          predicate = u -> canSend(status, team, u);
-        }
-        AbilityDescription ability = cause.ability();
-        Component message = plugin.translationManager()
-          .translate(ability.deathKey()).orElseGet(Message.ABILITY_GENERIC_DEATH)
-          .args(player.name(), cause.name(), ability.displayName());
-        // Client isn't aware of custom death message translations, so we have to manually broadcast
-        player.getServer().filterAudience(predicate).sendMessage(message);
-        event.deathMessage(Component.empty());
-      }
+      AbilityDescription ability = cause.ability();
+      Component message = plugin.translationManager()
+        .translate(ability.deathKey()).orElseGet(Message.ABILITY_GENERIC_DEATH)
+        .args(player.name(), cause.name(), ability.displayName());
+      event.deathMessage(message);
     }
-  }
-
-  private boolean canSend(OptionStatus status, Team team, Audience other) {
-    if (other instanceof Player player) {
-      return switch (status) {
-        case ALWAYS -> true;
-        case NEVER -> false;
-        case FOR_OTHER_TEAMS -> team.equals(player.getScoreboard().getPlayerTeam(player));
-        case FOR_OWN_TEAM -> !team.equals(player.getScoreboard().getPlayerTeam(player));
-      };
-    }
-    return false;
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)

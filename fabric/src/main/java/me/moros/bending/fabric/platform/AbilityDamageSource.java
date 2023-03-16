@@ -23,17 +23,15 @@ import java.util.Objects;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.DamageSource;
-import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.locale.TranslationManager;
 import net.kyori.adventure.platform.fabric.FabricServerAudiences;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
-import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.entity.LivingEntity;
 
-public class AbilityDamageSource extends EntityDamageSource implements DamageSource {
+public class AbilityDamageSource extends net.minecraft.world.damagesource.DamageSource implements DamageSource {
   private static TranslationManager manager;
 
   private final Component name;
@@ -41,16 +39,10 @@ public class AbilityDamageSource extends EntityDamageSource implements DamageSou
   private final TranslatableComponent deathMessage;
 
   private AbilityDamageSource(User user, AbilityDescription ability) {
-    super("bending.ability", PlatformAdapter.toFabricEntity(user));
-    bypassArmor();
+    super(PlatformAdapter.toFabricWorld(user.world()).damageSources().generic().typeHolder(), PlatformAdapter.toFabricEntity(user));
     this.name = user.name();
     this.ability = ability;
     this.deathMessage = manager.translate(ability.deathKey()).orElseGet(Message.ABILITY_GENERIC_DEATH);
-  }
-
-  @Override
-  public boolean isFire() {
-    return ability.element() == Element.FIRE;
   }
 
   @Override

@@ -47,7 +47,9 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -164,17 +166,17 @@ public final class PlatformAdapter {
     return ((FabricPlayer) player).handle();
   }
 
-  public static DamageCause fromFabricCause(DamageSource type) {
-    if (type.isExplosion()) {
+  public static DamageCause fromFabricCause(DamageSources sources, DamageSource source) {
+    if (source.is(DamageTypeTags.IS_EXPLOSION)) {
       return DamageCause.EXPLOSION;
     }
-    if (type.isFire() && !(type instanceof AbilityDamageSource)) {
+    if (source.is(DamageTypeTags.IS_FIRE)) {
       return DamageCause.FIRE;
-    } else if (type == DamageSource.FALL) {
+    } else if (source.is(DamageTypeTags.IS_FALL)) {
       return DamageCause.FALL;
-    } else if (type == DamageSource.FLY_INTO_WALL) {
+    } else if (source.equals(sources.flyIntoWall())) {
       return DamageCause.KINETIC;
-    } else if (type == DamageSource.IN_WALL) {
+    } else if (source.equals(sources.inWall())) {
       return DamageCause.SUFFOCATION;
     } else {
       return DamageCause.CUSTOM;
