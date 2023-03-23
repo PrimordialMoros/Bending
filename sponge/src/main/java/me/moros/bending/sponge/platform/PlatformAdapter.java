@@ -45,7 +45,6 @@ import me.moros.bending.sponge.platform.entity.SpongePlayer;
 import me.moros.bending.sponge.platform.item.SpongeItem;
 import me.moros.bending.sponge.platform.world.SpongeWorld;
 import net.kyori.adventure.key.Key;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.value.Value;
@@ -199,9 +198,9 @@ public final class PlatformAdapter {
     var type = source.type();
     if (type == DamageTypes.FALL.get()) {
       return DamageCause.FALL;
-    } else if (type == DamageTypes.CONTACT.get() && source instanceof DamageSource nms && "flyIntoWall".equals(nms.getMsgId())) {
+    } else if (type == DamageTypes.FLY_INTO_WALL.get()) {
       return DamageCause.KINETIC;
-    } else if (type == DamageTypes.SUFFOCATE.get()) {
+    } else if (type == DamageTypes.IN_WALL.get()) {
       return DamageCause.SUFFOCATION;
     } else {
       return DamageCause.CUSTOM;

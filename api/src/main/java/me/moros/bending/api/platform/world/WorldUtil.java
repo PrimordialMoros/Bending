@@ -27,6 +27,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import me.moros.bending.api.platform.Direction;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
+import me.moros.bending.api.platform.block.BlockTag;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.particle.Particle;
 import me.moros.bending.api.platform.property.StateProperty;
@@ -51,11 +52,11 @@ public final class WorldUtil {
   }
 
   /**
-   * Try to light a block if it's a campfire.
+   * Try to light a block if it's a campfire or candle.
    * @param block the block to light
    */
   public static void tryLightBlock(Block block) {
-    if (MaterialUtil.isCampfire(block)) {
+    if (MaterialUtil.isCampfire(block) || BlockTag.CANDLES.isTagged(block)) {
       block.setState(block.state().withProperty(StateProperty.LIT, true));
     }
   }
@@ -106,7 +107,7 @@ public final class WorldUtil {
         SoundEffect.FIRE_EXTINGUISH.play(block);
       }
       return true;
-    } else if (MaterialUtil.isCampfire(block)) {
+    } else if (MaterialUtil.isCampfire(block) || BlockTag.CANDLES.isTagged(block)) {
       block.setState(block.state().withProperty(StateProperty.LIT, false));
     }
     return false;

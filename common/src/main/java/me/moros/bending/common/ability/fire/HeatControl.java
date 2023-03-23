@@ -34,6 +34,7 @@ import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.Modifiable;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.block.Block;
+import me.moros.bending.api.platform.block.BlockTag;
 import me.moros.bending.api.platform.item.Inventory;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
@@ -183,12 +184,12 @@ public class HeatControl extends AbilityInstance {
     }
     boolean acted = false;
     Vector3d center = user.rayTrace(userConfig.range).blocks(user.world()).position();
-    Predicate<Block> predicate = b -> MaterialUtil.isFire(b) || MaterialUtil.isCampfire(b) || MaterialUtil.isMeltable(b);
+    Predicate<Block> predicate = b -> MaterialUtil.isFire(b) || MaterialUtil.isCampfire(b) || BlockTag.CANDLES.isTagged(b) || MaterialUtil.isMeltable(b);
     Predicate<Block> safe = b -> TempBlock.isBendable(b) && user.canBuild(b);
     List<Block> toMelt = new ArrayList<>();
     for (Block block : user.world().nearbyBlocks(center, userConfig.radius, predicate.and(safe))) {
       acted = true;
-      if (MaterialUtil.isFire(block) || MaterialUtil.isCampfire(block)) {
+      if (MaterialUtil.isFire(block) || MaterialUtil.isCampfire(block) || BlockTag.CANDLES.isTagged(block)) {
         WorldUtil.tryExtinguishFire(user, block);
       } else if (MaterialUtil.isMeltable(block)) {
         toMelt.add(block);

@@ -179,7 +179,7 @@ public final class MaterialUtil {
   }
 
   public static boolean isCampfire(Block block) {
-    return block.type() == BlockType.CAMPFIRE || block.type() == BlockType.SOUL_CAMPFIRE;
+    return BlockTag.CAMPFIRES.isTagged(block);
   }
 
   public static boolean isLava(Block block) {

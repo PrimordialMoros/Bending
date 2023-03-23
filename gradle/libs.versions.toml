@@ -9,7 +9,7 @@ cloud-snapshot = "1.8.0-SNAPSHOT"
 bstats = "3.0.1"
 paper = "1.19.2-R0.1-SNAPSHOT"
 sponge-api = "10.0.0-SNAPSHOT"
-sponge-common = "1.19.3-10.0.0-SNAPSHOT"
+sponge-common = "1.19.4-10.0.0-SNAPSHOT"
 minecraft = "1.19.4"
 fabric-loom = "1.1-SNAPSHOT"
 fabric-api = "0.75.3+1.19.4"
@@ -79,7 +79,7 @@ grief-prevention = { module = "com.github.TechFOrtress:GriefPrevention", version
 towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.98.6.12" }
 lwc = { module = "com.griefcraft:lwc", version = "2.2.9-dev" }
 worldguard-bukkit = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.7" }
-papi = { module = "me.clip:placeholderapi", version = "2.11.2" }
+papi = { module = "me.clip:placeholderapi", version = "2.11.3" }
 
 # Sponge
 sponge-api = { module = "org.spongepowered:spongeapi", version.ref = "sponge-api" }

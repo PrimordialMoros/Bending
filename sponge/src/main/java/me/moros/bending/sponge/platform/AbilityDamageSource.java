@@ -22,27 +22,21 @@ package me.moros.bending.sponge.platform;
 import java.util.Objects;
 
 import me.moros.bending.api.ability.AbilityDescription;
-import me.moros.bending.api.ability.DamageSource;
-import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.user.User;
 import net.kyori.adventure.text.Component;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
-import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractEntityDamageSource;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 
-public class AbilityDamageSource extends AbstractEntityDamageSource implements DamageSource {
+public class AbilityDamageSource extends net.minecraft.world.damagesource.DamageSource implements me.moros.bending.api.ability.DamageSource {
+  public static final ResourceKey BENDING_DAMAGE = ResourceKey.of("bending", "damage");
+
   private final Component name;
   private final AbilityDescription desc;
 
-  private AbilityDamageSource(Builder builder) {
-    super(builder);
-    this.name = builder.name;
-    this.desc = builder.ability;
-  }
-
-  @Override
-  public boolean isFire() {
-    return desc.element() == Element.FIRE;
+  private AbilityDamageSource(net.minecraft.world.damagesource.DamageSource original, Component name, AbilityDescription desc) {
+    super(original.typeHolder(), original.getDirectEntity(), original.getEntity());
+    this.name = name;
+    this.desc = desc;
   }
 
   @Override
@@ -55,25 +49,9 @@ public class AbilityDamageSource extends AbstractEntityDamageSource implements D
     return desc;
   }
 
-  public static Builder builder(User user, AbilityDescription ability) {
+  public static AbilityDamageSource wrap(DamageSource source, User user, AbilityDescription ability) {
     Objects.requireNonNull(user);
     Objects.requireNonNull(ability);
-    return new Builder(user.name(), ability).type(DamageTypes.CUSTOM).entity(PlatformAdapter.toSpongeEntity(user))
-      .bypassesArmor();
-  }
-
-  public static class Builder extends AbstractEntityDamageSourceBuilder<AbilityDamageSource, Builder> {
-    private final Component name;
-    private final AbilityDescription ability;
-
-    private Builder(Component name, AbilityDescription ability) {
-      this.name = name;
-      this.ability = ability;
-    }
-
-    @Override
-    public @NonNull AbilityDamageSource build() throws IllegalStateException {
-      return new AbilityDamageSource(this);
-    }
+    return new AbilityDamageSource((net.minecraft.world.damagesource.DamageSource) source, user.name(), ability);
   }
 }

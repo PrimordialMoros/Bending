@@ -38,6 +38,7 @@ import me.moros.bending.sponge.listener.ConnectionListener;
 import me.moros.bending.sponge.listener.PlaceholderListener;
 import me.moros.bending.sponge.listener.UserListener;
 import me.moros.bending.sponge.listener.WorldListener;
+import me.moros.bending.sponge.platform.AbilityDamageSource;
 import me.moros.bending.sponge.platform.CommandSender;
 import me.moros.bending.sponge.platform.CommandSender.PlayerCommandSender;
 import me.moros.bending.sponge.platform.PlatformAdapter;
@@ -49,14 +50,23 @@ import org.bstats.sponge.Metrics;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.data.DataRegistration;
+import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.cause.entity.damage.DamageScalings;
+import org.spongepowered.api.event.cause.entity.damage.DamageType;
+import org.spongepowered.api.event.cause.entity.damage.DamageTypeTemplate;
 import org.spongepowered.api.event.lifecycle.LoadedGameEvent;
 import org.spongepowered.api.event.lifecycle.ProvideServiceEvent;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
 import org.spongepowered.api.event.lifecycle.RegisterDataEvent;
+import org.spongepowered.api.event.lifecycle.RegisterDataPackValueEvent;
 import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
 import org.spongepowered.api.event.lifecycle.StoppingEngineEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.registry.RegistryKey;
+import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.tag.DamageTypeTags;
+import org.spongepowered.api.tag.TagTemplate;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
@@ -117,6 +127,20 @@ public final class SpongeBending extends AbstractBending<PluginContainer> {
   public void onRegisterData(RegisterDataEvent event) {
     event.register(DataRegistration.of(PlatformAdapter.dataKey(Metadata.ARMOR_KEY), ItemStack.class));
     event.register(DataRegistration.of(PlatformAdapter.dataKey(Metadata.METAL_KEY), ItemStack.class));
+  }
+
+  @Listener
+  private void onDamageTypePack(RegisterDataPackValueEvent<DamageTypeTemplate> event) {
+    var template = DamageTypeTemplate.builder().name("bending-damage").scaling(DamageScalings.NEVER.get())
+      .exhaustion(0).key(AbilityDamageSource.BENDING_DAMAGE).build();
+    event.register(template);
+  }
+
+  @Listener
+  private void onDamageTypeTagPack(RegisterDataPackValueEvent<TagTemplate<DamageType>> event) {
+    var template = TagTemplate.builder(DataPacks.DAMAGE_TYPE_TAG).key(DamageTypeTags.BYPASSES_INVULNERABILITY.key())
+      .addValue(RegistryKey.of(RegistryTypes.DAMAGE_TYPE, AbilityDamageSource.BENDING_DAMAGE)).build();
+    event.register(template);
   }
 
   @Override

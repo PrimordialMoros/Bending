@@ -42,8 +42,8 @@ import org.spongepowered.api.data.type.PickupRules;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
+import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSources;
-import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.item.inventory.Equipable;
 
 public class SpongeLivingEntity extends SpongeEntity implements LivingEntity {
@@ -73,7 +73,7 @@ public class SpongeLivingEntity extends SpongeEntity implements LivingEntity {
 
   @Override
   public boolean damage(double damage, Entity source) {
-    var ds = EntityDamageSource.builder().type(DamageTypes.CUSTOM).entity(PlatformAdapter.toSpongeEntity(source)).build();
+    var ds = DamageSource.builder().type(DamageTypes.GENERIC).entity(PlatformAdapter.toSpongeEntity(source)).build();
     return handle().damage(damage, ds);
   }
 
@@ -84,7 +84,9 @@ public class SpongeLivingEntity extends SpongeEntity implements LivingEntity {
     if (event.cancelled() || dmg <= 0) {
       return false;
     }
-    return handle().damage(dmg, AbilityDamageSource.builder(source, desc).build());
+    var value = DamageTypes.registry().value(AbilityDamageSource.BENDING_DAMAGE);
+    var spongeDamageSource = DamageSource.builder().type(value).entity(PlatformAdapter.toSpongeEntity(source)).build();
+    return handle().damage(dmg, (DamageSource) AbilityDamageSource.wrap(spongeDamageSource, source, desc));
   }
 
   @Override

@@ -25,6 +25,7 @@ import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.ActionType;
 import me.moros.bending.api.ability.Activation;
 import me.moros.bending.api.ability.DamageSource;
+import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.registry.Registries;
@@ -47,6 +48,7 @@ import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.text.TranslatableComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value.Immutable;
@@ -66,8 +68,6 @@ import org.spongepowered.api.event.action.CollideEvent;
 import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
-import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
-import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.api.event.entity.ChangeEntityEquipmentEvent;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
@@ -91,6 +91,8 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.LocatableBlock;
+import org.spongepowered.api.world.LocatableSnapshot;
+import org.spongepowered.api.world.server.ServerLocation;
 
 public class UserListener extends SpongeListener {
   private final Bending plugin;
@@ -170,12 +172,15 @@ public class UserListener extends SpongeListener {
   }
 
   @Listener(order = Order.EARLY)
-  public void onEntityDamageByEntity(DamageEntityEvent event, @First EntityDamageSource cause) {
+  public void onEntityDamageByEntity(DamageEntityEvent event, @First org.spongepowered.api.event.cause.entity.damage.source.DamageSource cause) {
     var entity = event.entity();
     if (disabledWorld(entity)) {
       return;
     }
-    var source = cause.source();
+    var source = cause.source().orElse(null);
+    if (source == null) {
+      return;
+    }
     if (source instanceof Arrow && source.get(PlatformAdapter.dataKey(MetalCable.CABLE_KEY)).isPresent()) {
       event.setCancelled(true);
     } else if (ActionLimiter.isLimited(source.uniqueId(), ActionType.DAMAGE)) {
@@ -206,11 +211,16 @@ public class UserListener extends SpongeListener {
     var entity = PlatformAdapter.fromSpongeEntity(target);
     var cause = PlatformAdapter.fromSpongeCause(source);
     Vector3d origin = null;
-    if (source instanceof EntityDamageSource entitySource) {
-      origin = PlatformAdapter.fromSpongeEntity(entitySource.source()).center();
+    var sourceEntity = source.source().orElse(null);
+    if (sourceEntity != null) {
+      origin = PlatformAdapter.fromSpongeEntity(sourceEntity).center();
     }
-    if (source.isFire() && source instanceof BlockDamageSource blockDamageSource) {
-      onFireDamage(target, blockDamageSource.location().asLocatableBlock());
+    var sourceBlock = source.blockSnapshot()
+      .flatMap(BlockSnapshot::location)
+      .map(ServerLocation::asLocatableBlock)
+      .orElse(null);
+    if (source.isFire() && sourceBlock != null) {
+      onFireDamage(target, sourceBlock);
     }
     double newDamage = game.activationController().onEntityDamage(entity, cause, oldDamage, origin);
     if (newDamage <= 0) {
@@ -270,7 +280,10 @@ public class UserListener extends SpongeListener {
   }
 
   private @Nullable DamageSource blockCause(Cause cause) {
-    return cause.first(BlockDamageSource.class).map(s -> s.location().asLocatableBlock())
+    return cause.first(org.spongepowered.api.event.cause.entity.damage.source.DamageSource.class)
+      .flatMap(org.spongepowered.api.event.cause.entity.damage.source.DamageSource::blockSnapshot)
+      .flatMap(LocatableSnapshot::location)
+      .map(ServerLocation::asLocatableBlock)
       .map(PlatformAdapter::fromSpongeBlock).flatMap(TempBlock.MANAGER::get)
       .map(TempBlock::damageSource).orElse(null);
   }
@@ -321,7 +334,7 @@ public class UserListener extends SpongeListener {
     if (disabledWorld(entity) || entity instanceof ServerPlayer) {
       return;
     }
-    if (source.isFire()) {
+    if (source.ability().element() == Element.FIRE) {
       ListIterator<ItemStackSnapshot> it = event.droppedItems().listIterator();
       while (it.hasNext()) {
         ItemStackSnapshot item = it.next();
