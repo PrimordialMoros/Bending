@@ -1,7 +1,7 @@
 [versions]
 math = "2.0.0-SNAPSHOT"
 tasker = "1.0.0-SNAPSHOT"
-adventure = "4.13.0"
+adventure = "4.12.0"
 adventure-fabric = "5.8.0"
 configurate = "4.1.2"
 cloud = "1.8.3"
@@ -11,7 +11,7 @@ paper = "1.19.2-R0.1-SNAPSHOT"
 sponge-api = "10.0.0-SNAPSHOT"
 sponge-common = "1.19.4-10.0.0-SNAPSHOT"
 minecraft = "1.19.4"
-fabric-loom = "1.1.12"
+fabric-loom = "1.1-SNAPSHOT"
 fabric-api = "0.77.2+1.20"
 fabric-loader = "0.14.19"
 shadow = "8.1.1"
@@ -30,7 +30,7 @@ tasker-minestom = { module = "me.moros:tasker-minestom", version.ref = "tasker" 
 
 javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
 gson = { module = "com.google.code.gson:gson", version = "2.10.1" }
-articdata = { module = "de.articdive:articdata", version = "1.19-88313627" }
+articdata = { module = "de.articdive:articdata", version = "1.19.3-ea3a049e" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.5" }
 guava = { module = "com.google.guava:guava", version = "31.1-jre" }
 jdbi = { module = "org.jdbi:jdbi3-core", version = "3.37.1" }
