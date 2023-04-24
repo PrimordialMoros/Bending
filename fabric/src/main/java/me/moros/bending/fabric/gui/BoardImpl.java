@@ -24,12 +24,12 @@ import java.util.List;
 import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.user.BendingPlayer;
 import me.moros.bending.common.gui.AbstractBoard;
-import me.moros.bending.fabric.platform.PlatformAdapter;
-import me.moros.bending.fabric.platform.ScoreboardUtil;
+import me.moros.bending.fabric.platform.entity.FabricPlayer;
+import me.moros.bending.fabric.platform.scoreboard.PlayerBoard;
+import me.moros.bending.fabric.platform.scoreboard.PlayerScoreboard;
+import me.moros.bending.fabric.platform.scoreboard.ScoreboardUtil;
 import net.kyori.adventure.platform.fabric.FabricServerAudiences;
 import net.kyori.adventure.text.Component;
-import net.minecraft.server.ServerScoreboard;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
@@ -37,18 +37,18 @@ import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria.RenderType;
 
 public final class BoardImpl extends AbstractBoard<PlayerTeam> {
-  private final ServerPlayer fabricPlayer;
+  private final FabricPlayer fabricPlayer;
   private final Scoreboard bendingBoard;
   private final Objective bendingSlots;
 
   public BoardImpl(BendingPlayer user) {
     super(user);
-    this.fabricPlayer = PlatformAdapter.toFabricEntity(user);
-    bendingBoard = new ServerScoreboard(fabricPlayer.server);
+    this.fabricPlayer = (FabricPlayer) user.entity();
+    bendingBoard = new PlayerScoreboard(fabricPlayer);
     var displayName = toNative(Message.BENDING_BOARD_TITLE.build());
     bendingSlots = bendingBoard.addObjective("BendingBoard", ObjectiveCriteria.DUMMY, displayName, RenderType.INTEGER);
     bendingBoard.setDisplayObjective(Scoreboard.DISPLAY_SLOT_SIDEBAR, bendingSlots);
-    ScoreboardUtil.setScoreboard(fabricPlayer, (ServerScoreboard) bendingBoard);
+    ScoreboardUtil.setScoreboard(fabricPlayer.handle(), (PlayerBoard) bendingBoard);
     init();
   }
 
@@ -57,7 +57,7 @@ public final class BoardImpl extends AbstractBoard<PlayerTeam> {
     bendingBoard.setDisplayObjective(Scoreboard.DISPLAY_SLOT_SIDEBAR, null);
     List.copyOf(bendingBoard.getPlayerTeams()).forEach(bendingBoard::removePlayerTeam);
     bendingBoard.removeObjective(bendingSlots);
-    ScoreboardUtil.resetScoreboard(fabricPlayer);
+    ScoreboardUtil.resetScoreboard(fabricPlayer.handle());
   }
 
   @Override
@@ -92,6 +92,6 @@ public final class BoardImpl extends AbstractBoard<PlayerTeam> {
   }
 
   private net.minecraft.network.chat.Component toNative(Component text) {
-    return FabricServerAudiences.of(fabricPlayer.server).toNative(text);
+    return FabricServerAudiences.of(fabricPlayer.handle().server).toNative(text);
   }
 }

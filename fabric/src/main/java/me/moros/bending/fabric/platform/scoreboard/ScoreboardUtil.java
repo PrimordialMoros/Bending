@@ -17,7 +17,7 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.fabric.platform;
+package me.moros.bending.fabric.platform.scoreboard;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,23 +27,23 @@ import java.util.UUID;
 
 import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket;
-import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.scores.Objective;
 
 public class ScoreboardUtil {
-  private static final Map<UUID, ServerScoreboard> playerBoards = new HashMap<>();
+  private static final Map<UUID, PlayerBoard> playerBoards = new HashMap<>();
 
   public static void resetScoreboard(ServerPlayer player) {
-    setScoreboard(player, player.server.getScoreboard());
+    setScoreboard(player, PlayerBoard.from(player.server.getScoreboard()));
   }
 
-  public static void setScoreboard(ServerPlayer player, ServerScoreboard scoreboard) {
-    ServerScoreboard previous = playerBoards.getOrDefault(player.getUUID(), player.server.getScoreboard());
+  public static void setScoreboard(ServerPlayer player, PlayerBoard scoreboard) {
+    var global = PlayerBoard.from(player.server.getScoreboard());
+    PlayerBoard previous = playerBoards.getOrDefault(player.getUUID(), global);
     if (scoreboard == previous) {
       return;
     }
-    if (scoreboard == player.server.getScoreboard()) {
+    if (scoreboard == global) {
       playerBoards.remove(player.getUUID());
     } else {
       playerBoards.put(player.getUUID(), scoreboard);

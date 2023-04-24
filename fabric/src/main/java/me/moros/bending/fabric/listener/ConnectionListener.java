@@ -36,7 +36,7 @@ import me.moros.bending.api.user.profile.PlayerBenderProfile;
 import me.moros.bending.common.Bending;
 import me.moros.bending.common.util.Initializer;
 import me.moros.bending.fabric.mixin.accessor.ServerLoginPacketListenerImplAccess;
-import me.moros.bending.fabric.platform.ScoreboardUtil;
+import me.moros.bending.fabric.platform.scoreboard.ScoreboardUtil;
 import me.moros.bending.fabric.platform.entity.FabricPlayer;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerLoginConnectionEvents;
