@@ -36,7 +36,6 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.projectile.Projectile;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -48,7 +47,7 @@ public class FabricEntity implements Entity {
   }
 
   public void setHandle(net.minecraft.world.entity.Entity handle) {
-    if (uuid().equals(handle.getUUID()) && (!(handle instanceof ServerPlayer))) {
+    if (uuid().equals(handle.getUUID())) {
       this.handle = handle;
     }
   }
