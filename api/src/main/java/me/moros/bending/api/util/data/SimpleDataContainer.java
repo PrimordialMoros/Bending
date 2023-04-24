@@ -25,7 +25,7 @@ import java.util.Optional;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 class SimpleDataContainer implements DataContainer {
-  private Map<DataKey<?>, Object> data;
+  private final Map<DataKey<?>, Object> data;
 
   SimpleDataContainer(Map<DataKey<?>, Object> data) {
     this.data = data;

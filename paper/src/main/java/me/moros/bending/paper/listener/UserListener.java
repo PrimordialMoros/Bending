@@ -23,6 +23,7 @@ import java.util.ListIterator;
 import java.util.UUID;
 
 import com.destroystokyo.paper.event.player.PlayerJumpEvent;
+import io.papermc.paper.event.block.BlockLockCheckEvent;
 import io.papermc.paper.event.entity.EntityInsideBlockEvent;
 import io.papermc.paper.event.entity.EntityMoveEvent;
 import me.moros.bending.api.ability.AbilityDescription;
@@ -49,6 +50,7 @@ import me.moros.bending.common.ability.earth.EarthGlove;
 import me.moros.bending.common.ability.earth.MetalCable;
 import me.moros.bending.paper.platform.DamageUtil;
 import me.moros.bending.paper.platform.PlatformAdapter;
+import me.moros.bending.paper.platform.block.LockableImpl;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.text.Component;
@@ -62,6 +64,7 @@ import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -274,10 +277,9 @@ public record UserListener(Game game, Bending plugin) implements Listener, Bukki
     }
   }
 
-  /* TODO Locksmithing - available after 1.19.3
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onAccessLock(BlockLockCheckEvent event) {
-    if (disabledWorld(event)) {
+    if (event.getPlayer().getGameMode() == GameMode.SPECTATOR || disabledWorld(event)) {
       return;
     }
     var lock = new LockableImpl(event.getBlockState()).lock().orElse("");
@@ -285,7 +287,7 @@ public record UserListener(Game game, Bending plugin) implements Listener, Bukki
     if (!key.isBlank()) {
       event.setResult(key.equals(lock) ? Result.ALLOW : Result.DENY);
     }
-  }*/
+  }
 
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
   public void onEntityDeathHigh(EntityDeathEvent event) {

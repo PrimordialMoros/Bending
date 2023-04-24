@@ -1,5 +1,6 @@
 plugins {
     application
+    id("com.github.johnrengelman.shadow")
 }
 
 application {

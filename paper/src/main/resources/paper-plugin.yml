@@ -1,0 +1,27 @@
+name: Bending
+version: ${pluginVersion}
+main: me.moros.bending.paper.BendingBootstrap
+author: Moros
+description: Bending plugin for PaperMC.
+website: https://github.com/PrimordialMoros/Bending
+api-version: 1.19
+dependencies:
+  - name: PlaceholderAPI
+    required: false
+  - name: WorldGuard
+    required: false
+  - name: GriefPrevention
+    required: false
+  - name: Towny
+    required: false
+  - name: LWC
+    required: false
+  - name: LuckPerms
+    required: false
+load-after:
+  - name: PlaceholderAPI
+  - name: WorldGuard
+  - name: GriefPrevention
+  - name: Towny
+  - name: LWC
+  - name: LuckPerms

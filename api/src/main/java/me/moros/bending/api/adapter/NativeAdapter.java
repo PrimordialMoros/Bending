@@ -19,8 +19,12 @@
 
 package me.moros.bending.api.adapter;
 
+import java.util.Optional;
+import java.util.function.Function;
+
 import me.moros.bending.api.collision.raytrace.BlockRayTrace;
 import me.moros.bending.api.collision.raytrace.Context;
+import me.moros.bending.api.event.BendingDamageEvent;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
@@ -33,11 +37,18 @@ import me.moros.math.FastMath;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
+import org.jetbrains.annotations.ApiStatus.Internal;
 
 /**
  * Interface for all NMS and Packet shenanigans that Bending takes advantage of.
  */
 public interface NativeAdapter extends PacketUtil {
+  @Internal
+  default boolean damage(BendingDamageEvent event, Function<String, Optional<TranslatableComponent>> translator) {
+    return event.target().damage(event.damage(), event.user());
+  }
+
   /**
    * Attempt to use NMS to set BlockData for a specific block.
    * @param block the block to set

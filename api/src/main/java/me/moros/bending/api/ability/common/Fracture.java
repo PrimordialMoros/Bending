@@ -47,7 +47,7 @@ public class Fracture implements Updatable {
   private final Collection<Block> weakened;
   private final Map<Block, Integer> wallData;
   private final FragileStructure.Builder<?> fragileBuilder;
-  private long interval;
+  private final long interval;
   private long nextUpdateTime;
 
   protected <T extends Fracture> Fracture(Builder<T> builder) {

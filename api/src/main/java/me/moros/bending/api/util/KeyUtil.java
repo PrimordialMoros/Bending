@@ -22,7 +22,6 @@ package me.moros.bending.api.util;
 import java.util.function.Function;
 
 import me.moros.bending.api.util.data.DataKey;
-import net.kyori.adventure.key.InvalidKeyException;
 import net.kyori.adventure.key.Key;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -55,12 +54,8 @@ public final class KeyUtil {
     int index = string.indexOf(DEFAULT_SEPARATOR);
     String namespace = index >= 1 ? string.substring(0, index) : defNamespace;
     String value = index >= 0 ? string.substring(index + 1) : string;
-    /*if (Key.parseableNamespace(namespace) && Key.parseableValue(value)) { // TODO use builtin api to resolve keys (available from adventure 4.12.0/paper 1.19.3+)
+    if (Key.parseableNamespace(namespace) && Key.parseableValue(value)) {
       return Key.key(namespace, value);
-    }*/
-    try {
-      return Key.key(namespace, value);
-    } catch (InvalidKeyException ignore) {
     }
     return null;
   }

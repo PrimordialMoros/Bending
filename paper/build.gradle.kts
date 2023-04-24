@@ -13,8 +13,6 @@ repositories {
 
 dependencies {
     bendingImplementation(projects.bendingCommon)
-    bendingImplementation(projects.adapterV119R1) { targetConfiguration = "reobf" }
-    bendingImplementation(projects.adapterV119R2) { targetConfiguration = "reobf" }
     bendingImplementation(projects.adapterV119R3) { targetConfiguration = "reobf" }
     bendingImplementation(libs.tasker.bukkit)
     bendingImplementation(libs.bstats.bukkit)
@@ -43,7 +41,7 @@ tasks {
         }
     }
     named<Copy>("processResources") {
-        filesMatching("plugin.yml") {
+        filesMatching("*plugin.yml") {
             expand("pluginVersion" to project.version)
         }
     }

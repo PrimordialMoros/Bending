@@ -20,14 +20,18 @@
 package me.moros.bending.paper.adapter.v1_19_R3;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 
 import io.papermc.paper.adventure.PaperAdventure;
+import me.moros.bending.api.event.BendingDamageEvent;
+import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.world.World;
 import me.moros.bending.common.adapter.AbstractNativeAdapter;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -83,5 +87,13 @@ public final class NativeAdapterImpl extends AbstractNativeAdapter {
   @Override
   protected int nextEntityId() {
     return net.minecraft.world.entity.Entity.nextEntityId();
+  }
+
+  @Override
+  public boolean damage(BendingDamageEvent event, Function<String, Optional<TranslatableComponent>> translator) {
+    // TODO remove once paper damage api is introduced
+    var deathMsg = translator.apply(event.ability().deathKey()).orElseGet(Message.ABILITY_GENERIC_DEATH);
+    var damageSource = new AbilityDamageSource(adapt(event.user().entity()), event.user(), event.ability(), deathMsg);
+    return adapt(event.target()).hurt(damageSource, (float) event.damage());
   }
 }

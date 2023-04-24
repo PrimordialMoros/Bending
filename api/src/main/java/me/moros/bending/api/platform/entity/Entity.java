@@ -21,6 +21,7 @@ package me.moros.bending.api.platform.entity;
 
 import me.moros.bending.api.ability.Ability;
 import me.moros.bending.api.collision.geometry.AABB;
+import me.moros.bending.api.event.VelocityEvent;
 import me.moros.bending.api.platform.Direction;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.block.Block;
@@ -75,7 +76,7 @@ public interface Entity extends Identity, ForwardingAudience.Single, Damageable,
   void velocity(Vector3d velocity);
 
   /**
-   * Set this entity's velocity and post a {@link VelocityEventImpl} if it's a LivingEntity.
+   * Set this entity's velocity and post a {@link VelocityEvent} if it's a LivingEntity.
    * @param ability the ability the causes this velocity change
    * @param velocity the new velocity
    * @return whether the new velocity was successfully applied

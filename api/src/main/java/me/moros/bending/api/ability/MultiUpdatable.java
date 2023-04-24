@@ -87,7 +87,7 @@ public class MultiUpdatable<T extends Updatable> implements Updatable, Iterable<
   }
 
   public static class Builder<T extends Updatable> {
-    private Collection<T> actions;
+    private final Collection<T> actions;
 
     private Builder() {
       this.actions = new ArrayList<>();

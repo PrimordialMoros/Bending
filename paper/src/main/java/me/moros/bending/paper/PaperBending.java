@@ -42,6 +42,7 @@ import me.moros.bending.paper.listener.UserListener;
 import me.moros.bending.paper.listener.WorldListener;
 import me.moros.bending.paper.platform.BukkitPermissionInitializer;
 import me.moros.bending.paper.platform.BukkitPlatform;
+import me.moros.bending.paper.platform.DamageUtil;
 import me.moros.bending.paper.protection.ProtectionInitializer;
 import me.moros.tasker.bukkit.BukkitExecutor;
 import me.moros.tasker.executor.CompositeExecutor;
@@ -60,6 +61,7 @@ final class PaperBending extends AbstractBending<BendingBootstrap> {
   void onPluginEnable() {
     new Metrics(parent, 8717);
     ReflectionUtil.injectStatic(Tasker.class, CompositeExecutor.of(new BukkitExecutor(parent)));
+    ReflectionUtil.injectStatic(DamageUtil.class, translationManager());
     ReflectionUtil.injectStatic(Platform.Holder.class, new BukkitPlatform(logger()));
     ReflectionUtil.injectStatic(BendingProperties.Holder.class, ConfigManager.load(BendingPropertiesImpl::new));
     new ProtectionInitializer(this).init();
@@ -101,12 +103,12 @@ final class PaperBending extends AbstractBending<BendingBootstrap> {
 
   @Override
   public String author() {
-    return parent.getDescription().getAuthors().get(0);
+    return parent.getPluginMeta().getAuthors().get(0);
   }
 
   @Override
   public String version() {
-    return parent.getDescription().getVersion();
+    return parent.getPluginMeta().getVersion();
   }
 
   @Override

@@ -109,7 +109,6 @@ public class Locksmithing extends AbilityInstance {
       var builder = Platform.instance().factory().itemBuilder(item).meta(Metadata.METAL_KEY, key);
       // Should we put custom lore to visually identify the items?
       if (Platform.instance().type() == PlatformType.BUKKIT) {
-        // TODO backwards compatibility before paper implemented BlockLockCheckEvent in 1.19.3
         builder.name(Component.text(key));
       }
       inv.setItemInMainHand(builder.build(item.amount()));
