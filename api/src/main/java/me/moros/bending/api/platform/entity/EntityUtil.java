@@ -19,6 +19,7 @@
 
 package me.moros.bending.api.platform.entity;
 
+import java.util.Set;
 import java.util.function.Predicate;
 
 import me.moros.bending.api.platform.Direction;
@@ -67,6 +68,10 @@ public final class EntityUtil {
       .filter(PotionEffectTag.HARMFUL::isTagged).forEach(entity::removePotion);
   }
 
+  private static final Set<PotionEffect> TICKING_EFFECT = Set.of(
+    PotionEffect.REGENERATION, PotionEffect.POISON, PotionEffect.WITHER, PotionEffect.HUNGER
+  );
+
   /**
    * Attempt to add a potion effect of a specified duration and amplifier.
    * The applied potion effect will only override an existing one if the duration or amplifier is bigger.
@@ -77,8 +82,8 @@ public final class EntityUtil {
    * @return if a new potion effect was added, false otherwise
    */
   public static boolean tryAddPotion(Entity entity, PotionEffect type, int duration, int amplifier) {
-    if (amplifier > 0 && duration > 0 && entity.valid() && entity instanceof LivingEntity livingEntity) {
-      int minDuration = PotionEffectTag.BENEFICIAL.isTagged(type) ? duration : 20;
+    if (amplifier >= 0 && duration > 0 && entity.valid() && entity instanceof LivingEntity livingEntity) {
+      int minDuration = TICKING_EFFECT.contains(type) ? 1 : (PotionEffectTag.BENEFICIAL.isTagged(type) ? duration : 20);
       Potion potion = livingEntity.potion(type);
       if (potion == null || potion.duration() < minDuration || potion.amplifier() < amplifier) {
         livingEntity.addPotion(type.builder().duration(duration).amplifier(amplifier).build());

@@ -92,9 +92,8 @@ public class HealingWaters extends AbilityInstance {
       if (!tryHeal()) {
         return UpdateResult.REMOVE;
       }
-    } else {
-      ParticleBuilder.rgb(user.mainHandSide(), "#00FFFF").spawn(user.world());
     }
+    ParticleBuilder.rgb(user.mainHandSide(), "#00FFFF").spawn(user.world());
     return UpdateResult.CONTINUE;
   }
 
@@ -152,7 +151,7 @@ public class HealingWaters extends AbilityInstance {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 3000;
     @Modifiable(Attribute.DURATION)
-    private long duration = 3000;
+    private long duration = 2500;
     @Modifiable(Attribute.RANGE)
     private double range = 5;
     @Modifiable(Attribute.STRENGTH)

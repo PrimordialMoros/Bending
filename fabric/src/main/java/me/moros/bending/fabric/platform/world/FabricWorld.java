@@ -165,10 +165,11 @@ public record FabricWorld(ServerLevel handle) implements World {
     Vector3d resPos = null;
     double minDistSq = Double.MAX_VALUE;
     var dir = context.dir().normalize().multiply(range);
+    var endPoint = context.origin().add(dir);
     var box = AABB.fromRay(context.origin(), dir, context.raySize());
     var aabb = new net.minecraft.world.phys.AABB(box.min.x(), box.min.y(), box.min.z(), box.max.x(), box.max.y(), box.max.z());
     var vec3d1 = new Vec3(context.origin().x(), context.origin().y(), context.origin().z());
-    var vec3d2 = new Vec3(dir.x(), dir.y(), dir.z());
+    var vec3d2 = new Vec3(endPoint.x(), endPoint.y(), endPoint.z());
     for (var fabricEntity : handle().getEntities(null, aabb)) {
       var pos = fabricEntity.getBoundingBox().clip(vec3d1, vec3d2).orElse(null);
       if (pos != null) {
@@ -181,7 +182,7 @@ public record FabricWorld(ServerLevel handle) implements World {
         }
       }
     }
-    return result == null ? RayTrace.miss(context.endPoint()) : RayTrace.hit(resPos, result);
+    return result == null ? RayTrace.miss(endPoint) : RayTrace.hit(resPos, result);
   }
 
   @Override
