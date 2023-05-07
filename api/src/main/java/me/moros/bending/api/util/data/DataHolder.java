@@ -24,6 +24,9 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
 
+/**
+ * Represents a holder of data key-value pairs.
+ */
 public interface DataHolder {
   /**
    * Attempt to retrieve the data for the specified key.

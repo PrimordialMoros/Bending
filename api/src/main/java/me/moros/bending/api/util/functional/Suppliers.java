@@ -21,6 +21,9 @@ package me.moros.bending.api.util.functional;
 
 import java.util.function.Supplier;
 
+/**
+ * Utility to create suppliers.
+ */
 public final class Suppliers {
   private Suppliers() {
   }

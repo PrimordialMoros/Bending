@@ -25,6 +25,9 @@ import me.moros.bending.api.util.data.DataKey;
 import net.kyori.adventure.key.Key;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * Utility class for keys.
+ */
 @SuppressWarnings("PatternValidation")
 public final class KeyUtil {
   public static final String BENDING_NAMESPACE = "bending";
@@ -34,18 +37,40 @@ public final class KeyUtil {
   private KeyUtil() {
   }
 
+  /**
+   * Create a mapper function that converts a string to a key using the provided namespace.
+   * @param namespace the namespace to use
+   * @return the mapper function
+   */
   public static Function<String, @Nullable Key> stringToKey(String namespace) {
     return input -> fromString(input, namespace);
   }
 
+  /**
+   * Create a key using the vanilla ({@value Key#MINECRAFT_NAMESPACE}) namespace.
+   * @param value the value of the key.
+   * @return the created key
+   */
   public static Key vanilla(String value) {
     return Key.key(Key.MINECRAFT_NAMESPACE, value);
   }
 
+  /**
+   * Create a key using the bending ({@value #BENDING_NAMESPACE}) namespace.
+   * @param value the value of the key
+   * @return the created key
+   */
   public static Key simple(String value) {
     return Key.key(BENDING_NAMESPACE, value);
   }
 
+  /**
+   * Create a bending data key.
+   * @param value the value to include in the data key.
+   * @param type the class type of the value
+   * @param <V> the type of the value
+   * @return the created data key
+   */
   public static <V> DataKey<V> data(String value, Class<V> type) {
     return DataKey.wrap(Key.key(BENDING_NAMESPACE, value), type);
   }

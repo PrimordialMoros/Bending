@@ -22,6 +22,9 @@ package me.moros.bending.api.collision.raytrace;
 import me.moros.bending.api.platform.block.Block;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * Represents a raytrace result that can hit a block.
+ */
 public interface BlockRayTrace extends RayTrace {
   @Nullable Block block();
 }

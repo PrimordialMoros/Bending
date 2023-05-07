@@ -25,22 +25,51 @@ import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.math.Vector3d;
 
+/**
+ * Represents a raytrace result.
+ */
 public interface RayTrace {
+  /**
+   * The result position of the raytrace.
+   * If {@link #hit()} is false then returns the end point of the raytrace.
+   * @return the hit position
+   */
   Vector3d position();
 
+  /**
+   * Check if the raytrace was successful.
+   * @return whether the raytrace hit anything
+   */
   boolean hit();
 
+  /**
+   * Create a raytrace result pointing at the provided position without hitting anything.
+   * @param position the vector to point to
+   * @return the raytrace result
+   */
   static CompositeRayTrace miss(Vector3d position) {
     Objects.requireNonNull(position);
     return new RayTraceImpl(position, null, null);
   }
 
+  /**
+   * Create a raytrace result hitting the specified block at the specified position.
+   * @param position the vector to point to
+   * @param block the block to hit
+   * @return the raytrace result
+   */
   static CompositeRayTrace hit(Vector3d position, Block block) {
     Objects.requireNonNull(position);
     Objects.requireNonNull(block);
     return new RayTraceImpl(position, block, null);
   }
 
+  /**
+   * Create a raytrace result hitting the specified entity at the specified position.
+   * @param position the vector to point to
+   * @param entity the entity to hit
+   * @return the raytrace result
+   */
   static CompositeRayTrace hit(Vector3d position, Entity entity) {
     Objects.requireNonNull(position);
     Objects.requireNonNull(entity);

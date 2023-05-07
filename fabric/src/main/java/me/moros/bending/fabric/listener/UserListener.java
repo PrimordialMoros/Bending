@@ -127,7 +127,7 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
         MetalCable cable = data.get();
         if (hitResult instanceof BlockHitResult blockHit) {
           var pos = blockHit.getBlockPos();
-          var world = PlatformAdapter.fromFabricWorld((ServerLevel) projectile.level);
+          var world = PlatformAdapter.fromFabricWorld((ServerLevel) projectile.getLevel());
           cable.hitBlock(world.blockAt(pos.getX(), pos.getY(), pos.getZ()));
         } else if (hitResult instanceof EntityHitResult entityHit && entityHit.getEntity() instanceof LivingEntity living) {
           cable.hitEntity(PlatformAdapter.fromFabricEntity(living));

@@ -24,15 +24,35 @@ import java.util.Locale;
 import me.moros.bending.api.util.KeyUtil;
 import net.kyori.adventure.key.Key;
 
+/**
+ * Represents a container of elements that share a common characteristic.
+ * Tags are primarily used in vanilla registries.
+ * @param <V> the type of elements
+ */
 public interface Tag<V> extends Container<V> {
+  /**
+   * Check if this tag contains an element associated with the specified key.
+   * @param key the key to check
+   * @return true if the tag contains the element, false otherwise
+   */
   boolean isTagged(Key key);
 
+  /**
+   * Check if this tag contains an element associated with the given string key.
+   * @param value the string key to check
+   * @return true if the tag contains the element, false otherwise
+   */
   default boolean isTagged(String value) {
     Key key = KeyUtil.VANILLA_KEY_MAPPER.apply(value.toLowerCase(Locale.ROOT));
     return key != null && isTagged(key);
   }
 
-  default boolean isTagged(V type) {
-    return containsValue(type);
+  /**
+   * Check if this tag contains the specified element.
+   * @param value the value to check
+   * @return true if the tag contains the element, false otherwise
+   */
+  default boolean isTagged(V value) {
+    return containsValue(value);
   }
 }

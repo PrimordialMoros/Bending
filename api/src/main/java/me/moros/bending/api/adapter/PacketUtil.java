@@ -28,6 +28,9 @@ import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.text.Component;
 
+/**
+ * Interface for packet utilities and adapter.
+ */
 public interface PacketUtil {
   /**
    * Send a notification.

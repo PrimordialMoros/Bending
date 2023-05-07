@@ -21,6 +21,14 @@ package me.moros.bending.api.gui;
 
 import me.moros.bending.api.platform.entity.player.Player;
 
+/**
+ * Represents a GUI that allows a player to choose an element.
+ */
 public interface ElementGui {
+  /**
+   * Show this gui to the specified player.
+   * @param player the player to show the gui to
+   * @return true if the gui was correctly opened and shown to the player, false otherwise
+   */
   boolean show(Player player);
 }

@@ -23,10 +23,25 @@ import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.locale.Message.Args1;
 import net.kyori.adventure.text.Component;
 
+/**
+ * Represents the result of a preset creation query.
+ */
 public enum PresetCreateResult implements Args1<String> {
+  /**
+   * Preset has been successfully created.
+   */
   SUCCESS(Message.PRESET_SUCCESS),
+  /**
+   * Preset creation was unable to complete because it already exists.
+   */
   EXISTS(Message.PRESET_EXISTS),
+  /**
+   * Preset creation was cancelled by an event listener.
+   */
   CANCELLED(Message.PRESET_CANCELLED),
+  /**
+   * Preset creation failed to a storage error.
+   */
   FAIL(Message.PRESET_FAIL);
 
   private final Args1<String> message;

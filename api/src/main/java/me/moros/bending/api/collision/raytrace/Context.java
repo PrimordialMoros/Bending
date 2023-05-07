@@ -29,24 +29,63 @@ import me.moros.math.Vector3d;
  * Represents the context of a ray trace.
  */
 public interface Context {
+  /**
+   * Get the origin of the raytrace.
+   * @return the origin vector
+   */
   Vector3d origin();
 
+  /**
+   * Get the endpoint of the raytrace.
+   * @return the endpoint vector
+   */
   Vector3d endPoint();
 
+  /**
+   * Get the direction of the raytrace.
+   * @return the direction vector
+   */
   default Vector3d dir() {
     return endPoint().subtract(origin());
   }
 
+  /**
+   * Get the range of the raytrace.
+   * @return the range
+   */
   double range();
 
+  /**
+   * Get the size of the raytrace.
+   * @return the ray size
+   */
   double raySize();
 
+  /**
+   * Check if the raytrace should ignore liquids.
+   * @return true if the raytrace should ignore liquids, false otherwise
+   */
   boolean ignoreLiquids();
 
+  /**
+   * Check if the raytrace should ignore passable blocks.
+   * @return true if the raytrace should ignore passable blocks, false otherwise
+   */
   boolean ignorePassable();
 
+  /**
+   * Check if the specified position should be ignored.
+   * @param x the x block coordinate
+   * @param y the y block coordinate
+   * @param z the z block coordinate
+   * @return true if the specified position should be ignored, false otherwise
+   */
   boolean ignore(int x, int y, int z);
 
+  /**
+   * Get the entity filtering predicate for this raytrace context.
+   * @return the entity predicate
+   */
   Predicate<Entity> entityPredicate();
 
   /**

@@ -24,6 +24,9 @@ import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.math.Vector3d;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * Represents a raytrace result that can hit an entity.
+ */
 public interface EntityRayTrace extends RayTrace {
   @Nullable Entity entity();
 

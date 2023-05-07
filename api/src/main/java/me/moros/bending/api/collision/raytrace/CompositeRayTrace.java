@@ -23,7 +23,10 @@ import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.math.Vector3d;
 
-public interface CompositeRayTrace extends EntityRayTrace, BlockRayTrace {
+/**
+ * Represents a composite raytrace that combines a {@link BlockRayTrace} and an {@link EntityRayTrace}.
+ */
+public interface CompositeRayTrace extends BlockRayTrace, EntityRayTrace {
   /**
    * @deprecated use {@link RayTrace#miss(Vector3d)}
    */

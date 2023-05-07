@@ -27,6 +27,9 @@ import java.util.NoSuchElementException;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 
+/**
+ * Iterator for travelling a line in a grid.
+ */
 public class GridIterator implements Iterator<Vector3d> {
   private final short[] signums = new short[3];
   private final Position end;
