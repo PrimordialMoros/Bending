@@ -283,6 +283,9 @@ public class EarthSmash extends AbilityInstance {
 
   @Override
   public void onCollision(Collision collision) {
+    if (boulder == null) { // Needed for multiple collisions during the same tick after shatter has been scheduled.
+      return;
+    }
     Ability collidedAbility = collision.collidedAbility();
     boolean shatter = collision.removeSelf();
     if (collidedAbility instanceof FlameRush other && other.isFullyCharged()) {

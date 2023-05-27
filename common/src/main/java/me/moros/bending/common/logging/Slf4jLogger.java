@@ -19,6 +19,8 @@
 
 package me.moros.bending.common.logging;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 public record Slf4jLogger(org.slf4j.Logger handle) implements Logger {
   @Override
   public void debug(String msg) {
@@ -26,7 +28,7 @@ public record Slf4jLogger(org.slf4j.Logger handle) implements Logger {
   }
 
   @Override
-  public void debug(String msg, Throwable t) {
+  public void debug(@Nullable String msg, Throwable t) {
     handle().debug(msg, t);
   }
 
@@ -36,7 +38,7 @@ public record Slf4jLogger(org.slf4j.Logger handle) implements Logger {
   }
 
   @Override
-  public void info(String msg, Throwable t) {
+  public void info(@Nullable String msg, Throwable t) {
     handle().info(msg, t);
   }
 
@@ -46,7 +48,7 @@ public record Slf4jLogger(org.slf4j.Logger handle) implements Logger {
   }
 
   @Override
-  public void warn(String msg, Throwable t) {
+  public void warn(@Nullable String msg, Throwable t) {
     handle().warn(msg, t);
   }
 
@@ -56,7 +58,7 @@ public record Slf4jLogger(org.slf4j.Logger handle) implements Logger {
   }
 
   @Override
-  public void error(String msg, Throwable t) {
+  public void error(@Nullable String msg, Throwable t) {
     handle().error(msg, t);
   }
 }
