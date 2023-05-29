@@ -29,6 +29,7 @@ import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.ColorPalette;
 import me.moros.bending.api.util.KeyUtil;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.key.KeyedValue;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
@@ -61,7 +62,7 @@ interface Placeholders {
   }
 
   static Component displayName(User user) {
-    Component name = user.name();
+    Component name = user.pointers().getOrDefaultFrom(Identity.DISPLAY_NAME, user::name);
     return withElementColor(user, e -> name.colorIfAbsent(e.color()), name, name);
   }
 
