@@ -71,12 +71,11 @@ public record HelpCommand<C extends Audience>(Commander<C> commander, MinecraftH
           onElementInfo(context, element);
           return;
         }
-      } else {
-        AbilityDescription result = Registries.ABILITIES.fromString(query);
-        if (result != null && !result.hidden() && permissionPredicate(context).test(result)) {
-          onAbilityInfo(sender, result);
-          return;
-        }
+      }
+      AbilityDescription result = Registries.ABILITIES.fromString(query);
+      if (result != null && !result.hidden() && permissionPredicate(context).test(result)) {
+        onAbilityInfo(sender, result);
+        return;
       }
     }
     help.queryCommands(rawQuery, sender);
