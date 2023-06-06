@@ -32,7 +32,7 @@ javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
 gson = { module = "com.google.code.gson:gson", version = "2.10.1" }
 articdata = { module = "de.articdive:articdata", version = "1.19.4-9ab279cf" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.6" }
-guava = { module = "com.google.guava:guava", version = "31.1-jre" }
+guava = { module = "com.google.guava:guava", version = "32.0.0-jre" }
 jdbi = { module = "org.jdbi:jdbi3-core", version = "3.38.2" }
 hikari = { module = "com.zaxxer:HikariCP", version = "5.0.1" }
 eventbus = { module = "net.kyori:event-api", version = "5.0.0-SNAPSHOT" }
