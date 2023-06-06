@@ -11,9 +11,9 @@ paper = "1.19.4-R0.1-SNAPSHOT"
 sponge-api = "10.0.0-SNAPSHOT"
 sponge-common = "1.19.4-10.0.0-SNAPSHOT"
 minecraft = "1.19.4"
-fabric-loom = "1.2-SNAPSHOT"
-fabric-api = "0.80.0+1.19.4"
-fabric-loader = "0.14.19"
+fabric-loom = "1.2.7"
+fabric-api = "0.83.0+1.20"
+fabric-loader = "0.14.21"
 shadow = "8.1.1"
 vanilla-gradle = "0.2.1-SNAPSHOT"
 
@@ -30,10 +30,10 @@ tasker-minestom = { module = "me.moros:tasker-minestom", version.ref = "tasker" 
 
 javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
 gson = { module = "com.google.code.gson:gson", version = "2.10.1" }
-articdata = { module = "de.articdive:articdata", version = "1.19.4-9ab279cf" }
+articdata = { module = "de.articdive:articdata", version = "1.19-88313627" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.6" }
 guava = { module = "com.google.guava:guava", version = "32.0.0-jre" }
-jdbi = { module = "org.jdbi:jdbi3-core", version = "3.38.2" }
+jdbi = { module = "org.jdbi:jdbi3-core", version = "3.38.3" }
 hikari = { module = "com.zaxxer:HikariCP", version = "5.0.1" }
 eventbus = { module = "net.kyori:event-api", version = "5.0.0-SNAPSHOT" }
 
@@ -60,25 +60,25 @@ cloud-sponge = { module = "cloud.commandframework:cloud-sponge", version.ref = "
 mysql = { module = "mysql:mysql-connector-java", version = "8.0.33" }
 mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.1.4" }
 postgresql = { module = "org.postgresql:postgresql", version = "42.6.0" }
-sqlite = { module = "org.xerial:sqlite-jdbc", version = "3.41.2.1" }
+sqlite = { module = "org.xerial:sqlite-jdbc", version = "3.42.0.0" }
 h2 = { module = "com.h2database:h2", version = "2.1.214" }
-hsql = { module = "org.hsqldb:hsqldb", version = "2.7.1" }
+hsql = { module = "org.hsqldb:hsqldb", version = "2.7.2" }
 
 # Fabric
 fabric-minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
 fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
 fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
-fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "2.1.0+1.19.4" }
-sgui = { module = "eu.pb4:sgui", version = "1.2.1+1.19.3" }
+fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "2.1.1+1.20" }
+sgui = { module = "eu.pb4:sgui", version = "1.2.2+1.20" }
 fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.2-SNAPSHOT" }
 
 # Bukkit
 paper = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
 inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.9" }
 grief-prevention = { module = "com.github.TechFOrtress:GriefPrevention", version = "16.18.1" }
-towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.99.0.5" }
+towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.99.1.2" }
 lwc = { module = "com.griefcraft:lwc", version = "2.2.9-dev" }
-worldguard-bukkit = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.7" }
+worldguard-bukkit = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.8" }
 papi = { module = "me.clip:placeholderapi", version = "2.11.3" }
 
 # Sponge
@@ -98,7 +98,7 @@ drivers-nonstandard = ["mariadb", "postgresql", "h2", "hsql"]
 
 [plugins]
 jmh = { id = "me.champeau.jmh", version = "0.7.1" }
-checker = { id = "org.checkerframework", version = "0.6.27" }
+checker = { id = "org.checkerframework", version = "0.6.28" }
 shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
 fabric-loom = { id = "fabric-loom", version.ref = "fabric-loom" }
 userdev = { id = "io.papermc.paperweight.userdev", version = "1.5.5" }
