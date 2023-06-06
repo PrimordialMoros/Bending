@@ -6,6 +6,7 @@
   "schedule": [
     "after 6pm on the 6th day of the month"
   ],
+  "ignoreDeps": ["articdata", "eslint-config-base"],
   "packageRules": [
     {
       "groupName": "all non-major dependencies",
