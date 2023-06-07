@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class ProjectileMixin extends EntityMixin {
   @Inject(method = "onHit", at = @At("HEAD"), cancellable = true)
   public void bending$onHit(HitResult hitResult, CallbackInfo ci) {
-    if (this.level.isClientSide || hitResult.getType() == Type.MISS) {
+    if (this.level().isClientSide || hitResult.getType() == Type.MISS) {
       return;
     }
     if (!ServerEntityEvents.PROJECTILE_HIT.invoker().onProjectileHit((Projectile) (Object) this, hitResult)) {

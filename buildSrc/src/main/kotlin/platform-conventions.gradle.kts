@@ -11,10 +11,6 @@ configurations.implementation {
 }
 
 tasks {
-    withType<AbstractArchiveTask> {
-        isPreserveFileTimestamps = false
-        isReproducibleFileOrder = true
-    }
     shadowJar {
         configurations = listOf(project.configurations.getByName("bendingImplementation"))
         exclude("org/checkerframework/") // Try to catch the myriad dependency leaks

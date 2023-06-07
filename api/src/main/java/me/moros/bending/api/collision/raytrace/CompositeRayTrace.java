@@ -19,35 +19,8 @@
 
 package me.moros.bending.api.collision.raytrace;
 
-import me.moros.bending.api.platform.block.Block;
-import me.moros.bending.api.platform.entity.Entity;
-import me.moros.math.Vector3d;
-
 /**
  * Represents a composite raytrace that combines a {@link BlockRayTrace} and an {@link EntityRayTrace}.
  */
 public interface CompositeRayTrace extends BlockRayTrace, EntityRayTrace {
-  /**
-   * @deprecated use {@link RayTrace#miss(Vector3d)}
-   */
-  @Deprecated
-  static CompositeRayTrace miss(Vector3d position) {
-    return RayTrace.miss(position);
-  }
-
-  /**
-   * @deprecated use {@link RayTrace#hit(Vector3d, Block)}
-   */
-  @Deprecated
-  static CompositeRayTrace hit(Vector3d position, Block block) {
-    return RayTrace.hit(position, block);
-  }
-
-  /**
-   * @deprecated use {@link RayTrace#hit(Vector3d, Entity)}
-   */
-  @Deprecated
-  static CompositeRayTrace hit(Vector3d position, Entity entity) {
-    return RayTrace.hit(position, entity);
-  }
 }

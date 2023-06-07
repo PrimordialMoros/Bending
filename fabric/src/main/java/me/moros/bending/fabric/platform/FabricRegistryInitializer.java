@@ -39,6 +39,7 @@ import me.moros.bending.api.registry.Registry;
 import me.moros.bending.api.registry.Tag;
 import me.moros.bending.api.registry.TagBuilder;
 import me.moros.bending.common.util.RegistryInitializer;
+import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.minecraft.core.Holder;
@@ -130,14 +131,15 @@ final class FabricRegistryInitializer implements RegistryInitializer {
   }
 
   private BlockProperties mapProperties(BlockType type, net.minecraft.world.level.block.state.BlockState data) {
-    var mat = data.getMaterial();
-    return BlockProperties.builder(type, data.getBlock().getDescriptionId())
+    var block = data.getBlock();
+    // TODO check deprecated
+    return BlockProperties.builder(type, block.getDescriptionId())
       .isAir(data.isAir())
-      .isSolid(mat.isSolid())
-      .isLiquid(mat.isLiquid())
-      .isFlammable(mat.isFlammable())
+      .isSolid(data.isSolid())
+      .isLiquid(data.liquid())
+      .isFlammable(FlammableBlockRegistry.getDefaultInstance().get(block).getBurnChance() > 0)
       .hasGravity(data.getBlock() instanceof FallingBlock)
-      .isCollidable(mat.blocksMotion())
+      .isCollidable(data.blocksMotion())
       .hardness(data.getBlock().defaultDestroyTime())
       .soundGroup(mapSoundGroup(data.getSoundType())).build();
   }

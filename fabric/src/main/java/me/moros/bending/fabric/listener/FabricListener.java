@@ -33,7 +33,7 @@ interface FabricListener {
   }
 
   default boolean disabledWorld(Entity entity) {
-    if (entity.getLevel() instanceof ServerLevel world) {
+    if (entity.level() instanceof ServerLevel world) {
       return disabledWorld(world);
     }
     return true;

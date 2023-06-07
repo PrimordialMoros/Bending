@@ -68,7 +68,7 @@ public class FabricEntity implements Entity {
 
   @Override
   public World world() {
-    return new FabricWorld((ServerLevel) handle().getLevel());
+    return new FabricWorld((ServerLevel) handle().level());
   }
 
   @Override
@@ -165,7 +165,7 @@ public class FabricEntity implements Entity {
 
   @Override
   public boolean isOnGround() {
-    return handle().isOnGround();
+    return handle().onGround();
   }
 
   @Override

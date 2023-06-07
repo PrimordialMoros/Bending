@@ -30,7 +30,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -45,8 +45,9 @@ public abstract class ExplosionMixin {
   private Level level;
 
   @Redirect(method = "finalizeExplosion", at = @At(value = "INVOKE",
-    target = "Lnet/minecraft/world/level/block/state/BlockState;getDrops(Lnet/minecraft/world/level/storage/loot/LootContext$Builder;)Ljava/util/List;"))
-  private List<ItemStack> bending$blockDrops(BlockState state, LootContext.Builder builder) {
+    target = "Lnet/minecraft/world/level/block/state/BlockState;getDrops(Lnet/minecraft/world/level/storage/loot/LootParams$Builder;)Ljava/util/List;")
+  )
+  private List<ItemStack> bending$blockDrops(BlockState state, LootParams.Builder builder) {
     var stacks = state.getDrops(builder);
     var pos = BlockPos.containing(builder.getParameter(LootContextParams.ORIGIN));
     var result = ServerItemEvents.BLOCK_DROP_LOOT.invoker().onDropLoot((ServerLevel) level, pos, stacks);

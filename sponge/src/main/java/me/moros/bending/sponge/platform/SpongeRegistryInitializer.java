@@ -46,6 +46,7 @@ import net.minecraft.world.level.block.SoundType;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.MatterTypes;
 import org.spongepowered.api.registry.DefaultedRegistryType;
 import org.spongepowered.api.registry.DefaultedRegistryValue;
 import org.spongepowered.api.registry.RegistryType;
@@ -133,14 +134,14 @@ final class SpongeRegistryInitializer implements RegistryInitializer {
 
   private BlockProperties mapProperties(BlockType type, org.spongepowered.api.block.BlockState data) {
     var nms = (net.minecraft.world.level.block.state.BlockState) data;
-    var mat = nms.getMaterial();
+    // TODO check deprecated
     return BlockProperties.builder(type, nms.getBlock().getDescriptionId())
       .isAir(nms.isAir())
-      .isSolid(mat.isSolid())
-      .isLiquid(mat.isLiquid())
-      .isFlammable(mat.isFlammable())
+      .isSolid(nms.isSolid())
+      .isLiquid(data.getOrElse(Keys.MATTER_TYPE, null) == MatterTypes.LIQUID.get())
+      .isFlammable(data.getOrElse(Keys.IS_FLAMMABLE, false))
       .hasGravity(data.getOrElse(Keys.IS_GRAVITY_AFFECTED, false))
-      .isCollidable(mat.blocksMotion())
+      .isCollidable(nms.blocksMotion())
       .hardness(nms.getBlock().defaultDestroyTime())
       .soundGroup(mapSoundGroup(nms.getSoundType())).build();
   }

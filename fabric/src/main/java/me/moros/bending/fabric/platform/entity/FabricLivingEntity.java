@@ -165,7 +165,7 @@ public class FabricLivingEntity extends FabricEntity implements LivingEntity {
 
   @Override
   public Entity shootArrow(Position origin, Vector3d direction, double power) {
-    var w = handle().getLevel();
+    var w = handle().level();
     var arrow = new Arrow(w, origin.x(), origin.y(), origin.z());
     arrow.shoot(direction.x(), direction.y(), direction.z(), (float) power, 0);
     arrow.setOwner(handle());

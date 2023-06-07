@@ -66,7 +66,7 @@ public record BlockListener(Supplier<Game> gameSupplier) implements FabricListen
       if (ActionLimiter.isLimited(player.getUUID(), ActionType.INTERACT_BLOCK)) {
         return false;
       }
-      var block = PlatformAdapter.fromFabricWorld(player.getLevel()).blockAt(pos.getX(), pos.getY(), pos.getZ());
+      var block = PlatformAdapter.fromFabricWorld(player.serverLevel()).blockAt(pos.getX(), pos.getY(), pos.getZ());
       TempBlock.MANAGER.get(block).ifPresent(TempBlock::removeWithoutReverting);
     }
     return true;

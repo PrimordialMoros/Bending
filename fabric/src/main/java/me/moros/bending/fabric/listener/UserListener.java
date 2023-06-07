@@ -127,7 +127,7 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
         MetalCable cable = data.get();
         if (hitResult instanceof BlockHitResult blockHit) {
           var pos = blockHit.getBlockPos();
-          var world = PlatformAdapter.fromFabricWorld((ServerLevel) projectile.getLevel());
+          var world = PlatformAdapter.fromFabricWorld((ServerLevel) projectile.level());
           cable.hitBlock(world.blockAt(pos.getX(), pos.getY(), pos.getZ()));
         } else if (hitResult instanceof EntityHitResult entityHit && entityHit.getEntity() instanceof LivingEntity living) {
           cable.hitEntity(PlatformAdapter.fromFabricEntity(living));
@@ -177,7 +177,7 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
   private InteractionResult onRightClickBlock(Player playerEntity, Level world, InteractionHand hand, BlockHitResult blockHitResult) {
     if (hand == InteractionHand.MAIN_HAND && !world.isClientSide && playerEntity instanceof ServerPlayer player) {
       var pos = blockHitResult.getBlockPos();
-      var block = PlatformAdapter.fromFabricWorld(player.getLevel()).blockAt(pos.getX(), pos.getY(), pos.getZ());
+      var block = PlatformAdapter.fromFabricWorld(player.serverLevel()).blockAt(pos.getX(), pos.getY(), pos.getZ());
       var loc = blockHitResult.getLocation();
       Vector3d point = Vector3d.of(loc.x(), loc.y(), loc.z());
       return onUserInteract(player, null, new BlockInteraction(block, point));
@@ -246,7 +246,7 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
   }
 
   private boolean onUserGlide(LivingEntity entity) {
-    if (entity.getLevel() instanceof ServerLevel world && !disabledWorld(world)) {
+    if (entity.level() instanceof ServerLevel world && !disabledWorld(world)) {
       if (ActionLimiter.isLimited(entity.getUUID(), ActionType.MOVE)) {
         return false;
       }

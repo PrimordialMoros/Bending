@@ -36,7 +36,7 @@ public abstract class MobMixin extends LivingEntityMixin {
 
   @Inject(method = "setTarget", at = @At("HEAD"), cancellable = true)
   private void bending$onSetTarget(@Nullable LivingEntity livingEntity, CallbackInfo ci) {
-    if (this.level.isClientSide || livingEntity == null || this.target == livingEntity) {
+    if (this.level().isClientSide || livingEntity == null || this.target == livingEntity) {
       return;
     }
     if (!ServerEntityEvents.TARGET.invoker().onEntityTarget((Mob) (Object) this, livingEntity)) {
