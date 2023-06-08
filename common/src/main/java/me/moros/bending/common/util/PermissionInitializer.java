@@ -57,6 +57,9 @@ public abstract class PermissionInitializer implements Initializer {
       CommandPermissions.REMOVE).map(CommandPermission::toString).collect(Collectors.toSet());
     children.add("bending.player");
     children.add("bending.bluefire");
+    children.add(CommandPermissions.CHOOSE + ".other");
+    children.add(CommandPermissions.ADD + ".other");
+    children.add(CommandPermissions.REMOVE + ".other");
     registerDefault("bending.admin", children, TriState.NOT_SET);
   }
 

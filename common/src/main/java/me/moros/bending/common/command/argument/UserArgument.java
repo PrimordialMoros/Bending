@@ -21,7 +21,6 @@ package me.moros.bending.common.command.argument;
 
 import java.util.List;
 import java.util.Queue;
-import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
@@ -93,17 +92,19 @@ public final class UserArgument<C extends Audience> extends CommandArgument<C, U
           return ArgumentParseResult.success(user);
         }
       }
-      User user = Registries.BENDERS.fromString(input);
-      if (user == null) {
-        UUID playerUuid = commandContext.getSender().getOrDefault(Identity.UUID, null);
-        if (playerUuid != null) {
-          user = Registries.BENDERS.get(playerUuid);
+      User result = Registries.BENDERS.fromString(input);
+      if (result == null) {
+        for (User user : Registries.BENDERS) {
+          if (input.equalsIgnoreCase(user.getOrDefault(Identity.NAME, ""))) {
+            result = user;
+            break;
+          }
         }
       }
-      if (user == null) {
+      if (result == null) {
         return ArgumentParseResult.failure(new Throwable("Could not find user " + input));
       }
-      return ArgumentParseResult.success(user);
+      return ArgumentParseResult.success(result);
     }
 
     @Override

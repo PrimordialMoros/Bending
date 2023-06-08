@@ -19,6 +19,8 @@
 
 package me.moros.bending.common.command.commands;
 
+import java.util.function.BiConsumer;
+
 import cloud.commandframework.Command.Builder;
 import cloud.commandframework.arguments.standard.EnumArgument;
 import cloud.commandframework.meta.CommandMeta;
@@ -34,6 +36,7 @@ import me.moros.bending.common.command.CommandPermissions;
 import me.moros.bending.common.command.CommandUtil;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.command.ContextKeys;
+import me.moros.bending.common.command.argument.UserArgument;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
 
@@ -42,32 +45,48 @@ public record ElementCommand<C extends Audience>(Commander<C> commander) impleme
   public void init() {
     Builder<C> builder = commander().rootBuilder();
     commander().register(builder.literal("choose", "ch")
+      .meta(CommandMeta.DESCRIPTION, "Choose an element through the GUI")
+      .permission(CommandPermissions.CHOOSE)
+      .senderType(commander().playerType())
+      .handler(c -> onElementChooseGUI(c.get(ContextKeys.BENDING_PLAYER)))
+    );
+
+    commander().manager().command(builder.literal("choose", "ch")
       .meta(CommandMeta.DESCRIPTION, "Choose an element")
       .permission(CommandPermissions.CHOOSE)
       .senderType(commander().playerType())
-      .argument(EnumArgument.optional(Element.class, "element"))
-      .handler(c -> {
-        var u = c.get(ContextKeys.BENDING_PLAYER);
-        c.<Element>getOptional("element").ifPresentOrElse(e -> onElementChoose(u, e), () -> onElementChoose(u));
-      })
+      .argument(EnumArgument.of(Element.class, "element"))
+      .handler(c -> onElementChoose(c.get(ContextKeys.BENDING_PLAYER), c.get("element")))
     );
-    commander().register(builder.literal("add", "a")
-      .meta(CommandMeta.DESCRIPTION, "Add an element")
-      .permission(CommandPermissions.ADD)
+    commander().manager().command(builder.literal("choose", "ch")
+      .meta(CommandMeta.DESCRIPTION, "Choose an element for a specific user")
+      .permission(CommandPermissions.CHOOSE + ".other")
+      .argument(EnumArgument.of(Element.class, "element"))
+      .argument(UserArgument.of("target"))
+      .handler(c -> onElementSet(c.get("target"), c.get("element")))
+    );
+
+    dualRegister(builder.literal("add", "a")
+      .meta(CommandMeta.DESCRIPTION, "Add an element").permission(CommandPermissions.ADD), this::onElementAdd);
+    dualRegister(builder.literal("remove", "rm")
+      .meta(CommandMeta.DESCRIPTION, "Remove an element").permission(CommandPermissions.REMOVE), this::onElementRemove);
+  }
+
+  private void dualRegister(Builder<C> builder, BiConsumer<User, Element> handler) {
+    commander().manager().command(builder
       .senderType(commander().playerType())
       .argument(EnumArgument.of(Element.class, "element"))
-      .handler(c -> onElementAdd(c.get(ContextKeys.BENDING_PLAYER), c.get("element")))
+      .handler(c -> handler.accept(c.get(ContextKeys.BENDING_PLAYER), c.get("element")))
     );
-    commander().register(builder.literal("remove", "rm")
-      .meta(CommandMeta.DESCRIPTION, "Remove an element")
-      .permission(CommandPermissions.REMOVE)
-      .senderType(commander().playerType())
+    commander().manager().command(builder
+      .permission(builder.commandPermission() + ".other")
       .argument(EnumArgument.of(Element.class, "element"))
-      .handler(c -> onElementRemove(c.get(ContextKeys.BENDING_PLAYER), c.get("element")))
+      .argument(UserArgument.of("target"))
+      .handler(c -> handler.accept(c.get("target"), c.get("element")))
     );
   }
 
-  private void onElementChoose(BendingPlayer player) {
+  private void onElementChooseGUI(BendingPlayer player) {
     Platform.instance().factory().buildMenu(this, player).ifPresent(g -> g.show(player));
   }
 
@@ -77,6 +96,10 @@ public record ElementCommand<C extends Audience>(Commander<C> commander) impleme
       Message.ELEMENT_CHOOSE_NO_PERMISSION.send(user, element.displayName());
       return;
     }
+    onElementSet(user, element);
+  }
+
+  private void onElementSet(User user, Element element) {
     if (user.chooseElement(element)) {
       Message.ELEMENT_CHOOSE_SUCCESS.send(user, element.displayName());
       sendElementNotification(user, element);

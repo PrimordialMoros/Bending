@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
 
 import com.mojang.datafixers.util.Pair;
 import me.moros.bending.api.adapter.PacketUtil;
@@ -43,9 +44,11 @@ import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
+import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
@@ -95,7 +98,7 @@ public abstract class AbstractPacketUtil implements PacketUtil {
   @Override
   public int createArmorStand(World world, Position center, Item item, Vector3d velocity, boolean gravity) {
     final int id = nextEntityId();
-    Collection<Packet<?>> packets = new ArrayList<>();
+    Collection<Packet<ClientGamePacketListener>> packets = new ArrayList<>();
     packets.add(createEntity(id, center, EntityType.ARMOR_STAND, 0));
     if (!gravity) {
       packets.add(new EntityDataBuilder(id).invisible().marker().build());
@@ -104,14 +107,14 @@ public abstract class AbstractPacketUtil implements PacketUtil {
       packets.add(addVelocity(id, velocity));
     }
     packets.add(setupEquipment(id, item));
-    broadcast(packets, world, center);
+    broadcast(new ClientboundBundlePacket(packets), world, center);
     return id;
   }
 
   @Override
   public int createFallingBlock(World world, Position center, me.moros.bending.api.platform.block.BlockState data, Vector3d velocity, boolean gravity) {
     final int id = nextEntityId();
-    Collection<Packet<?>> packets = new ArrayList<>();
+    Collection<Packet<ClientGamePacketListener>> packets = new ArrayList<>();
     final int blockDataId = net.minecraft.world.level.block.Block.getId(adapt(data));
     packets.add(createEntity(id, center, EntityType.FALLING_BLOCK, blockDataId));
     if (!gravity) {
@@ -120,24 +123,32 @@ public abstract class AbstractPacketUtil implements PacketUtil {
     if (velocity.lengthSq() > 0) {
       packets.add(addVelocity(id, velocity));
     }
-    broadcast(packets, world, center);
+    broadcast(new ClientboundBundlePacket(packets), world, center);
     return id;
   }
 
   @Override
   public void fakeBlock(Block block, me.moros.bending.api.platform.block.BlockState data) {
-    broadcast(List.of(fakeBlockPacket(block, adapt(data))), block.world(), block, block.world().viewDistance() << 4);
+    broadcast(fakeBlockPacket(block, adapt(data)), block.world(), block, block.world().viewDistance() << 4);
   }
 
   @Override
   public void fakeBreak(Block block, byte progress) {
-    broadcast(List.of(fakeBreakPacket(block, progress)), block.world(), block, block.world().viewDistance() << 4);
+    broadcast(fakeBreakPacket(block, progress), block.world(), block, block.world().viewDistance() << 4);
   }
 
   @Override
   public void destroy(int[] ids) {
     var packet = new ClientboundRemoveEntitiesPacket(ids);
     playerList().getPlayers().forEach(p -> p.connection.send(packet));
+  }
+
+  protected void broadcast(Packet<?> packet, World world, Position center) {
+    broadcast(packet, world, center, world.viewDistance() << 4);
+  }
+
+  protected void broadcast(Packet<?> packet, World world, Position center, int dist) {
+    forEachPlayer(world, center, dist, p -> p.connection.send(packet));
   }
 
   protected void broadcast(Collection<Packet<?>> packets, World world, Position center) {
@@ -148,12 +159,18 @@ public abstract class AbstractPacketUtil implements PacketUtil {
     if (packets.isEmpty()) {
       return;
     }
+    forEachPlayer(world, center, dist, p -> {
+      for (var packet : packets) {
+        p.connection.send(packet);
+      }
+    });
+  }
+
+  private void forEachPlayer(World world, Position center, int dist, Consumer<ServerPlayer> playerConsumer) {
     int distanceSq = dist * dist;
     for (var player : adapt(world).players()) {
       if (Vector3d.of(player.getX(), player.getY(), player.getZ()).distanceSq(center) <= distanceSq) {
-        for (var packet : packets) {
-          player.connection.send(packet);
-        }
+        playerConsumer.accept(player);
       }
     }
   }

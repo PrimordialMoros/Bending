@@ -43,7 +43,6 @@ public record ModifierCommand<C extends Audience>(Commander<C> commander) implem
       .permission(CommandPermissions.MODIFY);
     commander().register(builder.literal("add", "a")
       .meta(CommandMeta.DESCRIPTION, "Add a new modifier to the specified user")
-      .senderType(commander().playerType())
       .argument(ModifyPolicyArgument.of("policy"))
       .argument(EnumArgument.of(Attribute.class, "attribute"))
       .argument(EnumArgument.of(ModifierOperation.class, "operation"))
@@ -56,7 +55,6 @@ public record ModifierCommand<C extends Audience>(Commander<C> commander) implem
     );
     commander().register(builder.literal("clear", "c")
       .meta(CommandMeta.DESCRIPTION, "Clear all existing modifiers for a user")
-      .senderType(commander().playerType())
       .argument(UserArgument.optional("target", "me"))
       .handler(c -> onModifierClear(c.getSender(), c.get("target")))
     );
