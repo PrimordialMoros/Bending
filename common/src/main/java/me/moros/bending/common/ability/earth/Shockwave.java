@@ -43,10 +43,11 @@ import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.display.DisplayProperties.Transformation;
 import me.moros.bending.api.platform.particle.Particle;
 import me.moros.bending.api.platform.sound.SoundEffect;
 import me.moros.bending.api.platform.world.WorldUtil;
-import me.moros.bending.api.temporal.TempEntity;
+import me.moros.bending.api.temporal.TempDisplayEntity;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.ExpiringSet;
 import me.moros.bending.api.util.functional.Policies;
@@ -233,31 +234,15 @@ public class Shockwave extends AbilityInstance {
       if (MaterialUtil.isFire(block)) {
         block.setType(BlockType.AIR);
       }
-      double deltaY = Math.min(0.25, 0.05 + distanceTravelled / (3 * range));
-      Vector3d velocity = Vector3d.of(0, deltaY, 0);
+      double deltaY = 0.25 + Math.min(0.25, 0.05 + distanceTravelled / (3 * range));
       Block below = block.offset(Direction.DOWN);
-      BlockState data = mapData(below.type()).defaultState();
-      TempEntity.fallingBlock(data).velocity(velocity).duration(500)
-        .build(user.world(), below.center());
+      BlockState data = below.state();
+      TempDisplayEntity.blockDisplay(data).velocity(Vector3d.of(0, deltaY, 0)).duration(1200)
+        .edit(d -> d.transformation(new Transformation(Vector3d.MINUS_J, Vector3d.ONE))).build(block);
       data.asParticle(block.center().add(0, 0.75, 0)).count(5).offset(0.5, 0.25, 0.5).spawn(user.world());
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
         SoundEffect.EARTH.play(block);
       }
-    }
-  }
-
-  // Use different block type due to https://bugs.mojang.com/browse/MC-114286
-  private static BlockType mapData(BlockType type) {
-    if (type == BlockType.SAND) {
-      return BlockType.SANDSTONE;
-    } else if (type == BlockType.RED_SAND) {
-      return BlockType.RED_SANDSTONE;
-    } else if (type == BlockType.GRAVEL) {
-      return BlockType.STONE;
-    } else if (type == BlockType.COARSE_DIRT) {
-      return BlockType.DIRT;
-    } else {
-      return MaterialUtil.softType(type);
     }
   }
 

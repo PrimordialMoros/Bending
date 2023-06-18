@@ -44,12 +44,12 @@ import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.LivingEntity;
-import me.moros.bending.api.platform.item.Item;
+import me.moros.bending.api.platform.entity.display.DisplayProperties.Transformation;
 import me.moros.bending.api.platform.sound.SoundEffect;
 import me.moros.bending.api.platform.world.WorldUtil;
 import me.moros.bending.api.temporal.ActionLimiter;
 import me.moros.bending.api.temporal.TempBlock;
-import me.moros.bending.api.temporal.TempEntity;
+import me.moros.bending.api.temporal.TempDisplayEntity;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
@@ -161,8 +161,10 @@ public class IceCrawl extends AbilityInstance {
     public void render() {
       double x = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
       double z = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
-      TempEntity.armorStand(Item.PACKED_ICE).gravity(false).particles(true).duration(1400)
-        .build(user.world(), location.subtract(x, 2, z));
+      TempDisplayEntity.blockDisplay(BlockType.PACKED_ICE.defaultState()).particles(true).duration(1200)
+        .velocity(Vector3d.of(0, 0.32, 0))
+        .edit(d -> d.transformation(new Transformation(Vector3d.of(0, -0.75, 0), Vector3d.of(0.75, 0.75, 0.75))))
+        .build(user.world(), location.add(x, 0, z));
     }
 
     @Override
@@ -176,9 +178,10 @@ public class IceCrawl extends AbilityInstance {
     public boolean onEntityHit(Entity entity) {
       entity.damage(userConfig.damage, user, description());
       if (entity.valid() && entity instanceof LivingEntity livingEntity) {
-        Vector3d spawnLoc = entity.location().subtract(0, 0.2, 0);
-        TempEntity.fallingBlock(BlockType.PACKED_ICE.defaultState()).gravity(false)
-          .duration(userConfig.freezeDuration).build(user.world(), spawnLoc);
+        TempDisplayEntity.blockDisplay(BlockType.PACKED_ICE.defaultState()).gravity(false)
+          .duration(userConfig.freezeDuration)
+          .edit(d -> d.transformation(new Transformation(Vector3d.of(0, -0.2, 0), Vector3d.ONE)))
+          .build(user.world(), entity.location());
         ActionLimiter.builder().limit(ActionType.MOVE).duration(userConfig.freezeDuration).build(user, livingEntity);
       }
       return true;

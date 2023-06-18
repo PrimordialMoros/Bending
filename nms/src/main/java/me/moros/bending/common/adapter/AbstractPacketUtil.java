@@ -32,11 +32,14 @@ import com.mojang.datafixers.util.Pair;
 import me.moros.bending.api.adapter.PacketUtil;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.display.DisplayProperties;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.world.World;
 import me.moros.math.Position;
+import me.moros.math.Quaternion;
 import me.moros.math.Vector3d;
+import me.moros.math.adapter.Adapters;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
@@ -62,8 +65,17 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 public abstract class AbstractPacketUtil implements PacketUtil {
+  static {
+    Adapters.vector3d().register(Vector3f.class,
+      v -> Vector3d.of(v.x(), v.y(), v.z()),
+      v -> new Vector3f((float) v.x(), (float) v.y(), (float) v.z())
+    );
+  }
+
   private final PlayerList playerList;
 
   protected AbstractPacketUtil(PlayerList playerList) {
@@ -96,6 +108,22 @@ public abstract class AbstractPacketUtil implements PacketUtil {
   }
 
   @Override
+  public int createFallingBlock(World world, Position center, me.moros.bending.api.platform.block.BlockState state, Vector3d velocity, boolean gravity) {
+    final int id = nextEntityId();
+    Collection<Packet<ClientGamePacketListener>> packets = new ArrayList<>();
+    final int blockDataId = net.minecraft.world.level.block.Block.getId(adapt(state));
+    packets.add(createEntity(id, center, EntityType.FALLING_BLOCK, blockDataId));
+    if (!gravity) {
+      packets.add(new EntityDataBuilder(id).noGravity().build());
+    }
+    if (velocity.lengthSq() > 0) {
+      packets.add(addVelocity(id, velocity));
+    }
+    broadcast(new ClientboundBundlePacket(packets), world, center);
+    return id;
+  }
+
+  @Override
   public int createArmorStand(World world, Position center, Item item, Vector3d velocity, boolean gravity) {
     final int id = nextEntityId();
     Collection<Packet<ClientGamePacketListener>> packets = new ArrayList<>();
@@ -111,20 +139,53 @@ public abstract class AbstractPacketUtil implements PacketUtil {
     return id;
   }
 
+  private static Quaternionf adapt(Quaternion rot) {
+    return new Quaternionf(rot.q1(), rot.q1(), rot.q2(), rot.q0());
+  }
+
   @Override
-  public int createFallingBlock(World world, Position center, me.moros.bending.api.platform.block.BlockState data, Vector3d velocity, boolean gravity) {
+  public int createDisplayEntity(World world, Position center, DisplayProperties<?> properties) {
     final int id = nextEntityId();
-    Collection<Packet<ClientGamePacketListener>> packets = new ArrayList<>();
-    final int blockDataId = net.minecraft.world.level.block.Block.getId(adapt(data));
-    packets.add(createEntity(id, center, EntityType.FALLING_BLOCK, blockDataId));
-    if (!gravity) {
-      packets.add(new EntityDataBuilder(id).noGravity().build());
+    // calculate offset to center according to scale
+    var offset = properties.transformation().scale().toVector3d().multiply(-0.5);
+    var translation = offset.add(properties.transformation().translation()).add(0, 0.5, 0);
+    var builder = new EntityDataBuilder(id)
+      .setRaw(EntityMeta.INTERPOLATION_DELAY, properties.interpolationDelay())
+      .setRaw(EntityMeta.INTERPOLATION_DURATION, properties.interpolationDuration())
+      .setRaw(EntityMeta.TRANSLATION, translation.to(Vector3f.class))
+      .setRaw(EntityMeta.SCALE, properties.transformation().scale().to(Vector3f.class))
+      .setRaw(EntityMeta.ROTATION_LEFT, adapt(properties.transformation().left()))
+      .setRaw(EntityMeta.ROTATION_RIGHT, adapt(properties.transformation().right()))
+      .setRaw(EntityMeta.BILLBOARD, (byte) properties.billboard().ordinal())
+      .setRaw(EntityMeta.BRIGHTNESS, properties.brightness())
+      .setRaw(EntityMeta.VIEW_RANGE, properties.viewRange())
+      .setRaw(EntityMeta.SHADOW_RADIUS, properties.shadowRadius())
+      .setRaw(EntityMeta.SHADOW_STRENGTH, properties.shadowStrength())
+      .setRaw(EntityMeta.WIDTH, properties.width())
+      .setRaw(EntityMeta.HEIGHT, properties.height())
+      .setRaw(EntityMeta.GLOW_COLOR_OVERRIDE, properties.glowColor());
+
+    EntityType<?> type;
+    if (properties.data() instanceof me.moros.bending.api.platform.block.BlockState state) {
+      type = EntityType.BLOCK_DISPLAY;
+      builder.setRaw(EntityMeta.BLOCK_STATE_ID, adapt(state));
+    } else if (properties.data() instanceof Item item) {
+      type = EntityType.ITEM_DISPLAY;
+      builder.setRaw(EntityMeta.DISPLAYED_ITEM, adapt(item));
+    } else {
+      return 0;
     }
-    if (velocity.lengthSq() > 0) {
-      packets.add(addVelocity(id, velocity));
-    }
-    broadcast(new ClientboundBundlePacket(packets), world, center);
+    broadcast(new ClientboundBundlePacket(List.of(createEntity(id, center, type, 0), builder.build())), world, center);
     return id;
+  }
+
+  @Override
+  public void updateDisplayTranslation(World world, Position center, int id, Vector3d translation) {
+    var movement = new EntityDataBuilder(id)
+      .setRaw(EntityMeta.INTERPOLATION_DELAY, 0)
+      .setRaw(EntityMeta.INTERPOLATION_DURATION, 1)
+      .setRaw(EntityMeta.TRANSLATION, translation.to(Vector3f.class)).build();
+    broadcast(movement, world, center);
   }
 
   @Override

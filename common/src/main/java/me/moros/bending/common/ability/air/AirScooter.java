@@ -116,10 +116,11 @@ public class AirScooter extends AbilityInstance {
   }
 
   private final class Scooter extends AbstractRide {
+    private static final double RADIUS = 0.8;
     private double verticalPosition = 0;
 
     private Scooter() {
-      super(user, userConfig.speed, 3.25);
+      super(user, userConfig.speed, 2.5);
     }
 
     @Override
@@ -131,9 +132,9 @@ public class AirScooter extends AbilityInstance {
       Vector3d location = user.location();
       for (double theta = 0; theta < 2 * Math.PI * 2; theta += Math.PI / 5) {
         double sin = Math.sin(verticalPosition);
-        double x = 0.6 * Math.cos(theta) * sin;
-        double y = 0.6 * Math.cos(verticalPosition);
-        double z = 0.6 * Math.sin(theta) * sin;
+        double x = RADIUS * Math.cos(theta) * sin;
+        double y = RADIUS * Math.cos(verticalPosition);
+        double z = RADIUS * Math.sin(theta) * sin;
         ParticleBuilder.air(location.add(x, y - 0.25, z)).spawn(user.world());
       }
     }

@@ -21,6 +21,7 @@ package me.moros.bending.api.adapter;
 
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
+import me.moros.bending.api.platform.entity.display.DisplayProperties;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.world.World;
@@ -75,6 +76,24 @@ public interface PacketUtil {
    * @return the packet entity unique id or 0 if not supported
    */
   int createArmorStand(World world, Position center, Item item, Vector3d velocity, boolean gravity);
+
+  /**
+   * Create a packet display entity.
+   * @param world the world for the packet entity to appear in
+   * @param center the spawn location
+   * @param properties the properties to use for the display entity
+   * @return the packet entity unique id or 0 if not supported
+   */
+  int createDisplayEntity(World world, Position center, DisplayProperties<?> properties);
+
+  /**
+   * Update a packet display entity's translation using interpolation.
+   * @param world the world for the packet entity to appear in
+   * @param center the spawn location
+   * @param id the display entity's id
+   * @param translation the display entity's new translation to interpolate to
+   */
+  void updateDisplayTranslation(World world, Position center, int id, Vector3d translation);
 
   /**
    * Remove the specified packet entity.

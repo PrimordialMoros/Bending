@@ -198,6 +198,7 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
   public Entity dropItem(Position pos, ItemSnapshot item, boolean canPickup) {
     var loc = new Location(handle(), pos.x(), pos.y(), pos.z());
     var droppedItem = handle().dropItem(loc, PlatformAdapter.toBukkitItem(item));
+    droppedItem.setPersistent(false);
     droppedItem.setCanMobPickup(canPickup);
     droppedItem.setCanPlayerPickup(canPickup);
     return PlatformAdapter.fromBukkitEntity(droppedItem);

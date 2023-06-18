@@ -5,4 +5,4 @@ author: Moros
 description: Bending plugin for PaperMC.
 website: https://github.com/PrimordialMoros/Bending
 softdepend: [PlaceholderAPI, WorldGuard, GriefPrevention, Towny, LWC, LuckPerms]
-api-version: 1.19
+api-version: "1.19"

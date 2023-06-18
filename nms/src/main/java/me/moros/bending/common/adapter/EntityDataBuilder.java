@@ -19,33 +19,46 @@
 
 package me.moros.bending.common.adapter;
 
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.TreeSet;
+
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import net.minecraft.network.syncher.EntityDataSerializer;
+import net.minecraft.network.syncher.SynchedEntityData.DataValue;
 
 public class EntityDataBuilder {
-  private final PacketByteBuffer packetByteBuffer;
+  private final int id;
+  private final Collection<DataValue<?>> dataValues;
 
   public EntityDataBuilder(int id) {
-    packetByteBuffer = new PacketByteBuffer();
-    packetByteBuffer.writeVarInt(id);
+    this.id = id;
+    this.dataValues = new TreeSet<>(Comparator.comparingInt(DataValue::id));
+  }
+
+  public <T> EntityDataBuilder setRaw(int index, EntityDataSerializer<T> serializer, T data) {
+    dataValues.add(new DataValue<>(index, serializer, data));
+    return this;
+  }
+
+  public <T> EntityDataBuilder setRaw(EntityMeta<T> key, T data) {
+    return setRaw(key.index(), key.serializer(), data);
   }
 
   public EntityDataBuilder noGravity() {
-    packetByteBuffer.writeDataWatcherEntry(DataWatcherKey.GRAVITY, true);
-    return this;
+    return setRaw(EntityMeta.GRAVITY, true);
   }
 
   public EntityDataBuilder invisible() {
-    packetByteBuffer.writeDataWatcherEntry(DataWatcherKey.ENTITY_STATUS, (byte) 0x20); // Invisible
-    return this;
+    return setRaw(EntityMeta.ENTITY_STATUS, (byte) 0x20); // invisible
   }
 
   public EntityDataBuilder marker() {
-    packetByteBuffer.writeDataWatcherEntry(DataWatcherKey.ARMOR_STAND_STATUS, (byte) (0x02 | 0x08 | 0x10)); // no gravity, no base plate, marker
-    return this;
+    return setRaw(EntityMeta.ARMOR_STAND_STATUS, (byte) (0x02 | 0x08 | 0x10));  // no gravity, no base plate, marker
   }
 
   public ClientboundSetEntityDataPacket build() {
-    packetByteBuffer.writeDataWatcherEntriesEnd();
-    return new ClientboundSetEntityDataPacket(packetByteBuffer);
+    return new ClientboundSetEntityDataPacket(id, List.copyOf(dataValues));
   }
 }

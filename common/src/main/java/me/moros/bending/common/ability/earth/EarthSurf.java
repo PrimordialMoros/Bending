@@ -33,16 +33,16 @@ import me.moros.bending.api.config.attribute.Modifiable;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.display.DisplayProperties.Transformation;
 import me.moros.bending.api.platform.particle.Particle;
 import me.moros.bending.api.platform.sound.Sound;
-import me.moros.bending.api.temporal.TempEntity;
+import me.moros.bending.api.temporal.TempDisplayEntity;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.functional.ExpireRemovalPolicy;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.bending.api.util.material.EarthMaterials;
-import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
@@ -162,12 +162,12 @@ public class EarthSurf extends AbilityInstance {
       if (ticks % 3 == 0) {
         return;
       }
-      var builder = TempEntity.fallingBlock(MaterialUtil.softType(data.type()).defaultState()).velocity(Vector3d.of(0, 0.25, 0)).duration(500);
-      Vector3d center = user.location().add(Vector3d.MINUS_J);
+      var builder = TempDisplayEntity.blockDisplay(data).velocity(Vector3d.of(0, 0.25, 0))
+        .minYOffset(-1.25).duration(1000).edit(d -> d.transformation(new Transformation(Vector3d.MINUS_J, Vector3d.ONE)));
+      Vector3d center = user.location();
       Vector3d dir = user.direction().withY(0).normalize(user.velocity().withY(0).normalize());
       VectorUtil.createArc(dir, Vector3d.PLUS_J, Math.PI / 3, 3).forEach(v -> {
-        Vector3d point = center.add(v.multiply(0.6));
-        builder.build(user.world(), point);
+        builder.build(user.world(), center.add(v.multiply(0.6)));
       });
     }
 

@@ -60,6 +60,7 @@ public class TempEntity extends Temporary {
     return new FallingBlockBuilder(Objects.requireNonNull(data));
   }
 
+  @Deprecated
   public static ArmorStandBuilder armorStand(Item data) {
     return new ArmorStandBuilder(Objects.requireNonNull(data));
   }
@@ -102,11 +103,13 @@ public class TempEntity extends Temporary {
     }
   }
 
+  @Deprecated
   public static final class ArmorStandBuilder extends TempEntityBuilder<Item, TempEntity, ArmorStandBuilder> {
     private ArmorStandBuilder(Item data) {
       super(data);
     }
 
+    @Override
     public TempEntity build(World world, Vector3d center) {
       return new TempEntity(armorStand(world, center), MANAGER.fromMillis(duration));
     }

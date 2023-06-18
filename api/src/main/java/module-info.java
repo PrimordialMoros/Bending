@@ -21,6 +21,7 @@ module me.moros.bending {
   exports me.moros.bending.api.platform.block;
   exports me.moros.bending.api.platform.damage;
   exports me.moros.bending.api.platform.entity;
+  exports me.moros.bending.api.platform.entity.display;
   exports me.moros.bending.api.platform.entity.player;
   exports me.moros.bending.api.platform.item;
   exports me.moros.bending.api.platform.particle;

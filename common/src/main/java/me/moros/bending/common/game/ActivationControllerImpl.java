@@ -216,7 +216,7 @@ public final class ActivationControllerImpl implements ActivationController {
 
   @Override
   public void onUserInteract(User user, @Nullable Entity entity, @Nullable Block block) {
-    if (!cache.addInteraction(user.uuid())) {
+    if (!user.canBend() || !cache.addInteraction(user.uuid())) {
       return;
     }
     Activation method = Activation.INTERACT;

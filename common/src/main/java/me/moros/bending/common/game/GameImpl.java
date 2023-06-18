@@ -37,6 +37,7 @@ import me.moros.bending.api.temporal.ActionLimiter;
 import me.moros.bending.api.temporal.Cooldown;
 import me.moros.bending.api.temporal.TempArmor;
 import me.moros.bending.api.temporal.TempBlock;
+import me.moros.bending.api.temporal.TempDisplayEntity;
 import me.moros.bending.api.temporal.TempEntity;
 import me.moros.bending.api.temporal.TempLight;
 import me.moros.bending.api.temporal.TemporalManager;
@@ -126,7 +127,7 @@ public final class GameImpl implements Game {
   }
 
   private Collection<TemporalManager<?, ?>> initTemporary() {
-    return List.of(Cooldown.MANAGER, TempLight.MANAGER, TempEntity.MANAGER,
+    return List.of(Cooldown.MANAGER, TempLight.MANAGER, TempEntity.MANAGER, TempDisplayEntity.MANAGER,
       ActionLimiter.MANAGER, TempArmor.MANAGER, TempBlock.MANAGER);
   }
 

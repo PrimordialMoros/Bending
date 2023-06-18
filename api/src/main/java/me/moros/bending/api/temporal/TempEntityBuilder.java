@@ -26,7 +26,7 @@ import me.moros.bending.api.platform.world.World;
 import me.moros.math.Vector3d;
 
 @SuppressWarnings("unchecked")
-abstract class TempEntityBuilder<T, R extends TempEntity, B extends TempEntityBuilder<T, R, B>> {
+abstract class TempEntityBuilder<T, R, B extends TempEntityBuilder<T, R, B>> {
   protected final T data;
 
   protected Vector3d velocity = Vector3d.ZERO;
@@ -39,7 +39,7 @@ abstract class TempEntityBuilder<T, R extends TempEntity, B extends TempEntityBu
   }
 
   public B velocity(Vector3d velocity) {
-    this.velocity = Objects.requireNonNull(velocity);
+    this.velocity = Objects.requireNonNull(velocity).clampVelocity();
     return (B) this;
   }
 

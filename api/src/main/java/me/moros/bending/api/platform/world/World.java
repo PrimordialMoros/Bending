@@ -147,6 +147,7 @@ public interface World extends Keyed, ForwardingAudience, BlockGetter, BlockSett
 
   Entity createFallingBlock(Position pos, BlockState state, boolean gravity);
 
+  @Deprecated
   Entity createArmorStand(Position pos, Item type, boolean gravity);
 
   default int lightLevel(Position position) {

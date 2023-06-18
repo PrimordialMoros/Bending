@@ -89,7 +89,7 @@ public class FragileStructure implements Iterable<Block> {
     if (fallingBlocks) {
       Vector3d dir = ray.origin.add(ray.direction.normalize().multiply(8)).subtract(block.center());
       Vector3d velocity = VectorUtil.gaussianOffset(dir.normalize().multiply(0.3), 0.05);
-      TempEntity.fallingBlock(type.defaultState()).velocity(velocity).duration(5000).build(block);
+      TempEntity.fallingBlock(type.defaultState()).velocity(velocity).duration(3000).build(block);
     }
   }
 

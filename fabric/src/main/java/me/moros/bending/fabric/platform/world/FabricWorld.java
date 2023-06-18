@@ -209,7 +209,6 @@ public record FabricWorld(ServerLevel handle) implements World {
     return PlatformAdapter.fromFabricEntity(droppedItem);
   }
 
-
   @Override
   public Entity createFallingBlock(Position center, BlockState state, boolean gravity) {
     var data = PlatformAdapter.toFabricData(state);

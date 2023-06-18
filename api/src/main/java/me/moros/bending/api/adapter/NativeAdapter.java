@@ -29,6 +29,7 @@ import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.display.DisplayProperties;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.world.World;
@@ -105,6 +106,15 @@ public interface NativeAdapter extends PacketUtil {
   @Override
   default int createFallingBlock(World world, Position center, BlockState state, Vector3d velocity, boolean gravity) {
     return 0;
+  }
+
+  @Override
+  default int createDisplayEntity(World world, Position center, DisplayProperties<?> properties) {
+    return 0;
+  }
+
+  @Override
+  default void updateDisplayTranslation(World world, Position center, int id, Vector3d translation) {
   }
 
   @Override
