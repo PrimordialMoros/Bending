@@ -19,18 +19,19 @@
 
 package me.moros.bending.api.platform.entity.display;
 
-import me.moros.bending.api.platform.item.Item;
+public enum Billboard {
+  FIXED(0),
+  VERTICAL(1),
+  HORIZONTAL(2),
+  CENTER(3);
 
-record ItemDisplayProperties(
-  Item data, float width, float height, float viewRange, float shadowRadius, float shadowStrength,
-  int interpolationDelay, int interpolationDuration, int brightness, int glowColor,
-  Billboard billboard, Transformation transformation
-) implements DisplayProperties<Item> {
+  private final byte id;
 
-  ItemDisplayProperties(DisplayPropertiesBuilder<Item> builder) {
-    this(builder.data(), builder.width(), builder.height(), builder.viewRange(),
-      builder.shadowRadius(), builder.shadowStrength(),
-      builder.interpolationDelay(), builder.interpolationDuration(), builder.brightness(), builder.glowColor(),
-      builder.billboard(), builder.transformation());
+  Billboard(int index) {
+    this.id = (byte) index;
+  }
+
+  public byte getId() {
+    return this.id;
   }
 }

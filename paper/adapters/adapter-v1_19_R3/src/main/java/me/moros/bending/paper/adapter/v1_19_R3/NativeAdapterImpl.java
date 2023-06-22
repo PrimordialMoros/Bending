@@ -26,8 +26,6 @@ import java.util.function.Function;
 import io.papermc.paper.adventure.PaperAdventure;
 import me.moros.bending.api.event.BendingDamageEvent;
 import me.moros.bending.api.locale.Message;
-import me.moros.bending.api.platform.entity.Entity;
-import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.world.World;
 import me.moros.bending.common.adapter.AbstractNativeAdapter;
@@ -37,7 +35,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import org.bukkit.Bukkit;
@@ -62,16 +59,6 @@ public final class NativeAdapterImpl extends AbstractNativeAdapter {
   @Override
   protected BlockState adapt(me.moros.bending.api.platform.block.BlockState state) {
     return ((CraftBlockData) mapper.apply(state)).getState();
-  }
-
-  @Override
-  protected ServerPlayer adapt(Player player) {
-    return Objects.requireNonNull(playerList().getPlayer(player.uuid()));
-  }
-
-  @Override
-  protected net.minecraft.world.entity.Entity adapt(Entity entity) {
-    return Objects.requireNonNull(adapt(entity.world()).getEntity(entity.id()));
   }
 
   @Override

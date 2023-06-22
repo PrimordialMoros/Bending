@@ -21,21 +21,23 @@ package me.moros.bending.api.temporal;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
-import me.moros.bending.api.platform.entity.display.DisplayProperties;
-import me.moros.bending.api.platform.entity.display.DisplayProperties.Transformation;
-import me.moros.bending.api.platform.entity.display.DisplayPropertiesBuilder;
+import me.moros.bending.api.platform.block.BlockType;
+import me.moros.bending.api.platform.entity.display.BlockDisplayBuilder;
+import me.moros.bending.api.platform.entity.display.Display;
+import me.moros.bending.api.platform.entity.display.DisplayBuilder;
+import me.moros.bending.api.platform.entity.display.ItemDisplayBuilder;
+import me.moros.bending.api.platform.entity.display.TextDisplayBuilder;
+import me.moros.bending.api.platform.entity.display.Transformation;
 import me.moros.bending.api.platform.item.Item;
-import me.moros.bending.api.platform.particle.ParticleBuilder;
 import me.moros.bending.api.platform.world.World;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.kyori.adventure.text.Component;
 
 public class TempDisplayEntity extends Temporary {
   public static final TemporalManager<Integer, TempDisplayEntity> MANAGER = new TemporalManager<>(600) {
@@ -72,31 +74,48 @@ public class TempDisplayEntity extends Temporary {
     return reverted;
   }
 
-  public static DisplayEntityBuilder blockDisplay(BlockState data) {
-    return new DisplayEntityBuilder(Objects.requireNonNull(DisplayProperties.block(data)));
+  public static Builder<BlockDisplayBuilder> builder(BlockType data) {
+    return builder(data.defaultState());
   }
 
-  private static final Vector3d blockOffset = Vector3d.of(0.5, 0, 0.5);
+  public static Builder<BlockDisplayBuilder> builder(BlockState data) {
+    return builder(Display.block(data));
+  }
 
-  public static final class DisplayEntityBuilder extends TempEntityBuilder<DisplayPropertiesBuilder<?>, TempDisplayEntity, DisplayEntityBuilder> {
+  public static Builder<ItemDisplayBuilder> builder(Item data) {
+    return builder(Display.item(data));
+  }
+
+  public static Builder<TextDisplayBuilder> builder(Component data) {
+    return builder(Display.text(data));
+  }
+
+  public static <V, T extends DisplayBuilder<V, T>> Builder<T> builder(T builder) {
+    return new Builder<>(builder);
+  }
+
+  public static final class Builder<B extends DisplayBuilder<?, B>> extends TempEntityBuilder<B, TempDisplayEntity, Builder<B>> {
+    private static final Vector3d BLOCK_OFFSET = Vector3d.of(0.5, 0, 0.5);
+
     private double minYOffset = -0.1;
 
-    private DisplayEntityBuilder(DisplayPropertiesBuilder<?> data) {
+    private Builder(B data) {
       super(data);
+      gravity(false);
     }
 
-    public DisplayEntityBuilder edit(Consumer<DisplayPropertiesBuilder<?>> consumer) {
+    public Builder<B> edit(Consumer<B> consumer) {
       consumer.accept(data);
       return this;
     }
 
-    public DisplayEntityBuilder minYOffset(double minYOffset) {
+    public Builder<B> minYOffset(double minYOffset) {
       this.minYOffset = minYOffset;
       return this;
     }
 
     public TempDisplayEntity build(Block block) {
-      return build(block.world(), block.toVector3d().add(blockOffset));
+      return build(block.world(), block.toVector3d().add(BLOCK_OFFSET));
     }
 
     @Override
@@ -105,10 +124,6 @@ public class TempDisplayEntity extends Temporary {
     }
 
     private TempDisplayEntity displayEntity(World world, Vector3d center) {
-      var particleBuilder = particleBuilder(data.data(), center);
-      if (particleBuilder != null) {
-        renderParticles(particleBuilder, world);
-      }
       var properties = data.build();
       int id = Platform.instance().nativeAdapter().createDisplayEntity(world, center, properties);
       if (id <= 0) {
@@ -119,16 +134,6 @@ public class TempDisplayEntity extends Temporary {
         TICKING_PHYSICS.put(id, new DisplayMeta(id, world, center, data.transformation(), velocity, minYOffset));
       }
       return result;
-    }
-
-    private static @Nullable ParticleBuilder<?> particleBuilder(Object obj, Vector3d pos) {
-      if (obj instanceof Item item) {
-        return item.asParticle(pos);
-      } else if (obj instanceof BlockState state) {
-        return state.asParticle(pos);
-      } else {
-        return null;
-      }
     }
   }
 

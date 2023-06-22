@@ -6,7 +6,7 @@ plugins {
 dependencies {
     compileOnly(project(":bending-api"))
     implementation(project(":bending-nms"))
-    paperweight.paperDevBundle("1.20-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.20.1-R0.1-SNAPSHOT")
 }
 
 tasks.shadowJar {

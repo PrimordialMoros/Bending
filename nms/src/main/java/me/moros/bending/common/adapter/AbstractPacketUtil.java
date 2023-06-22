@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -32,12 +33,14 @@ import com.mojang.datafixers.util.Pair;
 import me.moros.bending.api.adapter.PacketUtil;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.Entity;
-import me.moros.bending.api.platform.entity.display.DisplayProperties;
+import me.moros.bending.api.platform.entity.display.BlockDisplay;
+import me.moros.bending.api.platform.entity.display.Display;
+import me.moros.bending.api.platform.entity.display.ItemDisplay;
+import me.moros.bending.api.platform.entity.display.TextDisplay;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.world.World;
 import me.moros.math.Position;
-import me.moros.math.Quaternion;
 import me.moros.math.Vector3d;
 import me.moros.math.adapter.Adapters;
 import net.kyori.adventure.text.Component;
@@ -65,7 +68,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 public abstract class AbstractPacketUtil implements PacketUtil {
@@ -90,9 +92,13 @@ public abstract class AbstractPacketUtil implements PacketUtil {
 
   protected abstract BlockState adapt(me.moros.bending.api.platform.block.BlockState state);
 
-  protected abstract net.minecraft.world.entity.Entity adapt(Entity entity);
+  protected net.minecraft.world.entity.Entity adapt(Entity entity) {
+    return Objects.requireNonNull(adapt(entity.world()).getEntity(entity.id()));
+  }
 
-  protected abstract ServerPlayer adapt(Player player);
+  protected ServerPlayer adapt(Player player) {
+    return Objects.requireNonNull(playerList().getPlayer(player.uuid()));
+  }
 
   protected abstract ItemStack adapt(Item item);
 
@@ -139,39 +145,26 @@ public abstract class AbstractPacketUtil implements PacketUtil {
     return id;
   }
 
-  private static Quaternionf adapt(Quaternion rot) {
-    return new Quaternionf(rot.q1(), rot.q1(), rot.q2(), rot.q0());
-  }
-
   @Override
-  public int createDisplayEntity(World world, Position center, DisplayProperties<?> properties) {
+  public int createDisplayEntity(World world, Position center, Display<?> properties) {
     final int id = nextEntityId();
-    // calculate offset to center according to scale
-    var offset = properties.transformation().scale().toVector3d().multiply(-0.5);
-    var translation = offset.add(properties.transformation().translation()).add(0, 0.5, 0);
-    var builder = new EntityDataBuilder(id)
-      .setRaw(EntityMeta.INTERPOLATION_DELAY, properties.interpolationDelay())
-      .setRaw(EntityMeta.INTERPOLATION_DURATION, properties.interpolationDuration())
-      .setRaw(EntityMeta.TRANSLATION, translation.to(Vector3f.class))
-      .setRaw(EntityMeta.SCALE, properties.transformation().scale().to(Vector3f.class))
-      .setRaw(EntityMeta.ROTATION_LEFT, adapt(properties.transformation().left()))
-      .setRaw(EntityMeta.ROTATION_RIGHT, adapt(properties.transformation().right()))
-      .setRaw(EntityMeta.BILLBOARD, (byte) properties.billboard().ordinal())
-      .setRaw(EntityMeta.BRIGHTNESS, properties.brightness())
-      .setRaw(EntityMeta.VIEW_RANGE, properties.viewRange())
-      .setRaw(EntityMeta.SHADOW_RADIUS, properties.shadowRadius())
-      .setRaw(EntityMeta.SHADOW_STRENGTH, properties.shadowStrength())
-      .setRaw(EntityMeta.WIDTH, properties.width())
-      .setRaw(EntityMeta.HEIGHT, properties.height())
-      .setRaw(EntityMeta.GLOW_COLOR_OVERRIDE, properties.glowColor());
-
+    var builder = DisplayUtil.applyCommon(new EntityDataBuilder(id), properties);
     EntityType<?> type;
-    if (properties.data() instanceof me.moros.bending.api.platform.block.BlockState state) {
+    // TODO pattern matching in java 21
+    if (properties instanceof BlockDisplay display) {
       type = EntityType.BLOCK_DISPLAY;
-      builder.setRaw(EntityMeta.BLOCK_STATE_ID, adapt(state));
-    } else if (properties.data() instanceof Item item) {
+      builder.setRaw(EntityMeta.BLOCK_STATE_ID, adapt(display.data()));
+    } else if (properties instanceof ItemDisplay display) {
       type = EntityType.ITEM_DISPLAY;
-      builder.setRaw(EntityMeta.DISPLAYED_ITEM, adapt(item));
+      builder.setRaw(EntityMeta.DISPLAYED_ITEM, adapt(display.data()));
+      builder.setRaw(EntityMeta.DISPLAY_TYPE, display.displayType().getId());
+    } else if (properties instanceof TextDisplay display) {
+      type = EntityType.TEXT_DISPLAY;
+      builder.setRaw(EntityMeta.TEXT, adapt(display.data()));
+      builder.setRaw(EntityMeta.LINE_WIDTH, display.lineWidth());
+      builder.setRaw(EntityMeta.BACKGROUND_COLOR, display.backgroundColor());
+      builder.setRaw(EntityMeta.OPACITY, display.opacity());
+      builder.setRaw(EntityMeta.TEXT_FLAGS, DisplayUtil.packTextDisplayFlagsIntoByte(display));
     } else {
       return 0;
     }

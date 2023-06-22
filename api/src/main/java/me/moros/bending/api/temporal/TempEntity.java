@@ -65,16 +65,16 @@ public class TempEntity extends Temporary {
     return new ArmorStandBuilder(Objects.requireNonNull(data));
   }
 
-  private static final Vector3d armorStandOffset = Vector3d.of(0, 1.8, 0);
-  private static final Vector3d fallingBlockOffset = Vector3d.of(0.5, 0, 0.5);
 
   public static final class FallingBlockBuilder extends TempEntityBuilder<BlockState, TempEntity, FallingBlockBuilder> {
+    private static final Vector3d FALLING_BLOCK_OFFSET = Vector3d.of(0.5, 0, 0.5);
+
     private FallingBlockBuilder(BlockState data) {
       super(data);
     }
 
     public TempFallingBlock buildReal(Block block) {
-      return buildReal(block.world(), block.toVector3d().add(fallingBlockOffset));
+      return buildReal(block.world(), block.toVector3d().add(FALLING_BLOCK_OFFSET));
     }
 
     public TempFallingBlock buildReal(World world, Vector3d center) {
@@ -82,21 +82,19 @@ public class TempEntity extends Temporary {
     }
 
     public TempEntity build(Block block) {
-      return build(block.world(), block.toVector3d().add(fallingBlockOffset));
+      return build(block.world(), block.toVector3d().add(FALLING_BLOCK_OFFSET));
     }
 
     @Override
     public TempEntity build(World world, Vector3d center) {
       int id = Platform.instance().nativeAdapter().createFallingBlock(world, center, data, velocity, gravity);
       if (id > 0) {
-        renderParticles(data.asParticle(center), world);
         return new TempEntity(new TempEntityData(id), MANAGER.fromMillis(duration));
       }
       return spawnReal(world, center);
     }
 
     private TempFallingBlock spawnReal(World world, Vector3d center) {
-      renderParticles(data.asParticle(center), world);
       Entity entity = world.createFallingBlock(center, data, gravity);
       entity.velocity(velocity);
       return new TempFallingBlock(entity, data, MANAGER.fromMillis(duration));
@@ -115,7 +113,6 @@ public class TempEntity extends Temporary {
     }
 
     private TempEntityData armorStand(World world, Vector3d center) {
-      renderParticles(data.asParticle(center.add(armorStandOffset)), world);
       int id = Platform.instance().nativeAdapter().createArmorStand(world, center, data, velocity, gravity);
       if (id > 0) {
         return new TempEntityData(id);

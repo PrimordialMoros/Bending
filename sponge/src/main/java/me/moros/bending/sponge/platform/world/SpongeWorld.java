@@ -223,6 +223,7 @@ public record SpongeWorld(ServerWorld handle) implements World {
   }
 
   @Override
+  @Deprecated
   public Entity createArmorStand(Position pos, me.moros.bending.api.platform.item.Item type, boolean gravity) {
     var vec = org.spongepowered.math.vector.Vector3d.from(pos.x(), pos.y(), pos.z());
     var spongeEntity = handle().createEntity(EntityTypes.ARMOR_STAND, vec);

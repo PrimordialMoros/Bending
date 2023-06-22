@@ -215,6 +215,7 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
   }
 
   @Override
+  @Deprecated
   public Entity createArmorStand(Position pos, Item type, boolean gravity) {
     var loc = new Location(handle(), pos.x(), pos.y(), pos.z());
     var item = PlatformAdapter.toBukkitItem(type);

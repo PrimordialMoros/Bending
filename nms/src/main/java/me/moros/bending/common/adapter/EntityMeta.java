@@ -19,6 +19,7 @@
 
 package me.moros.bending.common.adapter;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.world.item.ItemStack;
@@ -54,6 +55,12 @@ record EntityMeta<T>(int index, EntityDataSerializer<T> serializer) {
   // ItemDisplay
   static final EntityMeta<ItemStack> DISPLAYED_ITEM = create(22, EntityDataSerializers.ITEM_STACK);
   static final EntityMeta<Byte> DISPLAY_TYPE = create(23, EntityDataSerializers.BYTE);
+  // TextDisplay
+  static final EntityMeta<Component> TEXT = create(22, EntityDataSerializers.COMPONENT);
+  static final EntityMeta<Integer> LINE_WIDTH = create(23, EntityDataSerializers.INT);
+  static final EntityMeta<Integer> BACKGROUND_COLOR = create(24, EntityDataSerializers.INT);
+  static final EntityMeta<Byte> OPACITY = create(25, EntityDataSerializers.BYTE);
+  static final EntityMeta<Byte> TEXT_FLAGS = create(26, EntityDataSerializers.BYTE);
 
   private static <T> EntityMeta<T> create(int index, EntityDataSerializer<T> serializer) {
     return new EntityMeta<>(index, serializer);

@@ -21,7 +21,6 @@ package me.moros.bending.api.temporal;
 
 import java.util.Objects;
 
-import me.moros.bending.api.platform.particle.ParticleBuilder;
 import me.moros.bending.api.platform.world.World;
 import me.moros.math.Vector3d;
 
@@ -30,7 +29,6 @@ abstract class TempEntityBuilder<T, R, B extends TempEntityBuilder<T, R, B>> {
   protected final T data;
 
   protected Vector3d velocity = Vector3d.ZERO;
-  protected boolean particles = false;
   protected boolean gravity = true;
   protected long duration = 30_000;
 
@@ -43,11 +41,6 @@ abstract class TempEntityBuilder<T, R, B extends TempEntityBuilder<T, R, B>> {
     return (B) this;
   }
 
-  public B particles(boolean particles) {
-    this.particles = particles;
-    return (B) this;
-  }
-
   public B gravity(boolean gravity) {
     this.gravity = gravity;
     return (B) this;
@@ -56,13 +49,6 @@ abstract class TempEntityBuilder<T, R, B extends TempEntityBuilder<T, R, B>> {
   public B duration(long duration) {
     this.duration = duration;
     return (B) this;
-  }
-
-  protected void renderParticles(ParticleBuilder<?> builder, World world) {
-    if (particles) {
-      Vector3d offset = Vector3d.of(0.25, 0.125, 0.25);
-      builder.count(6).offset(offset).spawn(world);
-    }
   }
 
   public abstract R build(World world, Vector3d center);

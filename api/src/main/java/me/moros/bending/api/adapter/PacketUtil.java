@@ -21,7 +21,7 @@ package me.moros.bending.api.adapter;
 
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
-import me.moros.bending.api.platform.entity.display.DisplayProperties;
+import me.moros.bending.api.platform.entity.display.Display;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.world.World;
@@ -39,21 +39,24 @@ public interface PacketUtil {
    * @param item the material to use in the icon for the notification
    * @param title the content of the notification
    */
-  void sendNotification(Player player, Item item, Component title);
+  default void sendNotification(Player player, Item item, Component title) {
+  }
 
   /**
    * Send a block update packet to every connection within view distance.
    * @param block the world-position tuple for the fake block to appear in
    * @param state the fake block's data
    */
-  void fakeBlock(Block block, BlockState state);
+  default void fakeBlock(Block block, BlockState state) {
+  }
 
   /**
    * Send a block break animation to every connection within view distance.
    * @param block the world-position tuple for the animation to appear in
    * @param progress the animation <a href="https://wiki.vg/Protocol#Set_Block_Destroy_Stage">stage</a>
    */
-  void fakeBreak(Block block, byte progress);
+  default void fakeBreak(Block block, byte progress) {
+  }
 
   /**
    * Create a packet falling block entity.
@@ -64,7 +67,9 @@ public interface PacketUtil {
    * @param gravity whether the entity will have gravity enabled
    * @return the packet entity unique id or 0 if not supported
    */
-  int createFallingBlock(World world, Position center, BlockState state, Vector3d velocity, boolean gravity);
+  default int createFallingBlock(World world, Position center, BlockState state, Vector3d velocity, boolean gravity) {
+    return 0;
+  }
 
   /**
    * Create a packet armor stand entity.
@@ -75,7 +80,9 @@ public interface PacketUtil {
    * @param gravity whether the entity will have gravity enabled
    * @return the packet entity unique id or 0 if not supported
    */
-  int createArmorStand(World world, Position center, Item item, Vector3d velocity, boolean gravity);
+  default int createArmorStand(World world, Position center, Item item, Vector3d velocity, boolean gravity) {
+    return 0;
+  }
 
   /**
    * Create a packet display entity.
@@ -84,7 +91,9 @@ public interface PacketUtil {
    * @param properties the properties to use for the display entity
    * @return the packet entity unique id or 0 if not supported
    */
-  int createDisplayEntity(World world, Position center, DisplayProperties<?> properties);
+  default int createDisplayEntity(World world, Position center, Display<?> properties) {
+    return 0;
+  }
 
   /**
    * Update a packet display entity's translation using interpolation.
@@ -93,7 +102,8 @@ public interface PacketUtil {
    * @param id the display entity's id
    * @param translation the display entity's new translation to interpolate to
    */
-  void updateDisplayTranslation(World world, Position center, int id, Vector3d translation);
+  default void updateDisplayTranslation(World world, Position center, int id, Vector3d translation) {
+  }
 
   /**
    * Remove the specified packet entity.
@@ -108,5 +118,6 @@ public interface PacketUtil {
    * Remove all specified packet entities.
    * @param ids an array of packet entities' unique ids
    */
-  void destroy(int[] ids);
+  default void destroy(int[] ids) {
+  }
 }

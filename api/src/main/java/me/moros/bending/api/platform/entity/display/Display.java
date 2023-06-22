@@ -23,10 +23,9 @@ import java.util.Objects;
 
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.item.Item;
-import me.moros.math.Position;
-import me.moros.math.Quaternion;
+import net.kyori.adventure.text.Component;
 
-public interface DisplayProperties<T> {
+public sealed interface Display<T> permits BlockDisplay, ItemDisplay, TextDisplay {
   T data();
 
   float width();
@@ -51,25 +50,18 @@ public interface DisplayProperties<T> {
 
   Transformation transformation();
 
-  enum Billboard {FIXED, VERTICAL, HORIZONTAL, CENTER}
-
-  static DisplayPropertiesBuilder<BlockState> block(BlockState data) {
+  static BlockDisplayBuilder block(BlockState data) {
     Objects.requireNonNull(data);
-    return new DisplayPropertiesBuilder<>(data, BlockDisplayProperties::new);
+    return new BlockDisplayBuilder(data);
   }
 
-  static DisplayPropertiesBuilder<Item> item(Item data) {
+  static ItemDisplayBuilder item(Item data) {
     Objects.requireNonNull(data);
-    return new DisplayPropertiesBuilder<>(data, ItemDisplayProperties::new);
+    return new ItemDisplayBuilder(data);
   }
 
-  record Transformation(Position translation, Quaternion left, Position scale, Quaternion right) {
-    public Transformation(Position translation, Position scale) {
-      this(translation, QuaternionRotation.ZERO, scale, QuaternionRotation.ZERO);
-    }
-  }
-
-  record QuaternionRotation(double q0, double q1, double q2, double q3) implements Quaternion {
-    private static final QuaternionRotation ZERO = new QuaternionRotation(1, 0, 0, 0);
+  static TextDisplayBuilder text(Component data) {
+    Objects.requireNonNull(data);
+    return new TextDisplayBuilder(data);
   }
 }

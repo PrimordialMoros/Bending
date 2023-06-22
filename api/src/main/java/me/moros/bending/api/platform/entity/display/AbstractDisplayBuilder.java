@@ -22,16 +22,13 @@ package me.moros.bending.api.platform.entity.display;
 import java.util.Objects;
 import java.util.function.Function;
 
-import me.moros.bending.api.platform.entity.display.DisplayProperties.Billboard;
-import me.moros.bending.api.platform.entity.display.DisplayProperties.Transformation;
-import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
-import net.kyori.adventure.util.RGBLike;
 
-public final class DisplayPropertiesBuilder<T> {
-  private final T data;
-  private final Function<DisplayPropertiesBuilder<T>, DisplayProperties<T>> factory;
+@SuppressWarnings("unchecked")
+sealed class AbstractDisplayBuilder<V, T extends AbstractDisplayBuilder<V, T>> implements DisplayBuilder<V, T> permits BlockDisplayBuilder, ItemDisplayBuilder, TextDisplayBuilder {
+  private final Function<? super T, Display<? super V>> factory;
 
+  private V data;
   private float width = 1;
   private float height = 1;
   private float viewRange = 1;
@@ -44,123 +41,145 @@ public final class DisplayPropertiesBuilder<T> {
   private Billboard billboard = Billboard.FIXED;
   private Transformation transformation = new Transformation(Vector3d.ZERO, Vector3d.ONE);
 
-  DisplayPropertiesBuilder(T data, Function<DisplayPropertiesBuilder<T>, DisplayProperties<T>> factory) {
+  AbstractDisplayBuilder(V data, Function<T, Display<? super V>> factory) {
     this.data = data;
     this.factory = factory;
   }
 
-  public T data() {
+  @Override
+  public V data() {
     return data;
   }
 
+  @Override
+  public T data(V data) {
+    this.data = Objects.requireNonNull(data);
+    return (T) this;
+  }
+
+  @Override
   public float width() {
     return width;
   }
 
-  public DisplayPropertiesBuilder<T> width(float width) {
+  @Override
+  public T width(float width) {
     this.width = width;
-    return this;
+    return (T) this;
   }
 
+  @Override
   public float height() {
     return height;
   }
 
-  public DisplayPropertiesBuilder<T> height(float height) {
+  @Override
+  public T height(float height) {
     this.height = height;
-    return this;
+    return (T) this;
   }
 
+  @Override
   public float viewRange() {
     return viewRange;
   }
 
-  public DisplayPropertiesBuilder<T> viewRange(float viewRange) {
+  @Override
+  public T viewRange(float viewRange) {
     this.viewRange = viewRange;
-    return this;
+    return (T) this;
   }
 
+  @Override
   public float shadowRadius() {
     return shadowRadius;
   }
 
-  public DisplayPropertiesBuilder<T> shadowRadius(float shadowRadius) {
+  @Override
+  public T shadowRadius(float shadowRadius) {
     this.shadowRadius = shadowRadius;
-    return this;
+    return (T) this;
   }
 
+  @Override
   public float shadowStrength() {
     return shadowStrength;
   }
 
-  public DisplayPropertiesBuilder<T> shadowStrength(float shadowStrength) {
+  @Override
+  public T shadowStrength(float shadowStrength) {
     this.shadowStrength = shadowStrength;
-    return this;
+    return (T) this;
   }
 
+  @Override
   public int interpolationDelay() {
     return interpolationDelay;
   }
 
-  public DisplayPropertiesBuilder<T> interpolationDelay(int interpolationDelay) {
+  @Override
+  public T interpolationDelay(int interpolationDelay) {
     this.interpolationDelay = interpolationDelay;
-    return this;
+    return (T) this;
   }
 
+  @Override
   public int interpolationDuration() {
     return interpolationDuration;
   }
 
-  public DisplayPropertiesBuilder<T> interpolationDuration(int interpolationDuration) {
+  @Override
+  public T interpolationDuration(int interpolationDuration) {
     this.interpolationDuration = interpolationDuration;
-    return this;
+    return (T) this;
   }
 
+  @Override
   public int brightness() {
     return brightness;
   }
 
-  public DisplayPropertiesBuilder<T> brightness(int blockLight, int skyLight) {
-    return brightness(FastMath.clamp(blockLight, 0, 15) << 4 | FastMath.clamp(skyLight, 0, 15) << 20);
-  }
-
-  public DisplayPropertiesBuilder<T> brightness(int brightness) {
+  @Override
+  public T brightness(int brightness) {
     this.brightness = brightness;
-    return this;
+    return (T) this;
   }
 
+  @Override
   public int glowColor() {
     return glowColor;
   }
 
-  public DisplayPropertiesBuilder<T> glowColor(RGBLike color) {
-    return glowColor(255 << 24 | color.red() << 16 | color.green() << 8 | color.blue());
-  }
-
-  public DisplayPropertiesBuilder<T> glowColor(int argb) {
+  @Override
+  public T glowColor(int argb) {
     this.glowColor = argb;
-    return this;
+    return (T) this;
   }
 
+  @Override
   public Billboard billboard() {
     return billboard;
   }
 
-  public DisplayPropertiesBuilder<T> billboard(Billboard billboard) {
+  @Override
+  public T billboard(Billboard billboard) {
     this.billboard = Objects.requireNonNull(billboard);
-    return this;
+    return (T) this;
   }
 
+  @Override
   public Transformation transformation() {
     return transformation;
   }
 
-  public DisplayPropertiesBuilder<T> transformation(Transformation transformation) {
+  @Override
+  public T transformation(Transformation transformation) {
     this.transformation = Objects.requireNonNull(transformation);
-    return this;
+    return (T) this;
   }
 
-  public DisplayProperties<T> build() {
-    return factory.apply(this);
+  @Override
+  public Display<? super V> build() {
+    return factory.apply((T) this);
   }
 }

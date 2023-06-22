@@ -29,15 +29,10 @@ import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.entity.Entity;
-import me.moros.bending.api.platform.entity.display.DisplayProperties;
-import me.moros.bending.api.platform.entity.player.Player;
-import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.world.World;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.math.FastMath;
-import me.moros.math.Position;
 import me.moros.math.Vector3d;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import org.jetbrains.annotations.ApiStatus.Internal;
 
@@ -92,41 +87,6 @@ public interface NativeAdapter extends PacketUtil {
    */
   default boolean eyeInLava(Entity entity) {
     return MaterialUtil.isLava(eyeBlock(entity));
-  }
-
-  @Override
-  default void sendNotification(Player player, Item item, Component title) {
-  }
-
-  @Override
-  default int createArmorStand(World world, Position center, Item item, Vector3d velocity, boolean gravity) {
-    return 0;
-  }
-
-  @Override
-  default int createFallingBlock(World world, Position center, BlockState state, Vector3d velocity, boolean gravity) {
-    return 0;
-  }
-
-  @Override
-  default int createDisplayEntity(World world, Position center, DisplayProperties<?> properties) {
-    return 0;
-  }
-
-  @Override
-  default void updateDisplayTranslation(World world, Position center, int id, Vector3d translation) {
-  }
-
-  @Override
-  default void fakeBlock(Block block, BlockState state) {
-  }
-
-  @Override
-  default void fakeBreak(Block block, byte progress) {
-  }
-
-  @Override
-  default void destroy(int[] ids) {
   }
 
   /**

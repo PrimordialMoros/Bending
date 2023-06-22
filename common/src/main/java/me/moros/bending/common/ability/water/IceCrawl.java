@@ -44,7 +44,7 @@ import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.LivingEntity;
-import me.moros.bending.api.platform.entity.display.DisplayProperties.Transformation;
+import me.moros.bending.api.platform.entity.display.Transformation;
 import me.moros.bending.api.platform.sound.SoundEffect;
 import me.moros.bending.api.platform.world.WorldUtil;
 import me.moros.bending.api.temporal.ActionLimiter;
@@ -161,10 +161,12 @@ public class IceCrawl extends AbilityInstance {
     public void render() {
       double x = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
       double z = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
-      TempDisplayEntity.blockDisplay(BlockType.PACKED_ICE.defaultState()).particles(true).duration(1200)
+      Vector3d spawnLoc = location.add(x, 0, z);
+      TempDisplayEntity.builder(BlockType.PACKED_ICE).gravity(true).duration(1200)
         .velocity(Vector3d.of(0, 0.32, 0))
         .edit(d -> d.transformation(new Transformation(Vector3d.of(0, -0.75, 0), Vector3d.of(0.75, 0.75, 0.75))))
-        .build(user.world(), location.add(x, 0, z));
+        .build(user.world(), spawnLoc);
+      BlockType.PACKED_ICE.asParticle(spawnLoc).count(6).offset(0.25, 0.125, 0.25).spawn(user.world());
     }
 
     @Override
@@ -178,7 +180,7 @@ public class IceCrawl extends AbilityInstance {
     public boolean onEntityHit(Entity entity) {
       entity.damage(userConfig.damage, user, description());
       if (entity.valid() && entity instanceof LivingEntity livingEntity) {
-        TempDisplayEntity.blockDisplay(BlockType.PACKED_ICE.defaultState()).gravity(false)
+        TempDisplayEntity.builder(BlockType.PACKED_ICE)
           .duration(userConfig.freezeDuration)
           .edit(d -> d.transformation(new Transformation(Vector3d.of(0, -0.2, 0), Vector3d.ONE)))
           .build(user.world(), entity.location());

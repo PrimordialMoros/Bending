@@ -222,6 +222,7 @@ public record FabricWorld(ServerLevel handle) implements World {
   }
 
   @Override
+  @Deprecated
   public Entity createArmorStand(Position center, Item type, boolean gravity) {
     var item = PlatformAdapter.toFabricItem(type);
     var fabricEntity = new ArmorStand(handle(), center.x(), center.y(), center.z());

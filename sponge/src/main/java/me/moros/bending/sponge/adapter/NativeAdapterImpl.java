@@ -25,15 +25,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import me.moros.bending.api.platform.entity.Entity;
-import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.world.World;
 import me.moros.bending.common.adapter.AbstractNativeAdapter;
 import me.moros.bending.sponge.mixin.accessor.AdvancementProgressAccess;
 import me.moros.bending.sponge.mixin.accessor.CriterionProgressAccess;
 import me.moros.bending.sponge.mixin.accessor.EntityAccess;
-import me.moros.bending.sponge.platform.PlatformAdapter;
 import me.moros.bending.sponge.platform.block.SpongeBlockState;
 import me.moros.bending.sponge.platform.world.SpongeWorld;
 import net.kyori.adventure.text.Component;
@@ -46,7 +43,6 @@ import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.Sponge;
@@ -65,16 +61,6 @@ public final class NativeAdapterImpl extends AbstractNativeAdapter {
   @Override
   protected BlockState adapt(me.moros.bending.api.platform.block.BlockState state) {
     return (BlockState) ((SpongeBlockState) state).handle();
-  }
-
-  @Override
-  protected ServerPlayer adapt(Player player) {
-    return (ServerPlayer) PlatformAdapter.toSpongeEntity(player);
-  }
-
-  @Override
-  protected net.minecraft.world.entity.Entity adapt(Entity entity) {
-    return (net.minecraft.world.entity.Entity) PlatformAdapter.toSpongeEntity(entity);
   }
 
   @Override
