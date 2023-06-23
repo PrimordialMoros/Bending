@@ -20,9 +20,7 @@
 package me.moros.bending.common.command;
 
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.function.Function;
 
 import cloud.commandframework.Command.Builder;
@@ -53,7 +51,6 @@ record CommanderImpl<C extends Audience>(CommandManager<C> manager, Class<? exte
   @Override
   public void init() {
     registerExceptionHandler();
-    manager().commandSuggestionProcessor(this::suggestionProvider);
     manager().registerCommandPreProcessor(this::preprocessor);
     Collection<Function<Commander<C>, Initializer>> cmds = List.of(
       HelpCommand::new, VersionCommand::new, ReloadCommand::new,
@@ -78,22 +75,6 @@ record CommanderImpl<C extends Audience>(CommandManager<C> manager, Class<? exte
   private void registerExceptionHandler() {
     new MinecraftExceptionHandler<C>().withDefaultHandlers().withDecorator(Message::brand)
       .apply(manager(), AudienceProvider.nativeAudience());
-  }
-
-  private List<String> suggestionProvider(CommandPreprocessingContext<C> context, List<String> strings) {
-    String input;
-    if (context.getInputQueue().isEmpty()) {
-      input = "";
-    } else {
-      input = context.getInputQueue().peek().toLowerCase(Locale.ROOT);
-    }
-    List<String> suggestions = new LinkedList<>();
-    for (String suggestion : strings) {
-      if (suggestion.toLowerCase(Locale.ROOT).startsWith(input)) {
-        suggestions.add(suggestion);
-      }
-    }
-    return suggestions;
   }
 
   private void preprocessor(CommandPreprocessingContext<C> context) {

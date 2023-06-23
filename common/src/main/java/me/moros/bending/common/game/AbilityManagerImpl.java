@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -166,7 +165,7 @@ public class AbilityManagerImpl implements AbilityManager {
     // Update all instances and remove invalid instances
     generics.update();
     Iterator<Ability> globalIterator = globalInstances.values().iterator();
-    Collection<Exception> exceptions = new LinkedList<>();
+    Collection<Exception> exceptions = new ArrayList<>();
     while (globalIterator.hasNext()) {
       Ability ability = globalIterator.next();
       UpdateResult result = UpdateResult.REMOVE;
