@@ -148,37 +148,27 @@ public abstract class AbstractPacketUtil implements PacketUtil {
   @Override
   public int createDisplayEntity(World world, Position center, Display<?> properties) {
     final int id = nextEntityId();
-    var builder = DisplayUtil.applyCommon(new EntityDataBuilder(id), properties);
     EntityType<?> type;
     // TODO pattern matching in java 21
-    if (properties instanceof BlockDisplay display) {
+    if (properties instanceof BlockDisplay) {
       type = EntityType.BLOCK_DISPLAY;
-      builder.setRaw(EntityMeta.BLOCK_STATE_ID, adapt(display.data()));
-    } else if (properties instanceof ItemDisplay display) {
+    } else if (properties instanceof ItemDisplay) {
       type = EntityType.ITEM_DISPLAY;
-      builder.setRaw(EntityMeta.DISPLAYED_ITEM, adapt(display.data()));
-      builder.setRaw(EntityMeta.DISPLAY_TYPE, display.displayType().getId());
-    } else if (properties instanceof TextDisplay display) {
+    } else if (properties instanceof TextDisplay) {
       type = EntityType.TEXT_DISPLAY;
-      builder.setRaw(EntityMeta.TEXT, adapt(display.data()));
-      builder.setRaw(EntityMeta.LINE_WIDTH, display.lineWidth());
-      builder.setRaw(EntityMeta.BACKGROUND_COLOR, display.backgroundColor());
-      builder.setRaw(EntityMeta.OPACITY, display.opacity());
-      builder.setRaw(EntityMeta.TEXT_FLAGS, DisplayUtil.packTextDisplayFlagsIntoByte(display));
     } else {
       return 0;
     }
-    broadcast(new ClientboundBundlePacket(List.of(createEntity(id, center, type, 0), builder.build())), world, center);
+    var meta = DisplayUtil.mapProperties(this, new EntityDataBuilder(id), properties).build();
+    broadcast(new ClientboundBundlePacket(List.of(createEntity(id, center, type, 0), meta)), world, center);
     return id;
   }
 
   @Override
-  public void updateDisplayTranslation(World world, Position center, int id, Vector3d translation) {
-    var movement = new EntityDataBuilder(id)
-      .setRaw(EntityMeta.INTERPOLATION_DELAY, 0)
-      .setRaw(EntityMeta.INTERPOLATION_DURATION, 1)
-      .setRaw(EntityMeta.TRANSLATION, translation.to(Vector3f.class)).build();
-    broadcast(movement, world, center);
+  public void updateDisplay(World world, Position center, int id, Display<?> properties) {
+    // TODO filter changed properties only (currently sending all)
+    var meta = DisplayUtil.mapProperties(this, new EntityDataBuilder(id), properties).build();
+    broadcast(meta, world, center);
   }
 
   @Override

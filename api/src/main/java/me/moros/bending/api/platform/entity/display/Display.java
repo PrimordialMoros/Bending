@@ -25,8 +25,8 @@ import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.item.Item;
 import net.kyori.adventure.text.Component;
 
-public sealed interface Display<T> permits BlockDisplay, ItemDisplay, TextDisplay {
-  T data();
+public sealed interface Display<V> permits BlockDisplay, ItemDisplay, TextDisplay {
+  V data();
 
   float width();
 
@@ -50,18 +50,20 @@ public sealed interface Display<T> permits BlockDisplay, ItemDisplay, TextDispla
 
   Transformation transformation();
 
+  DisplayBuilder<V, ?> toBuilder();
+
   static BlockDisplayBuilder block(BlockState data) {
     Objects.requireNonNull(data);
-    return new BlockDisplayBuilder(data);
+    return new BlockDisplayBuilder().data(data);
   }
 
   static ItemDisplayBuilder item(Item data) {
     Objects.requireNonNull(data);
-    return new ItemDisplayBuilder(data);
+    return new ItemDisplayBuilder().data(data);
   }
 
   static TextDisplayBuilder text(Component data) {
     Objects.requireNonNull(data);
-    return new TextDisplayBuilder(data);
+    return new TextDisplayBuilder().data(data);
   }
 }

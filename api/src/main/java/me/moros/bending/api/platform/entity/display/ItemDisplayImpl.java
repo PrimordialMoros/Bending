@@ -33,4 +33,9 @@ record ItemDisplayImpl(
       builder.interpolationDelay(), builder.interpolationDuration(), builder.brightness(), builder.glowColor(),
       builder.billboard(), builder.transformation(), builder.displayType());
   }
+
+  @Override
+  public ItemDisplayBuilder toBuilder() {
+    return new ItemDisplayBuilder(this);
+  }
 }

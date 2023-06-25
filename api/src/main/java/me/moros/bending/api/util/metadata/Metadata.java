@@ -26,9 +26,9 @@ import me.moros.bending.api.util.data.DataKey;
  * Utility class to provide metadata keys
  */
 public final class Metadata {
-  public static final DataKey<Boolean> NPC = KeyUtil.data("bending-npc", Boolean.class);
+  public static final DataKey<Boolean> NPC = KeyUtil.data("npc", Boolean.class);
 
-  public static final DataKey<Boolean> ARMOR_KEY = KeyUtil.data("bending-armor", Boolean.class);
+  public static final DataKey<Boolean> ARMOR_KEY = KeyUtil.data("armor", Boolean.class);
   public static final DataKey<String> METAL_KEY = KeyUtil.data("bending-metal-key", String.class);
 
   private Metadata() {

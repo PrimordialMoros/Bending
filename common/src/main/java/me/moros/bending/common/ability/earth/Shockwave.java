@@ -234,7 +234,7 @@ public class Shockwave extends AbilityInstance {
       if (MaterialUtil.isFire(block)) {
         block.setType(BlockType.AIR);
       }
-      double deltaY = 0.25 + Math.min(0.25, 0.05 + distanceTravelled / (3 * range));
+      double deltaY = Math.min(0.38, 0.18 + distanceTravelled / (3 * range));
       Block below = block.offset(Direction.DOWN);
       BlockState data = below.state();
       TempDisplayEntity.builder(data).gravity(true).velocity(Vector3d.of(0, deltaY, 0)).duration(1200)

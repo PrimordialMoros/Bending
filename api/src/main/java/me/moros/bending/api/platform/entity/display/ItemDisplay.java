@@ -24,6 +24,9 @@ import me.moros.bending.api.platform.item.Item;
 public sealed interface ItemDisplay extends Display<Item> permits ItemDisplayImpl {
   DisplayType displayType();
 
+  @Override
+  ItemDisplayBuilder toBuilder();
+
   enum DisplayType {
     NONE(0),
     THIRD_PERSON_LEFT_HAND(1),

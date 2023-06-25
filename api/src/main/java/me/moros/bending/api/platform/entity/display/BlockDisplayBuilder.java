@@ -22,7 +22,11 @@ package me.moros.bending.api.platform.entity.display;
 import me.moros.bending.api.platform.block.BlockState;
 
 public final class BlockDisplayBuilder extends AbstractDisplayBuilder<BlockState, BlockDisplayBuilder> {
-  BlockDisplayBuilder(BlockState data) {
-    super(data, BlockDisplayImpl::new);
+  BlockDisplayBuilder() {
+    super(BlockDisplayImpl::new);
+  }
+
+  public BlockDisplayBuilder(BlockDisplay display) {
+    super(BlockDisplayImpl::new, display);
   }
 }

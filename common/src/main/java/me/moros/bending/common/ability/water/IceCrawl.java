@@ -163,7 +163,7 @@ public class IceCrawl extends AbilityInstance {
       double z = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
       Vector3d spawnLoc = location.add(x, 0, z);
       TempDisplayEntity.builder(BlockType.PACKED_ICE).gravity(true).duration(1200)
-        .velocity(Vector3d.of(0, 0.32, 0))
+        .velocity(Vector3d.of(0, 0.16, 0))
         .edit(d -> d.transformation(new Transformation(Vector3d.of(0, -0.75, 0), Vector3d.of(0.75, 0.75, 0.75))))
         .build(user.world(), spawnLoc);
       BlockType.PACKED_ICE.asParticle(spawnLoc).count(6).offset(0.25, 0.125, 0.25).spawn(user.world());

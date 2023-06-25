@@ -96,13 +96,13 @@ public interface PacketUtil {
   }
 
   /**
-   * Update a packet display entity's translation using interpolation.
-   * @param world the world for the packet entity to appear in
-   * @param center the spawn location
+   * Update a packet display entity's properties.
+   * @param world the world the packet entity is in
+   * @param center the center location to broadcast packets from
    * @param id the display entity's id
-   * @param translation the display entity's new translation to interpolate to
+   * @param properties the display entity's new properties
    */
-  default void updateDisplayTranslation(World world, Position center, int id, Vector3d translation) {
+  default void updateDisplay(World world, Position center, int id, Display<?> properties) {
   }
 
   /**

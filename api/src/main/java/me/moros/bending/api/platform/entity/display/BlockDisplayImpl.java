@@ -33,4 +33,9 @@ record BlockDisplayImpl(
       builder.interpolationDelay(), builder.interpolationDuration(), builder.brightness(), builder.glowColor(),
       builder.billboard(), builder.transformation());
   }
+
+  @Override
+  public BlockDisplayBuilder toBuilder() {
+    return new BlockDisplayBuilder(this);
+  }
 }

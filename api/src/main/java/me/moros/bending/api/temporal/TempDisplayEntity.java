@@ -32,7 +32,6 @@ import me.moros.bending.api.platform.entity.display.Display;
 import me.moros.bending.api.platform.entity.display.DisplayBuilder;
 import me.moros.bending.api.platform.entity.display.ItemDisplayBuilder;
 import me.moros.bending.api.platform.entity.display.TextDisplayBuilder;
-import me.moros.bending.api.platform.entity.display.Transformation;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.world.World;
 import me.moros.math.Position;
@@ -131,7 +130,7 @@ public class TempDisplayEntity extends Temporary {
       }
       var result = new TempDisplayEntity(id, MANAGER.fromMillis(duration));
       if (gravity || velocity.lengthSq() > 0) {
-        TICKING_PHYSICS.put(id, new DisplayMeta(id, world, center, data.transformation(), velocity, minYOffset));
+        TICKING_PHYSICS.put(id, new DisplayMeta(id, world, center, properties, velocity, minYOffset));
       }
       return result;
     }
@@ -145,18 +144,18 @@ public class TempDisplayEntity extends Temporary {
     private final int id;
     private final World world;
     private final Position origin;
-    private final Position offset;
+    private final Display<?> meta;
     private final double minYOffset;
 
     private Vector3d relativePosition;
     private Vector3d velocity;
 
-    private DisplayMeta(int id, World world, Vector3d origin, Transformation transformation, Vector3d velocity, double minYOffset) {
+    private DisplayMeta(int id, World world, Vector3d origin, Display<?> meta, Vector3d velocity, double minYOffset) {
       this.id = id;
       this.world = world;
       this.origin = origin;
-      this.relativePosition = transformation.translation().toVector3d();
-      this.offset = relativePosition.add(transformation.scale().toVector3d().multiply(-0.5).add(0, 0.5, 0));
+      this.meta = meta;
+      this.relativePosition = meta.transformation().translation().toVector3d();
       this.minYOffset = relativePosition.y() + minYOffset;
       this.velocity = velocity;
     }
@@ -173,7 +172,10 @@ public class TempDisplayEntity extends Temporary {
         relativePosition = relativePosition.withY(minYOffset);
         return;
       }
-      Platform.instance().nativeAdapter().updateDisplayTranslation(world, origin, id, relativePosition.add(offset));
+      var properties = meta.toBuilder()
+        .transformation(meta.transformation().withTranslation(relativePosition))
+        .interpolationDuration(1).build();
+      Platform.instance().nativeAdapter().updateDisplay(world, origin, id, properties);
     }
   }
 }

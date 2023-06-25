@@ -27,6 +27,22 @@ public record Transformation(Position translation, Quaternion left, Position sca
     this(translation, QuaternionRotation.ZERO, scale, QuaternionRotation.ZERO);
   }
 
+  public Transformation withTranslation(Position translation) {
+    return new Transformation(translation, left, scale, right);
+  }
+
+  public Transformation withScale(Position scale) {
+    return new Transformation(translation, left, scale, right);
+  }
+
+  public Transformation withLeftRotation(Quaternion left) {
+    return new Transformation(translation, left, scale, right);
+  }
+
+  public Transformation withRightRotation(Quaternion right) {
+    return new Transformation(translation, left, scale, right);
+  }
+
   private record QuaternionRotation(double q0, double q1, double q2, double q3) implements Quaternion {
     private static final QuaternionRotation ZERO = new QuaternionRotation(1, 0, 0, 0);
   }

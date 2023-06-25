@@ -41,7 +41,7 @@ import me.moros.math.VectorUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class FragileStructure implements Iterable<Block> {
-  public static final DataKey<FragileStructure> DESTRUCTIBLE = KeyUtil.data("bending-destructible", FragileStructure.class);
+  public static final DataKey<FragileStructure> DESTRUCTIBLE = KeyUtil.data("destructible", FragileStructure.class);
 
   private final Collection<Block> fragileBlocks;
   private final Predicate<Block> predicate;

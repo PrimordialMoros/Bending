@@ -34,8 +34,19 @@ public final class TextDisplayBuilder extends AbstractDisplayBuilder<Component, 
   private boolean hasDefaultBackground = false;
   private Alignment alignment = Alignment.CENTER;
 
-  TextDisplayBuilder(Component data) {
-    super(data, TextDisplayImpl::new);
+  TextDisplayBuilder() {
+    super(TextDisplayImpl::new);
+  }
+
+  public TextDisplayBuilder(TextDisplay display) {
+    super(TextDisplayImpl::new, display);
+    lineWidth(display.lineWidth());
+    backgroundColor(display.backgroundColor());
+    opacity(display.opacity());
+    hasShadow(display.textFlags().hasShadow());
+    isSeeThrough(display.textFlags().isSeeThrough());
+    hasDefaultBackground(display.textFlags().hasDefaultBackground());
+    alignment(display.textFlags().alignment());
   }
 
   public int lineWidth() {

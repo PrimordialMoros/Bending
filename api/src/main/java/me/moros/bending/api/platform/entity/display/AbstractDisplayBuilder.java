@@ -41,9 +41,24 @@ sealed class AbstractDisplayBuilder<V, T extends AbstractDisplayBuilder<V, T>> i
   private Billboard billboard = Billboard.FIXED;
   private Transformation transformation = new Transformation(Vector3d.ZERO, Vector3d.ONE);
 
-  AbstractDisplayBuilder(V data, Function<T, Display<? super V>> factory) {
-    this.data = data;
+  AbstractDisplayBuilder(Function<T, Display<? super V>> factory) {
     this.factory = factory;
+  }
+
+  AbstractDisplayBuilder(Function<T, Display<? super V>> factory, Display<V> display) {
+    this(factory);
+    data(display.data());
+    width(display.width());
+    height(display.height());
+    viewRange(display.viewRange());
+    shadowRadius(display.shadowRadius());
+    shadowStrength(display.shadowStrength());
+    interpolationDelay(display.interpolationDelay());
+    interpolationDuration(display.interpolationDuration());
+    brightness(display.brightness());
+    glowColor(display.glowColor());
+    billboard(display.billboard());
+    transformation(display.transformation());
   }
 
   @Override

@@ -19,8 +19,13 @@
 
 package me.moros.bending.common.adapter;
 
+import me.moros.bending.api.platform.entity.display.BlockDisplay;
 import me.moros.bending.api.platform.entity.display.Display;
+import me.moros.bending.api.platform.entity.display.ItemDisplay;
 import me.moros.bending.api.platform.entity.display.TextDisplay;
+import me.moros.bending.api.platform.entity.display.TextDisplay.TextFlags;
+import me.moros.bending.api.platform.entity.display.Transformation;
+import me.moros.math.Position;
 import me.moros.math.Quaternion;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -29,16 +34,37 @@ final class DisplayUtil {
   private DisplayUtil() {
   }
 
-  static EntityDataBuilder applyCommon(EntityDataBuilder builder, Display<?> properties) {
+  static EntityDataBuilder mapProperties(AbstractPacketUtil packetUtil, EntityDataBuilder builder, Display<?> properties) {
+    builder = applyCommon(builder, properties);
+    if (properties instanceof BlockDisplay display) {
+      builder.setRaw(EntityMeta.BLOCK_STATE_ID, packetUtil.adapt(display.data()));
+    } else if (properties instanceof ItemDisplay display) {
+      builder.setRaw(EntityMeta.DISPLAYED_ITEM, packetUtil.adapt(display.data()));
+      builder.setRaw(EntityMeta.DISPLAY_TYPE, display.displayType().getId());
+    } else if (properties instanceof TextDisplay display) {
+      builder.setRaw(EntityMeta.TEXT, packetUtil.adapt(display.data()));
+      builder.setRaw(EntityMeta.LINE_WIDTH, display.lineWidth());
+      builder.setRaw(EntityMeta.BACKGROUND_COLOR, display.backgroundColor());
+      builder.setRaw(EntityMeta.OPACITY, display.opacity());
+      builder.setRaw(EntityMeta.TEXT_FLAGS, DisplayUtil.packTextDisplayFlagsIntoByte(display.textFlags()));
+    }
+    return builder;
+  }
+
+  static EntityDataBuilder applyTransformation(EntityDataBuilder builder, Transformation transformation) {
     // calculate offset to center according to scale
-    var offset = properties.transformation().scale().toVector3d().multiply(-0.5);
-    var translation = offset.add(properties.transformation().translation()).add(0, 0.5, 0);
-    return builder.setRaw(EntityMeta.INTERPOLATION_DELAY, properties.interpolationDelay())
+    var offset = transformation.scale().toVector3d().multiply(-0.5);
+    var translation = offset.add(transformation.translation()).add(0, 0.5, 0);
+    return builder.setRaw(EntityMeta.TRANSLATION, adapt(translation))
+      .setRaw(EntityMeta.SCALE, adapt(transformation.scale()))
+      .setRaw(EntityMeta.ROTATION_LEFT, adapt(transformation.left()))
+      .setRaw(EntityMeta.ROTATION_RIGHT, adapt(transformation.right()));
+  }
+
+  static EntityDataBuilder applyCommon(EntityDataBuilder builder, Display<?> properties) {
+    return applyTransformation(builder, properties.transformation())
+      .setRaw(EntityMeta.INTERPOLATION_DELAY, properties.interpolationDelay())
       .setRaw(EntityMeta.INTERPOLATION_DURATION, properties.interpolationDuration())
-      .setRaw(EntityMeta.TRANSLATION, translation.to(Vector3f.class))
-      .setRaw(EntityMeta.SCALE, properties.transformation().scale().to(Vector3f.class))
-      .setRaw(EntityMeta.ROTATION_LEFT, adapt(properties.transformation().left()))
-      .setRaw(EntityMeta.ROTATION_RIGHT, adapt(properties.transformation().right()))
       .setRaw(EntityMeta.BILLBOARD, properties.billboard().getId())
       .setRaw(EntityMeta.BRIGHTNESS, properties.brightness())
       .setRaw(EntityMeta.VIEW_RANGE, properties.viewRange())
@@ -49,18 +75,18 @@ final class DisplayUtil {
       .setRaw(EntityMeta.GLOW_COLOR_OVERRIDE, properties.glowColor());
   }
 
-  static byte packTextDisplayFlagsIntoByte(TextDisplay textDisplay) {
+  static byte packTextDisplayFlagsIntoByte(TextFlags textFlags) {
     byte packedByte = 0;
-    if (textDisplay.hasShadow()) {
+    if (textFlags.hasShadow()) {
       packedByte |= 0x01;
     }
-    if (textDisplay.isSeeThrough()) {
+    if (textFlags.isSeeThrough()) {
       packedByte |= 0x02;
     }
-    if (textDisplay.hasDefaultBackground()) {
+    if (textFlags.hasDefaultBackground()) {
       packedByte |= 0x04;
     }
-    packedByte |= switch (textDisplay.alignment()) {
+    packedByte |= switch (textFlags.alignment()) {
       case CENTER -> packedByte;
       case LEFT -> 0x08;
       case RIGHT -> 0x16;
@@ -70,5 +96,9 @@ final class DisplayUtil {
 
   private static Quaternionf adapt(Quaternion rot) {
     return new Quaternionf(rot.q1(), rot.q1(), rot.q2(), rot.q0());
+  }
+
+  private static Vector3f adapt(Position vector) {
+    return vector.to(Vector3f.class);
   }
 }

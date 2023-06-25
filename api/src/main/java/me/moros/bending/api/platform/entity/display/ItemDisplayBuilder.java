@@ -27,8 +27,13 @@ import me.moros.bending.api.platform.item.Item;
 public final class ItemDisplayBuilder extends AbstractDisplayBuilder<Item, ItemDisplayBuilder> {
   private DisplayType displayType = DisplayType.NONE;
 
-  ItemDisplayBuilder(Item data) {
-    super(data, ItemDisplayImpl::new);
+  ItemDisplayBuilder() {
+    super(ItemDisplayImpl::new);
+  }
+
+  public ItemDisplayBuilder(ItemDisplay display) {
+    super(ItemDisplayImpl::new, display);
+    displayType(display.displayType());
   }
 
   public DisplayType displayType() {

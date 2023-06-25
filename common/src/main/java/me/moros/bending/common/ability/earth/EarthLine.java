@@ -195,7 +195,7 @@ public class EarthLine extends AbilityInstance {
       Vector3d spawnLoc = location.add(x, 0, z);
       BlockState type = user.world().blockAt(location).offset(Direction.DOWN).state();
       TempDisplayEntity.builder(type).gravity(true).duration(700)
-        .velocity(Vector3d.of(0, 0.32, 0))
+        .velocity(Vector3d.of(0, 0.2, 0))
         .edit(d -> d.transformation(new Transformation(Vector3d.of(0, -0.75, 0), Vector3d.of(0.75, 0.75, 0.75))))
         .build(user.world(), spawnLoc);
       type.asParticle(location).count(6).offset(0.25, 0.125, 0.25).spawn(user.world());

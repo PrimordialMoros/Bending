@@ -22,4 +22,6 @@ package me.moros.bending.api.platform.entity.display;
 import me.moros.bending.api.platform.block.BlockState;
 
 public sealed interface BlockDisplay extends Display<BlockState> permits BlockDisplayImpl {
+  @Override
+  BlockDisplayBuilder toBuilder();
 }

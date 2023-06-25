@@ -163,7 +163,7 @@ public class EarthSurf extends AbilityInstance {
         return;
       }
       var builder = TempDisplayEntity.builder(data).gravity(true).velocity(Vector3d.of(0, 0.25, 0))
-        .minYOffset(-1.25).duration(1000).edit(d -> d.transformation(new Transformation(Vector3d.MINUS_J, Vector3d.ONE)));
+        .minYOffset(-1.25).duration(750).edit(d -> d.transformation(new Transformation(Vector3d.MINUS_J, Vector3d.ONE)));
       Vector3d center = user.location();
       Vector3d dir = user.direction().withY(0).normalize(user.velocity().withY(0).normalize());
       VectorUtil.createArc(dir, Vector3d.PLUS_J, Math.PI / 3, 3).forEach(v -> {

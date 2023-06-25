@@ -25,7 +25,7 @@ record TextDisplayImpl(
   Component data, float width, float height, float viewRange, float shadowRadius, float shadowStrength,
   int interpolationDelay, int interpolationDuration, int brightness, int glowColor,
   Billboard billboard, Transformation transformation, int lineWidth, int backgroundColor, byte opacity,
-  boolean hasShadow, boolean isSeeThrough, boolean hasDefaultBackground, Alignment alignment
+  TextFlags textFlags
 ) implements TextDisplay {
 
   TextDisplayImpl(TextDisplayBuilder builder) {
@@ -33,6 +33,16 @@ record TextDisplayImpl(
       builder.shadowRadius(), builder.shadowStrength(),
       builder.interpolationDelay(), builder.interpolationDuration(), builder.brightness(), builder.glowColor(),
       builder.billboard(), builder.transformation(), builder.lineWidth(), builder.backgroundColor(), builder.opacity(),
-      builder.hasShadow(), builder.isSeeThrough(), builder.hasDefaultBackground(), builder.alignment());
+      new TextFlagsImpl(builder.hasShadow(), builder.isSeeThrough(), builder.hasDefaultBackground(), builder.alignment()));
+  }
+
+  @Override
+  public TextDisplayBuilder toBuilder() {
+    return new TextDisplayBuilder(this);
+  }
+
+  record TextFlagsImpl(boolean hasShadow, boolean isSeeThrough, boolean hasDefaultBackground,
+                       Alignment alignment
+  ) implements TextFlags {
   }
 }

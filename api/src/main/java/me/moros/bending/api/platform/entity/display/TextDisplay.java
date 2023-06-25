@@ -28,13 +28,10 @@ public sealed interface TextDisplay extends Display<Component> permits TextDispl
 
   byte opacity();
 
-  boolean hasShadow();
+  TextFlags textFlags();
 
-  boolean isSeeThrough();
-
-  boolean hasDefaultBackground();
-
-  Alignment alignment();
+  @Override
+  TextDisplayBuilder toBuilder();
 
   enum Alignment {
     CENTER(0),
@@ -50,5 +47,15 @@ public sealed interface TextDisplay extends Display<Component> permits TextDispl
     public byte getId() {
       return this.id;
     }
+  }
+
+  interface TextFlags {
+    boolean hasShadow();
+
+    boolean isSeeThrough();
+
+    boolean hasDefaultBackground();
+
+    Alignment alignment();
   }
 }

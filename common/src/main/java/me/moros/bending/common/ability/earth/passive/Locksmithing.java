@@ -29,7 +29,6 @@ import me.moros.bending.api.config.Configurable;
 import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.Modifiable;
 import me.moros.bending.api.platform.Platform;
-import me.moros.bending.api.platform.PlatformType;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.Lockable;
 import me.moros.bending.api.platform.entity.player.Player;
@@ -107,10 +106,6 @@ public class Locksmithing extends AbilityInstance {
     if (key.isBlank()) {
       key = UUID.randomUUID().toString();
       var builder = Platform.instance().factory().itemBuilder(item).meta(Metadata.METAL_KEY, key);
-      // Should we put custom lore to visually identify the items?
-      if (Platform.instance().type() == PlatformType.BUKKIT) {
-        builder.name(Component.text(key));
-      }
       inv.setItemInMainHand(builder.build(item.amount()));
     }
     return key;
@@ -137,10 +132,7 @@ public class Locksmithing extends AbilityInstance {
   }
 
   private static boolean validKey(ItemSnapshot item, String lock) {
-    if (item.get(Metadata.METAL_KEY).isEmpty()) {
-      return false;
-    }
-    return item.customName().map(lock::equals).orElse(false);
+    return item.get(Metadata.METAL_KEY).map(lock::equals).orElse(false);
   }
 
   @Override
