@@ -30,7 +30,6 @@ import me.moros.bending.api.util.data.DataHolder;
 import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.api.util.functional.Suppliers;
 import me.moros.bending.paper.platform.BukkitDataHolder;
-import me.moros.bending.paper.platform.PlatformAdapter;
 import me.moros.bending.paper.platform.world.BukkitWorld;
 import me.moros.math.FastMath;
 import me.moros.math.Position;
@@ -73,7 +72,7 @@ public class BukkitEntity implements Entity {
 
   @Override
   public EntityType type() {
-    return EntityType.registry().getOrThrow(PlatformAdapter.fromNsk(handle().getType().getKey()));
+    return EntityType.registry().getOrThrow(handle().getType().key());
   }
 
   @Override

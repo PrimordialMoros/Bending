@@ -58,8 +58,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public record BukkitWorld(org.bukkit.World handle) implements World {
   @Override
   public BlockType getBlockType(int x, int y, int z) {
-    var key = PlatformAdapter.fromNsk(handle().getType(x, y, z).getKey());
-    return BlockType.registry().getIfExists(key).orElse(BlockType.VOID_AIR);
+    return BlockType.registry().getIfExists(handle().getType(x, y, z).key()).orElse(BlockType.VOID_AIR);
   }
 
   @Override
@@ -260,6 +259,6 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
 
   @Override
   public @NonNull Key key() {
-    return PlatformAdapter.fromNsk(handle().getKey());
+    return handle().key();
   }
 }

@@ -87,7 +87,7 @@ public final class PlatformAdapter {
   }
 
   public static Potion fromBukkitPotion(org.bukkit.potion.PotionEffect p) {
-    var effect = PotionEffect.registry().getOrThrow(fromNsk(p.getType().getKey()));
+    var effect = PotionEffect.registry().getOrThrow(p.getType().key());
     return Potion.builder(effect).duration(p.getDuration()).amplifier(p.getAmplifier())
       .ambient(p.isAmbient()).particles(p.hasParticles()).icon(p.hasIcon()).build();
   }
@@ -101,7 +101,7 @@ public final class PlatformAdapter {
   }
 
   public static Item fromBukkitItem(Material material) {
-    var item = Item.registry().get(fromNsk(material.getKey()));
+    var item = Item.registry().get(material.key());
     if (item == null || !material.isItem()) {
       throw new IllegalStateException(material.name() + " is not a valid item!");
     }
@@ -109,7 +109,7 @@ public final class PlatformAdapter {
   }
 
   public static BlockType fromBukkitBlock(Material material) {
-    var blockType = BlockType.registry().get(fromNsk(material.getKey()));
+    var blockType = BlockType.registry().get(material.key());
     if (blockType == null || !material.isBlock()) {
       throw new IllegalStateException(material.name() + " is not a valid block type!");
     }
@@ -139,12 +139,7 @@ public final class PlatformAdapter {
   }
 
   public static NamespacedKey nsk(Key key) {
-    return new NamespacedKey(key.namespace(), key.value());
-  }
-
-  // To ensure consistent equals/hashcode we need to duplicate keys
-  public static Key fromNsk(NamespacedKey key) {
-    return Key.key(key.namespace(), key.value());
+    return key instanceof NamespacedKey nsk ? nsk : new NamespacedKey(key.namespace(), key.value());
   }
 
   @SuppressWarnings("unchecked")

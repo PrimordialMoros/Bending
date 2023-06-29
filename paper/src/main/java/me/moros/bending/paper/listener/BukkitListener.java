@@ -20,7 +20,6 @@
 package me.moros.bending.paper.listener;
 
 import me.moros.bending.api.game.Game;
-import me.moros.bending.paper.platform.PlatformAdapter;
 import org.bukkit.World;
 import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.entity.EntityEvent;
@@ -42,6 +41,6 @@ interface BukkitListener {
   }
 
   default boolean disabledWorld(World world) {
-    return !game().worldManager().isEnabled(PlatformAdapter.fromNsk(world.getKey()));
+    return !game().worldManager().isEnabled(world.key());
   }
 }

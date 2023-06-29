@@ -52,7 +52,7 @@ public final class BukkitRegistryInitializer implements RegistryInitializer {
                                     Registry<Key, BlockState> stateRegistry, Registry<Key, Item> itemRegistry) {
     for (Material mat : org.bukkit.Registry.MATERIAL) {
       if (mat.isBlock()) {
-        var key = PlatformAdapter.fromNsk(mat.getKey());
+        var key = mat.key();
         var type = registry.getOrThrow(key);
         var data = mat.createBlockData();
         stateRegistry.register(PlatformAdapter.fromBukkitData(data));
@@ -100,7 +100,7 @@ public final class BukkitRegistryInitializer implements RegistryInitializer {
     var map = StreamSupport.stream(org.bukkit.Registry.POTION_EFFECT_TYPE.spliterator(), false)
       .collect(Collectors.groupingBy(PlatformAdapter::potionCategory));
     for (var entry : map.entrySet()) {
-      var data = entry.getValue().stream().map(p -> registry.get(PlatformAdapter.fromNsk(p.getKey()))).toList();
+      var data = entry.getValue().stream().map(p -> registry.get(p.key())).toList();
       registry.getTagOrCreate(entry.getKey().key(), k -> builder.apply(k).add(data).build());
     }
   }
@@ -112,7 +112,7 @@ public final class BukkitRegistryInitializer implements RegistryInitializer {
 
   private <T extends org.bukkit.Keyed> void init(Registry<Key, ?> registry, Iterable<T> bukkitRegistry) {
     for (var keyed : bukkitRegistry) {
-      registry.get(PlatformAdapter.fromNsk(keyed.getKey()));
+      registry.get(keyed.key());
     }
   }
 
@@ -121,10 +121,9 @@ public final class BukkitRegistryInitializer implements RegistryInitializer {
   ) {
     for (var bukkitTag : tags) {
       var data = bukkitTag.getValues().stream().filter(materialPredicate)
-        .map(mat -> registry.get(PlatformAdapter.fromNsk(mat.getKey()))).toList();
+        .map(mat -> registry.get(mat.key())).toList();
       if (!data.isEmpty()) {
-        var tagKey = PlatformAdapter.fromNsk(bukkitTag.getKey());
-        registry.getTagOrCreate(tagKey, k -> builder.apply(k).add(data).build());
+        registry.getTagOrCreate(bukkitTag.key(), k -> builder.apply(k).add(data).build());
       }
     }
   }
@@ -152,6 +151,6 @@ public final class BukkitRegistryInitializer implements RegistryInitializer {
   }
 
   private Sound mapSound(org.bukkit.Sound sound) {
-    return Sound.registry().getOrThrow(PlatformAdapter.fromNsk(sound.getKey()));
+    return Sound.registry().getOrThrow(sound.key());
   }
 }

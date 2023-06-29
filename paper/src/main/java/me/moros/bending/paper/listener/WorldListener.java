@@ -20,7 +20,6 @@
 package me.moros.bending.paper.listener;
 
 import me.moros.bending.api.game.Game;
-import me.moros.bending.paper.platform.PlatformAdapter;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -30,14 +29,12 @@ import org.bukkit.event.world.WorldUnloadEvent;
 public record WorldListener(Game game) implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onWorldUnload(WorldUnloadEvent event) {
-    game.worldManager().onWorldUnload(PlatformAdapter.fromNsk(event.getWorld().getKey()));
+    game.worldManager().onWorldUnload(event.getWorld().key());
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerChangeWorld(PlayerChangedWorldEvent event) {
     var p = event.getPlayer();
-    var from = PlatformAdapter.fromNsk(event.getFrom().getKey());
-    var to = PlatformAdapter.fromNsk(p.getWorld().getKey());
-    game.worldManager().onUserChangeWorld(p.getUniqueId(), from, to);
+    game.worldManager().onUserChangeWorld(p.getUniqueId(), event.getFrom().key(), p.getWorld().key());
   }
 }
