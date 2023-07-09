@@ -28,7 +28,7 @@ import me.moros.bending.api.user.User;
 public abstract class AbstractUserEvent implements UserEvent {
   private final User user;
 
-  public AbstractUserEvent(User user) {
+  protected AbstractUserEvent(User user) {
     this.user = user;
   }
 

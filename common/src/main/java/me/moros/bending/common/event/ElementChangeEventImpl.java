@@ -21,11 +21,10 @@ package me.moros.bending.common.event;
 
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.event.ElementChangeEvent;
-import me.moros.bending.api.event.UserEvent;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.event.base.AbstractCancellableUserEvent;
 
-public class ElementChangeEventImpl extends AbstractCancellableUserEvent implements UserEvent, ElementChangeEvent {
+public class ElementChangeEventImpl extends AbstractCancellableUserEvent implements ElementChangeEvent {
   private final Element element;
   private final ElementAction action;
 

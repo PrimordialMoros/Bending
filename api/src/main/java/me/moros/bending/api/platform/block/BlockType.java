@@ -27,9 +27,8 @@ import me.moros.bending.api.platform.sound.SoundGroup;
 import me.moros.bending.api.registry.Registry;
 import me.moros.math.Position;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
 
-public sealed interface BlockType extends Keyed, BlockProperties, BlockTypes permits BlockTypeImpl {
+public sealed interface BlockType extends BlockProperties, BlockTypes permits BlockTypeImpl {
   static Registry<Key, BlockType> registry() {
     return BlockTypeImpl.REGISTRY;
   }

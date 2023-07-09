@@ -19,11 +19,10 @@
 
 package me.moros.bending.common.event;
 
-import me.moros.bending.api.event.UserEvent;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.event.base.AbstractUserEvent;
 
-public class UserRegisterEventImpl extends AbstractUserEvent implements UserEvent {
+public class UserRegisterEventImpl extends AbstractUserEvent {
   public UserRegisterEventImpl(User user) {
     super(user);
   }

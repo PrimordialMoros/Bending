@@ -23,9 +23,8 @@ import me.moros.bending.api.registry.Tag;
 import me.moros.bending.api.registry.TagBuilder;
 import me.moros.bending.api.util.KeyUtil;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
 
-public sealed interface PotionEffectTag extends Keyed, Tags, Tag<PotionEffect> permits TagImpl {
+public sealed interface PotionEffectTag extends Tags, Tag<PotionEffect> permits TagImpl {
   default boolean isTagged(Key key) {
     PotionEffect type = PotionEffect.registry().get(key);
     return type != null && isTagged(type);

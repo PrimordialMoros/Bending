@@ -81,6 +81,6 @@ public class Sphere implements Collider {
 
   @Override
   public int hashCode() {
-    return Objects.hash(center, radius);
+    return 31 * center.hashCode() + Double.hashCode(radius);
   }
 }

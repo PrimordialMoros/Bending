@@ -24,7 +24,7 @@ import me.moros.bending.api.event.AbilityEvent;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.event.base.AbstractAbilityEvent;
 
-public class AbilityActivationEventImpl extends AbstractAbilityEvent implements AbilityEvent {
+public class AbilityActivationEventImpl extends AbstractAbilityEvent {
   public AbilityActivationEventImpl(User user, AbilityDescription desc) {
     super(user, desc);
   }

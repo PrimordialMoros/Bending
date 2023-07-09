@@ -23,9 +23,8 @@ import me.moros.bending.api.registry.Tag;
 import me.moros.bending.api.registry.TagBuilder;
 import me.moros.bending.api.util.KeyUtil;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
 
-public sealed interface ItemTag extends Keyed, Tags, Tag<Item> permits TagImpl {
+public sealed interface ItemTag extends Tags, Tag<Item> permits TagImpl {
   default boolean isTagged(Key key) {
     Item type = Item.registry().get(key);
     return type != null && isTagged(type);
