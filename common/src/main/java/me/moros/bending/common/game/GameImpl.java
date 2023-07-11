@@ -114,7 +114,6 @@ public final class GameImpl implements Game {
   @Override
   public void reload() {
     cleanup();
-    plugin.translationManager().reload();
     Registries.BENDERS.forEach(u -> worldManager.instance(u.worldKey()).createPassives(u));
   }
 

@@ -26,7 +26,11 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 import me.moros.bending.api.ability.AbilityDescription;
+import me.moros.bending.api.ability.DamageSource;
+import me.moros.bending.api.event.BendingDamageEvent;
+import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.EntityType;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.item.Inventory;
 import me.moros.bending.api.platform.potion.Potion;
@@ -88,7 +92,15 @@ public class BukkitLivingEntity extends BukkitEntity implements LivingEntity {
 
   @Override
   public boolean damage(double damage, User source, AbilityDescription desc) {
-    return DamageUtil.damageEntity(handle(), source, damage, desc);
+    BendingDamageEvent event = source.game().eventBus().postAbilityDamageEvent(source, desc, this, damage);
+    double dmg = event.damage();
+    if (event.cancelled() || dmg <= 0) {
+      return false;
+    }
+    if (type() != EntityType.PLAYER) {
+      DamageUtil.cacheDamageSource(uuid(), DamageSource.of(source.name(), desc));
+    }
+    return Platform.instance().nativeAdapter().damage(event);
   }
 
   @Override

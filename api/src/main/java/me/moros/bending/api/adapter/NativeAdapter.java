@@ -19,9 +19,6 @@
 
 package me.moros.bending.api.adapter;
 
-import java.util.Optional;
-import java.util.function.Function;
-
 import me.moros.bending.api.collision.raytrace.BlockRayTrace;
 import me.moros.bending.api.collision.raytrace.Context;
 import me.moros.bending.api.event.BendingDamageEvent;
@@ -33,7 +30,6 @@ import me.moros.bending.api.platform.world.World;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
-import net.kyori.adventure.text.TranslatableComponent;
 import org.jetbrains.annotations.ApiStatus.Internal;
 
 /**
@@ -41,7 +37,7 @@ import org.jetbrains.annotations.ApiStatus.Internal;
  */
 public interface NativeAdapter extends PacketUtil {
   @Internal
-  default boolean damage(BendingDamageEvent event, Function<String, Optional<TranslatableComponent>> translator) {
+  default boolean damage(BendingDamageEvent event) {
     return event.target().damage(event.damage(), event.user());
   }
 

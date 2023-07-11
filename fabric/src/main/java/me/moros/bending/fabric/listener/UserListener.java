@@ -44,7 +44,6 @@ import me.moros.bending.fabric.event.ServerEntityEvents;
 import me.moros.bending.fabric.event.ServerInventoryEvents;
 import me.moros.bending.fabric.event.ServerItemEvents;
 import me.moros.bending.fabric.event.ServerPlayerEvents;
-import me.moros.bending.fabric.platform.AbilityDamageSource;
 import me.moros.bending.fabric.platform.FabricMetadata;
 import me.moros.bending.fabric.platform.PlatformAdapter;
 import me.moros.bending.fabric.platform.entity.FabricEntity;
@@ -322,7 +321,7 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
   }
 
   private InteractionResultHolder<List<ItemStack>> onDropLoot(LivingEntity entity, DamageSource source, List<ItemStack> items) {
-    if (!disabledWorld(entity) && source instanceof AbilityDamageSource s && s.ability().element() == Element.FIRE) {
+    if (!disabledWorld(entity) && source instanceof me.moros.bending.api.ability.DamageSource s && s.ability().element() == Element.FIRE) {
       ListIterator<ItemStack> it = items.listIterator();
       while (it.hasNext()) {
         ItemStack item = it.next();

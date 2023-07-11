@@ -19,29 +19,19 @@
 
 package me.moros.bending.paper.platform;
 
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Scheduler;
-import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.DamageSource;
-import me.moros.bending.api.event.BendingDamageEvent;
-import me.moros.bending.api.platform.Platform;
-import me.moros.bending.api.user.User;
-import me.moros.bending.common.locale.TranslationManager;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Utility class to handle bending damage and death messages.
  */
 public final class DamageUtil {
-  private static TranslationManager manager;
-
   private DamageUtil() {
   }
 
@@ -49,33 +39,6 @@ public final class DamageUtil {
     .expireAfterWrite(100, TimeUnit.MILLISECONDS)
     .scheduler(Scheduler.systemScheduler())
     .build();
-
-  /**
-   * Attempt to damage the specified entity with certain parameters.
-   * This will fire a {@link BendingDamageEvent} and calculate damage ignoring armor.
-   * @param target the entity to damage
-   * @param source the user damaging the target
-   * @param damage the amount of damage to inflict
-   * @param desc the ability which causes the damage
-   * @return true if entity was successfully damaged, false otherwise
-   */
-  public static boolean damageEntity(Entity target, User source, double damage, AbilityDescription desc) {
-    Objects.requireNonNull(target);
-    Objects.requireNonNull(source);
-    Objects.requireNonNull(desc);
-    if (damage <= 0) {
-      return false;
-    }
-    LivingEntity targetEntity = (LivingEntity) target;
-    var platformEntity = PlatformAdapter.fromBukkitEntity(targetEntity);
-    BendingDamageEvent event = source.game().eventBus().postAbilityDamageEvent(source, desc, platformEntity, damage);
-    double dmg = event.damage();
-    if (!event.cancelled() && dmg > 0 && Platform.instance().nativeAdapter().damage(event, manager::translate)) {
-      cacheDamageSource(targetEntity.getUniqueId(), DamageSource.of(event.user().name(), event.ability()));
-      return true;
-    }
-    return false;
-  }
 
   public static void cacheDamageSource(UUID uuid, @Nullable DamageSource source) {
     if (source != null) {

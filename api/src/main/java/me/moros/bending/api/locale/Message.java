@@ -20,12 +20,10 @@
 package me.moros.bending.api.locale;
 
 import java.util.Locale;
-import java.util.function.Supplier;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
-import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
@@ -146,7 +144,7 @@ public interface Message {
   Args2<Component, Component> ABILITY_INFO_INSTRUCTIONS = (ability, instructions) -> translatable("bending.command.info.instructions", TEXT_COLOR)
     .args(ability, instructions);
 
-  Supplier<TranslatableComponent> ABILITY_GENERIC_DEATH = () -> translatable("bending.ability.generic.death");
+  String ABILITY_GENERIC_DEATH_KEY = "bending.ability.generic.death";
 
   Args2<String, String> VERSION_COMMAND_HOVER = (author, link) -> translatable("bending.command.version.hover", NEUTRAL)
     .args(text(author, HEADER), text("GNU AGPLv3", TextColor.fromHexString("#007EC6")), text(link, LINK_COLOR))

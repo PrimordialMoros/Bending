@@ -79,6 +79,7 @@ public abstract class AbstractBending<T> implements Bending {
       game.cleanup();
       game.eventBus().shutdown();
       configManager().close();
+      translationManager().close();
       Tasker.sync().shutdown();
       Tasker.async().shutdown();
       game.storage().close();

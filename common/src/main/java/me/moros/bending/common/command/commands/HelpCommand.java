@@ -83,8 +83,8 @@ public record HelpCommand<C extends Audience>(Commander<C> commander, MinecraftH
 
   private void onAbilityInfo(C sender, AbilityDescription ability) {
     var translationManager = commander().plugin().translationManager();
-    Component description = translationManager.translate(ability.descriptionKey()).orElse(null);
-    Component instructions = translationManager.translate(ability.instructionsKey()).orElse(null);
+    Component description = translationManager.translate(ability.descriptionKey());
+    Component instructions = translationManager.translate(ability.instructionsKey());
     if (instructions == null && ability instanceof Sequence sequence) {
       instructions = sequence.instructions();
     }

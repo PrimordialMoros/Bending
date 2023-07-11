@@ -39,13 +39,13 @@ import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.api.util.metadata.BlockInteraction;
 import me.moros.bending.api.util.metadata.EntityInteraction;
 import me.moros.bending.api.util.metadata.Metadata;
-import me.moros.bending.common.Bending;
 import me.moros.bending.common.ability.earth.EarthGlove;
 import me.moros.bending.common.ability.earth.MetalCable;
 import me.moros.bending.sponge.platform.AbilityDamageSource;
 import me.moros.bending.sponge.platform.PlatformAdapter;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -95,11 +95,8 @@ import org.spongepowered.api.world.LocatableSnapshot;
 import org.spongepowered.api.world.server.ServerLocation;
 
 public class UserListener extends SpongeListener {
-  private final Bending plugin;
-
-  public UserListener(Game game, Bending plugin) {
+  public UserListener(Game game) {
     super(game);
-    this.plugin = plugin;
   }
 
   @Listener(order = Order.EARLY)
@@ -271,8 +268,7 @@ public class UserListener extends SpongeListener {
     DamageSource source = event.cause().first(DamageSource.class).orElseGet(() -> blockCause(event.cause()));
     if (source != null) {
       AbilityDescription ability = source.ability();
-      TranslatableComponent msg = plugin.translationManager()
-        .translate(ability.deathKey()).orElseGet(Message.ABILITY_GENERIC_DEATH)
+      TranslatableComponent msg = Component.translatable(ability.deathKey(), Message.ABILITY_GENERIC_DEATH_KEY)
         .args(player.displayName().get(), source.name(), ability.displayName());
       // TODO check rendering
       event.setMessage(msg);

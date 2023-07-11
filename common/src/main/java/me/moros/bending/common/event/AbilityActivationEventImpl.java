@@ -20,7 +20,6 @@
 package me.moros.bending.common.event;
 
 import me.moros.bending.api.ability.AbilityDescription;
-import me.moros.bending.api.event.AbilityEvent;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.event.base.AbstractAbilityEvent;
 

@@ -324,14 +324,13 @@ public record UserListener(Game game, Bending plugin) implements Listener, Bukki
     }
   }
 
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onPlayerDeath(PlayerDeathEvent event) {
     Player player = event.getEntity();
     DamageSource cause = DamageUtil.cachedDamageSource(player.getUniqueId());
     if (cause != null) {
       AbilityDescription ability = cause.ability();
-      Component message = plugin.translationManager()
-        .translate(ability.deathKey()).orElseGet(Message.ABILITY_GENERIC_DEATH)
+      Component message = Component.translatable(ability.deathKey(), Message.ABILITY_GENERIC_DEATH_KEY)
         .args(player.name(), cause.name(), ability.displayName());
       event.deathMessage(message);
     }

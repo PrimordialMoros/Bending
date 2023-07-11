@@ -128,7 +128,7 @@ public final class TextUtil {
   }
 
   /**
-   * Collects all the provided values formats them as an array.
+   * Collects all the provided values and formats them as an array.
    * @param values the values to collect
    * @param function the function to transform each value into a string
    * @param <T> the type of values

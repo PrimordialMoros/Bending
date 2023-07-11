@@ -65,7 +65,6 @@ public class TempEntity extends Temporary {
     return new ArmorStandBuilder(Objects.requireNonNull(data));
   }
 
-
   public static final class FallingBlockBuilder extends TempEntityBuilder<BlockState, TempEntity, FallingBlockBuilder> {
     private static final Vector3d FALLING_BLOCK_OFFSET = Vector3d.of(0.5, 0, 0.5);
 

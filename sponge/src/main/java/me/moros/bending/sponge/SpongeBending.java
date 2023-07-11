@@ -93,7 +93,7 @@ public final class SpongeBending extends AbstractBending<PluginContainer> {
     new SpongePermissionInitializer().init();
     var eventManager = event.game().eventManager();
     eventManager.registerListeners(parent, new BlockListener(game));
-    eventManager.registerListeners(parent, new UserListener(game, this));
+    eventManager.registerListeners(parent, new UserListener(game));
     eventManager.registerListeners(parent, new ConnectionListener(game, this));
     eventManager.registerListeners(parent, new WorldListener(game));
     eventManager.registerListeners(parent, new PlaceholderListener());

@@ -22,6 +22,7 @@ package me.moros.bending.common.adapter;
 import me.moros.bending.api.adapter.NativeAdapter;
 import me.moros.bending.api.collision.raytrace.BlockRayTrace;
 import me.moros.bending.api.collision.raytrace.Context;
+import me.moros.bending.api.event.BendingDamageEvent;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.world.World;
@@ -69,5 +70,11 @@ public abstract class AbstractNativeAdapter extends AbstractPacketUtil implement
       return true;
     }
     return false;
+  }
+
+  @Override
+  public boolean damage(BendingDamageEvent event) {
+    var damageSource = new AbilityDamageSource(adapt(event.user().entity()), event.user(), event.ability(), this::adapt);
+    return adapt(event.target()).hurt(damageSource, (float) event.damage());
   }
 }

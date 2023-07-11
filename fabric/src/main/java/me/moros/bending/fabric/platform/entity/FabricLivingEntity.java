@@ -26,6 +26,7 @@ import java.util.function.Supplier;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.event.BendingDamageEvent;
+import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.item.Inventory;
@@ -34,7 +35,6 @@ import me.moros.bending.api.platform.potion.PotionEffect;
 import me.moros.bending.api.platform.property.BooleanProperty;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.functional.Suppliers;
-import me.moros.bending.fabric.platform.AbilityDamageSource;
 import me.moros.bending.fabric.platform.PlatformAdapter;
 import me.moros.bending.fabric.platform.item.FabricInventory;
 import me.moros.math.Position;
@@ -97,7 +97,7 @@ public class FabricLivingEntity extends FabricEntity implements LivingEntity {
     if (event.cancelled() || dmg <= 0) {
       return false;
     }
-    return handle().hurt(AbilityDamageSource.create(source, desc), (float) dmg);
+    return Platform.instance().nativeAdapter().damage(event);
   }
 
   @Override

@@ -44,7 +44,6 @@ import me.moros.bending.fabric.listener.BlockListener;
 import me.moros.bending.fabric.listener.ConnectionListener;
 import me.moros.bending.fabric.listener.UserListener;
 import me.moros.bending.fabric.listener.WorldListener;
-import me.moros.bending.fabric.platform.AbilityDamageSource;
 import me.moros.bending.fabric.platform.CommandSender;
 import me.moros.bending.fabric.platform.CommandSender.PlayerCommandSender;
 import me.moros.bending.fabric.platform.FabricMetadata;
@@ -70,7 +69,6 @@ final class FabricBending extends AbstractBending<ModContainer> {
     super(container, path, new Slf4jLogger(LoggerFactory.getLogger(container.getMetadata().getName())));
 
     ReflectionUtil.injectStatic(Tasker.class, CompositeExecutor.of(new FabricExecutor()));
-    ReflectionUtil.injectStatic(AbilityDamageSource.class, translationManager());
 
     Tasker.async().repeat(FabricMetadata.INSTANCE::removeEmpty, 5, TimeUnit.MINUTES);
 

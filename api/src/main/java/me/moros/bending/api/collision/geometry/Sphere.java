@@ -19,8 +19,6 @@
 
 package me.moros.bending.api.collision.geometry;
 
-import java.util.Objects;
-
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 

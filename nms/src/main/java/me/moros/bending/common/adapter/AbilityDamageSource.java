@@ -17,27 +17,28 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.paper.adapter.v1_20_R1;
+package me.moros.bending.common.adapter;
 
-import io.papermc.paper.adventure.PaperAdventure;
+import java.util.function.Function;
+
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.DamageSource;
+import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.user.User;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TranslatableComponent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
 final class AbilityDamageSource extends net.minecraft.world.damagesource.DamageSource implements DamageSource {
   private final Component name;
   private final AbilityDescription ability;
-  private final TranslatableComponent deathMessage;
+  private final Function<Component, net.minecraft.network.chat.Component> mapper;
 
-  AbilityDamageSource(Entity userEntity, User user, AbilityDescription ability, TranslatableComponent deathMessage) {
+  AbilityDamageSource(Entity userEntity, User user, AbilityDescription ability, Function<Component, net.minecraft.network.chat.Component> mapper) {
     super(userEntity.damageSources().generic().typeHolder(), userEntity);
     this.name = user.name();
     this.ability = ability;
-    this.deathMessage = deathMessage;
+    this.mapper = mapper;
   }
 
   @Override
@@ -51,8 +52,13 @@ final class AbilityDamageSource extends net.minecraft.world.damagesource.DamageS
   }
 
   public net.minecraft.network.chat.Component getLocalizedDeathMessage(LivingEntity livingEntity) {
-    var advName = PaperAdventure.asAdventure(livingEntity.getDisplayName());
-    return PaperAdventure.asVanilla(deathMessage.args(advName, name, ability.displayName()));
+    //noinspection DataFlowIssue
+    return net.minecraft.network.chat.Component.translatableWithFallback(ability.deathKey(), // Key
+      Message.ABILITY_GENERIC_DEATH_KEY, // Fallback
+      livingEntity.getDisplayName(),
+      getDirectEntity().getDisplayName(),
+      mapper.apply(ability.displayName())
+    );
   }
 }
 
