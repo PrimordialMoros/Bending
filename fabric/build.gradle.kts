@@ -7,6 +7,15 @@ repositories {
     maven("https://maven.fabricmc.net/") {
         mavenContent { includeGroup("net.fabricmc") }
     }
+    maven("https://repo.moros.me/snapshots/") {
+        mavenContent {
+            includeGroup("net.kyori")
+            snapshotsOnly()
+        }
+    }
+    maven("https://maven.fabricmc.net/") {
+        mavenContent { includeGroup("net.fabricmc") }
+    }
     maven("https://maven.nucleoid.xyz/") // Placeholder API
 }
 

@@ -8,7 +8,7 @@ application {
 }
 
 repositories {
-    mavenLocal()
+    maven("https://repo.moros.me/snapshots/")
 }
 
 dependencies {

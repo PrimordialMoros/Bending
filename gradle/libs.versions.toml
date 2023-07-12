@@ -2,7 +2,7 @@
 math = "2.0.0"
 tasker = "1.0.0"
 adventure = "4.14.0"
-adventure-fabric = "5.8.0"
+adventure-fabric = "5.10.0-SNAPSHOT"
 configurate = "4.1.2"
 cloud = "1.8.3"
 cloud-snapshot = "1.8.0-SNAPSHOT"
@@ -30,7 +30,7 @@ tasker-minestom = { module = "me.moros:tasker-minestom", version.ref = "tasker" 
 
 javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
 gson = { module = "com.google.code.gson:gson", version = "2.10.1" }
-articdata = { module = "de.articdive:articdata", version = "1.20.1-d4098d14" }
+articdata = { module = "de.articdive:articdata", version = "1.20.1-77b86bc4" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.6" }
 guava = { module = "com.google.guava:guava", version = "32.1.1-jre" }
 jdbi = { module = "org.jdbi:jdbi3-core", version = "3.39.1" }
