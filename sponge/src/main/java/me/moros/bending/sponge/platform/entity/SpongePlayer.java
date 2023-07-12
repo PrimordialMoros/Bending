@@ -47,6 +47,11 @@ public class SpongePlayer extends SpongeLivingEntity implements Player {
   }
 
   @Override
+  public boolean isOnGround() {
+    return Player.super.isOnGround();
+  }
+
+  @Override
   public boolean hasPermission(String permission) {
     return handle().hasPermission(permission);
   }
