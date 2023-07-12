@@ -74,7 +74,12 @@ public abstract class AbstractNativeAdapter extends AbstractPacketUtil implement
 
   @Override
   public boolean damage(BendingDamageEvent event) {
+    var target = adapt(event.target());
+    int capturedInvulnerableTime = target.invulnerableTime;
+    target.invulnerableTime = 0;
     var damageSource = new AbilityDamageSource(adapt(event.user().entity()), event.user(), event.ability(), this::adapt);
-    return adapt(event.target()).hurt(damageSource, (float) event.damage());
+    boolean result = target.hurt(damageSource, (float) event.damage());
+    target.invulnerableTime = capturedInvulnerableTime;
+    return result;
   }
 }
