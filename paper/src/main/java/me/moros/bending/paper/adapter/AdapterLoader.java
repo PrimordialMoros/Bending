@@ -55,7 +55,7 @@ public final class AdapterLoader {
       logger.info("Successfully loaded native adapter for version " + nmsVersion);
       return adapter;
     } else {
-      String s = String.format("""
+      String s = """
                 
         ****************************************************************
         * Unable to find native adapter for version %s.
@@ -64,7 +64,7 @@ public final class AdapterLoader {
         * It is recommended you find a supported version.
         ****************************************************************
                 
-        """, nmsVersion);
+        """.formatted(nmsVersion);
       logger.warn(s);
     }
     return NativeAdapterImpl.DUMMY;

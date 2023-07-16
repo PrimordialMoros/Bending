@@ -75,7 +75,7 @@ final class FabricBending extends AbstractBending<ModContainer> {
     listeners = List.of(
       new BlockListener(this::game),
       new UserListener(this::game),
-      new ConnectionListener(this::game, this),
+      new ConnectionListener(logger(), this::game),
       new WorldListener(this::game)
     );
     registerLifecycleListeners();

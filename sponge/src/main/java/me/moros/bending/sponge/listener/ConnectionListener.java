@@ -19,20 +19,9 @@
 
 package me.moros.bending.sponge.listener;
 
-import java.time.Duration;
-import java.util.UUID;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import me.moros.bending.api.game.Game;
-import me.moros.bending.api.registry.Registries;
-import me.moros.bending.api.user.User;
-import me.moros.bending.api.user.profile.PlayerBenderProfile;
-import me.moros.bending.common.Bending;
+import me.moros.bending.common.listener.AbstractConnectionListener;
+import me.moros.bending.common.logging.Logger;
 import me.moros.bending.sponge.platform.entity.SpongePlayer;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
@@ -41,59 +30,25 @@ import org.spongepowered.api.event.filter.IsCancelled;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.util.Tristate;
 
-public class ConnectionListener extends SpongeListener {
-  private final Bending plugin;
-  private final AsyncLoadingCache<UUID, PlayerBenderProfile> profileCache;
-
-  public ConnectionListener(Game game, Bending plugin) {
-    super(game);
-    this.plugin = plugin;
-    this.profileCache = Caffeine.newBuilder().maximumSize(100).expireAfterWrite(Duration.ofMinutes(2))
-      .buildAsync(game.storage()::loadOrCreateProfile);
+public final class ConnectionListener extends AbstractConnectionListener {
+  public ConnectionListener(Logger logger, Game game) {
+    super(logger, game);
   }
 
   @Listener(order = Order.EARLY)
   @IsCancelled(Tristate.UNDEFINED)
   public void onPlayerPreLogin(ServerSideConnectionEvent.Auth event) {
-    UUID uuid = event.profile().uniqueId();
-    long startTime = System.currentTimeMillis();
-    try {
-      // Timeout after 1000ms to not block the login thread excessively
-      PlayerBenderProfile profile = profileCache.get(uuid).get(1000, TimeUnit.MILLISECONDS);
-      long deltaTime = System.currentTimeMillis() - startTime;
-      if (profile != null && deltaTime > 500) {
-        plugin.logger().warn("Processing login for " + uuid + " took " + deltaTime + "ms.");
-      }
-    } catch (TimeoutException e) {
-      plugin.logger().warn("Timed out while retrieving data for " + uuid);
-    } catch (CancellationException | ExecutionException | InterruptedException e) {
-      plugin.logger().warn(e.getMessage(), e);
-    }
+    asyncJoin(event.profile().uniqueId());
   }
 
   @Listener(order = Order.EARLY)
   public void onPlayerJoin(ServerSideConnectionEvent.Join event) {
     ServerPlayer player = event.player();
-    UUID uuid = player.uniqueId();
-    PlayerBenderProfile profile = profileCache.synchronous().get(uuid);
-    if (profile != null) {
-      User user = User.create(game, new SpongePlayer(player), profile).orElse(null);
-      if (user != null) {
-        Registries.BENDERS.register(user);
-        game.abilityManager(user.worldKey()).createPassives(user);
-      }
-    } else {
-      plugin.logger().error("Could not create bending profile for: " + uuid + " (" + player.name() + ")");
-    }
+    syncJoin(player.uniqueId(), player.name(), () -> new SpongePlayer(player));
   }
 
   @Listener(order = Order.EARLY)
   public void onPlayerLogout(ServerSideConnectionEvent.Disconnect event) {
-    UUID uuid = event.player().uniqueId();
-    User user = Registries.BENDERS.get(uuid);
-    if (user != null) {
-      game.activationController().onUserDeconstruct(user);
-    }
-    profileCache.synchronous().invalidate(uuid);
+    onQuit(event.player().uniqueId());
   }
 }

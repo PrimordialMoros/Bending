@@ -19,20 +19,9 @@
 
 package me.moros.bending.paper.listener;
 
-import java.time.Duration;
-import java.util.UUID;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import me.moros.bending.api.game.Game;
-import me.moros.bending.api.registry.Registries;
-import me.moros.bending.api.user.User;
-import me.moros.bending.api.user.profile.PlayerBenderProfile;
-import me.moros.bending.common.Bending;
+import me.moros.bending.common.listener.AbstractConnectionListener;
+import me.moros.bending.common.logging.Logger;
 import me.moros.bending.paper.platform.entity.BukkitPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -42,58 +31,24 @@ import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-public record ConnectionListener(Game game, Bending plugin,
-                                 AsyncLoadingCache<UUID, PlayerBenderProfile> profileCache) implements Listener {
-  public ConnectionListener(Game game, Bending plugin) {
-    this(game, plugin, createCache(game));
-  }
-
-  private static AsyncLoadingCache<UUID, PlayerBenderProfile> createCache(Game game) {
-    return Caffeine.newBuilder().maximumSize(100).expireAfterWrite(Duration.ofMinutes(2))
-      .buildAsync(game.storage()::loadOrCreateProfile);
+public final class ConnectionListener extends AbstractConnectionListener implements Listener {
+  public ConnectionListener(Logger logger, Game game) {
+    super(logger, game);
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onPlayerPreLogin(AsyncPlayerPreLoginEvent event) {
-    UUID uuid = event.getUniqueId();
-    long startTime = System.currentTimeMillis();
-    try {
-      // Timeout after 1000ms to not block the login thread excessively
-      PlayerBenderProfile profile = profileCache.get(uuid).get(1000, TimeUnit.MILLISECONDS);
-      long deltaTime = System.currentTimeMillis() - startTime;
-      if (profile != null && deltaTime > 500) {
-        plugin.logger().warn("Processing login for " + uuid + " took " + deltaTime + "ms.");
-      }
-    } catch (TimeoutException e) {
-      plugin.logger().warn("Timed out while retrieving data for " + uuid);
-    } catch (CancellationException | ExecutionException | InterruptedException e) {
-      plugin.logger().warn(e.getMessage(), e);
-    }
+    asyncJoin(event.getUniqueId());
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerJoin(PlayerJoinEvent event) {
     Player player = event.getPlayer();
-    UUID uuid = player.getUniqueId();
-    PlayerBenderProfile profile = profileCache.synchronous().get(uuid);
-    if (profile != null) {
-      User user = User.create(game, new BukkitPlayer(player), profile).orElse(null);
-      if (user != null) {
-        Registries.BENDERS.register(user);
-        game.abilityManager(user.worldKey()).createPassives(user);
-      }
-    } else {
-      plugin.logger().error("Could not create bending profile for: " + uuid + " (" + player.getName() + ")");
-    }
+    syncJoin(player.getUniqueId(), player.getName(), () -> new BukkitPlayer(player));
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerLogout(PlayerQuitEvent event) {
-    UUID uuid = event.getPlayer().getUniqueId();
-    User user = Registries.BENDERS.get(uuid);
-    if (user != null) {
-      game.activationController().onUserDeconstruct(user);
-    }
-    profileCache.synchronous().invalidate(uuid);
+    onQuit(event.getPlayer().getUniqueId());
   }
 }

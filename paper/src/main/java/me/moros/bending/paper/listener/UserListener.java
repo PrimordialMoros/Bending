@@ -45,7 +45,6 @@ import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.api.util.metadata.BlockInteraction;
 import me.moros.bending.api.util.metadata.EntityInteraction;
 import me.moros.bending.api.util.metadata.Metadata;
-import me.moros.bending.common.Bending;
 import me.moros.bending.common.ability.earth.EarthGlove;
 import me.moros.bending.common.ability.earth.MetalCable;
 import me.moros.bending.paper.platform.DamageUtil;
@@ -89,7 +88,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public record UserListener(Game game, Bending plugin) implements Listener, BukkitListener {
+public record UserListener(Game game) implements Listener, BukkitListener {
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onArrowHit(ProjectileHitEvent event) {
     if (disabledWorld(event)) {

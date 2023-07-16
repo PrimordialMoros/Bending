@@ -5,9 +5,9 @@
   "name": "Bending",
   "description": "Bending mod for Fabric.",
   "contact": {
-    "homepage": "https://github.com/PrimordialMoros/Bending/",
-    "sources": "https://github.com/PrimordialMoros/Bending/",
-    "issues": "https://github.com/PrimordialMoros/Bending/issues/"
+    "homepage": "https://github.com/PrimordialMoros/Bending",
+    "sources": "https://github.com/PrimordialMoros/Bending",
+    "issues": "https://github.com/PrimordialMoros/Bending/issues"
   },
   "authors": [
     "Moros"

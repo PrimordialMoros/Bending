@@ -39,7 +39,7 @@ import net.kyori.adventure.audience.Audience;
 public record ModifierCommand<C extends Audience>(Commander<C> commander) implements Initializer {
   @Override
   public void init() {
-    Builder<C> builder = commander().rootBuilder().literal("modifier", "modifiers", "mod", "m")
+    Builder<C> builder = commander().rootBuilder().literal("modifier", "modifiers")
       .permission(CommandPermissions.MODIFY);
     commander().register(builder.literal("add", "a")
       .meta(CommandMeta.DESCRIPTION, "Add a new modifier to the specified user")

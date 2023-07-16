@@ -64,8 +64,8 @@ final class PaperBending extends AbstractBending<BendingBootstrap> {
 
     var pluginManager = parent.getServer().getPluginManager();
     pluginManager.registerEvents(new BlockListener(game), parent);
-    pluginManager.registerEvents(new UserListener(game, this), parent);
-    pluginManager.registerEvents(new ConnectionListener(game, this), parent);
+    pluginManager.registerEvents(new UserListener(game), parent);
+    pluginManager.registerEvents(new ConnectionListener(logger(), game), parent);
     pluginManager.registerEvents(new WorldListener(game), parent);
 
     try {

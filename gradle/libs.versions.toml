@@ -2,7 +2,7 @@
 math = "2.0.0"
 tasker = "1.0.0"
 adventure = "4.14.0"
-adventure-fabric = "5.10.0-SNAPSHOT"
+adventure-fabric = "5.9.0-SNAPSHOT"
 configurate = "4.1.2"
 cloud = "1.8.3"
 cloud-snapshot = "1.8.0-SNAPSHOT"

@@ -19,25 +19,15 @@
 
 package me.moros.bending.fabric.listener;
 
-import java.time.Duration;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
-import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.mojang.authlib.GameProfile;
 import me.moros.bending.api.game.Game;
-import me.moros.bending.api.registry.Registries;
-import me.moros.bending.api.user.User;
-import me.moros.bending.api.user.profile.PlayerBenderProfile;
-import me.moros.bending.common.Bending;
+import me.moros.bending.common.listener.AbstractConnectionListener;
+import me.moros.bending.common.logging.Logger;
 import me.moros.bending.common.util.Initializer;
 import me.moros.bending.fabric.mixin.accessor.ServerLoginPacketListenerImplAccess;
 import me.moros.bending.fabric.platform.entity.FabricPlayer;
-import me.moros.bending.fabric.platform.scoreboard.ScoreboardUtil;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerLoginConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerLoginNetworking.LoginSynchronizer;
@@ -47,25 +37,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 
-public final class ConnectionListener implements FabricListener, Initializer {
-  private final Supplier<Game> gameSupplier;
-  private final Bending plugin;
-  private final AsyncLoadingCache<UUID, PlayerBenderProfile> profileCache;
-
-  public ConnectionListener(Supplier<Game> gameSupplier, Bending plugin) {
-    this.gameSupplier = gameSupplier;
-    this.plugin = plugin;
-    this.profileCache = Caffeine.newBuilder().maximumSize(100).expireAfterWrite(Duration.ofMinutes(2))
-      .buildAsync(this::cacheLoad);
-  }
-
-  @Override
-  public Supplier<Game> gameSupplier() {
-    return gameSupplier;
-  }
-
-  private PlayerBenderProfile cacheLoad(UUID uuid) {
-    return game().storage().loadOrCreateProfile(uuid);
+public final class ConnectionListener extends AbstractConnectionListener implements Initializer {
+  public ConnectionListener(Logger logger, Supplier<Game> gameSupplier) {
+    super(logger, gameSupplier);
   }
 
   @Override
@@ -78,51 +52,16 @@ public final class ConnectionListener implements FabricListener, Initializer {
   private void onPlayerPreLogin(ServerLoginPacketListenerImpl handler, MinecraftServer server, PacketSender sender, LoginSynchronizer synchronizer) {
     GameProfile prof = ((ServerLoginPacketListenerImplAccess) handler).profile();
     if (prof != null) {
-      synchronizer.waitFor(profileOrTimeout(prof.getId()));
+      synchronizer.waitFor(asyncJoin(prof.getId()));
     }
-  }
-
-  private CompletableFuture<?> profileOrTimeout(UUID uuid) {
-    long startTime = System.currentTimeMillis();
-    CompletableFuture<PlayerBenderProfile> future = profileCache.get(uuid).orTimeout(1000, TimeUnit.MILLISECONDS);
-    return future.thenApply(profile -> {
-      long deltaTime = System.currentTimeMillis() - startTime;
-      if (profile != null && deltaTime > 500) {
-        plugin.logger().warn("Processing login for " + uuid + " took " + deltaTime + "ms.");
-      }
-      return profile;
-    }).exceptionally(t -> {
-      if (t instanceof TimeoutException) {
-        plugin.logger().warn("Timed out while retrieving data for " + uuid);
-      } else {
-        plugin.logger().warn(t.getMessage(), t);
-      }
-      return null;
-    });
   }
 
   private void onPlayerJoin(ServerGamePacketListenerImpl handler, PacketSender sender, MinecraftServer server) {
     ServerPlayer player = handler.getPlayer();
-    UUID uuid = player.getUUID();
-    PlayerBenderProfile profile = profileCache.synchronous().get(uuid);
-    if (profile != null) {
-      User user = User.create(game(), new FabricPlayer(player), profile).orElse(null);
-      if (user != null) {
-        Registries.BENDERS.register(user);
-        game().abilityManager(user.worldKey()).createPassives(user);
-      }
-    } else {
-      plugin.logger().error("Could not create bending profile for: " + uuid + " (" + player.getGameProfile().getName() + ")");
-    }
+    syncJoin(player.getUUID(), player.getGameProfile().getName(), () -> new FabricPlayer(player));
   }
 
   private void onPlayerLogout(ServerGamePacketListenerImpl handler, MinecraftServer server) {
-    UUID uuid = handler.getPlayer().getUUID();
-    User user = Registries.BENDERS.get(uuid);
-    if (user != null) {
-      game().activationController().onUserDeconstruct(user);
-    }
-    ScoreboardUtil.resetScoreboard(handler.getPlayer());
-    profileCache.synchronous().invalidate(uuid);
+    onQuit(handler.getPlayer().getUUID());
   }
 }

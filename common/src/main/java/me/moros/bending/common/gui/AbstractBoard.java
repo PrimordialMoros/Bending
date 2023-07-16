@@ -137,7 +137,7 @@ public abstract class AbstractBoard<Team> implements Board {
   static {
     CHAT_CODES = new String[16];
     for (int i = 0; i < CHAT_CODES.length; i++) {
-      CHAT_CODES[i] = String.format("§%s§r", Integer.toHexString(i));
+      CHAT_CODES[i] = "§%s§r".formatted(Integer.toHexString(i));
     }
   }
 

@@ -42,14 +42,14 @@ import net.kyori.adventure.text.JoinConfiguration;
 public record PresetCommand<C extends Audience>(Commander<C> commander) implements Initializer {
   @Override
   public void init() {
-    Builder<C> builder = commander().rootBuilder().literal("preset", "presets", "pre", "p")
+    Builder<C> builder = commander().rootBuilder().literal("preset", "presets", "p")
       .permission(CommandPermissions.PRESET);
     commander().register(builder.literal("list", "ls")
       .meta(CommandMeta.DESCRIPTION, "List all available presets")
       .senderType(commander().playerType())
       .handler(c -> onPresetList(c.get(ContextKeys.BENDING_PLAYER)))
     );
-    commander().register(builder.literal("create", "save", "c")
+    commander().register(builder.literal("create", "c")
       .meta(CommandMeta.DESCRIPTION, "Create a new preset")
       .senderType(commander().playerType())
       .argument(StringArgument.single("name"))
