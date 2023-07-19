@@ -94,13 +94,22 @@ public final class BendingPlayer extends BendingUser implements PresetUser, Dele
 
   @Override
   public Board board() {
-    if (!game().worldManager().isEnabled(worldKey()) || !hasPermission("bending.board") || store().has(Board.HIDDEN)) {
-      board.disableScoreboard();
-      board = Board.dummy();
+    if (!canUseBoard()) {
+      if (board.isEnabled()) {
+        board.disableScoreboard();
+        board = Board.dummy();
+      }
     } else if (!board.isEnabled()) {
       board = Platform.instance().factory().buildBoard(this).orElseGet(Board::dummy);
     }
     return board;
+  }
+
+  private boolean canUseBoard() {
+    if (store().has(Board.HIDDEN) || !game().worldManager().isEnabled(worldKey()) || !canBend()) {
+      return false;
+    }
+    return !elements().isEmpty() && hasPermission("bending.board");
   }
 
   // Presets

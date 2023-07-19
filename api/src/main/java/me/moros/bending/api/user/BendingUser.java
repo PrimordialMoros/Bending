@@ -105,8 +105,12 @@ public sealed class BendingUser implements User permits BendingPlayer {
   @Override
   public boolean addElement(Element element) {
     if (!hasElement(element) && game().eventBus().postElementChangeEvent(this, element, ElementAction.ADD)) {
+      boolean empty = elements.isEmpty();
       elements.add(element);
       validatePassives();
+      if (empty) {
+        board();
+      }
       return true;
     }
     return false;
@@ -238,6 +242,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
     if (!canBend) {
       game.abilityManager(worldKey()).destroyUserInstances(this, a -> !a.description().isActivatedBy(Activation.PASSIVE));
     }
+    board(); // Update board visibility
     return canBend;
   }
 

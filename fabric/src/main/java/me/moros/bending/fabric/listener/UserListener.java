@@ -259,7 +259,6 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
     if (!disabledWorld(player) && gameType == GameType.SPECTATOR) {
       User user = Registries.BENDERS.get(player.getUUID());
       if (user != null) {
-        user.board().updateAll();
         game().abilityManager(user.world().key()).destroyUserInstances(user, a -> !a.description().isActivatedBy(Activation.PASSIVE));
       }
     }

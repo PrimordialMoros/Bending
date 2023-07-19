@@ -481,7 +481,6 @@ public record UserListener(Game game) implements Listener, BukkitListener {
     if (event.getNewGameMode() == GameMode.SPECTATOR) {
       User user = Registries.BENDERS.get(event.getPlayer().getUniqueId());
       if (user != null) {
-        user.board().updateAll();
         game.abilityManager(user.worldKey()).destroyUserInstances(user, a -> !a.description().isActivatedBy(Activation.PASSIVE));
       }
     }
