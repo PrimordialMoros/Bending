@@ -20,7 +20,6 @@ sourceSets {
 
 tasks.register("printVersionStatus") {
     doLast {
-        println(version)
         println("STATUS=${ if (isSnapshot()) "snapshot" else "release" }")
     }
 }
