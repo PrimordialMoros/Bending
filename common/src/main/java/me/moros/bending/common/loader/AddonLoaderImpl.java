@@ -19,23 +19,64 @@
 
 package me.moros.bending.common.loader;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.ServiceLoader;
-import java.util.ServiceLoader.Provider;
-import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import me.moros.bending.api.addon.Addon;
+import me.moros.bending.api.game.Game;
 import me.moros.bending.common.logging.Logger;
 
 record AddonLoaderImpl(Logger logger, AddonClassLoader loader, Collection<Addon> addons) implements AddonLoader {
-  AddonLoaderImpl(Logger logger, AddonClassLoader loader, Collection<Addon> addons) {
-    this.logger = logger;
-    this.loader = loader;
-    this.addons = new HashSet<>(addons);
-    this.addons.addAll(ServiceLoader.load(Addon.class, loader).stream().map(Provider::get).collect(Collectors.toSet()));
+  AddonLoaderImpl(Logger logger, AddonClassLoader loader) {
+    this(logger, loader, ConcurrentHashMap.newKeySet());
+  }
+
+  @Override
+  public void loadAll(Collection<Supplier<Addon>> providers) {
+    Stream.concat(ServiceLoader.load(Addon.class, loader).stream(), providers.stream()).forEach(this::tryLoad);
+  }
+
+  private void tryLoad(Supplier<Addon> provider) {
+    Addon addon = provider.get();
+    try {
+      addon.load();
+      this.addons.add(addon);
+    } catch (Throwable t) {
+      logger().warn("Unable to load addon %s".formatted(addon.getClass().getName()), t);
+    }
+  }
+
+  @Override
+  public void enableAll(Game game) {
+    forEachSafe(addon -> addon.enable(game));
+  }
+
+  @Override
+  public void unloadAll() {
+    forEachSafe(Addon::unload);
+    addons.clear();
+    try {
+      loader.close();
+    } catch (IOException e) {
+      logger.warn(e.getMessage(), e);
+    }
+  }
+
+  private void forEachSafe(Consumer<Addon> addonConsumer) {
+    for (var addon : this) {
+      try {
+        addonConsumer.accept(addon);
+      } catch (Throwable t) {
+        logger().warn(t.getMessage(), t);
+      }
+    }
   }
 
   @Override

@@ -86,9 +86,9 @@ hangarPublish.publications.register("plugin") {
         dependencies.url("WorldGuard", "https://enginehub.org/worldguard/") { required.set(false) }
         dependencies.url("PlaceholderAPI", "https://www.spigotmc.org/resources/placeholderapi.6245/") { required.set(false) }
         dependencies.url("LWC Extended", "https://www.spigotmc.org/resources/lwc-extended.69551/") { required.set(false) }
+        dependencies.hangar("MiniPlaceholders", "MiniPlaceholders") { required.set(false) }
         dependencies.hangar("TownyAdvanced", "Towny") { required.set(false) }
         dependencies.hangar("GriefPrevention", "GriefPrevention") { required.set(false) }
-
     }
 }
 

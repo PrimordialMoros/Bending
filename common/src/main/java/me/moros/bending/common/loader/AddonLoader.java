@@ -21,38 +21,20 @@ package me.moros.bending.common.loader;
 
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import me.moros.bending.api.addon.Addon;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.common.logging.Logger;
 
 public interface AddonLoader extends Iterable<Addon> {
-  Logger logger();
+  void loadAll(Collection<Supplier<Addon>> addonProviders);
 
-  default void loadAll() {
-    forEachSafe(Addon::load);
-  }
+  void enableAll(Game game);
 
-  default void enableAll(Game game) {
-    forEachSafe(addon -> addon.enable(game));
-  }
+  void unloadAll();
 
-  default void unloadAll() {
-    forEachSafe(Addon::unload);
-  }
-
-  private void forEachSafe(Consumer<Addon> addonConsumer) {
-    for (var addon : this) {
-      try {
-        addonConsumer.accept(addon);
-      } catch (Throwable t) {
-        logger().warn(t.getMessage(), t);
-      }
-    }
-  }
-
-  static AddonLoader create(Logger logger, Path dir, ClassLoader parent, Collection<Addon> addons) {
-    return new AddonLoaderImpl(logger, new AddonClassLoader(parent).loadJars(dir.resolve("addons")), addons);
+  static AddonLoader create(Logger logger, Path dir, ClassLoader parent) {
+    return new AddonLoaderImpl(logger, new AddonClassLoader(parent).loadJars(dir.resolve("addons")));
   }
 }

@@ -10,4 +10,4 @@ val Project.releaseNotes: Provider<String> get() = providers.environmentVariable
 
 fun Project.isSnapshot() = project.version.toString().endsWith("-SNAPSHOT")
 
-fun Project.apiVersion(): String = project.version.toString().replace(Regex("""\d+(?=[^.]*${'$'})"""), "0")
+fun Project.apiVersion(): String = project.version.toString().replace(Regex("""\b\d+(?=[^.]*$)"""), "0")

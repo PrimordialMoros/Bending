@@ -54,5 +54,6 @@ modrinth {
     token.set(providers.environmentVariable("MODRINTH_TOKEN"))
     dependencies {
         optional.project("luckperms")
+        optional.project("miniplaceholders")
     }
 }

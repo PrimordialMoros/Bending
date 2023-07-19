@@ -24,7 +24,8 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.List;
+import java.util.Set;
+import java.util.function.Supplier;
 
 import me.moros.bending.api.addon.Addon;
 import me.moros.bending.api.config.BendingProperties;
@@ -66,17 +67,17 @@ public abstract class AbstractBending<T> implements Bending {
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
-    this.addonLoader = AddonLoader.create(logger(), path, getClass().getClassLoader(), findExtraAddons());
+    this.addonLoader = AddonLoader.create(logger(), path, getClass().getClassLoader());
     ReflectionUtil.injectStatic(BendingProperties.Holder.class, ConfigManager.load(BendingPropertiesImpl::new));
     new AbilityInitializer().init();
-    addonLoader.loadAll();
   }
 
-  protected Collection<Addon> findExtraAddons() {
-    return List.of();
+  protected Collection<Supplier<Addon>> addonProviders() {
+    return Set.of();
   }
 
   protected void load() {
+    addonLoader.loadAll(addonProviders());
     game = new GameImpl(this);
     GameProviderUtil.registerProvider(game);
     addonLoader.enableAll(game);

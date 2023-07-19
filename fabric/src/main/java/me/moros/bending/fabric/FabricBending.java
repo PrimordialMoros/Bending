@@ -20,11 +20,12 @@
 package me.moros.bending.fabric;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
@@ -35,6 +36,7 @@ import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.util.Tasker;
 import me.moros.bending.common.AbstractBending;
 import me.moros.bending.common.command.Commander;
+import me.moros.bending.common.hook.MiniPlaceholdersHook;
 import me.moros.bending.common.logging.Slf4jLogger;
 import me.moros.bending.common.util.GameProviderUtil;
 import me.moros.bending.common.util.Initializer;
@@ -102,6 +104,9 @@ final class FabricBending extends AbstractBending<ModContainer> {
     if (phase == LoadPhase.FIRST) {
       listeners.forEach(Initializer::init);
       new PlaceholderHook().init();
+      if (FabricLoader.getInstance().isModLoaded("MiniPlaceholders")) {
+        new MiniPlaceholdersHook().init();
+      }
       if (FabricLoader.getInstance().isModLoaded("LuckPerms")) {
         LuckPermsHook.register();
       }
@@ -145,17 +150,17 @@ final class FabricBending extends AbstractBending<ModContainer> {
   }
 
   @Override
-  protected Collection<Addon> findExtraAddons() {
+  protected Collection<Supplier<Addon>> addonProviders() {
     var containers = FabricLoader.getInstance().getEntrypointContainers("bending", Addon.class);
-    Collection<Addon> addons = new ArrayList<>();
+    Collection<Supplier<Addon>> addonProviders = new HashSet<>();
     for (var container : containers) {
       try {
-        addons.add(container.getEntrypoint());
+        addonProviders.add(container::getEntrypoint);
       } catch (Throwable t) {
         logger().warn(t.getMessage(), t);
       }
     }
-    return addons;
+    return addonProviders;
   }
 
   private enum LoadPhase {FIRST, LOADING, LOADED}

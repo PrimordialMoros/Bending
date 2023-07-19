@@ -2,14 +2,14 @@
 math = "2.0.0"
 tasker = "1.0.0"
 adventure = "4.14.0"
-adventure-fabric = "5.9.0-SNAPSHOT"
+adventure-fabric = "5.9.0"
 configurate = "4.1.2"
 cloud = "1.8.3"
 cloud-snapshot = "1.8.0-SNAPSHOT"
 bstats = "3.0.2"
-paper = "1.19.4-R0.1-SNAPSHOT"
+paper = "1.20.1-R0.1-SNAPSHOT"
 sponge-api = "11.0.0-SNAPSHOT"
-sponge-common = "1.20-11.0.0-SNAPSHOT"
+sponge-common = "1.20.1-11.0.0-SNAPSHOT"
 minecraft = "1.20.1"
 fabric-loom = "1.3.8"
 fabric-api = "0.85.0+1.20.1"
@@ -37,6 +37,7 @@ hikari = { module = "com.zaxxer:HikariCP", version = "5.0.1" }
 eventbus = { module = "net.kyori:event-api", version = "5.0.0-SNAPSHOT" }
 
 adventure-api = { module = "net.kyori:adventure-api", version.ref = "adventure" }
+adventure-minimessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "adventure" }
 adventure-fabric = { module = "net.kyori:adventure-platform-fabric", version.ref = "adventure-fabric" }
 adventure-legacy = { module = "net.kyori:adventure-text-serializer-legacy", version.ref = "adventure" }
 
@@ -63,6 +64,8 @@ sqlite = { module = "org.xerial:sqlite-jdbc", version = "3.42.0.0" }
 h2 = { module = "com.h2database:h2", version = "2.2.220" }
 hsql = { module = "org.hsqldb:hsqldb", version = "2.7.2" }
 
+mini-placeholders = { module = "io.github.miniplaceholders:miniplaceholders-api", version = "2.2.0" }
+
 # Fabric
 fabric-minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
 fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
@@ -85,6 +88,7 @@ sponge-api = { module = "org.spongepowered:spongeapi", version.ref = "sponge-api
 sponge-common = { module = "org.spongepowered:sponge", version.ref = "sponge-common"}
 sponge-mixin = { module = "org.spongepowered:mixin", version = "0.8.5" }
 
+# Plugins for build-logic
 shadow = { module = "com.github.johnrengelman:shadow", version.ref = "shadow" }
 vanilla = { module = "org.spongepowered:vanillagradle", version = "0.2.1-SNAPSHOT" }
 minotaur = { module = "com.modrinth.minotaur:Minotaur", version = "2.8.2" }

@@ -29,6 +29,7 @@ import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.util.Tasker;
 import me.moros.bending.common.AbstractBending;
 import me.moros.bending.common.command.Commander;
+import me.moros.bending.common.hook.MiniPlaceholdersHook;
 import me.moros.bending.common.logging.Logger;
 import me.moros.bending.common.util.ReflectionUtil;
 import me.moros.bending.paper.hook.LuckPermsHook;
@@ -89,6 +90,9 @@ final class PaperBending extends AbstractBending<BendingBootstrap> {
   private void registerHooks(Server server) {
     if (server.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
       new PlaceholderAPIHook(this).register();
+    }
+    if (server.getPluginManager().isPluginEnabled("MiniPlaceholders")) {
+      new MiniPlaceholdersHook().init();
     }
     if (server.getPluginManager().isPluginEnabled("LuckPerms")) {
       LuckPermsHook.register(server.getServicesManager());

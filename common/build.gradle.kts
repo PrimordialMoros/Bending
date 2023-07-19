@@ -8,6 +8,8 @@ dependencies {
     api(libs.eventbus)
     compileOnlyApi(libs.caffeine)
     compileOnlyApi(libs.luckperms.api)
+    compileOnly(libs.adventure.minimessage)
+    compileOnly(libs.mini.placeholders)
     compileOnly(libs.hikari)
     compileOnly(libs.jdbi)
     compileOnly(libs.guava)
