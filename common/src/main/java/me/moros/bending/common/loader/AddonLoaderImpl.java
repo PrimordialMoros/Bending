@@ -21,16 +21,21 @@ package me.moros.bending.common.loader;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.ServiceLoader;
 import java.util.ServiceLoader.Provider;
 import java.util.stream.Collectors;
 
 import me.moros.bending.api.addon.Addon;
+import me.moros.bending.common.logging.Logger;
 
-record AddonLoaderImpl(AddonClassLoader loader, Collection<Addon> addons) implements AddonLoader {
-  AddonLoaderImpl(AddonClassLoader loader) {
-    this(loader, ServiceLoader.load(Addon.class, loader).stream().map(Provider::get).collect(Collectors.toSet()));
+record AddonLoaderImpl(Logger logger, AddonClassLoader loader, Collection<Addon> addons) implements AddonLoader {
+  AddonLoaderImpl(Logger logger, AddonClassLoader loader, Collection<Addon> addons) {
+    this.logger = logger;
+    this.loader = loader;
+    this.addons = new HashSet<>(addons);
+    this.addons.addAll(ServiceLoader.load(Addon.class, loader).stream().map(Provider::get).collect(Collectors.toSet()));
   }
 
   @Override

@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
@@ -415,7 +416,7 @@ public class Lightning extends AbilityInstance {
         @Override
         public Vector3d next() {
           if (!hasNext()) {
-            throw new RuntimeException("Reached segment end");
+            throw new NoSuchElementException("Reached segment end!");
           }
           f += POINT_DISTANCE;
           return start.add(direction.multiply(f));

@@ -1,10 +1,9 @@
 plugins {
-    signing
-    `maven-publish`
+    id("publish-conventions")
     alias(libs.plugins.jmh)
 }
 
-version = "3.2.0"
+version = apiVersion()
 
 dependencies {
     api(libs.math.core)
@@ -19,70 +18,9 @@ sourceSets {
     }
 }
 
-java {
-    if (!isSnapshot()) {
-        withJavadocJar()
-    }
-    withSourcesJar()
-}
-
-tasks {
-    withType<Sign>().configureEach {
-        onlyIf { !isSnapshot() }
-    }
-    withType<Jar> {
-        manifest {
-            attributes["Automatic-Module-Name"] = "me.moros.bending.api"
-        }
+tasks.register("printVersionStatus") {
+    doLast {
+        println(version)
+        println("STATUS=${ if (isSnapshot()) "snapshot" else "release" }")
     }
 }
-
-publishing {
-    publications.create<MavenPublication>("maven") {
-        from(components["java"])
-        pom {
-            name.set(project.name)
-            description.set("Modern Bending plugin for Minecraft servers")
-            url.set("https://github.com/PrimordialMoros/Bending")
-            licenses {
-                license {
-                    name.set("The GNU Affero General Public License, Version 3.0")
-                    url.set("https://www.gnu.org/licenses/agpl-3.0.txt")
-                }
-            }
-            developers {
-                developer {
-                    id.set("moros")
-                    name.set("Moros")
-                }
-            }
-            scm {
-                connection.set("scm:git:https://github.com/PrimordialMoros/Bending.git")
-                developerConnection.set("scm:git:ssh://git@github.com/PrimordialMoros/Bending.git")
-                url.set("https://github.com/PrimordialMoros/Bending")
-            }
-            issueManagement {
-                system.set("Github")
-                url.set("https://github.com/PrimordialMoros/Bending/issues")
-            }
-        }
-    }
-    if (project.hasProperty("ossrhUsername") && project.hasProperty("ossrhPassword")) {
-        val user = project.property("ossrhUsername") as String?
-        val pass = project.property("ossrhPassword") as String?
-        val snapshotUrl = uri("https://oss.sonatype.org/content/repositories/snapshots/")
-        val releaseUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-        repositories {
-            maven {
-                credentials { username = user; password = pass }
-                url = if (isSnapshot()) snapshotUrl else releaseUrl
-            }
-        }
-    }
-}
-
-signing {
-    sign(publishing.publications["maven"])
-}
-
-fun isSnapshot() = project.version.toString().endsWith("-SNAPSHOT")

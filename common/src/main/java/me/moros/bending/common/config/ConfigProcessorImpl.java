@@ -19,6 +19,7 @@
 
 package me.moros.bending.common.config;
 
+import java.io.UncheckedIOException;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Map;
@@ -61,7 +62,7 @@ record ConfigProcessorImpl(Logger logger,
     try {
       return (T) node.get(def.getClass(), def);
     } catch (SerializationException e) {
-      throw new RuntimeException(e);
+      throw new UncheckedIOException(e);
     }
   }
 

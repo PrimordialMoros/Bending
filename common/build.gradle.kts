@@ -1,20 +1,16 @@
+plugins {
+    id("base-conventions")
+}
+
 dependencies {
     api(projects.bendingApi)
     api(libs.storage)
     api(libs.eventbus)
-    api(libs.caffeine)
-    api(libs.hikari)
-    api(libs.jdbi) { exclude(module = "caffeine") }
-    compileOnlyApi(libs.guava)
+    compileOnlyApi(libs.caffeine)
     compileOnlyApi(libs.luckperms.api)
-    compileOnlyApi(libs.bundles.configurate)
-    compileOnlyApi(libs.bundles.cloud)
+    compileOnly(libs.hikari)
+    compileOnly(libs.jdbi)
+    compileOnly(libs.guava)
+    compileOnly(libs.bundles.configurate)
+    compileOnly(libs.bundles.cloud)
 }
-
-configurations {
-    runtimeElements {
-        exclude(module = "error_prone_annotations")
-        exclude(module = "slf4j-api")
-    }
-}
-

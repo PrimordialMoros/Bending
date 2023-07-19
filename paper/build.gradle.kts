@@ -1,5 +1,7 @@
 plugins {
     id("platform-conventions")
+    alias(libs.plugins.hangar)
+    alias(libs.plugins.run.paper)
 }
 
 repositories {
@@ -20,7 +22,10 @@ dependencies {
     bendingImplementation(libs.cloud.paper)
     bendingImplementation(libs.inventory.framework)
     bendingImplementation(libs.bundles.configurate) { exclude(module = "gson") }
-    bendingImplementation(libs.bundles.drivers.nonstandard) { isTransitive = false }
+    runtimeDownload(libs.caffeine)
+    runtimeDownload(libs.hikari)
+    runtimeDownload(libs.jdbi)
+    runtimeDownload(libs.bundles.drivers.nonstandard)
     compileOnly(libs.paper)
     compileOnly(libs.grief.prevention)
     compileOnly(libs.towny)
@@ -30,6 +35,9 @@ dependencies {
 }
 
 tasks {
+    runServer {
+        minecraftVersion(libs.versions.minecraft.get())
+    }
     shadowJar {
         exclude("fonts/") // We aren't using any fonts from IF
         dependencies {
@@ -37,7 +45,6 @@ tasks {
             reloc("com.typesafe", "typesafe")
             reloc("org.spongepowered.configurate", "configurate")
             reloc("com.github.stefvanschie.inventoryframework", "inventoryframework")
-            reloc("io.leangen", "leangen")
         }
     }
     named<Copy>("processResources") {
@@ -47,6 +54,44 @@ tasks {
     }
 }
 
+val generateRuntimeDependencies = tasks.register("writeDependencies", WriteDependencies::class) {
+    val runtimeDownloadConfig = configurations.getByName("runtimeDownload")
+    tree.set(runtimeDownloadConfig.incoming.resolutionResult.rootComponent)
+    files.from(runtimeDownloadConfig)
+    outputFileName.set("bending-dependencies")
+    outputDir.set(layout.buildDirectory.dir("generated/dependencies"))
+}
+
+sourceSets.main {
+    resources {
+        srcDir(generateRuntimeDependencies)
+    }
+}
+
 bendingPlatform {
     productionJar.set(tasks.shadowJar.flatMap { it.archiveFile })
+}
+
+hangarPublish.publications.register("plugin") {
+    version.set(project.version as String)
+    owner.set("Moros")
+    slug.set("Bending")
+    channel.set("Release")
+    changelog.set(releaseNotes)
+    apiKey.set(providers.environmentVariable("HANGAR_TOKEN"))
+    platforms.register(io.papermc.hangarpublishplugin.model.Platforms.PAPER) {
+        jar.set(bendingPlatform.productionJar)
+        platformVersions.add(libs.versions.minecraft)
+        dependencies.url("LuckPerms", "https://luckperms.net/") { required.set(false) }
+        dependencies.url("WorldGuard", "https://enginehub.org/worldguard/") { required.set(false) }
+        dependencies.url("PlaceholderAPI", "https://www.spigotmc.org/resources/placeholderapi.6245/") { required.set(false) }
+        dependencies.url("LWC Extended", "https://www.spigotmc.org/resources/lwc-extended.69551/") { required.set(false) }
+        dependencies.hangar("TownyAdvanced", "Towny") { required.set(false) }
+        dependencies.hangar("GriefPrevention", "GriefPrevention") { required.set(false) }
+
+    }
+}
+
+modrinth {
+    loaders.set(listOf("paper", "purpur"))
 }

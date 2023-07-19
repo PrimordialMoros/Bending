@@ -1,6 +1,6 @@
 plugins {
     application
-    id("com.github.johnrengelman.shadow")
+    id("base-conventions")
 }
 
 application {

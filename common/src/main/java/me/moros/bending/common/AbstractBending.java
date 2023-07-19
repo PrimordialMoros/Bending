@@ -19,9 +19,14 @@
 
 package me.moros.bending.common;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
 
+import me.moros.bending.api.addon.Addon;
 import me.moros.bending.api.config.BendingProperties;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.util.Tasker;
@@ -35,6 +40,7 @@ import me.moros.bending.common.logging.Logger;
 import me.moros.bending.common.util.GameProviderUtil;
 import me.moros.bending.common.util.ReflectionUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.configurate.reference.WatchServiceListener;
 
 public abstract class AbstractBending<T> implements Bending {
   protected final T parent;
@@ -42,9 +48,10 @@ public abstract class AbstractBending<T> implements Bending {
   private final Path path;
   private final Logger logger;
 
-  private final AddonLoader addonLoader;
+  private final WatchServiceListener listener;
   private final ConfigManager configManager;
   private final TranslationManager translationManager;
+  private final AddonLoader addonLoader;
 
   protected Game game;
 
@@ -52,12 +59,21 @@ public abstract class AbstractBending<T> implements Bending {
     this.parent = parent;
     this.path = dir;
     this.logger = logger;
-    this.addonLoader = AddonLoader.create(dir, getClass().getClassLoader());
-    this.configManager = new ConfigManager(logger, dir);
-    this.translationManager = new TranslationManager(logger, dir);
+    try {
+      this.listener = WatchServiceListener.create();
+      this.configManager = new ConfigManager(logger, dir, listener);
+      this.translationManager = new TranslationManager(logger, dir, listener);
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+    this.addonLoader = AddonLoader.create(logger(), path, getClass().getClassLoader(), findExtraAddons());
     ReflectionUtil.injectStatic(BendingProperties.Holder.class, ConfigManager.load(BendingPropertiesImpl::new));
     new AbilityInitializer().init();
     addonLoader.loadAll();
+  }
+
+  protected Collection<Addon> findExtraAddons() {
+    return List.of();
   }
 
   protected void load() {
@@ -79,7 +95,11 @@ public abstract class AbstractBending<T> implements Bending {
       game.cleanup();
       game.eventBus().shutdown();
       configManager().close();
-      translationManager().close();
+      try {
+        listener.close();
+      } catch (IOException e) {
+        logger.warn(e.getMessage(), e);
+      }
       Tasker.sync().shutdown();
       Tasker.async().shutdown();
       game.storage().close();

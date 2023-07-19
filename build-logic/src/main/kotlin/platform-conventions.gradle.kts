@@ -1,6 +1,6 @@
 plugins {
-    id("java-library")
-    id("com.github.johnrengelman.shadow")
+    id("base-conventions")
+    id("com.modrinth.minotaur")
 }
 
 val platformExt = extensions.create("bendingPlatform", BendingPlatformExtension::class)
@@ -10,26 +10,30 @@ configurations.implementation {
     extendsFrom(configurations.getByName("bendingImplementation"))
 }
 
+val runtimeDownload: Configuration by configurations.creating {
+    isCanBeResolved = true
+    isCanBeConsumed = false
+    attributes {
+        attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage.JAVA_RUNTIME))
+    }
+}
+
 tasks {
     shadowJar {
         configurations = listOf(project.configurations.getByName("bendingImplementation"))
-        exclude("org/checkerframework/") // Try to catch the myriad dependency leaks
         archiveClassifier.set("")
         archiveBaseName.set(project.name)
         from("$rootDir/LICENSE") {
             rename { "${rootProject.name.uppercase()}_${it}" }
         }
+        val excluded = setOf("checker-qual", "error_prone_annotations", "geantyref", "slf4j-api")
         dependencies {
             reloc("org.bstats", "bstats")
-            reloc("me.moros.storage", "storage")
             reloc("net.kyori.event", "eventbus")
-            reloc("com.github.benmanes.caffeine", "caffeine")
-            reloc("com.zaxxer.hikari", "hikari")
-            reloc("org.jdbi", "jdbi")
-            reloc("org.mariadb", "mariadb")
-            reloc("org.postgresql", "postgresql")
-            reloc("org.h2", "h2")
-            reloc("org.hsqldb", "hsqldb")
+            reloc("me.moros.storage", "storage")
+            exclude {
+                excluded.contains(it.moduleName)
+            }
         }
     }
     val copyJar = register("copyJar", CopyFile::class) {
@@ -39,5 +43,16 @@ tasks {
     }
     assemble {
         dependsOn(copyJar)
+    }
+}
+
+modrinth {
+    projectId.set("DzD7S3mv")
+    versionType.set("release")
+    file.set(platformExt.productionJar)
+    changelog.set(releaseNotes)
+    token.set(providers.environmentVariable("MODRINTH_TOKEN"))
+    dependencies {
+        optional.project("luckperms")
     }
 }

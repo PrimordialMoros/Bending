@@ -19,6 +19,7 @@
 
 package me.moros.bending.common.config;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,25 +33,19 @@ import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.reference.ConfigurationReference;
 import org.spongepowered.configurate.reference.WatchServiceListener;
 
-public final class ConfigManager {
+public final class ConfigManager implements Closeable {
   private static ConfigManager INSTANCE;
 
   private final Logger logger;
-  private final WatchServiceListener listener;
   private final ConfigurationReference<CommentedConfigurationNode> reference;
   private final ConfigProcessorImpl processor;
 
-  public ConfigManager(Logger logger, Path directory) {
+  public ConfigManager(Logger logger, Path directory, WatchServiceListener listener) throws IOException {
     this.logger = logger;
     Path path = directory.resolve("bending.conf");
-    try {
-      Files.createDirectories(path.getParent());
-      listener = WatchServiceListener.create();
-      reference = listener.listenToConfiguration(f -> HoconConfigurationLoader.builder().path(f).build(), path);
-      processor = new ConfigProcessorImpl(logger, reference);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    Files.createDirectories(path.getParent());
+    reference = listener.listenToConfiguration(f -> HoconConfigurationLoader.builder().path(f).build(), path);
+    processor = new ConfigProcessorImpl(logger, reference);
     if (INSTANCE == null) {
       INSTANCE = this;
     }
@@ -64,13 +59,9 @@ public final class ConfigManager {
     }
   }
 
+  @Override
   public void close() {
-    try {
-      reference.close();
-      listener.close();
-    } catch (IOException e) {
-      logger.warn(e.getMessage(), e);
-    }
+    reference.close();
   }
 
   public CommentedConfigurationNode config() {

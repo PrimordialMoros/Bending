@@ -23,15 +23,11 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 
 public final class BendingBootstrap implements ModInitializer {
-  private FabricBending instance;
-
   @Override
   public void onInitialize() {
     var container = FabricLoader.getInstance().getModContainer("bending").orElseThrow(
       () -> new IllegalStateException("Bending mod missing in Fabric")
     );
-    if (instance == null) {
-      instance = new FabricBending(container, FabricLoader.getInstance().getConfigDir().resolve("bending"));
-    }
+    new FabricBending(container, FabricLoader.getInstance().getConfigDir().resolve("bending"));
   }
 }

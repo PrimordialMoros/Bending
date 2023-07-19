@@ -1,10 +1,9 @@
 plugins {
-    id("com.github.johnrengelman.shadow")
+    id("base-conventions")
     alias(libs.plugins.userdev)
 }
 
 dependencies {
-    compileOnly(project(":bending-api"))
     implementation(project(":bending-nms"))
     paperweight.paperDevBundle("1.20.1-R0.1-SNAPSHOT")
 }

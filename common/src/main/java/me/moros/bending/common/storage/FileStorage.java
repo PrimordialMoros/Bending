@@ -20,6 +20,7 @@
 package me.moros.bending.common.storage;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
@@ -48,7 +49,7 @@ final class FileStorage extends AbstractStorage {
     try {
       Files.createDirectories(dataPath);
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new UncheckedIOException(e);
     }
   }
 
@@ -95,17 +96,17 @@ final class FileStorage extends AbstractStorage {
     edit(user.uuid(), ref -> ref.get("presets", preset.name()).raw(null));
   }
 
-  private void edit(UUID uuid, ThrowableConsumer<ConfigurationReference<? extends ConfigurationNode>> consumer) {
+  private void edit(UUID uuid, IOConsumer<ConfigurationReference<?>> consumer) {
     try (var ref = load(uuid)) {
       consumer.accept(ref);
       ref.save();
-    } catch (Throwable e) {
-      throw new RuntimeException(e);
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
     }
   }
 
   @FunctionalInterface
-  private interface ThrowableConsumer<T> {
-    void accept(T t) throws Throwable;
+  private interface IOConsumer<T> {
+    void accept(T t) throws IOException;
   }
 }

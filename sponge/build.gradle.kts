@@ -1,6 +1,3 @@
-import org.spongepowered.gradle.vanilla.repository.MinecraftPlatform
-import org.spongepowered.gradle.plugin.config.PluginLoaders
-
 plugins {
     id("platform-conventions")
     alias(libs.plugins.sponge)
@@ -19,7 +16,7 @@ repositories {
 
 minecraft {
     version(libs.versions.minecraft.get())
-    platform(MinecraftPlatform.SERVER)
+    platform(org.spongepowered.gradle.vanilla.repository.MinecraftPlatform.SERVER)
 }
 
 dependencies {
@@ -39,7 +36,6 @@ tasks {
         archiveBaseName.set("${project.name}-mc${libs.versions.minecraft.get()}")
         dependencies {
             reloc("cloud.commandframework", "cloudframework")
-            exclude(dependency("io.leangen.geantyref:geantyref"))
         }
         manifest.attributes["MixinConfigs"] = "bending-sponge.mixins.json"
     }
@@ -49,7 +45,7 @@ sponge {
     apiVersion(libs.versions.sponge.api.get())
     plugin("bending") {
         loader {
-            name(PluginLoaders.JAVA_PLAIN)
+            name(org.spongepowered.gradle.plugin.config.PluginLoaders.JAVA_PLAIN)
             version("1.0")
         }
         displayName("Bending")

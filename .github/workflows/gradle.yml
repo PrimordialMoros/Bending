@@ -1,11 +1,15 @@
-# This workflow will build a Java project with Gradle
-# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
-
 name: Build
-on: [push, pull_request]
+on:
+  push:
+    branches: [ "**" ]
+    tags-ignore: [ "**" ]
+  pull_request:
+  release:
+    types: [ published ]
 
 jobs:
   build:
+    if: "${{ github.event_name != 'pull_request' || github.repository != github.event.pull_request.head.repo.full_name }}"
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -17,9 +21,36 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: ${{ matrix.java }}
-          cache: 'gradle'
           distribution: 'temurin'
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@v1
-      - name: Build with Gradle
-        run: ./gradlew build --no-daemon
+      - name: Setup gradle
+        uses: gradle/gradle-build-action@v2
+      - name: Setup gradle cache
+        uses: actions/cache@v3
+        env:
+          cache-name: project-gradle-cache
+        with:
+          path: |
+            .gradle/caches/VanillaGradle
+            .gradle/loom-cache
+            **/.gradle/caches/paperweight
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/libs.versions.toml', '**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+      - name: Execute gradle build
+        run: ./gradlew build
+      - name: Determine status
+        run: ./gradlew printVersionStatus --quiet >> $GITHUB_ENV
+      - name: Publish release to modrinth
+        if: "${{ env.STATUS == 'release' && github.event_name == 'release' }}"
+        run: ./gradlew modrinth
+        env:
+          MODRINTH_TOKEN: "${{ secrets.MODRINTH_TOKEN }}"
+          RELEASE_NOTES: "${{ github.event.release.body }}"
+      - name: Publish release to hangar
+        if: "${{ env.STATUS == 'release' && github.event_name == 'release' }}"
+        run: ./gradlew publishAllPublicationsToHangar
+        env:
+          HANGAR_TOKEN: "${{ secrets.HANGAR_TOKEN }}"
+          RELEASE_NOTES: "${{ github.event.release.body }}"

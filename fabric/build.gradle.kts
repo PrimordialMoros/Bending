@@ -7,9 +7,6 @@ repositories {
     maven("https://maven.fabricmc.net/") {
         mavenContent { includeGroup("net.fabricmc") }
     }
-    maven("https://maven.fabricmc.net/") {
-        mavenContent { includeGroup("net.fabricmc") }
-    }
     maven("https://maven.nucleoid.xyz/") // Placeholder API
 }
 
@@ -29,6 +26,9 @@ dependencies {
     bendingImplementation(projects.bendingNms)
     bendingImplementation(libs.tasker.fabric)
     bendingImplementation(libs.bundles.configurate) { exclude(module = "gson") }
+    bendingImplementation(libs.caffeine)
+    bendingImplementation(libs.hikari)
+    bendingImplementation(libs.jdbi)
     bendingImplementation(libs.h2)
 }
 
@@ -41,7 +41,10 @@ tasks {
         dependencies {
             reloc("com.typesafe", "typesafe")
             reloc("org.spongepowered.configurate", "configurate")
-            exclude(dependency("io.leangen.geantyref:geantyref"))
+            reloc("com.github.benmanes.caffeine", "caffeine")
+            reloc("com.zaxxer.hikari", "hikari")
+            reloc("org.jdbi", "jdbi")
+            reloc("org.h2", "h2")
         }
     }
     named<Copy>("processResources") {
@@ -60,4 +63,11 @@ tasks {
 
 bendingPlatform {
     productionJar.set(tasks.remapJar.flatMap { it.archiveFile })
+}
+
+modrinth {
+    dependencies {
+        required.project("fabric-api")
+        optional.project("placeholder-api")
+    }
 }

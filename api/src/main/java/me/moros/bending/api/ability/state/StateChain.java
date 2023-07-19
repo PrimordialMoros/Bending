@@ -53,11 +53,11 @@ public class StateChain implements Updatable {
    * Add a new state to this chain.
    * @param state the state to add
    * @return this chain
-   * @throws RuntimeException if chain has already started
+   * @throws IllegalStateException if chain has already started
    */
   public StateChain addState(State state) {
     if (started) {
-      throw new RuntimeException("State is executing");
+      throw new IllegalStateException("State is executing");
     }
     chainQueue.offer(state);
     return this;
@@ -66,14 +66,14 @@ public class StateChain implements Updatable {
   /**
    * Attempt to start this chain.
    * @return this chain
-   * @throws RuntimeException if chain has already started or there are no states queued
+   * @throws IllegalStateException if chain has already started or there are no states queued
    */
   public StateChain start() {
     if (started) {
-      throw new RuntimeException("State is executing");
+      throw new IllegalStateException("State is executing");
     }
     if (chainQueue.isEmpty()) {
-      throw new RuntimeException("Chain is empty");
+      throw new IllegalStateException("Chain is empty");
     }
     started = true;
     nextState();

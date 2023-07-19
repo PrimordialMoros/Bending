@@ -20,6 +20,7 @@
 package me.moros.bending.fabric;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.fabric.FabricServerCommandManager;
+import me.moros.bending.api.addon.Addon;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.util.Tasker;
@@ -140,6 +142,20 @@ final class FabricBending extends AbstractBending<ModContainer> {
   @Override
   public String version() {
     return parent.getMetadata().getVersion().getFriendlyString();
+  }
+
+  @Override
+  protected Collection<Addon> findExtraAddons() {
+    var containers = FabricLoader.getInstance().getEntrypointContainers("bending", Addon.class);
+    Collection<Addon> addons = new ArrayList<>();
+    for (var container : containers) {
+      try {
+        addons.add(container.getEntrypoint());
+      } catch (Throwable t) {
+        logger().warn(t.getMessage(), t);
+      }
+    }
+    return addons;
   }
 
   private enum LoadPhase {FIRST, LOADING, LOADED}

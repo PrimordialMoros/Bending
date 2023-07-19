@@ -63,21 +63,15 @@ public final class TranslationManager implements Iterable<Locale> {
   private final Path translationsDirectory;
   private final AtomicLong lastUpdate;
   private final AtomicReference<ForwardingTranslationRegistry> registryReference;
-  private final WatchServiceListener listener;
 
-  public TranslationManager(Logger logger, Path directory) {
+  public TranslationManager(Logger logger, Path directory, WatchServiceListener listener) throws IOException {
     this.logger = logger;
     this.lastUpdate = new AtomicLong();
-    try {
-      this.translationsDirectory = Files.createDirectories(directory.resolve("translations"));
-      var registry = createRegistry();
-      this.registryReference = new AtomicReference<>(registry);
-      GlobalTranslator.translator().addSource(registry);
-      this.listener = WatchServiceListener.create();
-      this.listener.listenToDirectory(translationsDirectory, e -> reload());
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    this.translationsDirectory = Files.createDirectories(directory.resolve("translations"));
+    var registry = createRegistry();
+    this.registryReference = new AtomicReference<>(registry);
+    GlobalTranslator.translator().addSource(registry);
+    listener.listenToDirectory(translationsDirectory, e -> reload());
   }
 
   private void reload() {
@@ -153,14 +147,6 @@ public final class TranslationManager implements Iterable<Locale> {
   private String removeFileExtension(Path path) {
     String fileName = path.getFileName().toString();
     return fileName.substring(0, fileName.length() - ".properties".length());
-  }
-
-  public void close() {
-    try {
-      listener.close();
-    } catch (IOException e) {
-      logger.warn(e.getMessage(), e);
-    }
   }
 
   /**
