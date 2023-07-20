@@ -93,6 +93,7 @@ hangarPublish.publications.register("plugin") {
 }
 
 modrinth {
+    versionName.set("paper-$version")
     loaders.set(listOf("paper", "purpur"))
     gameVersions.add(libs.versions.minecraft)
 }

@@ -16,7 +16,7 @@ dependencies {
     modImplementation(libs.fabric.api)
     modImplementation(libs.fabric.loader)
     modImplementation(libs.fabric.permissions)
-    modImplementation(include(libs.fabric.placeholder.get())!!)
+    modImplementation(libs.fabric.placeholder)
     modImplementation(include(libs.sgui.get())!!)
     modImplementation(include(libs.adventure.fabric.get())!!)
     modImplementation(include(libs.adventure.legacy.get())!!)
@@ -66,6 +66,7 @@ bendingPlatform {
 }
 
 modrinth {
+    versionName.set("fabric-$version")
     gameVersions.add(libs.versions.minecraft)
     dependencies {
         required.project("fabric-api")

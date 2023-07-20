@@ -21,7 +21,6 @@ package me.moros.bending.fabric;
 
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -34,6 +33,7 @@ import me.moros.bending.api.addon.Addon;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.util.Tasker;
+import me.moros.bending.api.util.functional.Suppliers;
 import me.moros.bending.common.AbstractBending;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.hook.MiniPlaceholdersHook;
@@ -103,13 +103,7 @@ final class FabricBending extends AbstractBending<ModContainer> {
   private void onEnable(MinecraftServer server) {
     if (phase == LoadPhase.FIRST) {
       listeners.forEach(Initializer::init);
-      new PlaceholderHook().init();
-      if (FabricLoader.getInstance().isModLoaded("MiniPlaceholders")) {
-        new MiniPlaceholdersHook().init();
-      }
-      if (FabricLoader.getInstance().isModLoaded("LuckPerms")) {
-        LuckPermsHook.register();
-      }
+      registerHooks();
       phase = LoadPhase.LOADING;
     }
     if (phase == LoadPhase.LOADING) {
@@ -135,6 +129,18 @@ final class FabricBending extends AbstractBending<ModContainer> {
     }
   }
 
+  private void registerHooks() {
+    if (FabricLoader.getInstance().isModLoaded("placeholder-api")) {
+      new PlaceholderHook().init();
+    }
+    if (FabricLoader.getInstance().isModLoaded("miniplaceholders")) {
+      new MiniPlaceholdersHook().init();
+    }
+    if (FabricLoader.getInstance().isModLoaded("luckperms")) {
+      LuckPermsHook.register();
+    }
+  }
+
   private Game game() {
     return game != null ? game : DummyGame.INSTANCE;
   }
@@ -151,16 +157,8 @@ final class FabricBending extends AbstractBending<ModContainer> {
 
   @Override
   protected Collection<Supplier<Addon>> addonProviders() {
-    var containers = FabricLoader.getInstance().getEntrypointContainers("bending", Addon.class);
-    Collection<Supplier<Addon>> addonProviders = new HashSet<>();
-    for (var container : containers) {
-      try {
-        addonProviders.add(container::getEntrypoint);
-      } catch (Throwable t) {
-        logger().warn(t.getMessage(), t);
-      }
-    }
-    return addonProviders;
+    return FabricLoader.getInstance().getEntrypointContainers("bending", Addon.class).stream()
+      .map(c -> Suppliers.lazy(c::getEntrypoint)).toList();
   }
 
   private enum LoadPhase {FIRST, LOADING, LOADED}
