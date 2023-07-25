@@ -271,7 +271,7 @@ public class IceSpike extends AbilityInstance {
     @Modifiable(Attribute.HEIGHT)
     private int columnMaxHeight = 5;
     @Modifiable(Attribute.COOLDOWN)
-    private long fieldCooldown = 5;
+    private long fieldCooldown = 5000;
     @Modifiable(Attribute.RADIUS)
     private double fieldRadius = 10;
 

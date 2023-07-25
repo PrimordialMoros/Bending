@@ -70,8 +70,7 @@ public final class CommandUtil {
 
   public static AbilityDisplay collectAbilities(Predicate<AbilityDescription> permissionChecker, Element element) {
     var components = Registries.ABILITIES.stream()
-      .filter(desc -> element == desc.element() && !desc.hidden())
-      .filter(desc -> !desc.isActivatedBy(Activation.SEQUENCE) && !desc.isActivatedBy(Activation.PASSIVE))
+      .filter(desc -> element == desc.element() && !desc.hidden() && desc.canBind())
       .filter(permissionChecker)
       .map(AbilityDescription::meta)
       .toList();
@@ -89,7 +88,7 @@ public final class CommandUtil {
 
   public static AbilityDisplay collectPassives(Predicate<AbilityDescription> permissionChecker, Element element) {
     var components = Registries.ABILITIES.stream()
-      .filter(desc -> element == desc.element() && !desc.hidden() && desc.isActivatedBy(Activation.PASSIVE))
+      .filter(desc -> element == desc.element() && !desc.hidden() && !desc.canBind() && desc.isActivatedBy(Activation.PASSIVE))
       .filter(permissionChecker)
       .map(AbilityDescription::meta)
       .toList();

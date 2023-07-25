@@ -19,7 +19,6 @@
 
 package me.moros.bending.common.config;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,7 +32,7 @@ import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.reference.ConfigurationReference;
 import org.spongepowered.configurate.reference.WatchServiceListener;
 
-public final class ConfigManager implements Closeable {
+public final class ConfigManager {
   private static ConfigManager INSTANCE;
 
   private final Logger logger;
@@ -59,7 +58,6 @@ public final class ConfigManager implements Closeable {
     }
   }
 
-  @Override
   public void close() {
     reference.close();
   }

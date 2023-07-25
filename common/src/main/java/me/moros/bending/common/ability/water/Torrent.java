@@ -239,12 +239,12 @@ public class Torrent extends AbilityInstance {
     private double damage = 3;
     @Modifiable(Attribute.DAMAGE)
     private double freezeBonusDamage = 2;
+    @Modifiable(Attribute.DURATION)
+    private long freezeDuration = 12500;
     @Modifiable(Attribute.STRENGTH)
     private double knockback = 1;
     @Modifiable(Attribute.STRENGTH)
     private double knockup = 0.2;
-    @Modifiable(Attribute.DURATION)
-    private long freezeDuration = 12500;
 
     @Override
     public List<String> path() {
