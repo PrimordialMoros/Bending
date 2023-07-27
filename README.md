@@ -6,7 +6,7 @@ Bending
 <br>
 </h1>
 
-<h4 align="center">Experience the universe of <i>Avatar: The Last Airbender</i> in minecraft.</h4>
+<h4 align="center">Experience the universe of <i>Avatar: The Last Airbender</i> in Minecraft.</h4>
 
 <p align="center">
 <a href="https://github.com/PrimordialMoros/Bending/actions"><img src="https://img.shields.io/github/actions/workflow/status/PrimordialMoros/Bending/gradle.yml?branch=master&style=flat-square" alt="Gradle CI"/></a>
@@ -32,8 +32,9 @@ Bending
 - Multiple server implementations: Paper, Sponge, Fabric (also works as a singleplayer mod)
 
 ## Download
-
-Downloads are available at [Modrinth](https://modrinth.com/plugin/bending) and [GitHub Releases](https://github.com/PrimordialMoros/Bending/releases).
+- [Modrinth](https://modrinth.com/plugin/bending)
+- [Hangar](https://hangar.papermc.io/Moros/Bending)
+- [GitHub Releases](https://github.com/PrimordialMoros/Bending/releases)
 
 ## Building
 

@@ -68,8 +68,12 @@ public abstract class AbstractBending<T> implements Bending {
       throw new UncheckedIOException(e);
     }
     this.addonLoader = AddonLoader.create(logger(), path, getClass().getClassLoader());
-    ReflectionUtil.injectStatic(BendingProperties.Holder.class, ConfigManager.load(BendingPropertiesImpl::new));
+    this.configManager.subscribe(new BendingPropertiesImpl(), this::injectProperties);
     new AbilityInitializer().init();
+  }
+
+  private void injectProperties(BendingProperties properties) {
+    ReflectionUtil.injectStatic(BendingProperties.Holder.class, properties);
   }
 
   protected Collection<Supplier<Addon>> addonProviders() {

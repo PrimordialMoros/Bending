@@ -39,10 +39,12 @@ The project is split into the following modules:
 Top level package: `me.moros.bending.api`
 - `ability` - Contains ability related classes and interfaces
 - `adapter` - Contains packet and NMS code adapters
+- `addon` - Contains the interface for addons
 - `collision` - Collision and geometry related classes and interfaces
 - `config` - Contains config related classes and interfaces
 - `event` - Contains bending provided events
 - `game` - Contains the main bending systems
+- `gui` - Contains gui related interfaces
 - `locale` - Contains locale related classes and interfaces
 - `platform` - Contains the common platform api
 - `protection` - Contains classes and interfaces for region protection

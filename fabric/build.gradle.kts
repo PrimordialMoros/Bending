@@ -7,7 +7,9 @@ repositories {
     maven("https://maven.fabricmc.net/") {
         mavenContent { includeGroup("net.fabricmc") }
     }
-    maven("https://maven.nucleoid.xyz/") // Placeholder API
+    maven("https://maven.nucleoid.xyz/") {
+        mavenContent { includeGroup("eu.pb4" )}
+    }
 }
 
 dependencies {

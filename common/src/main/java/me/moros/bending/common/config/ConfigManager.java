@@ -22,6 +22,9 @@ package me.moros.bending.common.config;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import me.moros.bending.api.config.ConfigProcessor;
@@ -29,6 +32,7 @@ import me.moros.bending.api.config.Configurable;
 import me.moros.bending.common.logging.Logger;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
+import org.spongepowered.configurate.reactive.Disposable;
 import org.spongepowered.configurate.reference.ConfigurationReference;
 import org.spongepowered.configurate.reference.WatchServiceListener;
 
@@ -38,13 +42,16 @@ public final class ConfigManager {
   private final Logger logger;
   private final ConfigurationReference<CommentedConfigurationNode> reference;
   private final ConfigProcessorImpl processor;
+  private final Collection<Disposable> subscribers;
 
   public ConfigManager(Logger logger, Path directory, WatchServiceListener listener) throws IOException {
     this.logger = logger;
     Path path = directory.resolve("bending.conf");
     Files.createDirectories(path.getParent());
     reference = listener.listenToConfiguration(f -> HoconConfigurationLoader.builder().path(f).build(), path);
+    reference.errors().subscribe(e -> logger.warn(e.getValue().getMessage(), e.getValue()));
     processor = new ConfigProcessorImpl(logger, reference);
+    subscribers = new ArrayList<>();
     if (INSTANCE == null) {
       INSTANCE = this;
     }
@@ -59,11 +66,19 @@ public final class ConfigManager {
   }
 
   public void close() {
+    subscribers.forEach(Disposable::dispose);
+    subscribers.clear();
     reference.close();
   }
 
   public CommentedConfigurationNode config() {
     return reference.node();
+  }
+
+  public <T extends Configurable> void subscribe(T def, Consumer<? super T> consumer) {
+    var ref = processor.getReference(def);
+    subscribers.add(ref.subscribe(consumer::accept));
+    consumer.accept(ref.get());
   }
 
   public ConfigProcessor processor() {

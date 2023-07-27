@@ -12,7 +12,7 @@ sponge-api = "11.0.0-SNAPSHOT"
 sponge-common = "1.20.1-11.0.0-SNAPSHOT"
 minecraft = "1.20.1"
 fabric-loom = "1.3.8"
-fabric-api = "0.85.0+1.20.1"
+fabric-api = "0.86.1+1.20.1"
 fabric-loader = "0.14.21"
 shadow = "8.1.1"
 
@@ -30,7 +30,7 @@ tasker-minestom = { module = "me.moros:tasker-minestom", version.ref = "tasker" 
 javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
 gson = { module = "com.google.code.gson:gson", version = "2.10.1" }
 articdata = { module = "de.articdive:articdata", version = "1.20.1-77b86bc4" }
-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.6" }
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.7" }
 guava = { module = "com.google.guava:guava", version = "32.1.1-jre" }
 jdbi = { module = "org.jdbi:jdbi3-core", version = "3.39.1" }
 hikari = { module = "com.zaxxer:HikariCP", version = "5.0.1" }
@@ -42,6 +42,7 @@ adventure-fabric = { module = "net.kyori:adventure-platform-fabric", version.ref
 adventure-legacy = { module = "net.kyori:adventure-text-serializer-legacy", version.ref = "adventure" }
 
 luckperms-api = { module = "net.luckperms:api", version = "5.4" }
+mini-placeholders = { module = "io.github.miniplaceholders:miniplaceholders-api", version = "2.2.1" }
 
 configurate-core = { module = "org.spongepowered:configurate-core", version.ref = "configurate" }
 configurate-hocon = { module = "org.spongepowered:configurate-hocon", version.ref = "configurate" }
@@ -57,14 +58,12 @@ cloud-fabric = { module = "cloud.commandframework:cloud-fabric", version.ref = "
 cloud-sponge = { module = "cloud.commandframework:cloud-sponge", version.ref = "cloud-snapshot" }
 
 # Databases
-mysql = { module = "com.mysql:mysql-connector-java", version = "8.0.33" }
+mysql = { module = "mysql:mysql-connector-java", version = "8.0.33" }
 mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.1.4" }
 postgresql = { module = "org.postgresql:postgresql", version = "42.6.0" }
 sqlite = { module = "org.xerial:sqlite-jdbc", version = "3.42.0.0" }
 h2 = { module = "com.h2database:h2", version = "2.2.220" }
 hsql = { module = "org.hsqldb:hsqldb", version = "2.7.2" }
-
-mini-placeholders = { module = "io.github.miniplaceholders:miniplaceholders-api", version = "2.2.0" }
 
 # Fabric
 fabric-minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
@@ -91,7 +90,7 @@ sponge-mixin = { module = "org.spongepowered:mixin", version = "0.8.5" }
 # Plugins for build-logic
 shadow = { module = "com.github.johnrengelman:shadow", version.ref = "shadow" }
 vanilla = { module = "org.spongepowered:vanillagradle", version = "0.2.1-SNAPSHOT" }
-minotaur = { module = "com.modrinth.minotaur:Minotaur", version = "2.8.2" }
+minotaur = { module = "com.modrinth.minotaur:Minotaur", version = "2.8.3" }
 checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.29" }
 
 [bundles]
