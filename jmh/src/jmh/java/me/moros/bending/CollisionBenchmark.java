@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Moros
+ * Copyright 2020-2023 Moros
  *
  * This file is part of Bending.
  *
@@ -43,8 +43,8 @@ import org.openjdk.jmh.infra.Blackhole;
 
 @State(Scope.Benchmark)
 @Fork(value = 1)
-@Warmup(iterations = 2, time = 500, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 2, time = 500, timeUnit = TimeUnit.MILLISECONDS)
+@Warmup(iterations = 2, time = 50, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 2, time = 50, timeUnit = TimeUnit.MILLISECONDS)
 public class CollisionBenchmark {
   @Param({"1", "10"})
   int size;

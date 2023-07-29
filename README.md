@@ -22,6 +22,7 @@ Bending
 </p>
 
 #### Main Features:
+
 - Bend the 4 elements (Air, Water, Earth, Fire)
 - Built-in bending board
 - Dynamic ability interactions
@@ -32,6 +33,7 @@ Bending
 - Multiple server implementations: Paper, Sponge, Fabric (also works as a singleplayer mod)
 
 ## Download
+
 - [Modrinth](https://modrinth.com/plugin/bending)
 - [Hangar](https://hangar.papermc.io/Moros/Bending)
 - [GitHub Releases](https://github.com/PrimordialMoros/Bending/releases)
@@ -48,7 +50,8 @@ See [Contributing](CONTRIBUTING.md).
 
 Any contributions, large or small, major features, bug fixes, unit/integration tests are welcome and appreciated.
 
-For information on how to use Bending in your own projects check the [Developer API](https://github.com/PrimordialMoros/Bending/wiki/Developer-API) wiki.
+For information on how to use Bending in your own projects check
+the [Developer API](https://github.com/PrimordialMoros/Bending/wiki/Developer-API) wiki.
 
 ### Special thanks to
 

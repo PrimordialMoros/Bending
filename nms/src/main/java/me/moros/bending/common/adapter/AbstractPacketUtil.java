@@ -30,6 +30,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 
 import com.mojang.datafixers.util.Pair;
+import io.netty.buffer.Unpooled;
 import me.moros.bending.api.adapter.PacketUtil;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.Entity;
@@ -49,6 +50,7 @@ import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
@@ -58,6 +60,7 @@ import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
+import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -167,8 +170,16 @@ public abstract class AbstractPacketUtil implements PacketUtil {
   @Override
   public void updateDisplay(World world, Position center, int id, Display<?> properties) {
     // TODO filter changed properties only (currently sending all)
+    Packet<ClientGamePacketListener> packet = null;
+    var transformation = properties.transformation();
+    var translation = transformation.translation().toVector3d();
+    if (translation.lengthSq() > 32 * 32) {
+      properties = properties.toBuilder().transformation(transformation.withTranslation(Vector3d.ZERO)).build();
+      center = translation.add(center);
+      packet = teleportEntity(id, center);
+    }
     var meta = DisplayUtil.mapProperties(this, new EntityDataBuilder(id), properties).build();
-    broadcast(meta, world, center);
+    broadcast(packet == null ? meta : new ClientboundBundlePacket(List.of(packet, meta)), world, center);
   }
 
   @Override
@@ -265,5 +276,17 @@ public abstract class AbstractPacketUtil implements PacketUtil {
 
   protected ClientboundSetEquipmentPacket setupEquipment(int id, Item item) {
     return new ClientboundSetEquipmentPacket(id, List.of(new Pair<>(EquipmentSlot.HEAD, adapt(item))));
+  }
+
+  protected ClientboundTeleportEntityPacket teleportEntity(int id, Position position) {
+    var buf = new FriendlyByteBuf(Unpooled.buffer());
+    buf.writeVarInt(id);
+    buf.writeDouble(position.x());
+    buf.writeDouble(position.y());
+    buf.writeDouble(position.z());
+    buf.writeByte(0);
+    buf.writeByte(0);
+    buf.writeBoolean(false);
+    return new ClientboundTeleportEntityPacket(buf);
   }
 }

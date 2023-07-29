@@ -21,14 +21,13 @@ package me.moros.bending.common.ability.earth;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.AbilityInstance;
 import me.moros.bending.api.ability.Activation;
 import me.moros.bending.api.ability.common.FragileStructure;
-import me.moros.bending.api.collision.CollisionUtil;
-import me.moros.bending.api.collision.geometry.AABB;
 import me.moros.bending.api.collision.geometry.Collider;
 import me.moros.bending.api.collision.geometry.Ray;
 import me.moros.bending.api.collision.geometry.Sphere;
@@ -55,19 +54,17 @@ import me.moros.bending.api.util.functional.OutOfRangeRemovalPolicy;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
-import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.bending.api.util.material.MaterialUtil;
+import me.moros.bending.common.ability.earth.util.Projectile;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class MetalCable extends AbilityInstance {
   public static final DataKey<MetalCable> CABLE_KEY = KeyUtil.data("metal-cable", MetalCable.class);
 
-  private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(Vector3d.of(0.25, 0.25, 0.25));
   private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
@@ -78,11 +75,9 @@ public class MetalCable extends AbilityInstance {
   private Vector3d location;
   private Vector3d offset;
   private Entity cable;
-  private CableTarget target;
-  private TempFallingBlock projectile;
+  private Attached<?> attached;
 
   private boolean hasHit = false;
-  private boolean launched = false;
   private int ticks;
 
   public MetalCable(AbilityDescription desc) {
@@ -94,17 +89,15 @@ public class MetalCable extends AbilityInstance {
     if (method == Activation.SNEAK) {
       for (Entity entity : user.world().nearbyEntities(user.eyeLocation(), 3, e -> e.type() == EntityType.ARROW)) {
         MetalCable ability = entity.get(CABLE_KEY).orElse(null);
-        if (ability != null && !entity.uuid().equals(ability.user().uuid())) {
+        if (ability != null && !user.uuid().equals(ability.user().uuid())) {
           ability.remove();
         }
       }
       return false;
     } else if (method == Activation.ATTACK) {
       for (var cable : user.game().abilityManager(user.worldKey()).userInstances(user, MetalCable.class).toList()) {
-        if (!cable.launched) {
-          cable.tryLaunchTarget();
-          return false;
-        }
+        cable.tryLaunchTarget();
+        return false;
       }
     }
 
@@ -129,9 +122,6 @@ public class MetalCable extends AbilityInstance {
       return UpdateResult.REMOVE;
     }
     ticks++;
-    if (launched) {
-      return updateProjectile();
-    }
     if (cable == null || !cable.valid()) {
       return UpdateResult.REMOVE;
     }
@@ -145,45 +135,18 @@ public class MetalCable extends AbilityInstance {
     return visualizeLine(distance) ? UpdateResult.CONTINUE : UpdateResult.REMOVE;
   }
 
-  private UpdateResult updateProjectile() {
-    if (projectile == null || !projectile.valid()) {
-      return UpdateResult.REMOVE;
-    }
-    location = projectile.center();
-    if (ticks % 4 == 0) {
-      if (CollisionUtil.handle(user, BOX.at(location), this::onProjectileHit)) {
-        projectile.state().asParticle(location).count(8).offset(0.25, 0.15, 0.25).spawn(user.world());
-        return UpdateResult.REMOVE;
-      }
-    }
-    return UpdateResult.CONTINUE;
-  }
-
-  private boolean onProjectileHit(Entity entity) {
-    BlockType mat = projectile.state().type();
-    double damage;
-    if (EarthMaterials.METAL_BENDABLE.isTagged(mat)) {
-      damage = BendingProperties.instance().metalModifier(userConfig.damage);
-    } else if (EarthMaterials.LAVA_BENDABLE.isTagged(mat)) {
-      damage = BendingProperties.instance().magmaModifier(userConfig.damage);
-    } else {
-      damage = userConfig.damage;
-    }
-    entity.damage(damage, user, description());
-    return true;
-  }
-
   private boolean handleMovement(double distance) {
-    if (target == null || !target.isValid(user)) {
+    if (attached == null || !attached.isValid(user)) {
       return false;
     }
     Entity entityToMove = user;
     Vector3d targetLocation = location;
-    if (target.type == Type.ENTITY) {
-      //noinspection DataFlowIssue
-      cable.teleport(target.entity.location().add(0, target.offset, 0));
+    AttachedEntity attachedEntity = null;
+    if (attached instanceof AttachedEntity temp) {
+      attachedEntity = temp;
+      cable.teleport(attachedEntity.handle().location().add(0, attachedEntity.offset(), 0));
       if (user.sneaking()) {
-        entityToMove = target.entity;
+        entityToMove = attachedEntity.handle();
         Ray ray = user.ray(distance / 2);
         targetLocation = ray.origin.add(ray.direction);
       }
@@ -192,15 +155,14 @@ public class MetalCable extends AbilityInstance {
     if (distance > 3) {
       entityToMove.applyVelocity(this, direction.multiply(userConfig.pullSpeed));
     } else {
-      if (target.type == Type.ENTITY) {
+      if (attachedEntity != null) {
         entityToMove.applyVelocity(this, Vector3d.ZERO);
-        if (projectile != null) {
-          projectile.state().asParticle(projectile.center()).count(8).offset(0.25, 0.15, 0.25).spawn(user.world());
-          projectile.remove();
-          return false;
-        }
-        if (target.entity != null && target.entity.type() == EntityType.FALLING_BLOCK) {
-          target.entity.remove();
+        if (attachedEntity.handle().type() == EntityType.FALLING_BLOCK) {
+          if (attachedEntity.handle() instanceof TempFallingBlock fallingBlock) {
+            fallingBlock.state().asParticle(fallingBlock.center()).count(8)
+              .offset(0.25, 0.15, 0.25).spawn(user.world());
+          }
+          attachedEntity.handle().remove();
         }
         return false;
       } else {
@@ -244,7 +206,9 @@ public class MetalCable extends AbilityInstance {
   private boolean visualizeLine(double distance) {
     Vector3d origin = user.mainHandSide();
     Vector3d dir = location.subtract(origin);
-    Block ignore = target == null ? null : target.block;
+    Block ignore = Optional.ofNullable(attached)
+      .filter(AttachedBlock.class::isInstance).map(AttachedBlock.class::cast)
+      .map(AttachedBlock::handle).orElse(null);
     if (dir.lengthSq() > 0.1 && user.rayTrace(origin, dir).ignoreLiquids(false).ignore(ignore).blocks(user.world()).hit()) {
       return false;
     }
@@ -262,7 +226,7 @@ public class MetalCable extends AbilityInstance {
   }
 
   public void hitBlock(Block block) {
-    if (target != null) {
+    if (attached != null) {
       return;
     }
     if (!user.canBuild(block)) {
@@ -273,18 +237,20 @@ public class MetalCable extends AbilityInstance {
     if (user.sneaking() && !MaterialUtil.isUnbreakable(block)) {
       BlockState state = block.state();
       TempBlock.air().duration(BendingProperties.instance().earthRevertTime()).build(block);
-      projectile = TempFallingBlock.fallingBlock(state).velocity(dir.multiply(0.2)).buildReal(block.world(), location);
-      target = new CableTarget(projectile, 0.5);
+      var entity = TempFallingBlock.fallingBlock(state).velocity(dir.multiply(0.2)).buildReal(block.world(), location);
+      var ability = new Projectile(user, description(), entity, userConfig.projectileRange, userConfig.damage);
+      user.game().abilityManager(user.worldKey()).addAbility(user, ability);
+      attached = new AttachedEntity(entity, 0.5);
     } else {
       dir = dir.negate();
-      target = new CableTarget(block);
+      attached = new AttachedBlock(block, block.type());
     }
     FragileStructure.tryDamageStructure(block, 2, new Ray(location, dir));
     hasHit = true;
   }
 
   public void hitEntity(Entity entity) {
-    if (target != null || entity.uuid().equals(user.uuid())) {
+    if (attached != null || entity.uuid().equals(user.uuid())) {
       return;
     }
     if (!user.canBuild(entity.block())) {
@@ -292,7 +258,7 @@ public class MetalCable extends AbilityInstance {
       return;
     }
     double offset = FastMath.clamp(cable.location().y() - entity.location().y(), 0, entity.height());
-    target = new CableTarget(entity, offset);
+    attached = new AttachedEntity(entity, offset);
     entity.fallDistance(0);
     hasHit = true;
   }
@@ -310,24 +276,17 @@ public class MetalCable extends AbilityInstance {
   }
 
   private void tryLaunchTarget() {
-    if (launched || target == null || target.type == Type.BLOCK || target.entity == null) {
+    if (attached == null || !attached.canLaunch()) {
       return;
     }
-
-    launched = true;
-    Vector3d targetLocation = user.rayTrace(userConfig.projectileRange).cast(user.world()).entityCenterOrPosition();
-
-    Vector3d velocity = targetLocation.subtract(location).normalize().multiply(userConfig.launchSpeed);
-    target.entity.applyVelocity(this, velocity.add(0, 0.2, 0));
-    target.entity.fallDistance(0);
-    if (target.entity.type() == EntityType.FALLING_BLOCK) {
-      removalPolicy = Policies.builder()
-        .add(OutOfRangeRemovalPolicy.of(userConfig.projectileRange, location, () -> location))
-        .build();
-      onDestroy();
-    } else {
-      remove();
+    if (attached instanceof AttachedEntity attachedEntity) {
+      Vector3d targetLocation = user.rayTrace(userConfig.projectileRange).cast(user.world()).entityCenterOrPosition();
+      Vector3d velocity = targetLocation.subtract(location).normalize().multiply(userConfig.launchSpeed);
+      attachedEntity.handle().applyVelocity(this, velocity.add(0, 0.2, 0));
+      attachedEntity.handle().fallDistance(0);
     }
+    attached = null;
+    remove();
   }
 
   @Override
@@ -344,31 +303,35 @@ public class MetalCable extends AbilityInstance {
 
   @Override
   public Collection<Collider> colliders() {
-    if (launched && projectile != null) {
-      return List.of(BOX.at(projectile.center()));
-    }
     return List.of(new Sphere(location, 0.8));
   }
 
-  private enum Type {ENTITY, BLOCK}
+  private interface Attached<T> {
+    T handle();
 
-  private record CableTarget(Type type, @Nullable Entity entity, @Nullable Block block, @Nullable BlockType material,
-                             double offset) {
-    private CableTarget(Entity entity, double offset) {
-      this(Type.ENTITY, entity, null, null, offset);
+    boolean isValid(User user);
+
+    default boolean canLaunch() {
+      return true;
+    }
+  }
+
+  private record AttachedEntity(Entity handle, double offset) implements Attached<Entity> {
+    @Override
+    public boolean isValid(User user) {
+      return handle.valid() && handle.world().equals(user.world());
+    }
+  }
+
+  private record AttachedBlock(Block handle, BlockType material) implements Attached<Block> {
+    @Override
+    public boolean isValid(User user) {
+      return handle.type() == material;
     }
 
-    private CableTarget(Block block) {
-      this(Type.BLOCK, null, block, block.type(), 0);
-    }
-
-    public boolean isValid(User u) {
-      if (type == Type.ENTITY) {
-        return entity != null && entity.valid() && entity.world().equals(u.world());
-      } else {
-        //noinspection DataFlowIssue
-        return block.type() == material;
-      }
+    @Override
+    public boolean canLaunch() {
+      return false;
     }
   }
 

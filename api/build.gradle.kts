@@ -1,6 +1,5 @@
 plugins {
     id("publish-conventions")
-    alias(libs.plugins.jmh)
 }
 
 version = apiVersion()
@@ -20,6 +19,6 @@ sourceSets {
 
 tasks.register("printVersionStatus") {
     doLast {
-        println("STATUS=${ if (isSnapshot()) "snapshot" else "release" }")
+        println("STATUS=${if (isSnapshot()) "snapshot" else "release"}")
     }
 }

@@ -84,7 +84,7 @@ papi = { module = "me.clip:placeholderapi", version = "2.11.3" }
 
 # Sponge
 sponge-api = { module = "org.spongepowered:spongeapi", version.ref = "sponge-api" }
-sponge-common = { module = "org.spongepowered:sponge", version.ref = "sponge-common"}
+sponge-common = { module = "org.spongepowered:sponge", version.ref = "sponge-common" }
 sponge-mixin = { module = "org.spongepowered:mixin", version = "0.8.5" }
 
 # Plugins for build-logic

@@ -19,6 +19,7 @@ setupSubproject("bending-paper", "paper")
 file("paper/adapters").listFiles { _, name -> name.startsWith("adapter-") }?.forEach {
     setupSubproject(it.name, it.path)
 }
+include("jmh")
 //include("code-generator")
 
 fun setupSubproject(name: String, dir: String) {

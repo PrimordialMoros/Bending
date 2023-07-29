@@ -65,10 +65,9 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class EarthShot extends AbilityInstance implements Explosive {
   private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(Vector3d.of(0.25, 0.25, 0.25));
+  private static final Config config = ConfigManager.load(Config::new);
 
   private enum Mode {ROCK, METAL, MAGMA}
-
-  private static final Config config = ConfigManager.load(Config::new);
 
   private User user;
   private Config userConfig;

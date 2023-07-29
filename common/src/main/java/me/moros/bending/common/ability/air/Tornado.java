@@ -139,7 +139,7 @@ public class Tornado extends AbilityInstance {
       }
       entity.applyVelocity(this, velocity);
       return false;
-    }, true, true);
+    }, false, true);
 
     render(base, factor, height, radius);
     return UpdateResult.CONTINUE;
