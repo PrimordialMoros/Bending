@@ -42,6 +42,7 @@ public final class CollisionManager implements Updatable {
     this.manager = manager;
   }
 
+  @Override
   public UpdateResult update() {
     CachedAbility[] instances = filterAndCollect();
     if (instances.length < 2) {

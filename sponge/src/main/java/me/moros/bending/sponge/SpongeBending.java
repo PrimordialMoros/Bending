@@ -26,7 +26,6 @@ import cloud.commandframework.sponge.SpongeCommandManager;
 import com.google.inject.Inject;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.platform.Platform;
-import me.moros.bending.api.util.Tasker;
 import me.moros.bending.api.util.metadata.Metadata;
 import me.moros.bending.common.AbstractBending;
 import me.moros.bending.common.command.Commander;
@@ -44,7 +43,6 @@ import me.moros.bending.sponge.platform.CommandSender.PlayerCommandSender;
 import me.moros.bending.sponge.platform.PlatformAdapter;
 import me.moros.bending.sponge.platform.SpongePermissionInitializer;
 import me.moros.bending.sponge.platform.SpongePlatform;
-import me.moros.tasker.executor.CompositeExecutor;
 import me.moros.tasker.sponge.SpongeExecutor;
 import org.bstats.sponge.Metrics;
 import org.spongepowered.api.Server;
@@ -87,7 +85,7 @@ public final class SpongeBending extends AbstractBending<PluginContainer> {
   @Listener
   public void onEnable(StartedEngineEvent<Server> event) { // Worlds have been loaded
     ReflectionUtil.injectStatic(ElementMenu.class, parent);
-    ReflectionUtil.injectStatic(Tasker.class, CompositeExecutor.of(new SpongeExecutor(parent)));
+    injectTasker(new SpongeExecutor(parent));
     ReflectionUtil.injectStatic(Platform.Holder.class, new SpongePlatform());
     load();
     new SpongePermissionInitializer().init();

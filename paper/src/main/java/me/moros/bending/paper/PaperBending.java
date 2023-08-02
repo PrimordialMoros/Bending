@@ -26,7 +26,6 @@ import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.paper.PaperCommandManager;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.platform.Platform;
-import me.moros.bending.api.util.Tasker;
 import me.moros.bending.common.AbstractBending;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.hook.MiniPlaceholdersHook;
@@ -41,8 +40,7 @@ import me.moros.bending.paper.listener.WorldListener;
 import me.moros.bending.paper.platform.BukkitPermissionInitializer;
 import me.moros.bending.paper.platform.BukkitPlatform;
 import me.moros.bending.paper.protection.ProtectionInitializer;
-import me.moros.tasker.bukkit.BukkitExecutor;
-import me.moros.tasker.executor.CompositeExecutor;
+import me.moros.tasker.paper.PaperExecutor;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
@@ -57,7 +55,7 @@ final class PaperBending extends AbstractBending<BendingBootstrap> {
 
   void onPluginEnable() {
     new Metrics(parent, 8717);
-    ReflectionUtil.injectStatic(Tasker.class, CompositeExecutor.of(new BukkitExecutor(parent)));
+    injectTasker(new PaperExecutor(parent));
     ReflectionUtil.injectStatic(Platform.Holder.class, new BukkitPlatform(logger()));
     new ProtectionInitializer(this).init();
     load();

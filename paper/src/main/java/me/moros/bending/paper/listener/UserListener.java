@@ -26,6 +26,7 @@ import com.destroystokyo.paper.event.player.PlayerJumpEvent;
 import io.papermc.paper.event.block.BlockLockCheckEvent;
 import io.papermc.paper.event.entity.EntityInsideBlockEvent;
 import io.papermc.paper.event.entity.EntityMoveEvent;
+import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.ActionType;
 import me.moros.bending.api.ability.Activation;
@@ -72,6 +73,7 @@ import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.PlayerAnimationType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
@@ -392,26 +394,34 @@ public record UserListener(Game game) implements Listener, BukkitListener {
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
+  public void onPlayerSwing(PlayerArmSwingEvent event) {
+    if (disabledWorld(event)) {
+      return;
+    }
+    if (event.getHand() == EquipmentSlot.HAND && event.getAnimationType() == PlayerAnimationType.ARM_SWING) {
+      User user = Registries.BENDERS.get(event.getPlayer().getUniqueId());
+      if (user != null) {
+        game.activationController().onUserSwing(user);
+      }
+    }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerInteract(PlayerInteractEvent event) {
     if (disabledWorld(event)) {
       return;
     }
     if (event.getHand() == EquipmentSlot.HAND || (event.getHand() == EquipmentSlot.OFF_HAND && event.getAction() == Action.RIGHT_CLICK_AIR)) {
       User user = Registries.BENDERS.get(event.getPlayer().getUniqueId());
-      if (user != null) {
-        switch (event.getAction()) {
-          case RIGHT_CLICK_AIR, RIGHT_CLICK_BLOCK -> {
-            Block b = event.getClickedBlock();
-            var block = b == null ? null : PlatformAdapter.fromBukkitBlock(b);
-            if (block != null) {
-              Location pos = event.getInteractionPoint();
-              Vector3d point = pos == null ? null : Vector3d.of(pos.getX(), pos.getY(), pos.getZ());
-              user.store().add(BlockInteraction.KEY, new BlockInteraction(block, point));
-            }
-            game.activationController().onUserInteract(user, null, block);
-          }
-          case LEFT_CLICK_AIR, LEFT_CLICK_BLOCK -> game.activationController().onUserSwing(user);
+      if (user != null && event.getAction().isRightClick()) {
+        Block b = event.getClickedBlock();
+        var block = b == null ? null : PlatformAdapter.fromBukkitBlock(b);
+        if (block != null) {
+          Location pos = event.getInteractionPoint();
+          Vector3d point = pos == null ? null : Vector3d.of(pos.getX(), pos.getY(), pos.getZ());
+          user.store().add(BlockInteraction.KEY, new BlockInteraction(block, point));
         }
+        game.activationController().onUserInteract(user, null, block);
       }
     }
   }

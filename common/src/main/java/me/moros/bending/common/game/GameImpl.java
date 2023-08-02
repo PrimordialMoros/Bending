@@ -69,7 +69,7 @@ public final class GameImpl implements Game {
     this.storage = new StorageFactory(plugin).createInstance();
 
     flightManager = new FlightManagerImpl();
-    worldManager = new WorldManagerImpl(plugin);
+    worldManager = new WorldManagerImpl(plugin.logger());
 
     activationController = new ActivationControllerImpl();
     temporal = initTemporary();

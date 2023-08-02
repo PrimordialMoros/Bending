@@ -25,6 +25,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Set;
+import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 
 import me.moros.bending.api.addon.Addon;
@@ -40,6 +41,9 @@ import me.moros.bending.common.locale.TranslationManager;
 import me.moros.bending.common.logging.Logger;
 import me.moros.bending.common.util.GameProviderUtil;
 import me.moros.bending.common.util.ReflectionUtil;
+import me.moros.tasker.executor.CompositeExecutor;
+import me.moros.tasker.executor.SimpleAsyncExecutor;
+import me.moros.tasker.executor.SyncExecutor;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.reference.WatchServiceListener;
 
@@ -70,6 +74,12 @@ public abstract class AbstractBending<T> implements Bending {
     this.addonLoader = AddonLoader.create(logger(), path, getClass().getClassLoader());
     this.configManager.subscribe(new BendingPropertiesImpl(), this::injectProperties);
     new AbilityInitializer().init();
+  }
+
+  protected void injectTasker(SyncExecutor syncExecutor) {
+    int threads = Math.max(1, Runtime.getRuntime().availableProcessors() / 2);
+    var asyncExecutor = new SimpleAsyncExecutor(Executors.newScheduledThreadPool(threads));
+    ReflectionUtil.injectStatic(Tasker.class, CompositeExecutor.of(syncExecutor, asyncExecutor));
   }
 
   private void injectProperties(BendingProperties properties) {

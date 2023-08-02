@@ -173,10 +173,11 @@ public class AbilityManagerImpl implements AbilityManager {
         result = ability.update();
       } catch (Exception e) {
         exceptions.add(e);
-      }
-      if (result == UpdateResult.REMOVE) {
-        globalIterator.remove();
-        ability.onDestroy();
+      } finally {
+        if (result == UpdateResult.REMOVE) {
+          globalIterator.remove();
+          ability.onDestroy();
+        }
       }
     }
     for (Exception e : exceptions) {

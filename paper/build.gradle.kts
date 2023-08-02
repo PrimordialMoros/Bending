@@ -30,7 +30,7 @@ dependencies {
     compileOnly(libs.grief.prevention)
     compileOnly(libs.towny)
     compileOnly(libs.lwc)
-    compileOnly(libs.worldguard.bukkit)
+    compileOnly(libs.worldguard)
     compileOnly(libs.papi)
 }
 
