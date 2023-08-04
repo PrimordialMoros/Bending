@@ -19,13 +19,14 @@
 
 package me.moros.bending.api.platform.particle;
 
+import me.moros.bending.api.platform.particle.ParticleDustData.Transitive;
 import me.moros.bending.api.platform.particle.ParticleDustDataImpl.TransitiveDataImpl;
 import net.kyori.adventure.util.RGBLike;
 
-public interface ParticleDustData extends RGBLike {
+public sealed interface ParticleDustData extends RGBLike permits Transitive, ParticleDustDataImpl {
   float size();
 
-  interface Transitive extends ParticleDustData {
+  sealed interface Transitive extends ParticleDustData permits ParticleDustDataImpl.TransitiveDataImpl {
     int toRed();
 
     int toGreen();

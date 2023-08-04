@@ -20,13 +20,13 @@
 package me.moros.bending.api.temporal;
 
 import java.util.Objects;
+import java.util.Set;
 
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.entity.DelegateEntity;
 import me.moros.bending.api.platform.entity.Entity;
-import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.world.World;
 import me.moros.math.Vector3d;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -60,11 +60,6 @@ public class TempEntity extends Temporary {
     return new FallingBlockBuilder(Objects.requireNonNull(data));
   }
 
-  @Deprecated
-  public static ArmorStandBuilder armorStand(Item data) {
-    return new ArmorStandBuilder(Objects.requireNonNull(data));
-  }
-
   public static final class FallingBlockBuilder extends TempEntityBuilder<BlockState, TempEntity, FallingBlockBuilder> {
     private static final Vector3d FALLING_BLOCK_OFFSET = Vector3d.of(0.5, 0, 0.5);
 
@@ -86,9 +81,14 @@ public class TempEntity extends Temporary {
 
     @Override
     public TempEntity build(World world, Vector3d center) {
-      int id = Platform.instance().nativeAdapter().createFallingBlock(world, center, data, velocity, gravity);
-      if (id > 0) {
-        return new TempEntity(new TempEntityData(id), MANAGER.fromMillis(duration));
+      var packet = Platform.instance().nativeAdapter().createFallingBlock(center, data, velocity, gravity);
+      if (packet.id() > 0) {
+        if (viewers.isEmpty()) {
+          packet.broadcast(world, center);
+        } else {
+          packet.send(Set.copyOf(viewers));
+        }
+        return new TempEntity(new TempEntityData(packet.id()), MANAGER.fromMillis(duration));
       }
       return spawnReal(world, center);
     }
@@ -97,28 +97,6 @@ public class TempEntity extends Temporary {
       Entity entity = world.createFallingBlock(center, data, gravity);
       entity.velocity(velocity);
       return new TempFallingBlock(entity, data, MANAGER.fromMillis(duration));
-    }
-  }
-
-  @Deprecated
-  public static final class ArmorStandBuilder extends TempEntityBuilder<Item, TempEntity, ArmorStandBuilder> {
-    private ArmorStandBuilder(Item data) {
-      super(data);
-    }
-
-    @Override
-    public TempEntity build(World world, Vector3d center) {
-      return new TempEntity(armorStand(world, center), MANAGER.fromMillis(duration));
-    }
-
-    private TempEntityData armorStand(World world, Vector3d center) {
-      int id = Platform.instance().nativeAdapter().createArmorStand(world, center, data, velocity, gravity);
-      if (id > 0) {
-        return new TempEntityData(id);
-      }
-      Entity entity = world.createArmorStand(center, data, gravity);
-      entity.velocity(velocity);
-      return new TempEntityData(entity);
     }
   }
 

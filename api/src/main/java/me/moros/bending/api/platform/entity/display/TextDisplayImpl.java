@@ -27,7 +27,6 @@ record TextDisplayImpl(
   Billboard billboard, Transformation transformation, int lineWidth, int backgroundColor, byte opacity,
   TextFlags textFlags
 ) implements TextDisplay {
-
   TextDisplayImpl(TextDisplayBuilder builder) {
     this(builder.data(), builder.width(), builder.height(), builder.viewRange(),
       builder.shadowRadius(), builder.shadowStrength(),

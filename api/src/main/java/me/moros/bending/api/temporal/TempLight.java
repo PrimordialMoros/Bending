@@ -56,7 +56,7 @@ public final class TempLight extends Temporary {
     Type type = isValid(block, level);
     if (level <= 0 || type == Type.INVALID) {
       reverted = true;
-      Platform.instance().nativeAdapter().fakeBlock(block, block.state());
+      Platform.instance().nativeAdapter().fakeBlock(block, block.state()).broadcast(block.world(), block);
       MANAGER.removeEntry(block);
       return true;
     }
@@ -74,7 +74,7 @@ public final class TempLight extends Temporary {
     if (waterlogged) {
       state = state.withProperty(StateProperty.WATERLOGGED, true);
     }
-    Platform.instance().nativeAdapter().fakeBlock(block, state);
+    Platform.instance().nativeAdapter().fakeBlock(block, state).broadcast(block.world(), block);
   }
 
   public TempLight lock() {

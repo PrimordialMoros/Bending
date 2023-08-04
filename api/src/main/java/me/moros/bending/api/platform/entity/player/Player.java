@@ -19,6 +19,7 @@
 
 package me.moros.bending.api.platform.entity.player;
 
+import java.util.List;
 import java.util.Locale;
 
 import me.moros.bending.api.collision.geometry.AABB;
@@ -60,6 +61,6 @@ public interface Player extends LivingEntity {
   boolean canSee(Entity other);
 
   default void sendNotification(Item item, Component title) {
-    Platform.instance().nativeAdapter().sendNotification(this, item, title);
+    Platform.instance().nativeAdapter().createNotification(item, title).send(List.of(uuid()));
   }
 }

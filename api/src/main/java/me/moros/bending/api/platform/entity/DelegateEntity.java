@@ -54,7 +54,7 @@ public interface DelegateEntity extends Entity {
   }
 
   @Override
-  default @NonNull UUID uuid() {
+  default UUID uuid() {
     return entity().uuid();
   }
 

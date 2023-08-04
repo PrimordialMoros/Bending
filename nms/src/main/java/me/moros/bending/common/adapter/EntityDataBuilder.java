@@ -24,6 +24,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.TreeSet;
 
+import me.moros.bending.common.adapter.EntityMeta.EntityStatus;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.network.syncher.SynchedEntityData.DataValue;
@@ -31,10 +32,12 @@ import net.minecraft.network.syncher.SynchedEntityData.DataValue;
 public class EntityDataBuilder {
   private final int id;
   private final Collection<DataValue<?>> dataValues;
+  private byte statusFlags;
 
   public EntityDataBuilder(int id) {
     this.id = id;
     this.dataValues = new TreeSet<>(Comparator.comparingInt(DataValue::id));
+    this.statusFlags = 0;
   }
 
   public <T> EntityDataBuilder setRaw(int index, EntityDataSerializer<T> serializer, T data) {
@@ -50,12 +53,10 @@ public class EntityDataBuilder {
     return setRaw(EntityMeta.GRAVITY, true);
   }
 
-  public EntityDataBuilder invisible() {
-    return setRaw(EntityMeta.ENTITY_STATUS, (byte) 0x20); // invisible
-  }
-
-  public EntityDataBuilder marker() {
-    return setRaw(EntityMeta.ARMOR_STAND_STATUS, (byte) (0x02 | 0x08 | 0x10));  // no gravity, no base plate, marker
+  public EntityDataBuilder withStatus(EntityStatus status) {
+    statusFlags = (byte) (statusFlags | 1 << status.index());
+    setRaw(EntityMeta.ENTITY_STATUS, statusFlags);
+    return this;
   }
 
   public ClientboundSetEntityDataPacket build() {

@@ -94,11 +94,12 @@ public class Catapult extends AbilityInstance {
   }
 
   private @Nullable Block getBase() {
+    Vector3d center = user.location();
     AABB entityBounds = user.bounds().grow(Vector3d.of(0, 0.2, 0));
-    AABB floorBounds = new AABB(Vector3d.of(-1, -0.5, -1), Vector3d.of(1, 0, 1)).at(user.location());
+    AABB floorBounds = new AABB(Vector3d.of(-1, -0.5, -1), Vector3d.of(1, 0, 1)).at(center);
     return user.world().nearbyBlocks(floorBounds, b -> entityBounds.intersects(b.bounds())).stream()
       .filter(this::isValidBlock)
-      .min(Comparator.comparingDouble(b -> b.center().distanceSq(user.location())))
+      .min(Comparator.comparingDouble(b -> b.center().distanceSq(center)))
       .orElse(null);
   }
 

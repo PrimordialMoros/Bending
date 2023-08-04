@@ -32,7 +32,6 @@ import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.entity.Entity;
-import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.platform.particle.ParticleContext;
 import me.moros.math.Position;
@@ -146,9 +145,6 @@ public interface World extends Keyed, ForwardingAudience, BlockGetter, BlockSett
   Entity dropItem(Position pos, ItemSnapshot item, boolean canPickup);
 
   Entity createFallingBlock(Position pos, BlockState state, boolean gravity);
-
-  @Deprecated
-  Entity createArmorStand(Position pos, Item type, boolean gravity);
 
   default int lightLevel(Position position) {
     return lightLevel(position.blockX(), position.blockY(), position.blockZ());

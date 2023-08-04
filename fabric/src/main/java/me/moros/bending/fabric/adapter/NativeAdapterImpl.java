@@ -20,7 +20,6 @@
 package me.moros.bending.fabric.adapter;
 
 import me.moros.bending.api.platform.entity.Entity;
-import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.world.World;
 import me.moros.bending.common.adapter.AbstractNativeAdapter;
@@ -30,7 +29,6 @@ import net.kyori.adventure.platform.fabric.FabricServerAudiences;
 import net.kyori.adventure.text.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -50,11 +48,6 @@ public final class NativeAdapterImpl extends AbstractNativeAdapter {
   @Override
   protected BlockState adapt(me.moros.bending.api.platform.block.BlockState state) {
     return PlatformAdapter.toFabricData(state);
-  }
-
-  @Override
-  protected ServerPlayer adapt(Player player) {
-    return PlatformAdapter.toFabricEntity(player);
   }
 
   @Override

@@ -19,10 +19,10 @@
 
 package me.moros.bending.api.adapter;
 
-import me.moros.bending.api.platform.block.Block;
+import java.util.UUID;
+
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.entity.display.Display;
-import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.world.World;
 import me.moros.math.Position;
@@ -34,75 +34,66 @@ import net.kyori.adventure.text.Component;
  */
 public interface PacketUtil {
   /**
-   * Send a notification.
-   * @param player the notification's receiver
+   * Create a toast notification.
    * @param item the material to use in the icon for the notification
    * @param title the content of the notification
+   * @return the constructed packet
    */
-  default void sendNotification(Player player, Item item, Component title) {
+  default ClientboundPacket createNotification(Item item, Component title) {
+    return DummyPacket.INSTANCE;
   }
 
   /**
-   * Send a block update packet to every connection within view distance.
-   * @param block the world-position tuple for the fake block to appear in
+   * Create a block update packet packet.
+   * @param position the fake block's position
    * @param state the fake block's data
+   * @return the constructed packet
    */
-  default void fakeBlock(Block block, BlockState state) {
+  default ClientboundPacket fakeBlock(Position position, BlockState state) {
+    return DummyPacket.INSTANCE;
   }
 
   /**
-   * Send a block break animation to every connection within view distance.
-   * @param block the world-position tuple for the animation to appear in
+   * Create a block break animation packet.
+   * @param position the break animation's block position
    * @param progress the animation <a href="https://wiki.vg/Protocol#Set_Block_Destroy_Stage">stage</a>
+   * @return the constructed packet
    */
-  default void fakeBreak(Block block, byte progress) {
+  default ClientboundPacket fakeBreak(Position position, byte progress) {
+    return DummyPacket.INSTANCE;
   }
 
   /**
    * Create a packet falling block entity.
-   * @param world the world for the packet entity to appear in
    * @param center the spawn location
    * @param state the data to use for the falling block
    * @param velocity the initial velocity for the entity
    * @param gravity whether the entity will have gravity enabled
-   * @return the packet entity unique id or 0 if not supported
+   * @return the constructed packet
    */
-  default int createFallingBlock(World world, Position center, BlockState state, Vector3d velocity, boolean gravity) {
-    return 0;
-  }
-
-  /**
-   * Create a packet armor stand entity.
-   * @param world the world for the packet entity to appear in
-   * @param center the spawn location
-   * @param item the item to use for the armor stand's head equipment
-   * @param velocity the initial velocity for the entity
-   * @param gravity whether the entity will have gravity enabled
-   * @return the packet entity unique id or 0 if not supported
-   */
-  default int createArmorStand(World world, Position center, Item item, Vector3d velocity, boolean gravity) {
-    return 0;
+  default ClientboundPacket createFallingBlock(Position center, BlockState state, Vector3d velocity, boolean gravity) {
+    return DummyPacket.INSTANCE;
   }
 
   /**
    * Create a packet display entity.
-   * @param world the world for the packet entity to appear in
    * @param center the spawn location
    * @param properties the properties to use for the display entity
-   * @return the packet entity unique id or 0 if not supported
+   * @return the constructed packet
    */
-  default int createDisplayEntity(World world, Position center, Display<?> properties) {
-    return 0;
+  default ClientboundPacket createDisplayEntity(Position center, Display<?> properties) {
+    return DummyPacket.INSTANCE;
   }
 
   /**
    * Update a packet display entity's properties.
-   * @param world the world the packet entity is in
    * @param center the center location to broadcast packets from
    * @param id the display entity's id
    * @param properties the display entity's new properties
+   * @return the constructed packet
    */
-  default void updateDisplay(World world, Position center, int id, Display<?> properties) {
+  default ClientboundPacket updateDisplay(Position center, int id, Display<?> properties) {
+    return DummyPacket.INSTANCE;
   }
 
   /**
@@ -119,5 +110,17 @@ public interface PacketUtil {
    * @param ids an array of packet entities' unique ids
    */
   default void destroy(int[] ids) {
+  }
+
+  interface ClientboundPacket {
+    int id();
+
+    void send(Iterable<UUID> playerUUIDs);
+
+    default void broadcast(World world, Position center) {
+      broadcast(world, center, world.viewDistance() << 4);
+    }
+
+    void broadcast(World world, Position center, int dist);
   }
 }

@@ -30,10 +30,8 @@ import org.joml.Vector3f;
 record EntityMeta<T>(int index, EntityDataSerializer<T> serializer) {
   // Entity
   static final EntityMeta<Byte> ENTITY_STATUS = create(0, EntityDataSerializers.BYTE);
-  static final EntityMeta<Boolean> GRAVITY = create(5, EntityDataSerializers.BOOLEAN);
 
-  // ArmorStand
-  static final EntityMeta<Byte> ARMOR_STAND_STATUS = create(15, EntityDataSerializers.BYTE);
+  static final EntityMeta<Boolean> GRAVITY = create(5, EntityDataSerializers.BOOLEAN);
 
   // Display
   static final EntityMeta<Integer> INTERPOLATION_DELAY = create(8, EntityDataSerializers.INT);
@@ -64,5 +62,25 @@ record EntityMeta<T>(int index, EntityDataSerializer<T> serializer) {
 
   private static <T> EntityMeta<T> create(int index, EntityDataSerializer<T> serializer) {
     return new EntityMeta<>(index, serializer);
+  }
+
+  enum EntityStatus {
+    ON_FIRE(0),
+    SNEAKING(1),
+    SPRINTING(3),
+    SWIMMING(4),
+    INVISIBLE(5),
+    GLOWING(6),
+    GLIDING(7);
+
+    private final int index;
+
+    EntityStatus(int index) {
+      this.index = index;
+    }
+
+    int index() {
+      return index;
+    }
   }
 }

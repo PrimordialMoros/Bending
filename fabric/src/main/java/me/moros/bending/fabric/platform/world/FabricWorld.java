@@ -32,7 +32,6 @@ import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.block.Lockable;
 import me.moros.bending.api.platform.entity.Entity;
-import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.platform.particle.ParticleContext;
 import me.moros.bending.api.platform.world.World;
@@ -48,8 +47,6 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.ChunkStatus;
@@ -217,19 +214,6 @@ public record FabricWorld(ServerLevel handle) implements World {
     fabricEntity.setNoGravity(!gravity);
     fabricEntity.dropItem = false;
     ((FallingBlockEntityAccess) fabricEntity).bending$cancelDrop(true);
-    handle().addFreshEntity(fabricEntity);
-    return PlatformAdapter.fromFabricEntity(fabricEntity);
-  }
-
-  @Override
-  @Deprecated
-  public Entity createArmorStand(Position center, Item type, boolean gravity) {
-    var item = PlatformAdapter.toFabricItem(type);
-    var fabricEntity = new ArmorStand(handle(), center.x(), center.y(), center.z());
-    fabricEntity.setInvulnerable(true);
-    fabricEntity.setInvisible(true);
-    fabricEntity.setNoGravity(!gravity);
-    fabricEntity.setItemSlot(EquipmentSlot.HEAD, item);
     handle().addFreshEntity(fabricEntity);
     return PlatformAdapter.fromFabricEntity(fabricEntity);
   }

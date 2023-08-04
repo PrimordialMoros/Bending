@@ -21,6 +21,7 @@ package me.moros.bending.api.temporal;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import me.moros.bending.api.platform.Platform;
@@ -37,6 +38,7 @@ import me.moros.bending.api.platform.world.World;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.text.Component;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class TempDisplayEntity extends Temporary {
   public static final TemporalManager<Integer, TempDisplayEntity> MANAGER = new TemporalManager<>(600) {
@@ -113,20 +115,26 @@ public class TempDisplayEntity extends Temporary {
       return this;
     }
 
-    public TempDisplayEntity build(Block block) {
+    public @Nullable TempDisplayEntity build(Block block) {
       return build(block.world(), block.toVector3d().add(BLOCK_OFFSET));
     }
 
     @Override
-    public TempDisplayEntity build(World world, Vector3d center) {
+    public @Nullable TempDisplayEntity build(World world, Vector3d center) {
       return displayEntity(world, center);
     }
 
-    private TempDisplayEntity displayEntity(World world, Vector3d center) {
+    private @Nullable TempDisplayEntity displayEntity(World world, Vector3d center) {
       var properties = data.build();
-      int id = Platform.instance().nativeAdapter().createDisplayEntity(world, center, properties);
+      var packet = Platform.instance().nativeAdapter().createDisplayEntity(center, properties);
+      var id = packet.id();
       if (id <= 0) {
-        throw new RuntimeException("Unable to create entity");
+        return null;
+      }
+      if (viewers.isEmpty()) {
+        packet.broadcast(world, center);
+      } else {
+        packet.send(Set.copyOf(viewers));
       }
       var result = new TempDisplayEntity(id, MANAGER.fromMillis(duration));
       if (gravity || velocity.lengthSq() > 0) {
@@ -172,10 +180,11 @@ public class TempDisplayEntity extends Temporary {
         relativePosition = relativePosition.withY(minYOffset);
         return;
       }
+      // TODO change in 1.20.2 (position is interpolated)
       var properties = meta.toBuilder()
         .transformation(meta.transformation().withTranslation(relativePosition))
         .interpolationDuration(1).build();
-      Platform.instance().nativeAdapter().updateDisplay(world, origin, id, properties);
+      Platform.instance().nativeAdapter().updateDisplay(origin, id, properties).broadcast(world, origin);
     }
   }
 }

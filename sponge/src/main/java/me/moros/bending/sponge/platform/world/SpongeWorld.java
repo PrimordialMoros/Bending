@@ -46,12 +46,7 @@ import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.decoration.ArmorStand;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -220,20 +215,6 @@ public record SpongeWorld(ServerWorld handle) implements World {
     ((FallingBlockEntityAccess) fabricEntity).bending$cancelDrop(true);
     nms().addFreshEntity(fabricEntity);
     return PlatformAdapter.fromSpongeEntity((org.spongepowered.api.entity.Entity) fabricEntity);
-  }
-
-  @Override
-  @Deprecated
-  public Entity createArmorStand(Position pos, me.moros.bending.api.platform.item.Item type, boolean gravity) {
-    var vec = org.spongepowered.math.vector.Vector3d.from(pos.x(), pos.y(), pos.z());
-    var spongeEntity = handle().createEntity(EntityTypes.ARMOR_STAND, vec);
-    spongeEntity.offer(Keys.INVULNERABLE, true);
-    spongeEntity.offer(Keys.IS_INVISIBLE, true);
-    spongeEntity.offer(Keys.IS_GRAVITY_AFFECTED, gravity);
-    var item = BuiltInRegistries.ITEM.get(new ResourceLocation(type.key().namespace(), type.key().value()));
-    ((ArmorStand) spongeEntity).setItemSlot(EquipmentSlot.HEAD, new ItemStack(item));
-    handle().spawnEntity(spongeEntity);
-    return PlatformAdapter.fromSpongeEntity(spongeEntity);
   }
 
   @Override

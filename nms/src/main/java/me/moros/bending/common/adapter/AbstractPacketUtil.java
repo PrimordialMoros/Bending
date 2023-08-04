@@ -29,18 +29,16 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 
-import com.mojang.datafixers.util.Pair;
 import io.netty.buffer.Unpooled;
 import me.moros.bending.api.adapter.PacketUtil;
-import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.display.BlockDisplay;
 import me.moros.bending.api.platform.entity.display.Display;
 import me.moros.bending.api.platform.entity.display.ItemDisplay;
 import me.moros.bending.api.platform.entity.display.TextDisplay;
-import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.world.World;
+import me.moros.bending.common.adapter.EntityMeta.EntityStatus;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import me.moros.math.adapter.Adapters;
@@ -51,6 +49,7 @@ import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
@@ -59,7 +58,6 @@ import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
-import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -67,7 +65,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -99,10 +96,6 @@ public abstract class AbstractPacketUtil implements PacketUtil {
     return Objects.requireNonNull(adapt(entity.world()).getEntity(entity.id()));
   }
 
-  protected ServerPlayer adapt(Player player) {
-    return Objects.requireNonNull(playerList().getPlayer(player.uuid()));
-  }
-
   protected abstract ItemStack adapt(Item item);
 
   protected abstract net.minecraft.network.chat.Component adapt(Component component);
@@ -110,14 +103,22 @@ public abstract class AbstractPacketUtil implements PacketUtil {
   protected abstract int nextEntityId();
 
   @Override
-  public void sendNotification(Player player, Item item, Component title) {
-    var conn = adapt(player).connection;
-    conn.send(createNotification(item, title));
-    conn.send(clearNotification());
+  public ClientboundPacket createNotification(Item item, Component title) {
+    return wrap(new ClientboundBundlePacket(List.of(createNotificationPacket(item, title), clearNotification())));
   }
 
   @Override
-  public int createFallingBlock(World world, Position center, me.moros.bending.api.platform.block.BlockState state, Vector3d velocity, boolean gravity) {
+  public ClientboundPacket fakeBlock(Position position, me.moros.bending.api.platform.block.BlockState state) {
+    return wrap(fakeBlockPacket(position, adapt(state)));
+  }
+
+  @Override
+  public ClientboundPacket fakeBreak(Position position, byte progress) {
+    return wrap(fakeBreakPacket(position, progress));
+  }
+
+  @Override
+  public ClientboundPacket createFallingBlock(Position center, me.moros.bending.api.platform.block.BlockState state, Vector3d velocity, boolean gravity) {
     final int id = nextEntityId();
     Collection<Packet<ClientGamePacketListener>> packets = new ArrayList<>();
     final int blockDataId = net.minecraft.world.level.block.Block.getId(adapt(state));
@@ -128,28 +129,11 @@ public abstract class AbstractPacketUtil implements PacketUtil {
     if (velocity.lengthSq() > 0) {
       packets.add(addVelocity(id, velocity));
     }
-    broadcast(new ClientboundBundlePacket(packets), world, center);
-    return id;
+    return wrap(id, new ClientboundBundlePacket(packets));
   }
 
   @Override
-  public int createArmorStand(World world, Position center, Item item, Vector3d velocity, boolean gravity) {
-    final int id = nextEntityId();
-    Collection<Packet<ClientGamePacketListener>> packets = new ArrayList<>();
-    packets.add(createEntity(id, center, EntityType.ARMOR_STAND, 0));
-    if (!gravity) {
-      packets.add(new EntityDataBuilder(id).invisible().marker().build());
-    }
-    if (velocity.lengthSq() > 0) {
-      packets.add(addVelocity(id, velocity));
-    }
-    packets.add(setupEquipment(id, item));
-    broadcast(new ClientboundBundlePacket(packets), world, center);
-    return id;
-  }
-
-  @Override
-  public int createDisplayEntity(World world, Position center, Display<?> properties) {
+  public ClientboundPacket createDisplayEntity(Position center, Display<?> properties) {
     final int id = nextEntityId();
     EntityType<?> type;
     // TODO pattern matching in java 21
@@ -160,15 +144,18 @@ public abstract class AbstractPacketUtil implements PacketUtil {
     } else if (properties instanceof TextDisplay) {
       type = EntityType.TEXT_DISPLAY;
     } else {
-      return 0;
+      throw new AssertionError(); // sealed interface, not possible
     }
-    var meta = DisplayUtil.mapProperties(this, new EntityDataBuilder(id), properties).build();
-    broadcast(new ClientboundBundlePacket(List.of(createEntity(id, center, type, 0), meta)), world, center);
-    return id;
+    var meta = new EntityDataBuilder(id);
+    if (properties.glowColor() != -1) {
+      meta.withStatus(EntityStatus.GLOWING);
+    }
+    DisplayUtil.mapProperties(this, meta, properties);
+    return wrap(id, new ClientboundBundlePacket(List.of(createEntity(id, center, type, 0), meta.build())));
   }
 
   @Override
-  public void updateDisplay(World world, Position center, int id, Display<?> properties) {
+  public ClientboundPacket updateDisplay(Position center, int id, Display<?> properties) {
     // TODO filter changed properties only (currently sending all)
     Packet<ClientGamePacketListener> packet = null;
     var transformation = properties.transformation();
@@ -178,18 +165,12 @@ public abstract class AbstractPacketUtil implements PacketUtil {
       center = translation.add(center);
       packet = teleportEntity(id, center);
     }
-    var meta = DisplayUtil.mapProperties(this, new EntityDataBuilder(id), properties).build();
-    broadcast(packet == null ? meta : new ClientboundBundlePacket(List.of(packet, meta)), world, center);
-  }
-
-  @Override
-  public void fakeBlock(Block block, me.moros.bending.api.platform.block.BlockState data) {
-    broadcast(fakeBlockPacket(block, adapt(data)), block.world(), block, block.world().viewDistance() << 4);
-  }
-
-  @Override
-  public void fakeBreak(Block block, byte progress) {
-    broadcast(fakeBreakPacket(block, progress), block.world(), block, block.world().viewDistance() << 4);
+    var meta = new EntityDataBuilder(id);
+    if (properties.glowColor() != -1) {
+      meta.withStatus(EntityStatus.GLOWING);
+    }
+    DisplayUtil.mapProperties(this, meta, properties);
+    return wrap(id, packet == null ? meta.build() : new ClientboundBundlePacket(List.of(packet, meta.build())));
   }
 
   @Override
@@ -198,39 +179,7 @@ public abstract class AbstractPacketUtil implements PacketUtil {
     playerList().getPlayers().forEach(p -> p.connection.send(packet));
   }
 
-  protected void broadcast(Packet<?> packet, World world, Position center) {
-    broadcast(packet, world, center, world.viewDistance() << 4);
-  }
-
-  protected void broadcast(Packet<?> packet, World world, Position center, int dist) {
-    forEachPlayer(world, center, dist, p -> p.connection.send(packet));
-  }
-
-  protected void broadcast(Collection<Packet<?>> packets, World world, Position center) {
-    broadcast(packets, world, center, world.viewDistance() << 4);
-  }
-
-  protected void broadcast(Collection<Packet<?>> packets, World world, Position center, int dist) {
-    if (packets.isEmpty()) {
-      return;
-    }
-    forEachPlayer(world, center, dist, p -> {
-      for (var packet : packets) {
-        p.connection.send(packet);
-      }
-    });
-  }
-
-  private void forEachPlayer(World world, Position center, int dist, Consumer<ServerPlayer> playerConsumer) {
-    int distanceSq = dist * dist;
-    for (var player : adapt(world).players()) {
-      if (Vector3d.of(player.getX(), player.getY(), player.getZ()).distanceSq(center) <= distanceSq) {
-        playerConsumer.accept(player);
-      }
-    }
-  }
-
-  protected ClientboundUpdateAdvancementsPacket createNotification(Item item, Component title) {
+  protected ClientboundUpdateAdvancementsPacket createNotificationPacket(Item item, Component title) {
     String identifier = "bending:notification";
     ResourceLocation id = new ResourceLocation(identifier);
     String criteriaId = "bending:criteria_progress";
@@ -274,10 +223,6 @@ public abstract class AbstractPacketUtil implements PacketUtil {
     return new ClientboundBlockDestructionPacket(id, new BlockPos(b.blockX(), b.blockY(), b.blockZ()), progress);
   }
 
-  protected ClientboundSetEquipmentPacket setupEquipment(int id, Item item) {
-    return new ClientboundSetEquipmentPacket(id, List.of(new Pair<>(EquipmentSlot.HEAD, adapt(item))));
-  }
-
   protected ClientboundTeleportEntityPacket teleportEntity(int id, Position position) {
     var buf = new FriendlyByteBuf(Unpooled.buffer());
     buf.writeVarInt(id);
@@ -288,5 +233,56 @@ public abstract class AbstractPacketUtil implements PacketUtil {
     buf.writeByte(0);
     buf.writeBoolean(false);
     return new ClientboundTeleportEntityPacket(buf);
+  }
+
+  protected ClientboundPacket wrap(Packet<?> packet) {
+    return new PacketWrapper<>(packet);
+  }
+
+  protected ClientboundPacket wrap(int id, Packet<?> packet) {
+    return new PacketWrapper<>(id, packet);
+  }
+
+  private final class PacketWrapper<T extends PacketListener> implements ClientboundPacket {
+    private final int id;
+    private final Packet<T> packet;
+
+    private PacketWrapper(int id, Packet<T> packet) {
+      this.id = id;
+      this.packet = packet;
+    }
+
+    private PacketWrapper(Packet<T> packet) {
+      this(0, packet);
+    }
+
+    @Override
+    public int id() {
+      return id;
+    }
+
+    @Override
+    public void send(Iterable<UUID> playerUUIDs) {
+      for (var uuid : playerUUIDs) {
+        var player = playerList().getPlayer(uuid);
+        if (player != null) {
+          player.connection.send(packet);
+        }
+      }
+    }
+
+    @Override
+    public void broadcast(World world, Position center, int dist) {
+      forEachPlayer(world, center, dist, p -> p.connection.send(packet));
+    }
+
+    private void forEachPlayer(World world, Position center, int dist, Consumer<ServerPlayer> playerConsumer) {
+      int distanceSq = dist * dist;
+      for (var player : adapt(world).players()) {
+        if (Vector3d.of(player.getX(), player.getY(), player.getZ()).distanceSq(center) <= distanceSq) {
+          playerConsumer.accept(player);
+        }
+      }
+    }
   }
 }

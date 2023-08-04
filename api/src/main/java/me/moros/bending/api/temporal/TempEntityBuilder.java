@@ -19,14 +19,21 @@
 
 package me.moros.bending.api.temporal;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 
 import me.moros.bending.api.platform.world.World;
 import me.moros.math.Vector3d;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @SuppressWarnings("unchecked")
 abstract class TempEntityBuilder<T, R, B extends TempEntityBuilder<T, R, B>> {
   protected final T data;
+  protected final Set<UUID> viewers;
 
   protected Vector3d velocity = Vector3d.ZERO;
   protected boolean gravity = true;
@@ -34,6 +41,7 @@ abstract class TempEntityBuilder<T, R, B extends TempEntityBuilder<T, R, B>> {
 
   TempEntityBuilder(T data) {
     this.data = data;
+    this.viewers = new HashSet<>();
   }
 
   public B velocity(Vector3d velocity) {
@@ -51,5 +59,15 @@ abstract class TempEntityBuilder<T, R, B extends TempEntityBuilder<T, R, B>> {
     return (B) this;
   }
 
-  public abstract R build(World world, Vector3d center);
+  public B viewer(UUID viewer) {
+    return viewers(List.of(viewer));
+  }
+
+  public B viewers(Collection<UUID> viewers) {
+    this.viewers.clear();
+    this.viewers.addAll(viewers);
+    return (B) this;
+  }
+
+  public abstract @Nullable R build(World world, Vector3d center);
 }

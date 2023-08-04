@@ -79,7 +79,7 @@ public final class NativeAdapterImpl extends AbstractNativeAdapter {
   }
 
   @Override
-  protected ClientboundUpdateAdvancementsPacket createNotification(Item item, Component title) {
+  protected ClientboundUpdateAdvancementsPacket createNotificationPacket(Item item, Component title) {
     String identifier = "bending:notification";
     ResourceLocation id = new ResourceLocation(identifier);
     String criteriaId = "bending:criteria_progress";

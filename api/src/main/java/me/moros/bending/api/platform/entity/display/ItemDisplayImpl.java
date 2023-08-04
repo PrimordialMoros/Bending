@@ -26,7 +26,6 @@ record ItemDisplayImpl(
   int interpolationDelay, int interpolationDuration, int brightness, int glowColor,
   Billboard billboard, Transformation transformation, DisplayType displayType
 ) implements ItemDisplay {
-
   ItemDisplayImpl(ItemDisplayBuilder builder) {
     this(builder.data(), builder.width(), builder.height(), builder.viewRange(),
       builder.shadowRadius(), builder.shadowStrength(),

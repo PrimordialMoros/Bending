@@ -19,6 +19,8 @@
 
 package me.moros.bending.api.platform.entity;
 
+import java.util.UUID;
+
 import me.moros.bending.api.ability.Ability;
 import me.moros.bending.api.collision.geometry.AABB;
 import me.moros.bending.api.event.VelocityEvent;
@@ -30,12 +32,13 @@ import me.moros.bending.api.util.data.DataHolder;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.ForwardingAudience;
-import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 
-public interface Entity extends Identity, ForwardingAudience.Single, Damageable, DataHolder {
+public interface Entity extends ForwardingAudience.Single, Damageable, DataHolder {
   int id();
+
+  UUID uuid();
 
   Component name();
 

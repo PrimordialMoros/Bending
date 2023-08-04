@@ -32,7 +32,6 @@ import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.block.Lockable;
 import me.moros.bending.api.platform.entity.Entity;
-import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.platform.particle.ParticleContext;
 import me.moros.bending.api.platform.world.World;
@@ -48,7 +47,6 @@ import net.kyori.adventure.key.Key;
 import org.bukkit.Location;
 import org.bukkit.World.Environment;
 import org.bukkit.block.TileState;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
@@ -210,20 +208,6 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
     var bukkitEntity = handle().spawnFallingBlock(loc, data);
     bukkitEntity.setGravity(gravity);
     bukkitEntity.setDropItem(false);
-    return PlatformAdapter.fromBukkitEntity(bukkitEntity);
-  }
-
-  @Override
-  @Deprecated
-  public Entity createArmorStand(Position pos, Item type, boolean gravity) {
-    var loc = new Location(handle(), pos.x(), pos.y(), pos.z());
-    var item = PlatformAdapter.toBukkitItem(type);
-    var bukkitEntity = handle().spawn(loc, ArmorStand.class, as -> {
-      as.setInvulnerable(true);
-      as.setVisible(false);
-      as.setGravity(gravity);
-      as.getEquipment().setHelmet(item);
-    });
     return PlatformAdapter.fromBukkitEntity(bukkitEntity);
   }
 

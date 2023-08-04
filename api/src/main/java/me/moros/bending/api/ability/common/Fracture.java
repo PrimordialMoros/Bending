@@ -103,7 +103,7 @@ public class Fracture implements Updatable {
     int particles = FastMath.floor(0.5 * progress);
     Particle.LAVA.builder(block.center()).count(particles).offset(0.4).spawn(block.world());
     if (progress <= 9) {
-      Platform.instance().nativeAdapter().fakeBreak(block, (byte) progress);
+      Platform.instance().nativeAdapter().fakeBreak(block, (byte) progress).broadcast(block.world(), block);
       return false;
     }
     return true;

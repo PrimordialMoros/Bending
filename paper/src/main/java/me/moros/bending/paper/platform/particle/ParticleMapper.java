@@ -49,6 +49,7 @@ public final class ParticleMapper {
     if (p == SMOKE) return org.bukkit.Particle.SMOKE_NORMAL;
     if (p == LARGE_SMOKE) return org.bukkit.Particle.SMOKE_LARGE;
     if (p == EFFECT) return org.bukkit.Particle.SPELL;
+    if (p == EGG_CRACK) return org.bukkit.Particle.EGG_CRACK;
     if (p == INSTANT_EFFECT) return org.bukkit.Particle.SPELL_INSTANT;
     if (p == ENTITY_EFFECT) return org.bukkit.Particle.SPELL_MOB;
     if (p == AMBIENT_ENTITY_EFFECT) return org.bukkit.Particle.SPELL_MOB_AMBIENT;
@@ -62,6 +63,7 @@ public final class ParticleMapper {
     if (p == PORTAL) return org.bukkit.Particle.PORTAL;
     if (p == ENCHANT) return org.bukkit.Particle.ENCHANTMENT_TABLE;
     if (p == FLAME) return org.bukkit.Particle.FLAME;
+    if (p == CHERRY_LEAVES) return org.bukkit.Particle.CHERRY_LEAVES;
     if (p == LAVA) return org.bukkit.Particle.LAVA;
     if (p == CLOUD) return org.bukkit.Particle.CLOUD;
     if (p == DUST) return org.bukkit.Particle.REDSTONE;
