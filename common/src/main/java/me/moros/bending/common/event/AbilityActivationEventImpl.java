@@ -20,11 +20,21 @@
 package me.moros.bending.common.event;
 
 import me.moros.bending.api.ability.AbilityDescription;
+import me.moros.bending.api.ability.Activation;
+import me.moros.bending.api.event.AbilityActivationEvent;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.event.base.AbstractAbilityEvent;
 
-public class AbilityActivationEventImpl extends AbstractAbilityEvent {
-  public AbilityActivationEventImpl(User user, AbilityDescription desc) {
+public class AbilityActivationEventImpl extends AbstractAbilityEvent implements AbilityActivationEvent {
+  private final Activation activation;
+
+  public AbilityActivationEventImpl(User user, AbilityDescription desc, Activation activation) {
     super(user, desc);
+    this.activation = activation;
+  }
+
+  @Override
+  public Activation activation() {
+    return activation;
   }
 }

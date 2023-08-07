@@ -25,7 +25,6 @@ import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.event.base.AbstractCancellableAbilityEvent;
 
-
 public class BendingDamageEventImpl extends AbstractCancellableAbilityEvent implements BendingDamageEvent {
   private final LivingEntity target;
   private double damage;

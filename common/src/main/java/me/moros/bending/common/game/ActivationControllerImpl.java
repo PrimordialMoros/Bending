@@ -91,7 +91,7 @@ public final class ActivationControllerImpl implements ActivationController {
       Ability ability = desc.createAbility();
       if (ability.activate(user, method)) {
         user.game().abilityManager(user.worldKey()).addAbility(user, ability);
-        user.game().eventBus().postAbilityActivationEvent(user, desc);
+        user.game().eventBus().postAbilityActivationEvent(user, desc, method);
         return ability;
       }
     }

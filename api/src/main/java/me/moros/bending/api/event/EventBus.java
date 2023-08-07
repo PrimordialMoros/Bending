@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.function.Consumer;
 
 import me.moros.bending.api.ability.AbilityDescription;
+import me.moros.bending.api.ability.Activation;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.preset.Preset;
 import me.moros.bending.api.event.ElementChangeEvent.ElementAction;
@@ -104,8 +105,20 @@ public interface EventBus {
    * Posts a new {@link AbilityActivationEvent}.
    * @param user the user who attempts to activate the ability
    * @param desc the ability that is being activated
+   * @deprecated in favor of {@link #postAbilityActivationEvent(User, AbilityDescription, Activation)}
    */
-  void postAbilityActivationEvent(User user, AbilityDescription desc);
+  @Deprecated(forRemoval = true)
+  default void postAbilityActivationEvent(User user, AbilityDescription desc) {
+    postAbilityActivationEvent(user, desc, Activation.ATTACK);
+  }
+
+  /**
+   * Posts a new {@link AbilityActivationEvent}.
+   * @param user the user who attempts to activate the ability
+   * @param desc the ability that is being activated
+   * @param method the method used to activate the ability
+   */
+  void postAbilityActivationEvent(User user, AbilityDescription desc, Activation method);
 
   /**
    * Posts a new {@link ElementChangeEvent}.

@@ -49,7 +49,6 @@ public abstract class BlockMixin {
     bending$filterDrops(stacks, action, (ServerLevel) level, blockPos);
   }
 
-
   @Redirect(
     method = "dropResources(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/LevelAccessor;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntity;)V",
     at = @At(value = "INVOKE", target = "Ljava/util/List;forEach(Ljava/util/function/Consumer;)V")

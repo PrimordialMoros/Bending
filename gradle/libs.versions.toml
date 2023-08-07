@@ -57,7 +57,7 @@ cloud-fabric = { module = "cloud.commandframework:cloud-fabric", version.ref = "
 cloud-sponge = { module = "cloud.commandframework:cloud-sponge", version.ref = "cloud-snapshot" }
 
 # Databases
-mysql = { module = "mysql:mysql-connector-j", version = "8.1.0" }
+mysql = { module = "com.mysql:mysql-connector-j", version = "8.1.0" }
 mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.1.4" }
 postgresql = { module = "org.postgresql:postgresql", version = "42.6.0" }
 sqlite = { module = "org.xerial:sqlite-jdbc", version = "3.42.0.0" }

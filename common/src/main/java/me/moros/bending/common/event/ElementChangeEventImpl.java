@@ -43,5 +43,4 @@ public class ElementChangeEventImpl extends AbstractCancellableUserEvent impleme
   public ElementAction type() {
     return action;
   }
-
 }

@@ -19,8 +19,11 @@
 
 package me.moros.bending.api.event;
 
+import me.moros.bending.api.ability.Activation;
+
 /**
  * Called when a user has successfully activated an ability.
  */
 public interface AbilityActivationEvent extends AbilityEvent {
+  Activation activation();
 }

@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.function.Consumer;
 
 import me.moros.bending.api.ability.AbilityDescription;
+import me.moros.bending.api.ability.Activation;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.preset.Preset;
 import me.moros.bending.api.event.ActionLimitEvent;
@@ -93,8 +94,8 @@ public class EventBusImpl implements EventBus {
   }
 
   @Override
-  public void postAbilityActivationEvent(User user, AbilityDescription desc) {
-    post(new AbilityActivationEventImpl(user, desc));
+  public void postAbilityActivationEvent(User user, AbilityDescription desc, Activation method) {
+    post(new AbilityActivationEventImpl(user, desc, method));
   }
 
   @Override

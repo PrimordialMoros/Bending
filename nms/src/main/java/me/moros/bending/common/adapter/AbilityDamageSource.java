@@ -61,5 +61,3 @@ final class AbilityDamageSource extends net.minecraft.world.damagesource.DamageS
     );
   }
 }
-
-

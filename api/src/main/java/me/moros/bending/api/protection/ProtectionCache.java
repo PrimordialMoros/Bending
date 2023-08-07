@@ -61,8 +61,7 @@ public enum ProtectionCache {
    * @see #canBuildPostCache(User, Block)
    */
   public boolean canBuild(User user, Block block) {
-    UUID uuid = user.uuid();
-    return cache.computeIfAbsent(uuid, u -> buildCache()).get(block, b -> canBuildPostCache(user, b));
+    return cache.computeIfAbsent(user.uuid(), u -> buildCache()).get(block, b -> canBuildPostCache(user, b));
   }
 
   /**

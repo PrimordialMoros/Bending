@@ -89,6 +89,7 @@ public class Lightning extends AbilityInstance {
 
   private boolean launched = false;
   private boolean exploded = false;
+  private boolean canExplode = true;
   private double factor;
   private long startTime;
 
@@ -119,7 +120,7 @@ public class Lightning extends AbilityInstance {
 
   @Override
   public UpdateResult update() {
-    if (removalPolicy.test(user, description()) || exploded) {
+    if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
     if (launched) {
@@ -238,21 +239,15 @@ public class Lightning extends AbilityInstance {
       Collider collider = new Sphere(entity.center(), userConfig.radius);
       Collection<Entity> entities = new ArrayList<>();
       CollisionUtil.handle(user, collider, entities::add);
-      boolean remove = handleRedirection(entities);
-      if (!remove) {
-        for (Entity e : entities) {
-          if (onEntityHit(e)) {
-            remove = true;
-            Particle.ELECTRIC_SPARK.builder(e.center()).count(8).offset(0.3).spawn(user.world());
-          }
-        }
+      if (handleRedirection(entities)) {
+        return true;
       }
-      return remove;
+      entities.forEach(this::onEntityHit);
     }
     return false;
   }
 
-  private boolean onEntityHit(Entity entity) {
+  private void onEntityHit(Entity entity) {
     if (!affectedEntities.contains(entity)) {
       affectedEntities.add(entity);
       if (entity.type() == EntityType.CREEPER && entity instanceof LivingEntity creeper) {
@@ -265,11 +260,10 @@ public class Lightning extends AbilityInstance {
       double damage = factor * dmgFactor * userConfig.damage;
       entity.damage(damage, user, description());
       if (grounded) {
-        exploded = true; // Grounded, no explosion should happen
+        canExplode = false;
       }
-      return true;
+      Particle.ELECTRIC_SPARK.builder(entity.center()).count(8).offset(0.3).spawn(user.world());
     }
-    return false;
   }
 
   private boolean touchLiquid(Vector3d center, Block block) {
@@ -285,7 +279,7 @@ public class Lightning extends AbilityInstance {
   }
 
   private void explode(Vector3d center, Block block) {
-    if (exploded || touchLiquid(center, block)) {
+    if (exploded || !canExplode || touchLiquid(center, block)) {
       return;
     }
     exploded = true;
@@ -297,6 +291,7 @@ public class Lightning extends AbilityInstance {
       .breakBlocks(true)
       .sound(6, 1)
       .buildAndExplode(this, center);
+    removalPolicy = (u, d) -> true;
   }
 
   @Override
@@ -338,7 +333,7 @@ public class Lightning extends AbilityInstance {
       LineSegment first = new LineSegment(segment.start, offsetPoint, segment.isFork);
       LineSegment second = new LineSegment(offsetPoint, segment.end, segment.isFork);
       if (forkChance > 0 && rand.nextDouble() < forkChance) {
-        Vector3d forkEnd = offsetPoint.add(randomDirection(offsetPoint.subtract(start), segment.length * 0.75));
+        Vector3d forkEnd = randomDirection(first, offsetPoint, segment.length * 0.75);
         return List.of(first, new LineSegment(offsetPoint, forkEnd, true), second);
       }
       return List.of(first, second);
@@ -368,11 +363,13 @@ public class Lightning extends AbilityInstance {
       return segment.mid.add(VectorUtil.orthogonal(segment.direction, angle, length));
     }
 
-    private Vector3d randomDirection(Vector3d axis, double maxLength) {
-      Rotation rotation = Rotation.from(axis, rand.nextDouble(Math.PI / 4));
-      Vector3d angledVector = rand.nextBoolean() ? rotation.applyTo(axis) : rotation.applyInverseTo(axis);
+    private Vector3d randomDirection(LineSegment segment, Vector3d offset, double maxLength) {
+      double angle = Math.PI / 4;
+      Vector3d axis = offset.subtract(start);
+      Rotation rotation = Rotation.from(axis, rand.nextDouble(-angle, angle));
+      Vector3d angledVector = rotation.applyTo(segment.direction);
       double halfLength = 0.5 * maxLength;
-      return angledVector.normalize().multiply(halfLength + rand.nextDouble() * halfLength);
+      return offset.add(angledVector.normalize().multiply(halfLength + rand.nextDouble(halfLength)));
     }
 
     @Override
