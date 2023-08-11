@@ -19,13 +19,13 @@
 
 package me.moros.bending.common.collision;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 
 record CollisionQueryImpl<E>(Collection<Pair<E>> potentialCollisions) implements CollisionQuery<E> {
   CollisionQueryImpl() {
-    this(new ArrayList<>(32));
+    this(new HashSet<>(32));
   }
 
   void add(E first, E second) {
@@ -38,6 +38,24 @@ record CollisionQueryImpl<E>(Collection<Pair<E>> potentialCollisions) implements
   }
 
   record SimplePair<E>(E first, E second) implements Pair<E> {
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null || getClass() != obj.getClass()) {
+        return false;
+      }
+      SimplePair<?> other = (SimplePair<?>) obj;
+      return (first == other.first && second == other.second) || (first == other.second && second == other.first);
+    }
+
+    @Override
+    public int hashCode() {
+      int maxHash = Math.max(first.hashCode(), second.hashCode());
+      int minHash = Math.min(first.hashCode(), second.hashCode());
+      return 31 * minHash + maxHash;
+    }
   }
 
   record Itr<E>(Iterator<E> iterator) implements Iterator<E> {

@@ -114,7 +114,10 @@ public final class CollisionManager implements Updatable {
   }
 
   private CollisionData handleCollision(Ability first, Ability second, Collider c1, Collider c2, CollisionPair pair) {
-    CollisionData data = new CollisionData(first, second, c1, c2, pair.removeFirst(), pair.removeSecond());
+    boolean invertOrder = first.description() != pair.first();
+    boolean removeFirst = invertOrder ? pair.removeSecond() : pair.removeFirst();
+    boolean removeSecond = invertOrder ? pair.removeFirst() : pair.removeSecond();
+    CollisionData data = new CollisionData(first, second, c1, c2, removeFirst, removeSecond);
     first.onCollision(data.asCollision());
     second.onCollision(data.asInverseCollision());
     return data;
