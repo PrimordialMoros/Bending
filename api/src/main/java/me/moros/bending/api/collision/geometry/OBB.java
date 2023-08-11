@@ -37,6 +37,21 @@ public sealed interface OBB extends Collider permits OBBImpl {
   @Override
   OBB at(Position point);
 
+  Vector3d axis(int idx);
+
+  Vector3d extents();
+
+  @Override
+  default Vector3d halfExtents() {
+    return localSpace(extents()).abs();
+  }
+
+  Vector3d localSpace(Vector3d v);
+
+  default Type type() {
+    return Type.OBB;
+  }
+
   @Override
   default boolean contains(Vector3d point) {
     return closestPosition(point).distanceSq(point) <= EPSILON;

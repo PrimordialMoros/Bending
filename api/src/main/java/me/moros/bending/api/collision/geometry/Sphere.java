@@ -28,6 +28,15 @@ import me.moros.math.Vector3d;
 public sealed interface Sphere extends Collider permits SphereImpl {
   double radius();
 
+  default Type type() {
+    return Type.SPHERE;
+  }
+
+  default AABB outer() {
+    Vector3d half = halfExtents();
+    return AABB.of(position().subtract(half), position().add(half));
+  }
+
   @Override
   default Sphere at(Position point) {
     return of(point.toVector3d(), radius());

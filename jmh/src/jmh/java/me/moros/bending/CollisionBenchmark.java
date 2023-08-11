@@ -19,6 +19,7 @@
 
 package me.moros.bending;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 import me.moros.bending.CollisionUtil.CachedAbility;
 import me.moros.bending.CollisionUtil.CollectionType;
 import me.moros.bending.api.collision.geometry.Collider;
+import me.moros.bending.common.collision.LBVH;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -43,58 +45,89 @@ import org.openjdk.jmh.infra.Blackhole;
 
 @State(Scope.Benchmark)
 @Fork(value = 1)
-@Warmup(iterations = 2, time = 50, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 2, time = 50, timeUnit = TimeUnit.MILLISECONDS)
+@Warmup(iterations = 3, time = 50, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 5, time = 50, timeUnit = TimeUnit.MILLISECONDS)
+@OutputTimeUnit(TimeUnit.MICROSECONDS)
+@BenchmarkMode(Mode.AverageTime)
 public class CollisionBenchmark {
-  @Param({"1", "10"})
+  @Param({"1", "4", "10"}) // size * 30 players * 2 abilities each
   int size;
 
-  @Param({
-    "HashSet",
-    "IdentityHashSet",
-    "ConcurrentHashSet",
-    "LinkedHashSet",
-    "ArrayList",
-  })
-  CollectionType type;
-
-  Collection<CachedAbility> colliders;
+  CachedAbility[] colliders;
 
   @Setup
   public void setup() {
-    colliders = CollisionUtil.generateColliders(size);
+    // Generate up to 10 extra colliders per ability to stress the BVH
+    colliders = CollisionUtil.generateColliders(size, true);
   }
 
   @Benchmark
-  @BenchmarkMode(Mode.AverageTime)
-  @OutputTimeUnit(TimeUnit.MICROSECONDS)
   public void processCollisions(Blackhole bh) {
-    int amount = colliders.size() / 2;
-    Collection<CachedAbility> pruned = type.create(amount);
+    int amount = colliders.length / 2;
+    Collection<CachedAbility> pruned = CollectionType.IdentityHashSet.create(amount);
     for (var first : colliders) {
       if (pruned.contains(first)) {
         continue;
       }
       for (var second : colliders) {
-        if (first.uuid().equals(second.uuid()) || pruned.contains(second)) {
-          continue;
-        }
-        Entry<Collider, Collider> collision = checkCollision(first.colliders(), second.colliders());
-        if (collision != null) {
-          bh.consume(collision.getKey());
-          bh.consume(collision.getValue());
-          Blackhole.consumeCPU(512);
-          int idx = pruned.size() % 3;
-          if (idx == 0) {
-            pruned.add(first);
-            break;
-          } else if (idx == 1) {
-            pruned.add(second);
-          }
+        if (handleInternal(first, second, pruned, bh)) {
+          break;
         }
       }
     }
     bh.consume(pruned);
+  }
+
+  @Benchmark
+  public void processCollisionsParallel(Blackhole bh) {
+    int amount = colliders.length / 2;
+    Collection<CachedAbility> pruned = CollectionType.ConcurrentHashSet.create(amount);
+    Arrays.stream(colliders).parallel().forEach(first -> {
+      if (!pruned.contains(first)) {
+        for (var second : colliders) {
+          if (handleInternal(first, second, pruned, bh)) {
+            break;
+          }
+        }
+      }
+    });
+    bh.consume(pruned);
+  }
+
+  @Benchmark
+  public void processCollisionsLBVH(Blackhole bh) {
+    var copy = new CachedAbility[colliders.length];
+    System.arraycopy(colliders, 0, copy, 0, colliders.length);
+    var tree = LBVH.buildTree(copy);
+    int amount = colliders.length / 2;
+    Collection<CachedAbility> pruned = CollectionType.IdentityHashSet.create(amount);
+    for (var pair : tree.findPotentialCollisions()) {
+      var first = pair.first();
+      if (!pruned.contains(first)) {
+        handleInternal(first, pair.second(), pruned, bh);
+      }
+    }
+    bh.consume(pruned);
+  }
+
+  private boolean handleInternal(CachedAbility first, CachedAbility second, Collection<CachedAbility> pruned, Blackhole bh) {
+    if (first.uuid().equals(second.uuid()) || pruned.contains(second)) {
+      return false;
+    }
+    Entry<Collider, Collider> collision = checkCollision(first.colliders(), second.colliders());
+    if (collision != null) {
+      bh.consume(collision.getKey());
+      bh.consume(collision.getValue());
+      Blackhole.consumeCPU(512);
+      int idx = pruned.size() % 3;
+      if (idx == 0) {
+        pruned.add(first);
+        return true;
+      } else if (idx == 1) {
+        pruned.add(second);
+      }
+    }
+    return false;
   }
 
   private @Nullable Entry<Collider, Collider> checkCollision(Collection<Collider> firstColliders, Collection<Collider> secondColliders) {

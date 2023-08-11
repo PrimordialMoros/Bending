@@ -32,29 +32,24 @@ import java.util.concurrent.ThreadLocalRandom;
 import me.moros.bending.api.collision.geometry.AABB;
 import me.moros.bending.api.collision.geometry.Collider;
 import me.moros.bending.api.collision.geometry.OBB;
-import me.moros.bending.api.collision.geometry.Ray;
 import me.moros.bending.api.collision.geometry.Sphere;
+import me.moros.bending.common.collision.AABBUtil;
+import me.moros.bending.common.collision.Boundable;
+import me.moros.bending.common.collision.MortonEncoded;
 import me.moros.math.Rotation;
 import me.moros.math.Vector3d;
 
 public class CollisionUtil {
   private static final Vector3d[] AXES = new Vector3d[]{Vector3d.PLUS_I, Vector3d.PLUS_J, Vector3d.PLUS_K};
 
-  public static Collection<CachedAbility> generateColliders(int size) {
-    return generateColliders(size, false, CollectionType.ArrayList);
-  }
-
-  public static Collection<CachedAbility> generateColliders(int size, boolean extraColliders) {
-    return generateColliders(size, extraColliders, CollectionType.ArrayList);
-  }
-
-  public static Collection<CachedAbility> generateColliders(int size, boolean extraColliders, CollectionType type) {
+  public static CachedAbility[] generateColliders(int size, boolean extraColliders) {
     ThreadLocalRandom rand = ThreadLocalRandom.current();
-    Collection<CachedAbility> result = type.create(3 * 20 * size);
+    CachedAbility[] result = new CachedAbility[3 * 20 * size];
     UUID[] uuids = new UUID[30 * size];
     for (int i = 0; i < uuids.length; i++) {
       uuids[i] = UUID.randomUUID();
     }
+    int idx = 0;
     for (int i = 0; i < 3; i++) {
       for (int j = 1; j <= size; j++) {
         double[] arr = new double[]{1, 1, 1};
@@ -65,30 +60,29 @@ public class CollisionUtil {
         Rotation rotation = Rotation.from(AXES[i], angle);
         for (int k = 1; k <= 20; k++) {
           Vector3d center = randomVector(k * 0.5 * j);
-          OBB obb = OBB.of(aabb.at(center), rotation);
+          int r = rand.nextInt(3);
+          Collider collider;
+          if (r == 0) {
+            collider = OBB.of(aabb.at(center), rotation);
+          } else if (r == 1) {
+            collider = Sphere.of(center, r);
+          } else {
+            collider = aabb.at(center);
+          }
           UUID uuid = uuids[rand.nextInt(uuids.length)];
           List<Collider> colliders = new ArrayList<>();
-          colliders.add(obb);
-          if (extraColliders) {
-            int extraAmount = rand.nextInt(-10, 10);
+          colliders.add(collider);
+          if (extraColliders && rand.nextBoolean()) {
+            int extraAmount = rand.nextInt(10);
             for (int h = 0; h < extraAmount; h++) {
-              double value = rand.nextDouble(0.2 * k);
-              Vector3d center2 = randomVector(k * 0.5 * j);
-              Vector3d center3 = randomVector(k * 0.5 * j);
-              int r = rand.nextInt(3);
-              Collider collider;
-              if (r == 0) {
-                collider = Sphere.of(center2, value);
-              } else if (r == 1) {
-                collider = Ray.of(center2, center3.normalize().multiply(value));
-              } else {
-                collider = AABB.of(center2.min(center3), center2.max(center3));
-              }
-              colliders.add(collider);
+              double value = rand.nextDouble(2);
+              Vector3d center2 = center.add(randomVector(k * 0.2));
+              Vector3d center3 = center.add(randomVector(k * 0.2));
+              colliders.add(rand.nextBoolean() ? Sphere.of(center2, value) : AABB.of(center2.min(center3), center2.max(center3)));
             }
             Collections.shuffle(colliders);
           }
-          result.add(new CachedAbility(uuid, List.copyOf(colliders)));
+          result[idx++] = CachedAbility.create(uuid, List.copyOf(colliders));
         }
       }
     }
@@ -137,6 +131,11 @@ public class CollisionUtil {
     public abstract <E> Collection<E> create(int maximumSize);
   }
 
-  public record CachedAbility(UUID uuid, Collection<Collider> colliders) {
+  public record CachedAbility(UUID uuid, Collection<Collider> colliders, AABB box,
+                              int morton) implements Boundable, MortonEncoded {
+    private static CachedAbility create(UUID uuid, Collection<Collider> colliders) {
+      AABB box = AABBUtil.combine(colliders);
+      return new CachedAbility(uuid, colliders, box, MortonEncoded.calculateMorton(box.position()));
+    }
   }
 }

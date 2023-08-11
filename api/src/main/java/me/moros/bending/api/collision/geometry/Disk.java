@@ -30,6 +30,16 @@ public sealed interface Disk extends Collider permits DiskImpl {
 
   Sphere sphere();
 
+  default Type type() {
+    return Type.DISK;
+  }
+
+  default AABB outer() {
+    AABB box1 = sphere().outer();
+    AABB box2 = obb().outer();
+    return AABB.of(box1.min().min(box2.min()), box1.max().max(box2.max()));
+  }
+
   @Override
   default Vector3d position() {
     return sphere().position();

@@ -33,6 +33,14 @@ public sealed interface Ray extends Collider permits RayImpl {
 
   Vector3d inv();
 
+  default Type type() {
+    return Type.RAY;
+  }
+
+  default AABB outer() {
+    return AABB.fromRay(this, 0);
+  }
+
   @Override
   default Ray at(Position point) {
     return of(point.toVector3d(), direction());

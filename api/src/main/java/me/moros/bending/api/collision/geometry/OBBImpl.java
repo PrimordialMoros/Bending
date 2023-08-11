@@ -50,8 +50,13 @@ record OBBImpl(Vector3d position, Vector3d extents, AABB outer, Vector3d[] axes)
   }
 
   @Override
-  public Vector3d halfExtents() {
-    return OBBImpl.localSpace(axes, extents).abs();
+  public Vector3d axis(int idx) {
+    return axes[idx];
+  }
+
+  @Override
+  public Vector3d localSpace(Vector3d v) {
+    return localSpace(axes, v);
   }
 
   @Override
@@ -74,7 +79,7 @@ record OBBImpl(Vector3d position, Vector3d extents, AABB outer, Vector3d[] axes)
     return result;
   }
 
-  static Vector3d localSpace(Vector3d[] axes, Vector3d dir) {
+  private static Vector3d localSpace(Vector3d[] axes, Vector3d dir) {
     double[] out = new double[3];
     for (int row = 0; row < 3; row++) {
       out[row] = axes[row].dot(dir);

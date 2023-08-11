@@ -29,6 +29,14 @@ public sealed interface AABB extends Collider permits AABBImpl, AABBDummy {
   AABB BLOCK_BOUNDS = of(Vector3d.ZERO, Vector3d.ONE);
   AABB EXPANDED_BLOCK_BOUNDS = BLOCK_BOUNDS.grow(Vector3d.of(0.4, 0.4, 0.4));
 
+  default Type type() {
+    return Type.AABB;
+  }
+
+  default AABB outer() {
+    return this;
+  }
+
   /**
    * Get the min
    * @return the min box component

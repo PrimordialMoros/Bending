@@ -28,6 +28,12 @@ import me.moros.math.Vector3d;
 public sealed interface Collider permits AABB, Disk, OBB, Ray, Sphere {
   double EPSILON = 0.01;
 
+  enum Type {SPHERE, AABB, OBB, RAY, DISK}
+
+  Type type();
+
+  AABB outer();
+
   /**
    * Check if this collider intersects with another.
    * @param other the other collider to check
