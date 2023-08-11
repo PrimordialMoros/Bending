@@ -19,10 +19,15 @@
 
 package me.moros.bending.common.collision;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
-public record CollisionQueryImpl<E>(Collection<Pair<E>> potentialCollisions) implements CollisionQuery<E> {
+record CollisionQueryImpl<E>(Collection<Pair<E>> potentialCollisions) implements CollisionQuery<E> {
+  CollisionQueryImpl() {
+    this(new ArrayList<>(32));
+  }
+
   void add(E first, E second) {
     potentialCollisions.add(new SimplePair<>(first, second));
   }

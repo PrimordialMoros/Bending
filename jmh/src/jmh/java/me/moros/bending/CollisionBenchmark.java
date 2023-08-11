@@ -53,23 +53,22 @@ public class CollisionBenchmark {
   @Param({"1", "4", "10"}) // size * 30 players * 2 abilities each
   int size;
 
-  CachedAbility[] colliders;
+  CachedAbility[] abilities;
 
   @Setup
   public void setup() {
     // Generate up to 10 extra colliders per ability to stress the BVH
-    colliders = CollisionUtil.generateColliders(size, true);
+    abilities = CollisionUtil.generateColliders(size, true);
   }
 
   @Benchmark
   public void processCollisions(Blackhole bh) {
-    int amount = colliders.length / 2;
-    Collection<CachedAbility> pruned = CollectionType.IdentityHashSet.create(amount);
-    for (var first : colliders) {
+    Collection<CachedAbility> pruned = CollectionType.IdentityHashSet.create(abilities.length / 2);
+    for (var first : abilities) {
       if (pruned.contains(first)) {
         continue;
       }
-      for (var second : colliders) {
+      for (var second : abilities) {
         if (handleInternal(first, second, pruned, bh)) {
           break;
         }
@@ -80,11 +79,10 @@ public class CollisionBenchmark {
 
   @Benchmark
   public void processCollisionsParallel(Blackhole bh) {
-    int amount = colliders.length / 2;
-    Collection<CachedAbility> pruned = CollectionType.ConcurrentHashSet.create(amount);
-    Arrays.stream(colliders).parallel().forEach(first -> {
+    Collection<CachedAbility> pruned = CollectionType.ConcurrentHashSet.create(abilities.length / 2);
+    Arrays.stream(abilities).parallel().forEach(first -> {
       if (!pruned.contains(first)) {
-        for (var second : colliders) {
+        for (var second : abilities) {
           if (handleInternal(first, second, pruned, bh)) {
             break;
           }
@@ -96,12 +94,11 @@ public class CollisionBenchmark {
 
   @Benchmark
   public void processCollisionsLBVH(Blackhole bh) {
-    var copy = new CachedAbility[colliders.length];
-    System.arraycopy(colliders, 0, copy, 0, colliders.length);
-    var tree = LBVH.buildTree(copy);
-    int amount = colliders.length / 2;
-    Collection<CachedAbility> pruned = CollectionType.IdentityHashSet.create(amount);
-    for (var pair : tree.findPotentialCollisions()) {
+    var copy = new CachedAbility[abilities.length];
+    System.arraycopy(abilities, 0, copy, 0, abilities.length);
+    var bvh = LBVH.buildTree(copy);
+    Collection<CachedAbility> pruned = CollectionType.IdentityHashSet.create(abilities.length / 2);
+    for (var pair : bvh.queryAll()) {
       var first = pair.first();
       if (!pruned.contains(first)) {
         handleInternal(first, pair.second(), pruned, bh);

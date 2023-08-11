@@ -23,6 +23,4 @@ import me.moros.bending.api.collision.geometry.AABB;
 
 public interface Boundable {
   AABB box();
-
-  int morton();
 }

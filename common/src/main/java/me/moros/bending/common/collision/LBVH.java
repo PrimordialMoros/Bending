@@ -19,7 +19,6 @@
 
 package me.moros.bending.common.collision;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -27,7 +26,7 @@ import me.moros.bending.api.collision.geometry.AABB;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 //https://developer.nvidia.com/blog/thinking-parallel-part-iii-tree-construction-gpu/
-public class LBVH<E extends Boundable & MortonEncoded> {
+public class LBVH<E extends Boundable> {
   private final Node<E>[] treeNodes;
   private final Node<E>[] leafNodes;
 
@@ -36,16 +35,31 @@ public class LBVH<E extends Boundable & MortonEncoded> {
     this.leafNodes = leafNodes;
   }
 
-  public CollisionQuery<E> findPotentialCollisions() {
-    CollisionQueryImpl<E> query = new CollisionQueryImpl<>(new ArrayList<>(32));
-    Node<E> root = treeNodes[0];
-    for (var leaf : leafNodes) {
-      findPotentialCollisionsRecursive(leaf.element, root, query);
-    }
-    return query;
+  public int size() {
+    return leafNodes.length;
   }
 
-  private void findPotentialCollisionsRecursive(E toCheck, Node<E> node, CollisionQueryImpl<E> potential) {
+  private Node<E> root() {
+    return treeNodes[0];
+  }
+
+  public CollisionQuery<E> queryAll() {
+    CollisionQueryImpl<E> result = new CollisionQueryImpl<>();
+    Node<E> root = root();
+    for (var leaf : leafNodes) {
+      recursiveQuery(leaf.element, root, result);
+    }
+    return result;
+  }
+
+  public CollisionQuery<E> query(E element) {
+    CollisionQueryImpl<E> result = new CollisionQueryImpl<>();
+    Node<E> root = root();
+    recursiveQuery(element, root, result);
+    return result;
+  }
+
+  private void recursiveQuery(E toCheck, Node<E> node, CollisionQueryImpl<E> potential) {
     if (node.element == toCheck) {
       return;
     }
@@ -53,8 +67,8 @@ public class LBVH<E extends Boundable & MortonEncoded> {
       if (node.element != null) {
         potential.add(toCheck, node.element);
       } else {
-        findPotentialCollisionsRecursive(toCheck, node.left, potential);
-        findPotentialCollisionsRecursive(toCheck, node.right, potential);
+        recursiveQuery(toCheck, node.left, potential);
+        recursiveQuery(toCheck, node.right, potential);
       }
     }
   }
@@ -64,22 +78,22 @@ public class LBVH<E extends Boundable & MortonEncoded> {
     Arrays.sort(elements, Comparator.comparingInt(MortonEncoded::morton));
     int length = elements.length;
     int leafLength = length - 1;
-    Node<E>[] tree = new Node[leafLength];
-    Node<E>[] leafNodes = new Node[length];
+    final Node<E>[] treeNodes = new Node[leafLength];
+    final Node<E>[] leafNodes = new Node[length];
     for (int i = 0; i < length; ++i) {
       if (i < leafLength) {
-        tree[i] = new Node<>();
+        treeNodes[i] = new Node<>();
       }
       Node<E> node = new Node<>();
       node.element = elements[i];
       node.box = node.element.box();
       leafNodes[i] = node;
     }
-    for (int i = 0; i < tree.length; ++i) {
-      generateNode(elements, tree, leafNodes, i);
+    for (int i = 0; i < treeNodes.length; ++i) {
+      generateNode(elements, treeNodes, leafNodes, i);
     }
-    calculateVolumeHierarchy(tree[0]);
-    return new LBVH<>(tree, leafNodes);
+    calculateVolumeHierarchy(treeNodes[0]);
+    return new LBVH<>(treeNodes, leafNodes);
   }
 
   private static void calculateVolumeHierarchy(Node<?> node) {
@@ -91,21 +105,22 @@ public class LBVH<E extends Boundable & MortonEncoded> {
     node.box = AABBUtil.combine(node.left.box, node.right.box);
   }
 
-  private static <E extends MortonEncoded> void generateNode(E[] sorted, Node<E>[] tree, Node<E>[] leafNodes, int idx) {
+  private static <E> void generateNode(final MortonEncoded[] sorted, final Node<E>[] treeNodes, final Node<E>[] leafNodes, final int idx) {
     final Range range = determineRange(sorted, idx);
     final int split = findSplit(sorted, range.start(), range.end());
-    Node<E> left, right;
+    final Node<E> left;
+    final Node<E> right;
     if (split == range.start()) {
       left = leafNodes[split];
     } else {
-      left = tree[split];
+      left = treeNodes[split];
     }
     if (split + 1 == range.end()) {
       right = leafNodes[split + 1];
     } else {
-      right = tree[split + 1];
+      right = treeNodes[split + 1];
     }
-    final Node<E> node = tree[idx];
+    final Node<E> node = treeNodes[idx];
     node.left = left;
     node.right = right;
     left.parent = node;

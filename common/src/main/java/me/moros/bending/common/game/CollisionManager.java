@@ -25,14 +25,22 @@ import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import me.moros.bending.api.ability.Ability;
 import me.moros.bending.api.ability.Updatable;
 import me.moros.bending.api.collision.Collision.CollisionData;
 import me.moros.bending.api.collision.CollisionPair;
+import me.moros.bending.api.collision.geometry.AABB;
 import me.moros.bending.api.collision.geometry.Collider;
 import me.moros.bending.api.game.AbilityManager;
 import me.moros.bending.api.registry.Registries;
+import me.moros.bending.common.collision.AABBUtil;
+import me.moros.bending.common.collision.Boundable;
+import me.moros.bending.common.collision.CollisionQuery;
+import me.moros.bending.common.collision.CollisionQuery.Pair;
+import me.moros.bending.common.collision.LBVH;
+import me.moros.bending.common.collision.MortonEncoded;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class CollisionManager implements Updatable {
@@ -42,53 +50,56 @@ public final class CollisionManager implements Updatable {
     this.manager = manager;
   }
 
+  private CachedAbility[] filterAndCollect() {
+    Collection<CachedAbility> instances = new ArrayList<>(manager.size());
+    for (Ability ability : manager) {
+      Collection<Collider> colliders = ability.colliders();
+      if (!colliders.isEmpty()) {
+        instances.add(CachedAbility.create(ability, colliders));
+      }
+    }
+    return instances.toArray(CachedAbility[]::new);
+  }
+
   @Override
   public UpdateResult update() {
     CachedAbility[] instances = filterAndCollect();
     if (instances.length < 2) {
       return UpdateResult.CONTINUE;
     }
-    Collection<CachedAbility> pruned = Collections.newSetFromMap(new IdentityHashMap<>(instances.length));
-    for (CachedAbility firstEntry : instances) {
-      if (pruned.contains(firstEntry)) {
-        continue;
-      }
-      Ability first = firstEntry.ability();
-      for (var secondEntry : instances) {
-        Ability second = secondEntry.ability();
-        if (first.user().equals(second.user()) || pruned.contains(secondEntry)) {
-          continue;
-        }
-        CollisionPair pair = Registries.COLLISIONS.get(CollisionPair.createKey(first.description(), second.description()));
-        if (pair != null) {
-          Entry<Collider, Collider> collision = checkCollision(firstEntry.colliders(), secondEntry.colliders());
-          if (collision != null) {
-            CollisionData result = handleCollision(first, second, collision.getKey(), collision.getValue(), pair);
-            if (result.removeFirst()) {
-              manager.destroyInstance(first);
-              pruned.add(firstEntry);
-              break;
-            }
-            if (result.removeSecond()) {
-              manager.destroyInstance(second);
-              pruned.add(secondEntry);
-            }
-          }
-        }
-      }
+    Set<CachedAbility> pruned = Collections.newSetFromMap(new IdentityHashMap<>(instances.length));
+    LBVH<CachedAbility> bvh = LBVH.buildTree(instances);
+    CollisionQuery<CachedAbility> query = bvh.queryAll();
+    for (Pair<CachedAbility> pair : query) {
+      processPotentialCollision(pair, pruned);
     }
     return UpdateResult.CONTINUE;
   }
 
-  private CachedAbility[] filterAndCollect() {
-    Collection<CachedAbility> instances = new ArrayList<>(manager.size());
-    for (Ability ability : manager) {
-      Collection<Collider> colliders = ability.colliders();
-      if (!colliders.isEmpty()) {
-        instances.add(new CachedAbility(ability, colliders));
+  private void processPotentialCollision(Pair<CachedAbility> queryPair, Set<CachedAbility> pruned) {
+    CachedAbility firstEntry = queryPair.first();
+    CachedAbility secondEntry = queryPair.second();
+    if (firstEntry.isSameUser(secondEntry) || pruned.contains(firstEntry) || pruned.contains(secondEntry)) {
+      return;
+    }
+    Ability first = firstEntry.ability();
+    Ability second = secondEntry.ability();
+    CollisionPair pair = Registries.COLLISIONS.get(CollisionPair.createKey(first.description(), second.description()));
+    if (pair == null) {
+      return;
+    }
+    Entry<Collider, Collider> collision = checkCollision(firstEntry.colliders(), secondEntry.colliders());
+    if (collision != null) {
+      CollisionData result = handleCollision(first, second, collision.getKey(), collision.getValue(), pair);
+      if (result.removeFirst()) {
+        manager.destroyInstance(first);
+        pruned.add(firstEntry);
+      }
+      if (result.removeSecond()) {
+        manager.destroyInstance(second);
+        pruned.add(secondEntry);
       }
     }
-    return instances.toArray(CachedAbility[]::new);
   }
 
   private @Nullable Entry<Collider, Collider> checkCollision(Iterable<Collider> firstColliders, Iterable<Collider> secondColliders) {
@@ -109,6 +120,15 @@ public final class CollisionManager implements Updatable {
     return data;
   }
 
-  private record CachedAbility(Ability ability, Collection<Collider> colliders) {
+  private record CachedAbility(Ability ability, Collection<Collider> colliders, AABB box,
+                               int morton) implements Boundable, MortonEncoded {
+    private boolean isSameUser(CachedAbility other) {
+      return ability.user().uuid().equals(other.ability.user().uuid());
+    }
+
+    private static CachedAbility create(Ability ability, Collection<Collider> colliders) {
+      AABB box = AABBUtil.combine(colliders);
+      return new CachedAbility(ability, colliders, box, MortonEncoded.calculateMorton(box.position()));
+    }
   }
 }

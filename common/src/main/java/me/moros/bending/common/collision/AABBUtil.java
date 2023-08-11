@@ -26,13 +26,16 @@ import me.moros.bending.api.collision.geometry.Collider;
 import me.moros.math.Vector3d;
 
 public final class AABBUtil {
-  private static final Vector3d MARGIN = Vector3d.of(0.2, 0.2, 0.2);
+  private static final double MARGIN = 0.01;
 
   private AABBUtil() {
   }
 
   public static AABB combine(AABB first, AABB second) {
-    return AABB.of(first.min().min(second.min()).subtract(MARGIN), first.max().max(second.max()).add(MARGIN));
+    return AABB.of(
+      first.min().min(second.min()).subtract(MARGIN, MARGIN, MARGIN),
+      first.max().max(second.max()).add(MARGIN, MARGIN, MARGIN)
+    );
   }
 
   public static AABB combine(Collection<Collider> colliders) {
@@ -51,6 +54,9 @@ public final class AABBUtil {
       maxY = Math.max(maxY, aabb.max().y());
       maxZ = Math.max(maxZ, aabb.max().z());
     }
-    return AABB.of(Vector3d.of(minX, minY, minZ).subtract(MARGIN), Vector3d.of(maxX, maxY, maxZ).add(MARGIN));
+    return AABB.of(
+      Vector3d.of(minX - MARGIN, minY - MARGIN, minZ - MARGIN),
+      Vector3d.of(maxX + MARGIN, maxY + MARGIN, maxZ + MARGIN)
+    );
   }
 }
