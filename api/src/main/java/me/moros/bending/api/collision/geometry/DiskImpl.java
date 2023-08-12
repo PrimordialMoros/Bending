@@ -19,5 +19,5 @@
 
 package me.moros.bending.api.collision.geometry;
 
-record DiskImpl(OBB obb, Sphere sphere) implements Disk {
+record DiskImpl(Sphere sphere, OBB obb) implements Disk {
 }

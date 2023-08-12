@@ -99,7 +99,7 @@ public class AirWheel extends AbilityInstance {
   public UpdateResult update() {
     long time = System.currentTimeMillis();
     center = user.location().add(0, 0.8, 0).add(user.direction().withY(0).multiply(1.2));
-    collider = Disk.of(OBB.of(BOUNDS, Vector3d.PLUS_J, Math.toRadians(user.yaw())), Sphere.of(center, 2));
+    collider = Disk.of(Sphere.of(2), OBB.of(BOUNDS, Vector3d.PLUS_J, Math.toRadians(user.yaw()))).at(center);
 
     if (time >= nextRenderTime) {
       render();

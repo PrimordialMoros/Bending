@@ -17,26 +17,33 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.collision;
+package me.moros.bending.common.collision;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import me.moros.bending.api.ability.Ability;
+import me.moros.bending.api.collision.Collision;
 import me.moros.bending.api.collision.geometry.Collider;
 
-/**
- * Represents a real collision between two ability instances.
- */
-public interface Collision {
-  Ability collidedAbility();
+record CollisionView(Ability collidedAbility, Collider colliderSelf, Collider colliderOther,
+                     AtomicBoolean self, AtomicBoolean other) implements Collision {
+  @Override
+  public boolean removeSelf() {
+    return self.get();
+  }
 
-  Collider colliderSelf();
+  @Override
+  public void removeSelf(boolean value) {
+    self.set(value);
+  }
 
-  Collider colliderOther();
+  @Override
+  public boolean removeOther() {
+    return other.get();
+  }
 
-  boolean removeSelf();
-
-  void removeSelf(boolean value);
-
-  boolean removeOther();
-
-  void removeOther(boolean value);
+  @Override
+  public void removeOther(boolean value) {
+    other.set(value);
+  }
 }

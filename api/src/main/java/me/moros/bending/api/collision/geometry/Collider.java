@@ -30,8 +30,16 @@ public sealed interface Collider permits AABB, Disk, OBB, Ray, Sphere {
 
   enum Type {SPHERE, AABB, OBB, RAY, DISK}
 
+  /**
+   * Get the collider type.
+   * @return the collider type
+   */
   Type type();
 
+  /**
+   * Calculate a tight-fitting AABB that contains this collider (for broad phase collision detection).
+   * @return the calculated outer AABB
+   */
   AABB outer();
 
   /**
@@ -40,7 +48,7 @@ public sealed interface Collider permits AABB, Disk, OBB, Ray, Sphere {
    * @return true if the two colliders intersect, false otherwise
    */
   default boolean intersects(Collider other) {
-    return ColliderUtil.intersects(this, other);
+    return other != AABB.dummy() && ColliderUtil.intersects(this, other);
   }
 
   /**

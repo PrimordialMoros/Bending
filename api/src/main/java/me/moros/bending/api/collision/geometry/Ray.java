@@ -33,10 +33,12 @@ public sealed interface Ray extends Collider permits RayImpl {
 
   Vector3d inv();
 
+  @Override
   default Type type() {
     return Type.RAY;
   }
 
+  @Override
   default AABB outer() {
     return AABB.fromRay(this, 0);
   }

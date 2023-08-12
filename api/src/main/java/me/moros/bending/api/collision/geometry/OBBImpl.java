@@ -28,6 +28,16 @@ import me.moros.math.Vector3d;
 
 record OBBImpl(Vector3d position, Vector3d extents, AABB outer, Vector3d[] axes) implements OBB {
   @Override
+  public Vector3d axis(int idx) {
+    return axes[idx];
+  }
+
+  @Override
+  public Vector3d localSpace(Vector3d v) {
+    return localSpace(axes, v);
+  }
+
+  @Override
   public Vector3d closestPosition(Vector3d target) {
     Vector3d t = target.subtract(position);
     Vector3d closest = position;
@@ -47,16 +57,6 @@ record OBBImpl(Vector3d position, Vector3d extents, AABB outer, Vector3d[] axes)
     var copy = new Vector3d[3];
     System.arraycopy(axes, 0, copy, 0, 3);
     return new OBBImpl(point3d, extents, outer.at(point3d), copy);
-  }
-
-  @Override
-  public Vector3d axis(int idx) {
-    return axes[idx];
-  }
-
-  @Override
-  public Vector3d localSpace(Vector3d v) {
-    return localSpace(axes, v);
   }
 
   @Override
@@ -80,11 +80,7 @@ record OBBImpl(Vector3d position, Vector3d extents, AABB outer, Vector3d[] axes)
   }
 
   private static Vector3d localSpace(Vector3d[] axes, Vector3d dir) {
-    double[] out = new double[3];
-    for (int row = 0; row < 3; row++) {
-      out[row] = axes[row].dot(dir);
-    }
-    return Vector3d.from(out);
+    return Vector3d.of(axes[0].dot(dir), axes[1].dot(dir), axes[2].dot(dir));
   }
 
   static OBB from(AABB aabb, Rotation rotation) {
@@ -95,7 +91,7 @@ record OBBImpl(Vector3d position, Vector3d extents, AABB outer, Vector3d[] axes)
     for (int i = 0; i < 3; i++) {
       axes[i] = Vector3d.from(m[i]);
     }
-    Vector3d halfExtents = OBBImpl.localSpace(axes, e).abs();
+    Vector3d halfExtents = localSpace(axes, e).abs();
     return new OBBImpl(center, e, AABB.of(center.subtract(halfExtents), center.add(halfExtents)), axes);
   }
 }

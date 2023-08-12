@@ -27,6 +27,12 @@ import me.moros.math.Vector3d;
  * Oriented bounding box.
  */
 public sealed interface OBB extends Collider permits OBBImpl {
+  Vector3d axis(int idx);
+
+  Vector3d extents();
+
+  Vector3d localSpace(Vector3d v);
+
   /**
    * Calculate the position closest to the target that lies on/in the OBB.
    * @param target the target point to calculate relative to
@@ -35,21 +41,16 @@ public sealed interface OBB extends Collider permits OBBImpl {
   Vector3d closestPosition(Vector3d target);
 
   @Override
+  default Type type() {
+    return Type.OBB;
+  }
+
+  @Override
   OBB at(Position point);
-
-  Vector3d axis(int idx);
-
-  Vector3d extents();
 
   @Override
   default Vector3d halfExtents() {
     return localSpace(extents()).abs();
-  }
-
-  Vector3d localSpace(Vector3d v);
-
-  default Type type() {
-    return Type.OBB;
   }
 
   @Override

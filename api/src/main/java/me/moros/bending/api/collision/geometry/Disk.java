@@ -23,17 +23,19 @@ import me.moros.math.Position;
 import me.moros.math.Vector3d;
 
 /**
- * Combination of {@link OBB} and {@link Sphere} to simulate a disk collider.
+ * Combination of {@link Sphere} and {@link OBB} to simulate a disk collider.
  */
 public sealed interface Disk extends Collider permits DiskImpl {
-  OBB obb();
-
   Sphere sphere();
 
+  OBB obb();
+
+  @Override
   default Type type() {
     return Type.DISK;
   }
 
+  @Override
   default AABB outer() {
     AABB box1 = sphere().outer();
     AABB box2 = obb().outer();
@@ -47,7 +49,7 @@ public sealed interface Disk extends Collider permits DiskImpl {
 
   @Override
   default Disk at(Position point) {
-    return of(obb().at(point), sphere().at(point));
+    return of(sphere().at(point), obb().at(point));
   }
 
   @Override
@@ -60,7 +62,7 @@ public sealed interface Disk extends Collider permits DiskImpl {
     return sphere().contains(point) && obb().contains(point);
   }
 
-  static Disk of(OBB obb, Sphere sphere) {
-    return new DiskImpl(obb, sphere);
+  static Disk of(Sphere sphere, OBB obb) {
+    return new DiskImpl(sphere, obb);
   }
 }

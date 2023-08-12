@@ -29,7 +29,6 @@ import java.util.Set;
 
 import me.moros.bending.api.ability.Ability;
 import me.moros.bending.api.ability.Updatable;
-import me.moros.bending.api.collision.Collision.CollisionData;
 import me.moros.bending.api.collision.CollisionPair;
 import me.moros.bending.api.collision.geometry.AABB;
 import me.moros.bending.api.collision.geometry.Collider;
@@ -37,6 +36,7 @@ import me.moros.bending.api.game.AbilityManager;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.common.collision.AABBUtil;
 import me.moros.bending.common.collision.Boundable;
+import me.moros.bending.common.collision.CollisionData;
 import me.moros.bending.common.collision.CollisionQuery;
 import me.moros.bending.common.collision.CollisionQuery.Pair;
 import me.moros.bending.common.collision.LBVH;

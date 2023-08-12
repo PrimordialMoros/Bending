@@ -108,7 +108,7 @@ public class LavaDisk extends AbilityInstance {
     location = source.center();
     direction = user.direction();
     AABB aabb = AABB.of(Vector3d.of(-r, -0.3, -r), Vector3d.of(r, 0.3, r));
-    collider = Disk.of(OBB.of(aabb), Sphere.of(r)).at(location);
+    collider = Disk.of(Sphere.of(r), OBB.of(aabb)).at(location);
     for (Block block : user.world().nearbyBlocks(aabb.at(location))) {
       if (MaterialUtil.isWater(block) || MaterialUtil.isWater(block.offset(Direction.UP))) {
         return false;

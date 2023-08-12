@@ -57,7 +57,7 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
     AABB bounds = AABB.of(Vector3d.of(-0.15, -radius, -radius), Vector3d.of(0.15, radius, radius));
     double angle = Math.toRadians(user.yaw());
     OBB obb = OBB.of(bounds, Vector3d.PLUS_J, angle);
-    collider = Disk.of(obb, Sphere.of(radius));
+    collider = Disk.of(Sphere.of(radius), obb).at(location);
   }
 
   @Override

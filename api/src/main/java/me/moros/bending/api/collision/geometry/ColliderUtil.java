@@ -79,9 +79,6 @@ final class ColliderUtil {
   }
 
   static boolean intersects(Collider first, Collider second) {
-    if (first.equals(AABB.dummy()) || second.equals(AABB.dummy())) {
-      return false;
-    }
     return RESOLVERS[first.type().ordinal()][second.type().ordinal()].test(first, second);
   }
 
@@ -96,6 +93,12 @@ final class ColliderUtil {
     return sphere.contains(Vector3d.of(x, y, z));
   }
 
+  private static boolean sphereIntersectsRay(Sphere sphere, Ray ray) {
+    Vector3d m = ray.position().subtract(sphere.position());
+    double b = m.dot(ray.direction());
+    return b * b - (m.dot(m) - sphere.radius() * sphere.radius()) >= 0;
+  }
+
   private static boolean aabbIntersectsRay(AABB aabb, Ray ray) {
     Vector3d t0 = aabb.min().subtract(ray.position()).multiply(ray.inv());
     Vector3d t1 = aabb.max().subtract(ray.position()).multiply(ray.inv());
@@ -106,7 +109,6 @@ final class ColliderUtil {
     Vector3d v = sphere.position().subtract(obb.closestPosition(sphere.position()));
     return v.dot(v) <= sphere.radius() * sphere.radius();
   }
-
 
   private static boolean obbIntersectsAabb(OBB obb, AABB aabb) {
     return obbIntersection(obb, OBB.of(aabb));
@@ -132,12 +134,6 @@ final class ColliderUtil {
 
   private static boolean diskIntersectsRay(Disk disk, Ray ray) {
     return sphereIntersectsRay(disk.sphere(), ray) && obbIntersectsRay(disk.obb(), ray);
-  }
-
-  private static boolean sphereIntersectsRay(Sphere sphere, Ray ray) {
-    Vector3d m = ray.position().subtract(sphere.position());
-    double b = m.dot(ray.direction());
-    return b * b - (m.dot(m) - sphere.radius() * sphere.radius()) >= 0;
   }
 
   private static boolean sphereIntersection(Sphere first, Sphere other) {
