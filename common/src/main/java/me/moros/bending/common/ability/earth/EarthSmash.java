@@ -315,7 +315,7 @@ public class EarthSmash extends AbilityInstance {
     }
 
     default boolean canSlotSwitch() {
-      return false;
+      return true;
     }
   }
 
@@ -343,6 +343,11 @@ public class EarthSmash extends AbilityInstance {
 
     @Override
     public boolean canCollide() {
+      return false;
+    }
+
+    @Override
+    public boolean canSlotSwitch() {
       return false;
     }
   }
@@ -402,11 +407,6 @@ public class EarthSmash extends AbilityInstance {
         }
       }
     }
-
-    @Override
-    public boolean canSlotSwitch() {
-      return true;
-    }
   }
 
   private final class GrabState implements EarthSmashState {
@@ -434,6 +434,11 @@ public class EarthSmash extends AbilityInstance {
         state = new IdleState();
       }
       return UpdateResult.CONTINUE;
+    }
+
+    @Override
+    public boolean canSlotSwitch() {
+      return false;
     }
   }
 
@@ -496,11 +501,6 @@ public class EarthSmash extends AbilityInstance {
     public boolean canGrab() {
       return true;
     }
-
-    @Override
-    public boolean canSlotSwitch() {
-      return true;
-    }
   }
 
   private class IdleState implements EarthSmashState {
@@ -511,11 +511,6 @@ public class EarthSmash extends AbilityInstance {
 
     @Override
     public boolean canGrab() {
-      return true;
-    }
-
-    @Override
-    public boolean canSlotSwitch() {
       return true;
     }
   }
@@ -580,11 +575,6 @@ public class EarthSmash extends AbilityInstance {
     @Override
     public boolean canCollide() {
       return false;
-    }
-
-    @Override
-    public boolean canSlotSwitch() {
-      return true;
     }
   }
 

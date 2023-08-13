@@ -20,7 +20,6 @@
 package me.moros.bending.api.game;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -33,40 +32,19 @@ import me.moros.bending.api.user.User;
  * Handles active {@link Ability} instances.
  */
 public interface AbilityManager extends Updatable, Iterable<Ability> {
+  int size();
+
   void addUpdatable(Updatable instance);
 
   void addAbility(User user, Ability instance);
 
-  void changeOwner(Ability ability, User user);
-
   void createPassives(User user);
 
-  int size();
+  void changeOwner(Ability ability, User user);
 
   default <T extends Ability> boolean hasAbility(User user, Class<T> type) {
     return userInstances(user, type).findAny().isPresent();
   }
-
-  void destroyInstance(Ability ability);
-
-  private Predicate<Ability> isInstance(Class<? extends Ability> type) {
-    return type::isInstance;
-  }
-
-  default boolean destroyUserInstance(User user, Class<? extends Ability> type) {
-    return destroyUserInstances(user, isInstance(type));
-  }
-
-  default boolean destroyUserInstances(User user, Collection<Class<? extends Ability>> types) {
-    var predicates = types.stream().map(this::isInstance).toList();
-    return destroyUserInstances(user, predicates);
-  }
-
-  default boolean destroyUserInstances(User user, Predicate<Ability> predicate) {
-    return destroyUserInstances(user, List.of(predicate));
-  }
-
-  boolean destroyUserInstances(User user, Iterable<Predicate<Ability>> predicates);
 
   Stream<Ability> userInstances(User user);
 
@@ -84,7 +62,43 @@ public interface AbilityManager extends Updatable, Iterable<Ability> {
     return instances().filter(type::isInstance).map(type::cast);
   }
 
+  /**
+   * @deprecated renamed to {@link #destroyUserInstances(User, Class)}
+   */
+  @Deprecated(forRemoval = true)
+  default boolean destroyUserInstance(User user, Class<? extends Ability> type) {
+    return destroyUserInstances(user, type);
+  }
+
+  default boolean destroyUserInstances(User user, Class<? extends Ability> type) {
+    return destroyUserInstances(user, isInstance(type));
+  }
+
+  default boolean destroyUserInstances(User user, Collection<Class<? extends Ability>> types) {
+    return destroyUserInstances(user, types.stream().map(this::isInstance).reduce(a -> false, Predicate::or));
+  }
+
+  boolean destroyUserInstances(User user, Predicate<Ability> predicate);
+
+  /**
+   * @deprecated use {@link #destroyUserInstances(User, Predicate)} with a combined predicate
+   */
+  @Deprecated(forRemoval = true)
+  default boolean destroyUserInstances(User user, Iterable<Predicate<Ability>> predicates) {
+    Predicate<Ability> predicate = a -> false;
+    for (var p : predicates) {
+      predicate = predicate.or(p);
+    }
+    return destroyUserInstances(user, predicate);
+  }
+
   void destroyUserInstances(User user);
 
+  void destroyInstance(Ability ability);
+
   void destroyAllInstances();
+
+  private Predicate<Ability> isInstance(Class<? extends Ability> type) {
+    return type::isInstance;
+  }
 }

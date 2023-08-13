@@ -95,8 +95,8 @@ final class ColliderUtil {
 
   private static boolean sphereIntersectsRay(Sphere sphere, Ray ray) {
     Vector3d m = ray.position().subtract(sphere.position());
-    double b = m.dot(ray.direction());
-    return b * b - (m.dot(m) - sphere.radius() * sphere.radius()) >= 0;
+    double b = ray.direction().dot(m);
+    return (m.lengthSq() - b * b / ray.direction().lengthSq()) <= sphere.radius() * sphere.radius();
   }
 
   private static boolean aabbIntersectsRay(AABB aabb, Ray ray) {

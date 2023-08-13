@@ -26,11 +26,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.Multimaps;
 import me.moros.bending.api.ability.Ability;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.Activation;
@@ -52,13 +53,19 @@ public class AbilityManagerImpl implements AbilityManager {
   AbilityManagerImpl(Logger logger, Key world) {
     this.logger = logger;
     this.world = world;
-    globalInstances = MultimapBuilder.hashKeys(32).arrayListValues(16).build();
+    globalInstances = Multimaps.newMultimap(new ConcurrentHashMap<>(32), () -> new ArrayList<>(8));
     addQueue = new ArrayList<>(16);
     generics = MultiUpdatable.empty();
   }
 
-  private boolean isPassive(AbilityDescription desc) {
-    return desc.isActivatedBy(Activation.PASSIVE);
+  @Override
+  public int size() {
+    return globalInstances.size();
+  }
+
+  @Override
+  public Iterator<Ability> iterator() {
+    return Collections.unmodifiableCollection(globalInstances.values()).iterator();
   }
 
   @Override
@@ -78,25 +85,14 @@ public class AbilityManagerImpl implements AbilityManager {
   }
 
   @Override
-  public void changeOwner(Ability ability, User user) {
-    if (ability.user().equals(user) || !ability.user().worldKey().equals(user.worldKey()) || !world.equals(user.worldKey())) {
-      return;
-    }
-    if (globalInstances.remove(ability.user().uuid(), ability)) {
-      ability.onUserChange(user);
-      ability.loadConfig();
-      globalInstances.put(user.uuid(), ability);
-    }
-  }
-
-  @Override
   public void createPassives(User user) {
     if (!world.equals(user.worldKey())) {
       return;
     }
-    Collection<AbilityDescription> allPassives = Registries.ABILITIES.stream().filter(this::isPassive).toList();
+    Predicate<AbilityDescription> isPassive = desc -> desc.isActivatedBy(Activation.PASSIVE);
+    Collection<AbilityDescription> allPassives = Registries.ABILITIES.stream().filter(isPassive).toList();
+    destroyUserInstances(user, a -> isPassive.test(a.description()));
     for (AbilityDescription passive : allPassives) {
-      destroyUserInstance(user, passive.createAbility().getClass());
       if (user.hasElement(passive.element()) && user.hasPermission(passive)) {
         Ability ability = passive.createAbility();
         if (ability.activate(user, Activation.PASSIVE)) {
@@ -107,32 +103,15 @@ public class AbilityManagerImpl implements AbilityManager {
   }
 
   @Override
-  public int size() {
-    return globalInstances.size();
-  }
-
-  @Override
-  public void destroyInstance(Ability ability) {
+  public void changeOwner(Ability ability, User user) {
+    if (ability.user().equals(user) || !ability.user().worldKey().equals(user.worldKey()) || !world.equals(user.worldKey())) {
+      return;
+    }
     if (globalInstances.remove(ability.user().uuid(), ability)) {
-      ability.onDestroy();
+      ability.onUserChange(user);
+      ability.loadConfig();
+      globalInstances.put(user.uuid(), ability);
     }
-  }
-
-  @Override
-  public boolean destroyUserInstances(User user, Iterable<Predicate<Ability>> predicates) {
-    boolean destroyed = false;
-    Iterator<Ability> iterator = globalInstances.get(user.uuid()).iterator();
-    while (iterator.hasNext()) {
-      Ability ability = iterator.next();
-      for (var predicate : predicates) {
-        if (predicate.test(ability)) {
-          iterator.remove();
-          ability.onDestroy();
-          destroyed = true;
-        }
-      }
-    }
-    return destroyed;
   }
 
   @Override
@@ -146,28 +125,18 @@ public class AbilityManagerImpl implements AbilityManager {
   }
 
   @Override
-  public void destroyUserInstances(User user) {
-    globalInstances.removeAll(user.uuid()).forEach(Ability::onDestroy);
-  }
-
-  @Override
-  public void destroyAllInstances() {
-    generics.clear();
-    globalInstances.values().forEach(Ability::onDestroy);
-    globalInstances.clear();
-  }
-
-  @Override
   public UpdateResult update() {
     // Add any queued abilities to global instances
     addQueue.forEach(entry -> globalInstances.put(entry.getKey(), entry.getValue()));
     addQueue.clear();
     // Update all instances and remove invalid instances
     generics.update();
-    Iterator<Ability> globalIterator = globalInstances.values().iterator();
+    Collection<Ability> copy = new ArrayList<>(globalInstances.values());
+    Iterator<Ability> copyIterator = copy.iterator();
     Collection<Exception> exceptions = new ArrayList<>();
-    while (globalIterator.hasNext()) {
-      Ability ability = globalIterator.next();
+    while (copyIterator.hasNext()) {
+      Ability ability = copyIterator.next();
+      UUID uuid = ability.user().uuid();
       UpdateResult result = UpdateResult.REMOVE;
       try {
         result = ability.update();
@@ -175,7 +144,8 @@ public class AbilityManagerImpl implements AbilityManager {
         exceptions.add(e);
       } finally {
         if (result == UpdateResult.REMOVE) {
-          globalIterator.remove();
+          copyIterator.remove();
+          globalInstances.remove(uuid, ability);
           ability.onDestroy();
         }
       }
@@ -187,7 +157,36 @@ public class AbilityManagerImpl implements AbilityManager {
   }
 
   @Override
-  public Iterator<Ability> iterator() {
-    return Collections.unmodifiableCollection(globalInstances.values()).iterator();
+  public boolean destroyUserInstances(User user, Predicate<Ability> predicate) {
+    boolean destroyed = false;
+    Iterator<Ability> iterator = globalInstances.get(user.uuid()).iterator();
+    while (iterator.hasNext()) {
+      Ability ability = iterator.next();
+      if (predicate.test(ability)) {
+        iterator.remove();
+        ability.onDestroy();
+        destroyed = true;
+      }
+    }
+    return destroyed;
+  }
+
+  @Override
+  public void destroyUserInstances(User user) {
+    globalInstances.removeAll(user.uuid()).forEach(Ability::onDestroy);
+  }
+
+  @Override
+  public void destroyInstance(Ability ability) {
+    if (globalInstances.remove(ability.user().uuid(), ability)) {
+      ability.onDestroy();
+    }
+  }
+
+  @Override
+  public void destroyAllInstances() {
+    generics.clear();
+    globalInstances.values().forEach(Ability::onDestroy);
+    globalInstances.clear();
   }
 }

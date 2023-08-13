@@ -35,6 +35,7 @@ import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.AbilityInstance;
 import me.moros.bending.api.ability.Activation;
 import me.moros.bending.api.ability.common.FragileStructure;
+import me.moros.bending.api.collision.Collision;
 import me.moros.bending.api.collision.CollisionUtil;
 import me.moros.bending.api.collision.geometry.Collider;
 import me.moros.bending.api.collision.geometry.Ray;
@@ -64,6 +65,7 @@ import me.moros.bending.api.util.functional.ExpireRemovalPolicy;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
+import me.moros.bending.common.ability.earth.MetalCable;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Rotation;
 import me.moros.math.Vector3d;
@@ -83,9 +85,9 @@ public class Lightning extends AbilityInstance {
 
   private final Set<Entity> affectedEntities = new HashSet<>();
 
+  private Collection<Collider> colliders = new ArrayList<>();
   private ListIterator<LineSegment> arcIterator;
   private Vector3d direction;
-  private Vector3d location;
 
   private boolean launched = false;
   private boolean exploded = false;
@@ -145,11 +147,28 @@ public class Lightning extends AbilityInstance {
     return UpdateResult.CONTINUE;
   }
 
+  private boolean tryInteractWithCable(Vector3d origin, @Nullable MetalCable cable, boolean directed) {
+    if (cable == null) {
+      for (Entity entity : user.world().nearbyEntities(origin, 2, e -> e.type() == EntityType.ARROW)) {
+        MetalCable ability = entity.get(MetalCable.CABLE_KEY).orElse(null);
+        if (ability != null && !user.uuid().equals(ability.user().uuid())) {
+          cable = ability;
+          break;
+        }
+      }
+    }
+    if (cable != null) {
+      cable.electrify(origin, directed).ifPresent(this::onEntityHit);
+      removalPolicy = (u, d) -> true;
+      return true;
+    }
+    return false;
+  }
+
   private void launch() {
     if (launched) {
       return;
     }
-
     long deltaTime = System.currentTimeMillis() - startTime;
     factor = 1;
     if (deltaTime >= userConfig.maxChargeTime) {
@@ -162,7 +181,9 @@ public class Lightning extends AbilityInstance {
       removalPolicy = (u, d) -> true; // Remove in next tick
       return;
     }
-
+    if (tryInteractWithCable(user.eyeLocation(), null, true)) {
+      return;
+    }
     double distance = userConfig.range * factor;
     Vector3d origin = user.eyeLocation();
     Vector3d target = origin.add(user.direction().multiply(distance));
@@ -171,7 +192,6 @@ public class Lightning extends AbilityInstance {
     if (rayTrace.hit()) {
       point = rayTrace.position();
     }
-    location = origin;
     direction = target.subtract(origin).normalize();
     arcIterator = new Arc(origin, target, point).iterator();
     user.addCooldown(description(), userConfig.cooldown);
@@ -203,7 +223,7 @@ public class Lightning extends AbilityInstance {
       if (!user.canBuild(segment.end)) {
         return false;
       }
-      location = segment.end;
+      colliders.add(Sphere.of(segment.mid, 0.2));
       renderSegment(segment);
       if (electrocuteAround(result.entity())) {
         return false;
@@ -296,7 +316,7 @@ public class Lightning extends AbilityInstance {
 
   @Override
   public Collection<Collider> colliders() {
-    return location == null ? List.of() : List.of(Sphere.of(location, 0.3));
+    return launched ? List.copyOf(colliders) : List.of();
   }
 
   @Override
@@ -310,6 +330,13 @@ public class Lightning extends AbilityInstance {
       SoundEffect.LIGHTNING.play(user.world(), user.location());
       user.addCooldown(description(), userConfig.cooldown);
       user.damage(userConfig.overchargeDamage, user, description());
+    }
+  }
+
+  @Override
+  public void onCollision(Collision collision) {
+    if (collision.collidedAbility() instanceof MetalCable cable) {
+      tryInteractWithCable(collision.colliderSelf().position(), cable, false);
     }
   }
 

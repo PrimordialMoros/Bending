@@ -22,7 +22,7 @@ package me.moros.bending.common.ability.earth;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.IntStream;
+import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.AbilityInstance;
@@ -43,6 +43,7 @@ import me.moros.bending.api.platform.entity.EntityType;
 import me.moros.bending.api.platform.item.Inventory;
 import me.moros.bending.api.platform.item.InventoryUtil;
 import me.moros.bending.api.platform.item.Item;
+import me.moros.bending.api.platform.particle.Particle;
 import me.moros.bending.api.platform.particle.ParticleBuilder;
 import me.moros.bending.api.platform.sound.SoundEffect;
 import me.moros.bending.api.temporal.TempBlock;
@@ -59,6 +60,7 @@ import me.moros.bending.common.ability.earth.util.Projectile;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
+import me.moros.math.VectorUtil;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
@@ -71,9 +73,7 @@ public class MetalCable extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private Collection<Vector3d> pointLocations;
   private Vector3d location;
-  private Vector3d offset;
   private Entity cable;
   private Attached<?> attached;
 
@@ -212,15 +212,11 @@ public class MetalCable extends AbilityInstance {
     if (dir.lengthSq() > 0.1 && user.rayTrace(origin, dir).ignoreLiquids(false).ignore(ignore).blocks(user.world()).hit()) {
       return false;
     }
-    boolean evenTicks = ticks % 2 == 0;
-    if (!evenTicks) {
-      int points = FastMath.ceil(distance * 2);
-      offset = dir.multiply(1.0 / points);
-      pointLocations = IntStream.rangeClosed(0, points - 1).mapToObj(i -> origin.add(offset.multiply(i))).toList();
-    }
-    Vector3d offset2 = evenTicks ? Vector3d.ZERO : offset.multiply(0.5);
-    for (Vector3d temp : pointLocations) {
-      ParticleBuilder.rgb(temp.add(offset2), "#444444", 0.75F).spawn(user.world());
+    int points = FastMath.ceil(distance * 2);
+    Vector3d offset = dir.multiply(1.0 / points);
+    Vector3d originWithOffset = origin.add(offset.multiply(0.33 * (ticks % 3)));
+    for (int i = 0; i < points; ++i) {
+      ParticleBuilder.rgb(originWithOffset.add(offset.multiply(i)), "#444444", 0.75F).spawn(user.world());
     }
     return true;
   }
@@ -303,7 +299,37 @@ public class MetalCable extends AbilityInstance {
 
   @Override
   public Collection<Collider> colliders() {
-    return List.of(Sphere.of(location, 0.8));
+    Vector3d origin = user.mainHandSide();
+    Vector3d dir = location.subtract(origin);
+    return List.of(Ray.of(origin, dir), Sphere.of(location, 0.8));
+  }
+
+  public Optional<Entity> electrify(Vector3d pos, boolean directed) {
+    Vector3d origin = user.mainHandSide();
+    Vector3d projected = VectorUtil.closestPoint(origin, location, pos);
+    Vector3d dirToOrigin = origin.subtract(projected);
+    Vector3d dirToEnd = location.subtract(projected);
+    if (directed || dirToOrigin.lengthSq() < dirToEnd.lengthSq()) {
+      visualizeElectrifiedLine(projected, dirToOrigin);
+      return Optional.of(user);
+    } else {
+      visualizeElectrifiedLine(projected, dirToEnd);
+      return Optional.ofNullable(attached).filter(AttachedEntity.class::isInstance)
+        .map(AttachedEntity.class::cast).map(AttachedEntity::handle);
+    }
+  }
+
+  private void visualizeElectrifiedLine(Vector3d origin, Vector3d direction) {
+    int points = FastMath.ceil(direction.length() * 4);
+    Vector3d offset = direction.multiply(1.0 / points);
+    for (int i = 0; i < points; i++) {
+      Vector3d v = origin.add(offset.multiply(i));
+      Particle.WAX_OFF.builder(v).offset(0.05).spawn(user.world());
+      if (ThreadLocalRandom.current().nextInt(6) == 0) {
+        SoundEffect.LIGHTNING.play(user.world(), v);
+        Particle.ELECTRIC_SPARK.builder(v).offset(0.1).count(5).spawn(user.world());
+      }
+    }
   }
 
   private interface Attached<T> {

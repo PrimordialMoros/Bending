@@ -36,6 +36,16 @@ public final class DummyAbilityManager implements AbilityManager {
   }
 
   @Override
+  public int size() {
+    return 0;
+  }
+
+  @Override
+  public Iterator<Ability> iterator() {
+    return Collections.emptyIterator();
+  }
+
+  @Override
   public void addUpdatable(Updatable instance) {
   }
 
@@ -44,25 +54,11 @@ public final class DummyAbilityManager implements AbilityManager {
   }
 
   @Override
-  public void changeOwner(Ability ability, User user) {
-  }
-
-  @Override
   public void createPassives(User user) {
   }
 
   @Override
-  public int size() {
-    return 0;
-  }
-
-  @Override
-  public void destroyInstance(Ability ability) {
-  }
-
-  @Override
-  public boolean destroyUserInstances(User user, Iterable<Predicate<Ability>> predicates) {
-    return true;
+  public void changeOwner(Ability ability, User user) {
   }
 
   @Override
@@ -76,20 +72,24 @@ public final class DummyAbilityManager implements AbilityManager {
   }
 
   @Override
-  public void destroyUserInstances(User user) {
-  }
-
-  @Override
-  public void destroyAllInstances() {
-  }
-
-  @Override
   public UpdateResult update() {
     return UpdateResult.REMOVE;
   }
 
   @Override
-  public Iterator<Ability> iterator() {
-    return Collections.emptyIterator();
+  public boolean destroyUserInstances(User user, Predicate<Ability> predicates) {
+    return true;
+  }
+
+  @Override
+  public void destroyUserInstances(User user) {
+  }
+
+  @Override
+  public void destroyInstance(Ability ability) {
+  }
+
+  @Override
+  public void destroyAllInstances() {
   }
 }

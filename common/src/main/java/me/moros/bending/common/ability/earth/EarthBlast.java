@@ -193,8 +193,9 @@ public class EarthBlast extends AbilityInstance {
 
   @Override
   public void onCollision(Collision collision) {
-    if (collision.collidedAbility() instanceof Lightning) {
-      blast.electrify();
+    if (collision.collidedAbility() instanceof Lightning && blast.electrify()) {
+      collision.removeSelf(false);
+      collision.removeOther(true);
     }
   }
 
@@ -215,8 +216,8 @@ public class EarthBlast extends AbilityInstance {
 
     @Override
     public void postRender() {
-      electrified = Math.max(1, electrified - 0.05);
       if (electrified > 1) {
+        electrified = Math.max(1, electrified - 0.05);
         Vector3d center = center();
         if (ThreadLocalRandom.current().nextInt(5) == 0) {
           SoundEffect.LIGHTNING.play(user.world(), center);
@@ -239,10 +240,12 @@ public class EarthBlast extends AbilityInstance {
       return true;
     }
 
-    private void electrify() {
+    private boolean electrify() {
       if (electrified <= 1 && EarthMaterials.METAL_BENDABLE.isTagged(type)) {
         electrified = 2;
+        return true;
       }
+      return false;
     }
   }
 

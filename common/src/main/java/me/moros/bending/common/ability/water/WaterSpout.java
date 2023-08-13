@@ -72,7 +72,7 @@ public class WaterSpout extends AbilityInstance implements SpoutAbility {
 
   @Override
   public boolean activate(User user, Activation method) {
-    if (user.game().abilityManager(user.worldKey()).destroyUserInstance(user, WaterSpout.class)) {
+    if (user.game().abilityManager(user.worldKey()).destroyUserInstances(user, WaterSpout.class)) {
       return false;
     }
 

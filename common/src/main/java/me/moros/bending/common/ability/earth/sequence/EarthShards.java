@@ -27,7 +27,6 @@ import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.AbilityInstance;
 import me.moros.bending.api.ability.Activation;
 import me.moros.bending.api.ability.common.basic.ParticleStream;
-import me.moros.bending.api.collision.Collision;
 import me.moros.bending.api.collision.geometry.Collider;
 import me.moros.bending.api.collision.geometry.Ray;
 import me.moros.bending.api.config.Configurable;
@@ -107,11 +106,6 @@ public class EarthShards extends AbilityInstance {
       Vector3d dir = VectorUtil.gaussianOffset(target, distance * userConfig.spread).subtract(origin);
       streams.add(new ShardStream(Ray.of(origin, dir)));
     }
-  }
-
-  @Override
-  public void onCollision(Collision collision) {
-    user.game().abilityManager(user.worldKey()).destroyInstance(this);
   }
 
   @Override
