@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
@@ -41,6 +41,7 @@ import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.util.KeyUtil;
 import me.moros.bending.api.util.TextUtil;
 import me.moros.bending.common.logging.Logger;
+import me.moros.bending.common.util.Debouncer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.translation.GlobalTranslator;
@@ -57,29 +58,23 @@ import org.spongepowered.configurate.reference.WatchServiceListener;
  */
 public final class TranslationManager implements Iterable<Locale> {
   private static final String PATH = "bending.lang.messages_en";
-  private static final long DELAY = 500;
 
   private final Logger logger;
   private final Path translationsDirectory;
-  private final AtomicLong lastUpdate;
   private final AtomicReference<ForwardingTranslationRegistry> registryReference;
+  private final Debouncer<?> buffer;
 
   public TranslationManager(Logger logger, Path directory, WatchServiceListener listener) throws IOException {
     this.logger = logger;
-    this.lastUpdate = new AtomicLong();
     this.translationsDirectory = Files.createDirectories(directory.resolve("translations"));
     var registry = createRegistry();
     this.registryReference = new AtomicReference<>(registry);
     GlobalTranslator.translator().addSource(registry);
-    listener.listenToDirectory(translationsDirectory, e -> reload());
+    this.buffer = Debouncer.create(this::reload, 2, TimeUnit.SECONDS);
+    listener.listenToDirectory(translationsDirectory, e -> buffer.request());
   }
 
   private void reload() {
-    long time = System.currentTimeMillis();
-    long previous = lastUpdate.getAndSet(time);
-    if (time < previous + DELAY) {
-      return;
-    }
     var newRegistry = createRegistry();
     var old = registryReference.getAndSet(newRegistry);
     GlobalTranslator.translator().removeSource(old);

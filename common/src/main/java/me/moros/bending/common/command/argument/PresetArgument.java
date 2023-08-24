@@ -79,16 +79,17 @@ public final class PresetArgument<C extends Audience> extends CommandArgument<C,
     @Override
     public ArgumentParseResult<Preset> parse(CommandContext<C> commandContext, Queue<String> inputQueue) {
       String input = inputQueue.peek();
-      if (input != null) {
-        inputQueue.remove();
-        Preset preset = commandContext.get(ContextKeys.BENDING_PLAYER).presetByName(input);
-        if (preset != null) {
-          return ArgumentParseResult.success(preset);
-        } else {
-          return ArgumentParseResult.failure(new Throwable("Could not find preset " + input));
-        }
+      if (input == null) {
+        return ArgumentParseResult.failure(new NoInputProvidedException(Parser.class, commandContext));
       }
-      return ArgumentParseResult.failure(new NoInputProvidedException(Parser.class, commandContext));
+      Preset preset = commandContext.getOptional(ContextKeys.BENDING_PLAYER)
+        .map(u -> u.presetByName(input)).orElse(null);
+      if (preset != null) {
+        inputQueue.remove();
+        return ArgumentParseResult.success(preset);
+      } else {
+        return ArgumentParseResult.failure(new Throwable("Could not find preset " + input));
+      }
     }
 
     @Override

@@ -62,7 +62,7 @@ public class BukkitPlayer extends BukkitLivingEntity implements Player {
 
   @Override
   public boolean valid() {
-    return handle().isOnline();
+    return handle().isConnected();
   }
 
   @Override

@@ -85,26 +85,25 @@ public final class UserArgument<C extends Audience> extends CommandArgument<C, U
       if (input == null) {
         return ArgumentParseResult.failure(new NoInputProvidedException(Parser.class, commandContext));
       }
-      inputQueue.remove();
+      User result;
       if (input.equalsIgnoreCase("me")) {
-        User user = commandContext.getOrDefault(ContextKeys.BENDING_PLAYER, null);
-        if (user != null) {
-          return ArgumentParseResult.success(user);
-        }
+        result = commandContext.getOrDefault(ContextKeys.BENDING_PLAYER, null);
+      } else {
+        result = Registries.BENDERS.fromString(input);
       }
-      User result = Registries.BENDERS.fromString(input);
       if (result == null) {
         for (User user : Registries.BENDERS) {
-          if (input.equalsIgnoreCase(user.getOrDefault(Identity.NAME, ""))) {
+          if (input.equalsIgnoreCase(mapName(user))) {
             result = user;
             break;
           }
         }
       }
-      if (result == null) {
-        return ArgumentParseResult.failure(new Throwable("Could not find user " + input));
+      if (result != null) {
+        inputQueue.remove();
+        return ArgumentParseResult.success(result);
       }
-      return ArgumentParseResult.success(result);
+      return ArgumentParseResult.failure(new Throwable("Could not find user " + input));
     }
 
     @Override

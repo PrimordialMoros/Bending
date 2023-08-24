@@ -31,7 +31,7 @@ gson = { module = "com.google.code.gson:gson", version = "2.10.1" }
 articdata = { module = "de.articdive:articdata", version = "1.20.1-77b86bc4" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.8" }
 guava = { module = "com.google.guava:guava", version = "32.1.2-jre" }
-jdbi = { module = "org.jdbi:jdbi3-core", version = "3.40.0" }
+jdbi = { module = "org.jdbi:jdbi3-core", version = "3.41.0" }
 hikari = { module = "com.zaxxer:HikariCP", version = "5.0.1" }
 eventbus = { module = "net.kyori:event-api", version = "5.0.0-SNAPSHOT" }
 

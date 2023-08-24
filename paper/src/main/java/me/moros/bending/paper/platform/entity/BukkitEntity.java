@@ -87,25 +87,23 @@ public class BukkitEntity implements Entity {
 
   @Override
   public int yaw() {
-    return FastMath.round(handle().getLocation().getYaw());
+    return FastMath.round(handle().getYaw());
   }
 
   @Override
   public int pitch() {
-    return FastMath.round(handle().getLocation().getPitch());
+    return FastMath.round(handle().getPitch());
   }
 
   @Override
   public Vector3d location() {
-    var loc = handle().getLocation();
-    return Vector3d.of(loc.getX(), loc.getY(), loc.getZ());
+    return Vector3d.of(handle().getX(), handle().getY(), handle().getZ());
   }
 
   @Override
   public Vector3d direction() {
-    Location loc = handle().getLocation();
-    double xRadians = Math.toRadians(loc.getYaw());
-    double yRadians = Math.toRadians(loc.getPitch());
+    double xRadians = Math.toRadians(handle().getYaw());
+    double yRadians = Math.toRadians(handle().getPitch());
     double a = Math.cos(yRadians);
     return Vector3d.of(-a * Math.sin(xRadians), -Math.sin(yRadians), a * Math.cos(xRadians));
   }

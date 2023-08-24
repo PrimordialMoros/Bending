@@ -49,19 +49,19 @@ interface Placeholders {
     return KeyedValue.keyedValue(KeyUtil.simple(id), placeholder);
   }
 
-  static Component userElements(User user) {
+  private static Component userElements(User user) {
     JoinConfiguration sep = JoinConfiguration.commas(true);
     Collection<Component> elements = user.elements().stream().map(Element::displayName).toList();
     return Component.join(sep, elements).colorIfAbsent(ColorPalette.TEXT_COLOR);
   }
 
-  static Component findElement(User user) {
+  private static Component findElement(User user) {
     Component empty = Component.text("NonBender");
     Component avatar = Component.text("Avatar");
     return withElementColor(user, Element::displayName, empty, avatar);
   }
 
-  static Component displayName(User user) {
+  private static Component displayName(User user) {
     Component name = user.pointers().getOrDefaultFrom(Identity.DISPLAY_NAME, user::name);
     return withElementColor(user, e -> name.colorIfAbsent(e.color()), name, name);
   }
@@ -77,12 +77,12 @@ interface Placeholders {
     }
   }
 
-  static Component selectedAbility(User user) {
+  private static Component selectedAbility(User user) {
     AbilityDescription desc = user.selectedAbility();
     return desc == null ? Component.empty() : desc.displayName();
   }
 
-  static Component abilityInfo(User user, String abilityName) {
+  private static Component abilityInfo(User user, String abilityName) {
     AbilityDescription desc = Registries.ABILITIES.fromString(abilityName);
     if (desc == null) {
       return Component.empty();

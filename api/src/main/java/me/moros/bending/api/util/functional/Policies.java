@@ -36,9 +36,14 @@ public enum Policies implements RemovalPolicy {
    */
   DEAD((u, d) -> u.dead()),
   /**
-   * Checks if the user is offline or invalid.
+   * @deprecated renamed to {@link #INVALID}
    */
+  @Deprecated(forRemoval = true)
   OFFLINE((u, d) -> !u.valid()),
+  /**
+   * Checks if the user is invalid or disconnected.
+   */
+  INVALID((u, d) -> !u.valid()),
   /**
    * Checks if the user is sneaking.
    */
@@ -80,12 +85,12 @@ public enum Policies implements RemovalPolicy {
   }
 
   /**
-   * Constructs a new builder that includes {@link Policies#DEAD} and {@link Policies#OFFLINE}.
+   * Constructs a new builder that includes {@link Policies#DEAD} and {@link Policies#INVALID}.
    */
   public static Builder builder() {
     return new Builder()
       .add(Policies.DEAD)
-      .add(Policies.OFFLINE);
+      .add(Policies.INVALID);
   }
 
   /**

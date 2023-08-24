@@ -67,7 +67,7 @@ public class FabricPlayer extends FabricLivingEntity implements Player {
 
   @Override
   public boolean valid() {
-    return handle().server.getPlayerList().getPlayer(uuid()) != null;
+    return !handle().hasDisconnected();
   }
 
   @Override

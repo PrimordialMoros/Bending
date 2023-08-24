@@ -79,16 +79,16 @@ public final class AbilityDescriptionArgument<C extends Audience> extends Comman
     @Override
     public ArgumentParseResult<AbilityDescription> parse(CommandContext<C> commandContext, Queue<String> inputQueue) {
       String input = inputQueue.peek();
-      if (input != null) {
-        inputQueue.remove();
-        AbilityDescription check = Registries.ABILITIES.fromString(input);
-        if (check != null && !check.hidden()) {
-          return ArgumentParseResult.success(check);
-        } else {
-          return ArgumentParseResult.failure(new Throwable("Could not find ability " + input));
-        }
+      if (input == null) {
+        return ArgumentParseResult.failure(new NoInputProvidedException(Parser.class, commandContext));
       }
-      return ArgumentParseResult.failure(new NoInputProvidedException(Parser.class, commandContext));
+      AbilityDescription check = Registries.ABILITIES.fromString(input);
+      if (check != null && !check.hidden()) {
+        inputQueue.remove();
+        return ArgumentParseResult.success(check);
+      } else {
+        return ArgumentParseResult.failure(new Throwable("Could not find ability " + input));
+      }
     }
 
     @Override

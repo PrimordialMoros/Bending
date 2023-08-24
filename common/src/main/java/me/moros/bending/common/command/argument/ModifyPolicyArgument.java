@@ -20,6 +20,7 @@
 package me.moros.bending.common.command.argument;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.function.BiFunction;
 
@@ -84,15 +85,14 @@ public final class ModifyPolicyArgument<C extends Audience> extends CommandArgum
       if (input == null) {
         return ArgumentParseResult.failure(new NoInputProvidedException(Parser.class, commandContext));
       }
-      Element element = Element.fromName(input);
-      if (element != null) {
+      ModifyPolicy result = Optional.ofNullable(Element.fromName(input)).map(ModifyPolicy::of)
+        .orElseGet(() -> {
+          AbilityDescription desc = Registries.ABILITIES.fromString(input);
+          return desc == null ? null : ModifyPolicy.of(desc);
+        });
+      if (result != null) {
         inputQueue.remove();
-        return ArgumentParseResult.success(ModifyPolicy.of(element));
-      }
-      AbilityDescription desc = Registries.ABILITIES.fromString(input);
-      if (desc != null) {
-        inputQueue.remove();
-        return ArgumentParseResult.success(ModifyPolicy.of(desc));
+        return ArgumentParseResult.success(result);
       }
       return ArgumentParseResult.failure(new Throwable("Could not match policy " + input));
     }
