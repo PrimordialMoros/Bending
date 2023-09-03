@@ -52,7 +52,7 @@ public class ScoreboardUtil {
     Set<Objective> temp = new HashSet<>();
 
     // Remove old
-    for (int i = 0; i < 3; ++i) {
+    for (int i = 0; i < 3; i++) {
       Objective obj = previous.getDisplayObjective(i);
       if (obj != null && temp.add(obj)) {
         player.connection.send(new ClientboundSetObjectivePacket(obj, 1));
@@ -68,7 +68,7 @@ public class ScoreboardUtil {
     for (var team : scoreboard.getPlayerTeams()) {
       player.connection.send(ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(team, true));
     }
-    for (int i = 0; i < 19; ++i) {
+    for (int i = 0; i < 19; i++) {
       Objective obj = scoreboard.getDisplayObjective(i);
       if (obj != null && temp.add(obj)) {
         scoreboard.getStartTrackingPackets(obj).forEach(player.connection::send);

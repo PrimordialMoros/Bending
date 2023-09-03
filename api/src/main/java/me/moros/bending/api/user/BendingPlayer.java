@@ -19,43 +19,23 @@
 
 package me.moros.bending.api.user;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-
-import me.moros.bending.api.ability.AbilityDescription;
-import me.moros.bending.api.ability.preset.Preset;
-import me.moros.bending.api.ability.preset.PresetCreateResult;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.gui.Board;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.entity.DelegatePlayer;
 import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.platform.entity.player.Player;
-import me.moros.bending.api.user.profile.BenderProfile;
-import me.moros.bending.api.user.profile.Identifiable;
-import me.moros.bending.api.user.profile.PlayerBenderProfile;
-import me.moros.bending.api.util.Tasker;
 import net.kyori.adventure.util.TriState;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * {@link User} implementation for players.
  */
-public final class BendingPlayer extends BendingUser implements PresetUser, DelegatePlayer {
-  private final int internalId;
-  private final Set<Preset> presets;
-
+final class BendingPlayer extends BendingUser implements DelegatePlayer {
   private Board board;
 
-  BendingPlayer(Game game, Player player, PlayerBenderProfile profile) {
-    super(game, player, profile);
-    this.internalId = profile.id();
-    this.presets = new HashSet<>(profile.presets());
+  BendingPlayer(Game game, Player player) {
+    super(game, player);
     this.board = Board.dummy();
-    if (profile.board()) {
-      Tasker.sync().submit(this::board);
-    }
   }
 
   @Override
@@ -75,11 +55,6 @@ public final class BendingPlayer extends BendingUser implements PresetUser, Dele
 
   @Override
   public void currentSlot(int slot) {
-  }
-
-  @Override
-  public @Nullable AbilityDescription selectedAbility() {
-    return boundAbility(currentSlot());
   }
 
   @Override
@@ -109,50 +84,6 @@ public final class BendingPlayer extends BendingUser implements PresetUser, Dele
     if (store().has(Board.HIDDEN) || !game().worldManager().isEnabled(worldKey()) || !canBend()) {
       return false;
     }
-    return !elements().isEmpty() && hasPermission("bending.board");
-  }
-
-  // Presets
-  @Override
-  public Set<Preset> presets() {
-    return Set.copyOf(presets);
-  }
-
-  @Override
-  public @Nullable Preset presetByName(String name) {
-    return presets.stream().filter(p -> p.name().equalsIgnoreCase(name)).findAny().orElse(null);
-  }
-
-  @Override
-  public CompletableFuture<PresetCreateResult> addPreset(Preset preset) {
-    String n = preset.name();
-    if (preset.id() > 0 || presets.contains(preset) || presets.stream().map(Preset::name).anyMatch(n::equalsIgnoreCase)) {
-      return CompletableFuture.completedFuture(PresetCreateResult.EXISTS);
-    }
-    if (n.isEmpty() || !game().eventBus().postPresetCreateEvent(this, preset)) {
-      return CompletableFuture.completedFuture(PresetCreateResult.CANCELLED);
-    }
-    return game().storage().savePresetAsync(Identifiable.of(internalId, uuid()), preset).thenApply(id -> {
-      if (id > 0) {
-        presets.add(preset.withId(id));
-        return PresetCreateResult.SUCCESS;
-      }
-      return PresetCreateResult.FAIL;
-    });
-  }
-
-  @Override
-  public boolean removePreset(Preset preset) {
-    if (preset.id() <= 0 || !presets.contains(preset)) {
-      return false;
-    }
-    presets.remove(preset);
-    game().storage().deletePresetAsync(Identifiable.of(internalId, uuid()), preset);
-    return true;
-  }
-
-  public PlayerBenderProfile toProfile() {
-    var data = BenderProfile.of(createPresetFromSlots("").abilities(), elements(), presets);
-    return BenderProfile.of(internalId, uuid(), !store().has(Board.HIDDEN), data);
+    return hasElements() && hasPermission("bending.board");
   }
 }

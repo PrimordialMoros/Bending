@@ -32,6 +32,7 @@ dependencies {
     bendingImplementation(libs.hikari)
     bendingImplementation(libs.jdbi)
     bendingImplementation(libs.h2)
+    bendingImplementation(libs.bundles.flyway) { isTransitive = false }
 }
 
 loom {
@@ -47,6 +48,7 @@ tasks {
             reloc("com.zaxxer.hikari", "hikari")
             reloc("org.jdbi", "jdbi")
             reloc("org.h2", "h2")
+            reloc("org.flyway", "flyway")
         }
     }
     named<Copy>("processResources") {

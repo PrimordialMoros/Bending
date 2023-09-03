@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.function.ObjIntConsumer;
 import java.util.function.Supplier;
 
 import me.moros.bending.api.ability.AbilityDescription;
@@ -46,23 +47,23 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * An immutable representation of slots.
  */
 public final class Preset {
-  public static final Preset EMPTY = from(new AbilityDescription[9]);
+  private static final Preset EMPTY = from(new AbilityDescription[9]);
 
-  private final int id;
   private final String name;
   private final AbilityDescription[] abilities;
   private final Supplier<TextColor> presetColor;
 
-  private Preset(int id, String name, @Nullable AbilityDescription[] abilities) {
-    this.id = id;
+  private Preset(String name, Preset other) {
+    this.name = name;
+    this.abilities = other.abilities;
+    this.presetColor = other.presetColor;
+  }
+
+  private Preset(String name, @Nullable AbilityDescription[] abilities) {
     this.name = name;
     this.abilities = new AbilityDescription[9];
     System.arraycopy(abilities, 0, this.abilities, 0, Math.min(9, abilities.length));
     this.presetColor = Suppliers.lazy(this::dominantColor);
-  }
-
-  public int id() {
-    return id;
   }
 
   public String name() {
@@ -74,8 +75,8 @@ public final class Preset {
   }
 
   /**
-   * Get the abilities that this preset holds.
-   * @return an unmodifiable copy of the abilities
+   * Get the abilities that this preset holds as a list.
+   * @return an immutable list with the abilities
    */
   public List<@Nullable AbilityDescription> abilities() {
     return Collections.unmodifiableList(Arrays.asList(abilities));
@@ -86,50 +87,52 @@ public final class Preset {
    * @return true if this preset holds no abilities, false otherwise
    */
   public boolean isEmpty() {
-    for (AbilityDescription desc : abilities) {
-      if (desc != null) {
-        return false;
-      }
-    }
-    return true;
+    return matchesBinds(EMPTY);
   }
 
+  /**
+   * Check if this preset matches the binds of another.
+   * @param other the other preset to compare against
+   * @return true if the binds match, false otherwise
+   */
+  public boolean matchesBinds(Preset other) {
+    return matchesBinds(other.abilities);
+  }
 
   /**
-   * Find the differences between this preset and another.
-   * @param preset the other preset to compare against
-   * @return the number of different abilities between the two presets
+   * Check if this preset matches the given binds.
+   * @param other the other binds to compare against
+   * @return true if the binds match, false otherwise
    */
-  public int compare(Preset preset) {
-    int count = 0;
-    for (int slot = 0; slot < 9; slot++) {
-      if (!Objects.equals(abilities[slot], preset.abilities[slot])) {
-        count++;
-      }
-    }
-    return count;
+  public boolean matchesBinds(AbilityDescription[] other) {
+    return Arrays.equals(abilities, other);
   }
 
   /**
    * Copy this preset to another array.
    * @param destination the array to copy to
    */
-  public void copyTo(@Nullable AbilityDescription[] destination) {
-    if (destination.length != 9) {
-      throw new IllegalArgumentException("Destination array must be of length 9!");
-    }
+  public void copyTo(AbilityDescription[] destination) {
     System.arraycopy(abilities, 0, destination, 0, 9);
+  }
+
+  public void forEach(ObjIntConsumer<AbilityDescription> consumer) {
+    for (int idx = 0; idx < abilities.length; idx++) {
+      AbilityDescription desc = abilities[idx];
+      if (desc != null) {
+        consumer.accept(desc, idx);
+      }
+    }
   }
 
   public List<Component> display() {
     List<Component> components = new ArrayList<>();
-    for (int i = 0; i < 9; i++) {
-      AbilityDescription desc = abilities[i];
-      if (desc != null) {
-        components.add(Component.text((i + 1) + ". ", ColorPalette.TEXT_COLOR).append(desc.meta()));
-      }
-    }
+    forEach((desc, idx) -> components.add(slotToComponent(idx, desc)));
     return components;
+  }
+
+  private Component slotToComponent(int idx, AbilityDescription desc) {
+    return Component.text((idx + 1) + ". ", ColorPalette.TEXT_COLOR).append(desc.meta());
   }
 
   public Component meta() {
@@ -143,11 +146,7 @@ public final class Preset {
 
   private TextColor dominantColor() {
     Map<Element, Integer> counter = new EnumMap<>(Element.class);
-    for (AbilityDescription desc : abilities) {
-      if (desc != null) {
-        counter.compute(desc.element(), (k, v) -> (v == null) ? 1 : v + 1);
-      }
-    }
+    forEach((desc, idx) -> counter.merge(desc.element(), 1, Integer::sum));
     return counter.entrySet().stream().max(Entry.comparingByValue())
       .map(e -> e.getKey().color()).orElse(ColorPalette.NEUTRAL);
   }
@@ -161,45 +160,48 @@ public final class Preset {
       return false;
     }
     Preset other = (Preset) obj;
-    return id == other.id && name.equals(other.name) && Arrays.equals(abilities, other.abilities);
+    return name.equals(other.name) && Arrays.equals(abilities, other.abilities);
   }
 
   @Override
   public int hashCode() {
-    int result = id;
-    result = 31 * result + name.hashCode();
-    result = 31 * result + Arrays.hashCode(abilities);
-    return result;
+    return 31 * name.hashCode() + Arrays.hashCode(abilities);
   }
 
-  /**
-   * Create a copy of this preset with the given id.
-   * @param id the new preset id
-   * @return the preset copy with the new id
-   */
-  public Preset withId(int id) {
-    return id == this.id ? this : new Preset(id, name, abilities);
+  public Preset withName(String newName) {
+    if (this.name.equals(newName)) {
+      return this;
+    }
+    validateName(newName);
+    return new Preset(newName, this);
   }
 
   public static Preset from(AbilityDescription[] abilities) {
-    return create(0, "", abilities);
+    Objects.requireNonNull(abilities);
+    return new Preset("", abilities);
   }
 
   /**
    * Create a new preset.
-   * <br>Note: New presets must use a non-positive id as they will acquire a real one when they get saved.
-   * @param id the id of the preset to create
    * @param name the name of the preset to create
    * @param abilities the abilities of the preset to create
    * @return the newly created preset
-   * @throws IllegalArgumentException if preset name is invalid, use {@link TextUtil#sanitizeInput(String)} to validate.
+   * @throws IllegalArgumentException if preset name is invalid, use {@link TextUtil#sanitizeInput(String)} to validate
    */
-  public static Preset create(int id, String name, AbilityDescription[] abilities) {
+  public static Preset create(String name, AbilityDescription[] abilities) {
     Objects.requireNonNull(abilities);
+    validateName(name);
+    return new Preset(name, abilities);
+  }
+
+  public static Preset empty() {
+    return EMPTY;
+  }
+
+  private static void validateName(String name) throws IllegalArgumentException {
     String validatedName = TextUtil.sanitizeInput(name);
     if (!validatedName.equals(name)) {
       throw new IllegalArgumentException("Invalid preset name: " + name);
     }
-    return new Preset(id, name, abilities);
   }
 }

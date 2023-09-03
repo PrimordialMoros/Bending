@@ -17,17 +17,11 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.event;
+package me.moros.bending.common.storage.file;
 
-import me.moros.bending.api.ability.preset.Preset;
+import java.io.IOException;
 
-/**
- * Called when a user is attempting to create a {@link Preset}.
- */
-public interface PresetCreateEvent extends UserEvent, Cancellable {
-  /**
-   * Provides the preset that is being created.
-   * @return the preset
-   */
-  Preset preset();
+@FunctionalInterface
+public interface IOFunction<T, R> {
+  R apply(T t) throws IOException;
 }

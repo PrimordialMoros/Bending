@@ -17,14 +17,21 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.common.storage.file.loader;
+package me.moros.bending.common.config;
 
-import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
-import org.spongepowered.configurate.loader.AbstractConfigurationLoader.Builder;
+import java.util.function.Consumer;
 
-public class HoconLoader implements Loader<HoconConfigurationLoader> {
-  @Override
-  public Builder<?, HoconConfigurationLoader> loaderBuilder() {
-    return HoconConfigurationLoader.builder().emitJsonCompatible(true);
+import me.moros.bending.api.config.Configurable;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
+
+record Subscriber<T extends Configurable>(T def, Consumer<? super T> consumer) {
+  @SuppressWarnings("unchecked")
+  void accept(CommentedConfigurationNode root) {
+    CommentedConfigurationNode node = root.node(def.path());
+    try {
+      consumer.accept((T) node.get(def.getClass(), def));
+    } catch (SerializationException ignore) {
+    }
   }
 }

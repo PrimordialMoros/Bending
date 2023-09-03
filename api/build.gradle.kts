@@ -9,6 +9,8 @@ dependencies {
     api(libs.tasker.core)
     compileOnlyApi(libs.adventure.api)
     compileOnly(libs.caffeine)
+    testImplementation(libs.bundles.junit)
+    testImplementation(libs.adventure.api)
 }
 
 sourceSets {
@@ -17,8 +19,13 @@ sourceSets {
     }
 }
 
-tasks.register("printVersionStatus") {
-    doLast {
-        println("STATUS=${if (isSnapshot()) "snapshot" else "release"}")
+tasks {
+    register("printVersionStatus") {
+        doLast {
+            println("STATUS=${if (isSnapshot()) "snapshot" else "release"}")
+        }
+    }
+    test {
+        useJUnitPlatform()
     }
 }

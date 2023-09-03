@@ -21,11 +21,17 @@ package me.moros.bending.paper;
 
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.paper.PaperCommandManager;
+import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.platform.Platform;
+import me.moros.bending.api.registry.Registries;
+import me.moros.bending.api.user.User;
 import me.moros.bending.common.AbstractBending;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.hook.MiniPlaceholdersHook;
@@ -42,6 +48,9 @@ import me.moros.bending.paper.platform.BukkitPlatform;
 import me.moros.bending.paper.protection.ProtectionInitializer;
 import me.moros.tasker.paper.PaperExecutor;
 import org.bstats.bukkit.Metrics;
+import org.bstats.charts.AdvancedPie;
+import org.bstats.charts.SimplePie;
+import org.bstats.charts.SingleLineChart;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -54,7 +63,6 @@ final class PaperBending extends AbstractBending<BendingBootstrap> {
   }
 
   void onPluginEnable() {
-    new Metrics(parent, 8717);
     injectTasker(new PaperExecutor(parent));
     ReflectionUtil.injectStatic(Platform.Holder.class, new BukkitPlatform(logger()));
     new ProtectionInitializer(this).init();
@@ -95,6 +103,19 @@ final class PaperBending extends AbstractBending<BendingBootstrap> {
     if (server.getPluginManager().isPluginEnabled("LuckPerms")) {
       LuckPermsHook.register(server.getServicesManager());
     }
+    setupCustomCharts(new Metrics(parent, 8717));
+  }
+
+  private void setupCustomCharts(Metrics metrics) {
+    metrics.addCustomChart(new SimplePie("storage_engine", () -> game.storage().toString().toLowerCase(Locale.ROOT)));
+    metrics.addCustomChart(new AdvancedPie("protections", () -> Registries.PROTECTIONS.stream()
+      .collect(Collectors.groupingBy(p -> p.key().value(), Collectors.summingInt(e -> 1))))
+    );
+    metrics.addCustomChart(new AdvancedPie("player_elements", () -> Registries.BENDERS.players()
+      .map(User::elements).flatMap(Collection::stream)
+      .collect(Collectors.groupingBy(Element::toString, Collectors.summingInt(e -> 1))))
+    );
+    metrics.addCustomChart(new SingleLineChart("bending_npc_count", Registries.BENDERS::nonPlayerCount));
   }
 
   @Override

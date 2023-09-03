@@ -20,12 +20,12 @@
 package me.moros.bending.common.storage.file.serializer;
 
 import me.moros.bending.api.ability.preset.Preset;
-import me.moros.bending.api.user.profile.PlayerBenderProfile;
+import me.moros.bending.api.user.profile.BenderProfile;
 import org.spongepowered.configurate.serialize.TypeSerializerCollection;
 
 public final class Serializers {
   public static final TypeSerializerCollection ALL = TypeSerializerCollection.builder()
     .register(Preset.class, PresetSerializer.INSTANCE)
-    .register(PlayerBenderProfile.class, PlayerBenderProfileSerializer.INSTANCE)
+    .register(BenderProfile.class, BenderProfileSerializer.INSTANCE)
     .build();
 }

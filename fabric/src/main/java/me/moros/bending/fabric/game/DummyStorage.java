@@ -19,13 +19,15 @@
 
 package me.moros.bending.fabric.game;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.LongAdder;
 
-import me.moros.bending.api.ability.preset.Preset;
 import me.moros.bending.api.storage.BendingStorage;
-import me.moros.bending.api.user.profile.Identifiable;
-import me.moros.bending.api.user.profile.PlayerBenderProfile;
+import me.moros.bending.api.user.profile.BenderProfile;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 final class DummyStorage implements BendingStorage {
@@ -35,30 +37,63 @@ final class DummyStorage implements BendingStorage {
   }
 
   @Override
-  public void init() {
+  public Set<UUID> loadUuids() {
+    return Set.of();
   }
 
   @Override
-  public PlayerBenderProfile loadOrCreateProfile(UUID uuid) {
-    throw new UnsupportedOperationException("Can't create profile in dummy storage");
+  public CompletableFuture<Set<UUID>> loadUuidsAsync() {
+    return CompletableFuture.completedFuture(Set.of());
   }
 
   @Override
-  public CompletableFuture<@Nullable PlayerBenderProfile> loadProfileAsync(UUID uuid) {
+  public @Nullable BenderProfile loadProfile(UUID uuid) {
+    return null;
+  }
+
+  @Override
+  public CompletableFuture<@Nullable BenderProfile> loadProfileAsync(UUID uuid) {
     return CompletableFuture.completedFuture(null);
   }
 
   @Override
-  public void saveProfilesAsync(Iterable<PlayerBenderProfile> profiles) {
+  public Map<UUID, BenderProfile> loadProfiles(Set<UUID> uuids) {
+    return Map.of();
   }
 
   @Override
-  public CompletableFuture<Integer> savePresetAsync(Identifiable user, Preset preset) {
-    return CompletableFuture.completedFuture(0);
+  public CompletableFuture<Map<UUID, BenderProfile>> loadProfilesAsync(Set<UUID> uuids, LongAdder progressCounter) {
+    return CompletableFuture.completedFuture(Map.of());
   }
 
   @Override
-  public void deletePresetAsync(Identifiable user, Preset preset) {
+  public boolean saveProfile(BenderProfile profile) {
+    return false;
+  }
+
+  @Override
+  public CompletableFuture<Boolean> saveProfileAsync(BenderProfile profile) {
+    return CompletableFuture.completedFuture(false);
+  }
+
+  @Override
+  public boolean saveProfiles(Collection<BenderProfile> profiles) {
+    return false;
+  }
+
+  @Override
+  public CompletableFuture<Boolean> saveProfilesAsync(Collection<BenderProfile> profiles) {
+    return CompletableFuture.completedFuture(false);
+  }
+
+  @Override
+  public CompletableFuture<Boolean> saveProfilesAsync(Collection<BenderProfile> profiles, LongAdder progressCounter) {
+    return CompletableFuture.completedFuture(false);
+  }
+
+  @Override
+  public String toString() {
+    return "Dummy";
   }
 
   @Override

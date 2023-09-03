@@ -22,12 +22,12 @@ package me.moros.bending.common.command;
 import cloud.commandframework.keys.CloudKey;
 import cloud.commandframework.keys.SimpleCloudKey;
 import io.leangen.geantyref.TypeToken;
-import me.moros.bending.api.user.BendingPlayer;
+import me.moros.bending.api.user.User;
 
 public final class ContextKeys {
-  public static final CloudKey<BendingPlayer> BENDING_PLAYER = SimpleCloudKey.of(
+  public static final CloudKey<User> BENDING_PLAYER = SimpleCloudKey.of(
     "bending:player",
-    TypeToken.get(BendingPlayer.class)
+    TypeToken.get(User.class)
   );
 
   private ContextKeys() {

@@ -30,6 +30,7 @@ import cloud.commandframework.arguments.parser.ArgumentParseResult;
 import cloud.commandframework.arguments.parser.ArgumentParser;
 import cloud.commandframework.context.CommandContext;
 import cloud.commandframework.exceptions.parsing.NoInputProvidedException;
+import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.command.ContextKeys;
@@ -109,7 +110,7 @@ public final class UserArgument<C extends Audience> extends CommandArgument<C, U
     @Override
     public List<String> suggestions(CommandContext<C> commandContext, String input) {
       Predicate<User> canSee = commandContext.getOptional(ContextKeys.BENDING_PLAYER)
-        .map(u -> (Predicate<User>) u::canSee).orElse(e -> true);
+        .map(Player.class::cast).map(u -> (Predicate<User>) u::canSee).orElse(e -> true);
       return Registries.BENDERS.stream().filter(canSee).map(this::mapName).toList();
     }
 

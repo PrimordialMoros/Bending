@@ -24,29 +24,29 @@ import me.moros.bending.api.locale.Message.Args1;
 import net.kyori.adventure.text.Component;
 
 /**
- * Represents the result of a preset creation query.
+ * Represents the result of a preset registration query.
  */
-public enum PresetCreateResult implements Args1<String> {
+public enum PresetRegisterResult implements Args1<String> {
   /**
-   * Preset has been successfully created.
+   * Preset has been successfully registered.
    */
   SUCCESS(Message.PRESET_SUCCESS),
   /**
-   * Preset creation was unable to complete because it already exists.
+   * Preset registration was unable to complete because it already exists.
    */
   EXISTS(Message.PRESET_EXISTS),
   /**
-   * Preset creation was cancelled by an event listener.
+   * Preset registration was cancelled by an event listener.
    */
   CANCELLED(Message.PRESET_CANCELLED),
   /**
-   * Preset creation failed to a storage error.
+   * Preset registration failed due to a storage error.
    */
   FAIL(Message.PRESET_FAIL);
 
   private final Args1<String> message;
 
-  PresetCreateResult(Args1<String> message) {
+  PresetRegisterResult(Args1<String> message) {
     this.message = message;
   }
 

@@ -27,12 +27,12 @@ import me.moros.bending.api.gui.ElementGui;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemBuilder;
 import me.moros.bending.api.platform.item.ItemSnapshot;
-import me.moros.bending.api.user.BendingPlayer;
+import me.moros.bending.api.user.User;
 
 public interface PlatformFactory {
-  Optional<Board> buildBoard(BendingPlayer player);
+  Optional<Board> buildBoard(User user);
 
-  Optional<ElementGui> buildMenu(ElementHandler handler, BendingPlayer player);
+  Optional<ElementGui> buildMenu(ElementHandler handler, User user);
 
   ItemBuilder itemBuilder(Item item);
 

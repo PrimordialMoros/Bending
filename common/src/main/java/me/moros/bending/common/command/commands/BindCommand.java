@@ -28,7 +28,6 @@ import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.preset.Preset;
 import me.moros.bending.api.locale.Message;
-import me.moros.bending.api.user.BendingPlayer;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.ColorPalette;
 import me.moros.bending.common.command.CommandPermissions;
@@ -71,28 +70,28 @@ public record BindCommand<C extends Audience>(Commander<C> commander) implements
     );
   }
 
-  private void onBind(BendingPlayer player, AbilityDescription ability, int slot) {
+  private void onBind(User user, AbilityDescription ability, int slot) {
     if (!ability.canBind()) {
-      Message.ABILITY_BIND_FAIL.send(player, ability.displayName());
+      Message.ABILITY_BIND_FAIL.send(user, ability.displayName());
       return;
     }
-    if (!player.hasPermission(ability)) {
-      Message.ABILITY_BIND_NO_PERMISSION.send(player, ability.displayName());
+    if (!user.hasPermission(ability)) {
+      Message.ABILITY_BIND_NO_PERMISSION.send(user, ability.displayName());
     }
-    if (!player.hasElement(ability.element())) {
-      Message.ABILITY_BIND_REQUIRES_ELEMENT.send(player, ability.displayName(), ability.element().displayName());
+    if (!user.hasElement(ability.element())) {
+      Message.ABILITY_BIND_REQUIRES_ELEMENT.send(user, ability.displayName(), ability.element().displayName());
       return;
     }
     if (slot == 0) {
-      slot = player.currentSlot();
+      slot = user.currentSlot();
     }
-    player.bindAbility(slot, ability);
-    Message.ABILITY_BIND_SUCCESS.send(player, ability.displayName(), slot);
+    user.bindAbility(slot, ability);
+    Message.ABILITY_BIND_SUCCESS.send(user, ability.displayName(), slot);
   }
 
   private void onBindClear(User user, int slot) {
     if (slot == 0) {
-      user.bindPreset(Preset.EMPTY);
+      user.bindPreset(Preset.empty());
       Message.CLEAR_ALL_SLOTS.send(user);
       return;
     }
@@ -111,6 +110,6 @@ public record BindCommand<C extends Audience>(Commander<C> commander) implements
         .colorIfAbsent(ColorPalette.TEXT_COLOR);
     }
     Message.BOUND_SLOTS.send(sender, user.name().hoverEvent(HoverEvent.showText(hover)));
-    user.createPresetFromSlots("").display().forEach(sender::sendMessage);
+    user.slots().display().forEach(sender::sendMessage);
   }
 }

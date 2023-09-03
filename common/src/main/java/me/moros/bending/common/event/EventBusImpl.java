@@ -114,8 +114,8 @@ public class EventBusImpl implements EventBus {
   }
 
   @Override
-  public boolean postPresetCreateEvent(User user, Preset preset) {
-    return !preset.isEmpty() && post(new PresetCreateEventImpl(user, preset));
+  public boolean postPresetRegisterEvent(User user, Preset preset) {
+    return !preset.isEmpty() && post(new PresetRegisterEventImpl(user, preset));
   }
 
   @Override

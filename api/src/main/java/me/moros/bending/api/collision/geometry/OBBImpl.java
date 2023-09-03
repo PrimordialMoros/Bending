@@ -54,9 +54,7 @@ record OBBImpl(Vector3d position, Vector3d extents, AABB outer, Vector3d[] axes)
   @Override
   public OBB at(Position point) {
     var point3d = point.toVector3d();
-    var copy = new Vector3d[3];
-    System.arraycopy(axes, 0, copy, 0, 3);
-    return new OBBImpl(point3d, extents, outer.at(point3d), copy);
+    return new OBBImpl(point3d, extents, outer.at(point3d), axes.clone());
   }
 
   @Override

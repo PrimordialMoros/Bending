@@ -25,15 +25,17 @@ import me.moros.bending.common.storage.file.serializer.Serializers;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.loader.AbstractConfigurationLoader;
-import org.spongepowered.configurate.loader.AbstractConfigurationLoader.Builder;
 import org.spongepowered.configurate.reference.ConfigurationReference;
 
 @FunctionalInterface
-public interface Loader<T extends AbstractConfigurationLoader<?>> {
-  Builder<?, T> loaderBuilder();
+public interface Loader<B extends AbstractConfigurationLoader.Builder<B, ?>> {
+  B loaderBuilder();
+
+  default B withSerializers() {
+    return loaderBuilder().defaultOptions(o -> o.serializers(b -> b.registerAll(Serializers.ALL)));
+  }
 
   default ConfigurationReference<? extends ConfigurationNode> load(Path path) throws ConfigurateException {
-    return loaderBuilder().defaultOptions(o -> o.serializers(b -> b.registerAll(Serializers.ALL)))
-      .path(path).build().loadToReference();
+    return withSerializers().path(path).build().loadToReference();
   }
 }

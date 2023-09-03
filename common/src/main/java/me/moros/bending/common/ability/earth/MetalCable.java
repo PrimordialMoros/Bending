@@ -215,7 +215,7 @@ public class MetalCable extends AbilityInstance {
     int points = FastMath.ceil(distance * 2);
     Vector3d offset = dir.multiply(1.0 / points);
     Vector3d originWithOffset = origin.add(offset.multiply(0.33 * (ticks % 3)));
-    for (int i = 0; i < points; ++i) {
+    for (int i = 0; i < points; i++) {
       ParticleBuilder.rgb(originWithOffset.add(offset.multiply(i)), "#444444", 0.75F).spawn(user.world());
     }
     return true;

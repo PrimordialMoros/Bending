@@ -25,6 +25,7 @@ dependencies {
     runtimeDownload(libs.caffeine)
     runtimeDownload(libs.hikari)
     runtimeDownload(libs.jdbi)
+    runtimeDownload(libs.bundles.flyway)
     runtimeDownload(libs.bundles.drivers.nonstandard)
     compileOnly(libs.paper)
     compileOnly(libs.grief.prevention)
@@ -74,9 +75,8 @@ bendingPlatform {
 
 hangarPublish.publications.register("plugin") {
     version.set(project.version as String)
-    owner.set("Moros")
-    slug.set("Bending")
     channel.set("Release")
+    id.set("Bending")
     changelog.set(releaseNotes)
     apiKey.set(providers.environmentVariable("HANGAR_TOKEN"))
     platforms.register(io.papermc.hangarpublishplugin.model.Platforms.PAPER) {
@@ -86,9 +86,9 @@ hangarPublish.publications.register("plugin") {
         dependencies.url("WorldGuard", "https://enginehub.org/worldguard/") { required.set(false) }
         dependencies.url("PlaceholderAPI", "https://www.spigotmc.org/resources/placeholderapi.6245/") { required.set(false) }
         dependencies.url("LWC Extended", "https://www.spigotmc.org/resources/lwc-extended.69551/") { required.set(false) }
-        dependencies.hangar("MiniPlaceholders", "MiniPlaceholders") { required.set(false) }
-        dependencies.hangar("TownyAdvanced", "Towny") { required.set(false) }
-        dependencies.hangar("GriefPrevention", "GriefPrevention") { required.set(false) }
+        dependencies.hangar("MiniPlaceholders") { required.set(false) }
+        dependencies.hangar("Towny") { required.set(false) }
+        dependencies.hangar("GriefPrevention") { required.set(false) }
     }
 }
 

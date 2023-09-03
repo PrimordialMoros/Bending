@@ -34,34 +34,24 @@ import me.moros.storage.StorageDataSource;
 import me.moros.storage.StorageType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
-import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 /**
  * Factory class that constructs and returns a Hikari-based database storage for Bending.
  * @see BendingStorage
  */
 public record StorageFactory(Bending plugin) {
-  private StorageEngine parseEngine() {
-    var def = StorageEngine.H2;
-    var node = plugin.configManager().config().node("storage", "engine");
-    try {
-      return node.get(StorageEngine.class, def);
-    } catch (SerializationException ignore) {
-    }
-    return def;
-  }
-
   public @Nullable BendingStorage createInstance() {
-    var engine = parseEngine();
-    return engine.loader().map(this::fileStorage).orElseGet(() -> engine.type().map(this::sqlStorage).orElse(null));
+    Config config = ConfigManager.load(Config::new);
+    return config.engine.loader().map(this::fileStorage).orElseGet(() -> sqlStorage(config));
   }
 
   private BendingStorage fileStorage(Loader<?> loader) {
     return new FileStorage(plugin.logger(), plugin.path().resolve("data").resolve("flatfile"), loader);
   }
 
-  private @Nullable BendingStorage sqlStorage(StorageType storageType) {
-    Config config = ConfigManager.load(Config::new);
+  private @Nullable BendingStorage sqlStorage(Config config) {
+    StorageType storageType = config.engine.type().orElseThrow();
     Builder builder = StorageDataSource.builder(storageType).database(config.database)
       .host(config.host).port(config.port).username(config.username).password(config.password);
     builder.configure(c -> {
@@ -74,7 +64,7 @@ public record StorageFactory(Bending plugin) {
     if (storageType.isLocal()) {
       switch (storageType) {
         case HSQL -> builder.properties(p -> {
-          p.put("sql.syntax_mys", true);
+          p.put("sql.syntax_pgs", true);
           p.put("hsqldb.default_table_type", "cached");
         });
         case H2 -> builder.properties(p -> {
@@ -90,15 +80,26 @@ public record StorageFactory(Bending plugin) {
         return null;
       }
       // Convert to uri and back to path - needed only for windows compatibility
-      var uri = parent.resolve("bending" + (storageType == StorageType.SQLITE ? ".db" : "")).toUri();
-      builder.path(Path.of(uri));
+      builder.path(Path.of(parent.resolve("bending").toUri()));
     }
     StorageDataSource data = builder.build("bending-hikari");
-    return data == null ? null : new SqlStorage(plugin, data);
+    return data == null ? null : new SqlStorage(plugin.logger(), data);
   }
 
   @ConfigSerializable
   private static final class Config extends Configurable {
+    @Comment("""
+      Available options:
+       - Remote:
+         > POSTGRESQL (preferred)
+         > MARIADB
+         > MYSQL
+       - Local:
+         > H2 (preferred)
+         > HSQL
+         > JSON
+      """)
+    private StorageEngine engine = StorageEngine.H2;
     private String host = "localhost";
     private int port = 5432;
     private String username = "bending";

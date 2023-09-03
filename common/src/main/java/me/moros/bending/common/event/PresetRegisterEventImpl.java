@@ -20,14 +20,14 @@
 package me.moros.bending.common.event;
 
 import me.moros.bending.api.ability.preset.Preset;
-import me.moros.bending.api.event.PresetCreateEvent;
+import me.moros.bending.api.event.PresetRegisterEvent;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.event.base.AbstractCancellableUserEvent;
 
-public class PresetCreateEventImpl extends AbstractCancellableUserEvent implements PresetCreateEvent {
+public class PresetRegisterEventImpl extends AbstractCancellableUserEvent implements PresetRegisterEvent {
   private final Preset preset;
 
-  public PresetCreateEventImpl(User user, Preset preset) {
+  public PresetRegisterEventImpl(User user, Preset preset) {
     super(user);
     this.preset = preset;
   }

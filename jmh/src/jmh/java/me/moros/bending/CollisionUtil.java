@@ -27,6 +27,7 @@ import java.util.IdentityHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.api.collision.geometry.AABB;
@@ -118,7 +119,7 @@ public class CollisionUtil {
     ConcurrentHashSet {
       @Override
       public <E> Collection<E> create(int maximumSize) {
-        return new LinkedHashSet<>(maximumSize);
+        return ConcurrentHashMap.newKeySet(maximumSize);
       }
     },
     ArrayList {

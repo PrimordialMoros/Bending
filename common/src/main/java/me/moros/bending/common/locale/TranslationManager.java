@@ -41,7 +41,7 @@ import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.util.KeyUtil;
 import me.moros.bending.api.util.TextUtil;
 import me.moros.bending.common.logging.Logger;
-import me.moros.bending.common.util.Debouncer;
+import me.moros.bending.common.util.Debounced;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.translation.GlobalTranslator;
@@ -62,7 +62,7 @@ public final class TranslationManager implements Iterable<Locale> {
   private final Logger logger;
   private final Path translationsDirectory;
   private final AtomicReference<ForwardingTranslationRegistry> registryReference;
-  private final Debouncer<?> buffer;
+  private final Debounced<?> buffer;
 
   public TranslationManager(Logger logger, Path directory, WatchServiceListener listener) throws IOException {
     this.logger = logger;
@@ -70,7 +70,7 @@ public final class TranslationManager implements Iterable<Locale> {
     var registry = createRegistry();
     this.registryReference = new AtomicReference<>(registry);
     GlobalTranslator.translator().addSource(registry);
-    this.buffer = Debouncer.create(this::reload, 2, TimeUnit.SECONDS);
+    this.buffer = Debounced.create(this::reload, 2, TimeUnit.SECONDS);
     listener.listenToDirectory(translationsDirectory, e -> buffer.request());
   }
 

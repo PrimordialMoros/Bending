@@ -23,7 +23,7 @@ import cloud.commandframework.Command.Builder;
 import cloud.commandframework.meta.CommandMeta;
 import me.moros.bending.api.gui.Board;
 import me.moros.bending.api.locale.Message;
-import me.moros.bending.api.user.BendingPlayer;
+import me.moros.bending.api.user.User;
 import me.moros.bending.common.command.CommandPermissions;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.command.ContextKeys;
@@ -42,19 +42,19 @@ public record BoardCommand<C extends Audience>(Commander<C> commander) implement
     );
   }
 
-  private void onBoard(BendingPlayer player) {
-    boolean hidden = player.store().has(Board.HIDDEN);
-    if (!player.board().isEnabled() && !hidden) {
-      Message.BOARD_DISABLED.send(player);
+  private void onBoard(User user) {
+    boolean hidden = user.store().has(Board.HIDDEN);
+    if (!user.board().isEnabled() && !hidden) {
+      Message.BOARD_DISABLED.send(user);
       return;
     }
     if (hidden) {
-      player.store().remove(Board.HIDDEN);
-      Message.BOARD_TOGGLED_ON.send(player);
+      user.store().remove(Board.HIDDEN);
+      Message.BOARD_TOGGLED_ON.send(user);
     } else {
-      player.store().add(Board.HIDDEN, Board.dummy());
-      Message.BOARD_TOGGLED_OFF.send(player);
+      user.store().add(Board.HIDDEN, Board.dummy());
+      Message.BOARD_TOGGLED_OFF.send(user);
     }
-    player.board();
+    user.board();
   }
 }

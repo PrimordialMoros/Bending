@@ -28,7 +28,8 @@ import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.user.User;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
+
+import static net.kyori.adventure.text.format.TextDecoration.STRIKETHROUGH;
 
 public abstract class AbstractBoard<Team> implements Board {
   protected static final Component SEP = Component.text(" -------------- ");
@@ -60,16 +61,14 @@ public abstract class AbstractBoard<Team> implements Board {
 
   @Override
   public void updateAll() {
+    var snapshot = user.slots().abilities();
     for (int slot = 1; slot <= 9; slot++) {
-      AbilityDescription desc = user.boundAbility(slot);
+      AbilityDescription desc = snapshot.get(slot - 1);
       Component suffix;
       if (desc == null) {
         suffix = Message.BENDING_BOARD_EMPTY_SLOT.build(slot);
       } else {
-        suffix = desc.displayName();
-        if (user.onCooldown(desc)) {
-          suffix = suffix.decorate(TextDecoration.STRIKETHROUGH);
-        }
+        suffix = !user.onCooldown(desc) ? desc.displayName() : desc.displayName().decorate(STRIKETHROUGH);
       }
       setSuffix(getOrCreateTeam(slot), suffix);
     }
@@ -94,7 +93,7 @@ public abstract class AbstractBoard<Team> implements Board {
     }
     Team team = misc.computeIfAbsent(desc, d -> createTeam(11, pickAvailableSlot())).team();
     if (show) {
-      setPrefix(team, INACTIVE.append(desc.displayName().decorate(TextDecoration.STRIKETHROUGH)));
+      setPrefix(team, INACTIVE.append(desc.displayName().decorate(STRIKETHROUGH)));
     } else {
       removeTeam(team);
       misc.remove(desc);

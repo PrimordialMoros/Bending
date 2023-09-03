@@ -23,16 +23,21 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
-import me.moros.bending.api.ability.preset.Preset;
-import me.moros.bending.api.user.profile.Identifiable;
-import me.moros.bending.api.user.profile.PlayerBenderProfile;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
+import me.moros.bending.api.user.profile.BenderProfile;
+import me.moros.bending.api.util.TextUtil;
 import me.moros.bending.common.logging.Logger;
+import me.moros.bending.common.storage.file.IOFunction;
 import me.moros.bending.common.storage.file.loader.Loader;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.configurate.ConfigurateException;
-import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.NodePath;
 import org.spongepowered.configurate.reference.ConfigurationReference;
 
@@ -41,6 +46,7 @@ final class FileStorage extends AbstractStorage {
 
   private final Path dataPath;
   private final Loader<?> loader;
+  private final LoadingCache<Path, ReentrantLock> locks;
 
   FileStorage(Logger logger, Path directory, Loader<?> loader) {
     super(logger);
@@ -51,62 +57,61 @@ final class FileStorage extends AbstractStorage {
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
+    this.locks = Caffeine.newBuilder().expireAfterAccess(Duration.ofMinutes(10)).build(key -> new ReentrantLock());
   }
 
-  private ConfigurationReference<? extends ConfigurationNode> load(UUID uuid) throws ConfigurateException {
-    return loader.load(dataPath.resolve(uuid + SUFFIX));
-  }
-
-  @Override
-  public void init() {
+  private Path filePath(UUID uuid) {
+    return dataPath.resolve(uuid + SUFFIX);
   }
 
   @Override
-  public void close() {
-  }
-
-  @Override
-  protected int createNewProfileId(UUID uuid) {
-    return uuid.hashCode();
-  }
-
-  @Override
-  protected @Nullable PlayerBenderProfile loadProfile(UUID uuid) {
-    try (var ref = load(uuid)) {
-      return ref.node().get(PlayerBenderProfile.class);
-    } catch (ConfigurateException e) {
-      logger.warn(e.getMessage(), e);
-      return null;
-    }
-  }
-
-  @Override
-  protected void saveProfile(PlayerBenderProfile profile) {
-    edit(profile.uuid(), ref -> ref.set(NodePath.path(), profile));
-  }
-
-  @Override
-  protected int savePreset(Identifiable user, Preset preset) {
-    edit(user.uuid(), ref -> ref.set(NodePath.path("presets", preset.name()), preset));
-    return preset.name().hashCode() & 0x7FFFFFFF;
-  }
-
-  @Override
-  protected void deletePreset(Identifiable user, Preset preset) {
-    edit(user.uuid(), ref -> ref.get("presets", preset.name()).raw(null));
-  }
-
-  private void edit(UUID uuid, IOConsumer<ConfigurationReference<?>> consumer) {
-    try (var ref = load(uuid)) {
-      consumer.accept(ref);
-      ref.save();
+  public Set<UUID> loadUuids() {
+    try (var stream = Files.list(dataPath)) {
+      return stream.map(p -> p.getFileName().toString())
+        .filter(name -> name.endsWith(SUFFIX))
+        .map(name -> name.substring(0, name.length() - SUFFIX.length()))
+        .map(TextUtil::parseUUID)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toSet());
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
   }
 
-  @FunctionalInterface
-  private interface IOConsumer<T> {
-    void accept(T t) throws IOException;
+  @Override
+  public @Nullable BenderProfile loadProfile(UUID uuid) {
+    Path path = filePath(uuid);
+    return loadDataFile(path, ref -> Files.exists(path) ? ref.node().get(BenderProfile.class) : null, null);
+  }
+
+  @Override
+  public boolean saveProfile(BenderProfile profile) {
+    return loadDataFile(filePath(profile.uuid()), ref -> {
+      ref.set(NodePath.path(), profile);
+      ref.save();
+      return true;
+    }, false);
+  }
+
+  private <R> R loadDataFile(Path path, IOFunction<ConfigurationReference<?>, R> function, R onException) {
+    ReentrantLock lock = locks.get(path);
+    lock.lock();
+    try (var ref = loader.load(path)) {
+      return function.apply(ref);
+    } catch (IOException e) {
+      logger.warn(e.getMessage(), e);
+      return onException;
+    } finally {
+      lock.unlock();
+    }
+  }
+
+  @Override
+  public String toString() {
+    return "Json";
+  }
+
+  @Override
+  public void close() {
   }
 }

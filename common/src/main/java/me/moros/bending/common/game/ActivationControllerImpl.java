@@ -37,12 +37,12 @@ import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.damage.DamageCause;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.LivingEntity;
+import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.protection.ProtectionCache;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.temporal.ActionLimiter;
 import me.moros.bending.api.temporal.TempArmor;
 import me.moros.bending.api.temporal.TempBlock;
-import me.moros.bending.api.user.BendingPlayer;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.BendingEffect;
 import me.moros.bending.common.ability.SpoutAbility;
@@ -103,10 +103,10 @@ public final class ActivationControllerImpl implements ActivationController {
     ActionLimiter.MANAGER.get(user.uuid()).ifPresent(ActionLimiter::revert);
     TempArmor.MANAGER.get(user.uuid()).ifPresent(TempArmor::revert);
     user.game().abilityManager(user.worldKey()).destroyUserInstances(user);
-    if (user instanceof BendingPlayer bendingPlayer) {
-      user.game().storage().saveProfileAsync(bendingPlayer.toProfile());
-      bendingPlayer.board().disableScoreboard();
+    if (user instanceof Player) {
+      user.game().storage().saveProfileAsync(user.toProfile());
     }
+    user.board().disableScoreboard();
     user.game().flightManager().remove(user);
     Registries.BENDERS.invalidateKey(user.uuid());
     ProtectionCache.INSTANCE.invalidate(user);

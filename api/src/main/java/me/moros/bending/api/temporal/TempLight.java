@@ -65,6 +65,7 @@ public final class TempLight extends Temporary {
     return false;
   }
 
+  @Override
   public int repeat() {
     return repeat;
   }

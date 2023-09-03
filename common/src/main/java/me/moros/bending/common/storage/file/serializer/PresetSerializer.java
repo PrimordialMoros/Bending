@@ -20,6 +20,7 @@
 package me.moros.bending.common.storage.file.serializer;
 
 import java.lang.reflect.Type;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -35,7 +36,7 @@ import org.spongepowered.configurate.serialize.SerializationException;
 final class PresetSerializer extends AbstractSerializer<Preset> {
   static final PresetSerializer INSTANCE = new PresetSerializer();
 
-  private final TypeToken<Map<Integer, String>> mapToken = new TypeToken<>() {
+  private static final TypeToken<Map<Integer, String>> MAP_TOKEN = new TypeToken<>() {
   };
 
   private PresetSerializer() {
@@ -44,22 +45,34 @@ final class PresetSerializer extends AbstractSerializer<Preset> {
   @Override
   public Preset deserialize(Type type, ConfigurationNode source) throws SerializationException {
     String name = Optional.ofNullable(source.key()).map(Object::toString).orElse("");
-    if (name.isEmpty() || !TextUtil.sanitizeInput(name).equals(name)) {
+    if (!TextUtil.sanitizeInput(name).equals(name)) {
       throw new SerializationException(source, String.class, "Invalid preset name: " + name);
     }
-    var slots = mapToList(source.get(mapToken, Map.of()), Registries.ABILITIES::fromString, 9);
-    if (slots.isEmpty()) {
+    Map<Integer, String> input = source.get(MAP_TOKEN, Map.of());
+    AbilityDescription[] output = new AbilityDescription[9];
+    if (!input.isEmpty()) {
+      for (int i = 0; i < output.length; i++) {
+        var current = input.get(i + 1);
+        if (current != null) {
+          output[i] = Registries.ABILITIES.fromString(current);
+        }
+      }
+    }
+    Preset result = Preset.create(name, output);
+    if (result.isEmpty()) {
       throw new SerializationException("Empty preset " + name);
     }
-    return Preset.create(name.hashCode() & 0x7FFFFFFF, name, slots.toArray(AbilityDescription[]::new));
+    return result;
   }
 
   @Override
   public void serialize(Type type, @Nullable Preset preset, ConfigurationNode target) throws SerializationException {
-    if (preset == null) {
+    if (preset == null || preset.isEmpty()) {
       target.raw(null);
       return;
     }
-    target.set(mapToken, listToMap(preset.abilities(), AbilityDescription::name, 9));
+    Map<Integer, String> output = new LinkedHashMap<>(12); // 9 / 0.75 (load factor)
+    preset.forEach((desc, idx) -> output.put(idx + 1, desc.name()));
+    target.set(MAP_TOKEN, output);
   }
 }

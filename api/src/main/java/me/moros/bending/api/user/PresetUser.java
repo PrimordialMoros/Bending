@@ -20,11 +20,10 @@
 package me.moros.bending.api.user;
 
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 
 import me.moros.bending.api.ability.preset.Preset;
-import me.moros.bending.api.ability.preset.PresetCreateResult;
-import me.moros.bending.api.event.PresetCreateEvent;
+import me.moros.bending.api.ability.preset.PresetRegisterResult;
+import me.moros.bending.api.event.PresetRegisterEvent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -45,11 +44,11 @@ public interface PresetUser {
   @Nullable Preset presetByName(String name);
 
   /**
-   * Attempt to add the specified preset to the user. Calls a {@link PresetCreateEvent}.
+   * Attempt to register the specified preset to the user. Calls a {@link PresetRegisterEvent}.
    * @param preset the preset to add
-   * @return future with the result
+   * @return the result
    */
-  CompletableFuture<PresetCreateResult> addPreset(Preset preset);
+  PresetRegisterResult addPreset(Preset preset);
 
   /**
    * Attempt to remove the specified preset from the user.

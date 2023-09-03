@@ -22,7 +22,8 @@ package me.moros.bending.fabric.gui;
 import java.util.List;
 
 import me.moros.bending.api.locale.Message;
-import me.moros.bending.api.user.BendingPlayer;
+import me.moros.bending.api.platform.entity.DelegatePlayer;
+import me.moros.bending.api.registry.Registries;
 import me.moros.bending.common.gui.AbstractBoard;
 import me.moros.bending.fabric.platform.entity.FabricPlayer;
 import me.moros.bending.fabric.platform.scoreboard.PlayerBoard;
@@ -41,9 +42,9 @@ public final class BoardImpl extends AbstractBoard<PlayerTeam> {
   private final Scoreboard bendingBoard;
   private final Objective bendingSlots;
 
-  public BoardImpl(BendingPlayer user) {
-    super(user);
-    this.fabricPlayer = (FabricPlayer) user.entity();
+  public BoardImpl(DelegatePlayer player) {
+    super(Registries.BENDERS.getOrThrow(player.uuid()));
+    this.fabricPlayer = (FabricPlayer) player.entity();
     bendingBoard = new PlayerScoreboard(fabricPlayer);
     var displayName = toNative(Message.BENDING_BOARD_TITLE.build());
     bendingSlots = bendingBoard.addObjective("BendingBoard", ObjectiveCriteria.DUMMY, displayName, RenderType.INTEGER);

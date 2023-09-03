@@ -26,7 +26,6 @@ import cloud.commandframework.arguments.standard.StringArgument;
 import cloud.commandframework.meta.CommandMeta;
 import me.moros.bending.api.ability.preset.Preset;
 import me.moros.bending.api.locale.Message;
-import me.moros.bending.api.user.BendingPlayer;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.ColorPalette;
 import me.moros.bending.api.util.TextUtil;
@@ -69,36 +68,36 @@ public record PresetCommand<C extends Audience>(Commander<C> commander) implemen
     );
   }
 
-  private void onPresetList(BendingPlayer player) {
-    Collection<Preset> presets = player.presets();
+  private void onPresetList(User user) {
+    Collection<Preset> presets = user.presets();
     if (presets.isEmpty()) {
-      Message.NO_PRESETS.send(player);
+      Message.NO_PRESETS.send(user);
     } else {
-      Message.PRESET_LIST_HEADER.send(player);
+      Message.PRESET_LIST_HEADER.send(user);
       JoinConfiguration sep = JoinConfiguration.commas(true);
-      player.sendMessage(Component.join(sep, presets.stream().map(Preset::meta).toList()).colorIfAbsent(ColorPalette.TEXT_COLOR));
+      user.sendMessage(Component.join(sep, presets.stream().map(Preset::meta).toList()).colorIfAbsent(ColorPalette.TEXT_COLOR));
     }
   }
 
-  private void onPresetCreate(BendingPlayer player, String name) {
+  private void onPresetCreate(User user, String name) {
     String input = TextUtil.sanitizeInput(name);
     if (input.isEmpty()) {
-      Message.INVALID_PRESET_NAME.send(player);
+      Message.INVALID_PRESET_NAME.send(user);
       return;
     }
-    Preset preset = player.createPresetFromSlots(input);
+    Preset preset = user.slots();
     if (preset.isEmpty()) {
-      Message.EMPTY_PRESET.send(player);
+      Message.EMPTY_PRESET.send(user);
       return;
     }
-    player.addPreset(preset).thenAccept(result -> result.send(player, input));
+    user.addPreset(preset.withName(input)).send(user, input);
   }
 
-  private void onPresetRemove(BendingPlayer player, Preset preset) {
-    if (player.removePreset(preset)) {
-      Message.PRESET_REMOVE_SUCCESS.send(player, preset.name());
+  private void onPresetRemove(User user, Preset preset) {
+    if (user.removePreset(preset)) {
+      Message.PRESET_REMOVE_SUCCESS.send(user, preset.name());
     } else {
-      Message.PRESET_REMOVE_FAIL.send(player, preset.name());
+      Message.PRESET_REMOVE_FAIL.send(user, preset.name());
     }
   }
 

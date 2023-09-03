@@ -17,11 +17,17 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.user.profile;
+package me.moros.bending.api.event;
+
+import me.moros.bending.api.ability.preset.Preset;
 
 /**
- * Represents player bender data.
+ * Called when a {@link Preset} is registered to a user.
  */
-public interface PlayerBenderProfile extends BenderProfile, Identifiable {
-  boolean board();
+public interface PresetRegisterEvent extends UserEvent, Cancellable {
+  /**
+   * Provides the preset that is being registered.
+   * @return the preset
+   */
+  Preset preset();
 }

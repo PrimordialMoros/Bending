@@ -17,18 +17,23 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.user.profile;
+package me.moros.bending.common.backup;
 
-import java.util.Objects;
-import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-public interface Identifiable {
-  int id();
+import me.moros.bending.api.storage.BendingStorage;
+import me.moros.bending.common.Bending;
+import net.kyori.adventure.audience.Audience;
 
-  UUID uuid();
+public sealed interface Operation permits AbstractOperation {
+  CompletableFuture<Void> execute(AtomicBoolean lock);
 
-  static Identifiable of(int id, UUID uuid) {
-    Objects.requireNonNull(uuid);
-    return new IdentifiableImpl(id, uuid);
+  static Operation ofExport(Bending plugin, BendingStorage storage, Audience audience, String name) {
+    return new ExportOperation(plugin, storage, audience, name);
+  }
+
+  static Operation ofImport(Bending plugin, BendingStorage storage, Audience audience, String name) {
+    return new ImportOperation(plugin, storage, audience, name);
   }
 }

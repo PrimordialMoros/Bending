@@ -41,7 +41,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * AbilityDescription is immutable and thread-safe.
  * Assume that all collections returning AbilityDescription are also immutable
  */
-public class AbilityDescription implements Keyed, Translatable {
+public sealed class AbilityDescription implements Keyed, Translatable permits AbilityDescription.Sequence {
   public static final String NAMESPACE = "bending.ability";
 
   private final Key key;
@@ -66,7 +66,7 @@ public class AbilityDescription implements Keyed, Translatable {
     hidden = builder.hidden;
     bypassCooldown = builder.bypassCooldown;
     displayName = Component.text(name, element.color());
-    hashcode = Objects.hash(name, constructor, element, activations, hidden, canBind, bypassCooldown);
+    hashcode = Objects.hash(name, element, activations);
     key = Key.key(NAMESPACE, name.toLowerCase(Locale.ROOT));
   }
 
@@ -111,27 +111,6 @@ public class AbilityDescription implements Keyed, Translatable {
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null || getClass() != obj.getClass()) {
-      return false;
-    }
-    AbilityDescription other = (AbilityDescription) obj;
-    return name.equals(other.name) && element == other.element;
-  }
-
-  @Override
-  public int hashCode() {
-    return hashcode;
-  }
-
-  public static <T extends Ability> Builder builder(String name, Function<AbilityDescription, T> constructor) {
-    return new Builder(name, constructor);
-  }
-
-  @Override
   public @NonNull Key key() {
     return key;
   }
@@ -151,6 +130,32 @@ public class AbilityDescription implements Keyed, Translatable {
 
   public String deathKey() {
     return translationKey() + ".death";
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    AbilityDescription other = (AbilityDescription) obj;
+    return name.equals(other.name) && element == other.element && activations.equals(other.activations);
+  }
+
+  @Override
+  public int hashCode() {
+    return hashcode;
+  }
+
+  public static <T extends Ability> Builder builder(String name, Function<AbilityDescription, T> constructor) {
+    Objects.requireNonNull(name);
+    Objects.requireNonNull(constructor);
+    if (name.isEmpty()) {
+      throw new IllegalArgumentException("Ability name cannot be empty!");
+    }
+    return new Builder(name, constructor);
   }
 
   /**

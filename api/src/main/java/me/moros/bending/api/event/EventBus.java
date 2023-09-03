@@ -147,12 +147,12 @@ public interface EventBus {
   boolean postMultiBindChangeEvent(User user, Preset preset);
 
   /**
-   * Posts a new {@link PresetCreateEvent}.
-   * @param user the user who is creating a new preset
-   * @param preset the preset that is being created
+   * Posts a new {@link PresetRegisterEvent}.
+   * @param user the user that the registered preset will belong to
+   * @param preset the preset that is being registered
    * @return true if the event was executed and was not cancelled, false otherwise
    */
-  boolean postPresetCreateEvent(User user, Preset preset);
+  boolean postPresetRegisterEvent(User user, Preset preset);
 
   /**
    * Posts a new {@link TickEffectEvent}.

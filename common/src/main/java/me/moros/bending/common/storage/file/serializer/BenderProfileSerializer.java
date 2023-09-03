@@ -20,27 +20,23 @@
 package me.moros.bending.common.storage.file.serializer;
 
 import java.lang.reflect.Type;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import io.leangen.geantyref.TypeToken;
-import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.preset.Preset;
-import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.profile.BenderProfile;
-import me.moros.bending.api.user.profile.PlayerBenderProfile;
+import me.moros.bending.api.util.collect.ElementSet;
+import me.moros.bending.common.storage.file.IOFunction;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 
-final class PlayerBenderProfileSerializer extends AbstractSerializer<PlayerBenderProfile> {
-  static final PlayerBenderProfileSerializer INSTANCE = new PlayerBenderProfileSerializer();
+final class BenderProfileSerializer extends AbstractSerializer<BenderProfile> {
+  static final BenderProfileSerializer INSTANCE = new BenderProfileSerializer();
 
   private static final String UUID = "uuid";
   private static final String BOARD = "board";
@@ -48,46 +44,42 @@ final class PlayerBenderProfileSerializer extends AbstractSerializer<PlayerBende
   private static final String ELEMENTS = "elements";
   private static final String PRESETS = "presets";
 
-  private static final TypeToken<Map<Integer, String>> ABILITY_MAP_TOKEN = new TypeToken<>() {
-  };
   private static final TypeToken<Set<Element>> ELEMENT_SET_TOKEN = new TypeToken<>() {
   };
   private static final TypeToken<Map<String, Preset>> PRESET_MAP_TOKEN = new TypeToken<>() {
   };
 
-  private PlayerBenderProfileSerializer() {
+  private BenderProfileSerializer() {
   }
 
   @Override
-  public PlayerBenderProfile deserialize(Type type, ConfigurationNode source) throws SerializationException {
+  public BenderProfile deserialize(Type type, ConfigurationNode source) throws SerializationException {
     ConfigurationNode uuidNode = nonVirtualNode(source, UUID);
     UUID uuid = uuidNode.get(UUID.class);
     if (uuid == null) {
       throw new SerializationException(uuidNode, UUID.class, "Invalid uuid!");
     }
     boolean board = getSafe(nonVirtualNodeOrNull(source, BOARD), n -> n.getBoolean(true)).orElse(true);
-    var slotsMap = getSafe(nonVirtualNodeOrNull(source, SLOTS), n -> n.get(ABILITY_MAP_TOKEN)).orElseGet(Map::of);
-    var slots = mapToList(slotsMap, Registries.ABILITIES::fromString, 9);
-    var elements = getSafe(nonVirtualNodeOrNull(source, ELEMENTS), n -> n.get(ELEMENT_SET_TOKEN)).orElseGet(Set::of);
+    var elements = getSafe(nonVirtualNodeOrNull(source, ELEMENTS), n -> n.get(ELEMENT_SET_TOKEN)).orElseGet(ElementSet::of);
+    var slots = getSafe(nonVirtualNodeOrNull(source, SLOTS), n -> n.get(Preset.class)).orElseGet(Preset::empty);
     var presetMap = getSafe(nonVirtualNodeOrNull(source, PRESETS), n -> n.get(PRESET_MAP_TOKEN)).orElseGet(Map::of);
-    var data = BenderProfile.of(slots, elements, new HashSet<>(presetMap.values()));
-    return BenderProfile.of(uuid.hashCode(), uuid, board, data);
+    return BenderProfile.of(uuid, board, elements, slots, presetMap.values());
   }
 
   @Override
-  public void serialize(Type type, @Nullable PlayerBenderProfile profile, ConfigurationNode target) throws SerializationException {
+  public void serialize(Type type, @Nullable BenderProfile profile, ConfigurationNode target) throws SerializationException {
     if (profile == null) {
       target.raw(null);
       return;
     }
     target.node(UUID).set(profile.uuid());
     target.node(BOARD).set(profile.board());
-    target.node(SLOTS).set(ABILITY_MAP_TOKEN, listToMap(profile.slots(), AbilityDescription::name, 9));
     target.node(ELEMENTS).set(ELEMENT_SET_TOKEN, profile.elements());
-    target.node(PRESETS).set(PRESET_MAP_TOKEN, profile.presets().stream().collect(Collectors.toMap(Preset::name, Function.identity())));
+    target.node(SLOTS).set(Preset.class, profile.slots());
+    target.node(PRESETS).set(PRESET_MAP_TOKEN, profile.presets());
   }
 
-  private <T> Optional<T> getSafe(@Nullable ConfigurationNode node, ThrowableFunction<ConfigurationNode, T> mapper) {
+  private <T> Optional<T> getSafe(@Nullable ConfigurationNode node, IOFunction<ConfigurationNode, T> mapper) {
     if (node != null) {
       try {
         return Optional.ofNullable(mapper.apply(node));
@@ -95,10 +87,5 @@ final class PlayerBenderProfileSerializer extends AbstractSerializer<PlayerBende
       }
     }
     return Optional.empty();
-  }
-
-  @FunctionalInterface
-  public interface ThrowableFunction<T, R> {
-    R apply(T t) throws Throwable;
   }
 }

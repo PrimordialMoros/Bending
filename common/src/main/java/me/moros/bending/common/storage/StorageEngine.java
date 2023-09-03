@@ -22,25 +22,21 @@ package me.moros.bending.common.storage;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import me.moros.bending.common.storage.file.loader.HoconLoader;
 import me.moros.bending.common.storage.file.loader.JsonLoader;
 import me.moros.bending.common.storage.file.loader.Loader;
 import me.moros.storage.StorageType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public enum StorageEngine {
-  // Flat file
-  JSON("JSON", JsonLoader::new),
-  HOCON("HOCON", HoconLoader::new),
-
   // Remote databases
   MYSQL(StorageType.MYSQL),
   MARIADB(StorageType.MARIADB),
   POSTGRESQL(StorageType.POSTGRESQL),
   // Local databases
-  SQLITE(StorageType.SQLITE),
   H2(StorageType.H2),
-  HSQL(StorageType.HSQL);
+  HSQL(StorageType.HSQL),
+  // Flat file
+  JSON("JSON", JsonLoader::new);
 
   private final String name;
   private final StorageType type;

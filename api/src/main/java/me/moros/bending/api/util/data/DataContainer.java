@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 import me.moros.bending.api.util.ExpiringSet;
 
 /**
- * Represents an object that holds a map collection of data.
+ * Represents a container for data.
  */
 public interface DataContainer extends DataHolder {
   /**

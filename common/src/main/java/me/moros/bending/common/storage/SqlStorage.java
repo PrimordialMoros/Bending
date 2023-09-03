@@ -23,71 +23,134 @@ import java.nio.ByteBuffer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
+import com.google.common.collect.ImmutableBiMap;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.preset.Preset;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.profile.BenderProfile;
-import me.moros.bending.api.user.profile.Identifiable;
-import me.moros.bending.api.user.profile.PlayerBenderProfile;
-import me.moros.bending.common.Bending;
-import me.moros.bending.common.storage.sql.SqlQueries;
-import me.moros.storage.SqlStreamReader;
+import me.moros.bending.api.util.collect.ElementSet;
+import me.moros.bending.common.logging.Logger;
+import me.moros.bending.common.storage.sql.BinaryUUIDColumnMapper;
+import me.moros.bending.common.storage.sql.PresetAccumulator;
+import me.moros.bending.common.storage.sql.dialect.SqlDialect;
+import me.moros.bending.common.storage.sql.migration.V1__Rename_legacy_tables;
+import me.moros.bending.common.storage.sql.migration.V3__Migrate_from_legacy;
 import me.moros.storage.StorageDataSource;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.flywaydb.core.Flyway;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.argument.AbstractArgumentFactory;
 import org.jdbi.v3.core.argument.Argument;
 import org.jdbi.v3.core.config.ConfigRegistry;
-import org.jdbi.v3.core.statement.Batch;
 import org.jdbi.v3.core.statement.PreparedBatch;
-import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.core.statement.StatementContext;
 
 final class SqlStorage extends AbstractStorage {
-  private final BiMap<AbilityDescription, Integer> abilityMap;
+  private final BiMap<AbilityDescription, UUID> abilityIndex;
 
-  private final Bending plugin;
   private final StorageDataSource dataSource;
+  private final SqlDialect dialect;
   private final Jdbi DB;
 
-  SqlStorage(Bending plugin, StorageDataSource dataSource) {
-    super(plugin.logger());
-    this.plugin = plugin;
+  SqlStorage(Logger logger, StorageDataSource dataSource) {
+    super(logger);
     this.dataSource = dataSource;
+    this.dialect = SqlDialect.createFor(dataSource);
+    migrateWithFlyway();
     this.DB = Jdbi.create(this.dataSource.source());
-    if (!nativeUuid()) {
-      DB.registerArgument(new UUIDArgumentFactory());
+    if (!dialect.nativeUuid()) {
+      DB.registerArgument(new UUIDArgumentFactory()).registerColumnMapper(UUID.class, new BinaryUUIDColumnMapper());
     }
-    this.abilityMap = HashBiMap.create(64);
+    this.abilityIndex = createAbilities();
+  }
+
+  private void migrateWithFlyway() {
+    Flyway flyway = Flyway.configure(getClass().getClassLoader())
+      .table("bending_schemahistory").loggers("slf4j").locations("classpath:bending/migrations")
+      .javaMigrations(new V1__Rename_legacy_tables(), new V3__Migrate_from_legacy(logger, dialect.nativeUuid()))
+      .dataSource(dataSource.source()).validateOnMigrate(true).validateMigrationNaming(true)
+      .placeholders(Map.of(
+        "extraTableOptions", dialect.extraTableOptions(),
+        "uuidType", dialect.uuidType(),
+        "defineElementEnumType", dialect.defineElementEnumType(),
+        "elementEnumType", dialect.elementEnumType()
+      )).load();
+    flyway.migrate();
+  }
+
+  private BiMap<AbilityDescription, UUID> createAbilities() {
+    var entries = DB.inTransaction(handle -> {
+      Map<AbilityDescription, UUID> map = handle.createQuery(dialect.SELECT_ABILITIES)
+        .map(this::abilityRowMapper).filter(Objects::nonNull).collectToMap(Entry::getKey, Entry::getValue);
+      int size = map.size();
+      PreparedBatch batch = handle.prepareBatch(dialect.insertAbilities());
+      for (AbilityDescription desc : Registries.ABILITIES) {
+        if (desc.canBind() && !map.containsKey(desc)) {
+          UUID uuid = map.computeIfAbsent(desc, k -> UUID.randomUUID());
+          batch.bind(0, uuid).bind(1, desc.name()).add();
+        }
+      }
+      if (map.size() != size) {
+        batch.execute();
+      }
+      return map.entrySet();
+    });
+    return ImmutableBiMap.copyOf(entries);
   }
 
   @Override
-  public void init() {
-    if (!tableExists("bending_players")) {
-      String path = "bending/schema/" + dataSource.type().realName() + ".sql";
-      Collection<String> statements = SqlStreamReader.parseQueries(plugin.resource(path));
-      DB.useHandle(handle -> {
-        Batch batch = handle.createBatch();
-        statements.forEach(batch::add);
-        batch.execute();
-      });
+  public Set<UUID> loadUuids() {
+    return DB.withHandle(handle -> handle.createQuery(dialect.SELECT_ALL_USER_UUIDS).mapTo(UUID.class).set());
+  }
+
+  @Override
+  public @Nullable BenderProfile loadProfile(UUID uuid) {
+    Boolean board = DB.withHandle(handle -> handle.createQuery(dialect.SELECT_USER_BY_UUID)
+      .bind(0, uuid).mapTo(boolean.class).findOne().orElse(null));
+    if (board == null) {
+      return null;
     }
-    createAbilities();
+    Set<Element> elements = getElements(uuid);
+    Map<String, Preset> presetMap = getSlotsAndPresets(uuid);
+    Preset slots = presetMap.remove("");
+    if (slots == null) {
+      slots = Preset.empty();
+    }
+    return BenderProfile.of(uuid, board, elements, slots, presetMap.values());
+  }
+
+  @Override
+  public boolean saveProfile(BenderProfile profile) {
+    BenderProfile old = loadProfile(profile.uuid());
+    boolean wasNotStored = old == null;
+    if (wasNotStored) {
+      old = BenderProfile.of(profile.uuid());
+    }
+    if (wasNotStored || old.board() != profile.board()) {
+      saveBoard(profile);
+    }
+    if (!profile.elements().equals(old.elements())) {
+      saveElements(profile);
+    }
+    savePresets(old, profile);
+    return true;
+  }
+
+  @Override
+  public String toString() {
+    return dataSource.type().toString();
   }
 
   @Override
@@ -95,206 +158,98 @@ final class SqlStorage extends AbstractStorage {
     dataSource.source().close();
   }
 
-  private void createAbilities() {
-    DB.useHandle(handle -> {
-      PreparedBatch batch = handle.prepareBatch(SqlQueries.groupInsertAbilities(dataSource.type()));
-      for (AbilityDescription desc : Registries.ABILITIES) {
-        if (desc.canBind()) {
-          batch.bind(0, desc.name()).add();
-        }
-      }
-      batch.execute();
-    });
-    List<Entry<String, Integer>> col = DB.withHandle(handle ->
-      handle.createQuery(SqlQueries.ABILITIES_SELECT.query())
-        .map(this::abilityRowMapper).list()
-    );
-    for (var entry : col) {
-      AbilityDescription desc = Registries.ABILITIES.fromString(entry.getKey());
-      if (desc != null) {
-        abilityMap.forcePut(desc, entry.getValue());
-      }
-    }
-  }
-
-  @Override
-  protected int createNewProfileId(UUID uuid) {
-    return DB.withHandle(handle -> handle.createUpdate(SqlQueries.PLAYER_INSERT.query()).bind(0, uuid)
-      .executeAndReturnGeneratedKeys(("player_id")).mapTo(int.class).one());
-  }
-
-  @Override
-  protected @Nullable PlayerBenderProfile loadProfile(UUID uuid) {
-    Entry<Integer, Boolean> temp = DB.withHandle(handle ->
-      handle.createQuery(SqlQueries.PLAYER_SELECT_BY_UUID.query())
-        .bind(0, uuid).map(this::profileRowMapper).findOne().orElse(null)
-    );
-    if (temp != null && temp.getKey() > 0) {
-      int id = temp.getKey();
-      return BenderProfile.of(id, uuid, temp.getValue(), BenderProfile.of(getSlots(id), getElements(id), getPresets(id)));
-    }
-    return null;
-  }
-
-  @Override
-  protected void saveProfile(PlayerBenderProfile profile) {
-    saveBoard(profile);
-    saveElements(profile);
-    saveSlots(profile);
-  }
-
-  @Override
-  protected int savePreset(Identifiable user, Preset preset) {
-    try {
-      DB.useHandle(handle ->
-        handle.createUpdate(SqlQueries.PRESET_REMOVE_SPECIFIC.query()).bind(0, user.id()).bind(1, preset.name())
-      );
-    } catch (Exception e) {
-      logError(e);
-      return 0;
-    }
-    List<AbilityDescription> abilities = preset.abilities();
-    return DB.withHandle(handle -> {
-      int presetId = handle.createUpdate(SqlQueries.PRESET_INSERT_NEW.query())
-        .bind(0, user.id()).bind(1, preset.name())
-        .executeAndReturnGeneratedKeys("preset_id")
-        .mapTo(int.class).findOne().orElse(0);
-      if (presetId <= 0) {
-        return 0;
-      }
-      PreparedBatch batch = handle.prepareBatch(SqlQueries.PRESET_SLOTS_INSERT.query());
-      int size = abilities.size();
-      for (int slot = 0; slot < size; slot++) {
-        int abilityId = getAbilityId(abilities.get(slot));
-        if (abilityId > 0) {
-          batch.bind(0, presetId).bind(1, slot + 1).bind(2, abilityId).add();
-        }
-      }
-      batch.execute();
-      return presetId;
-    });
-  }
-
-  @Override
-  protected void deletePreset(Identifiable user, Preset preset) {
-    DB.useHandle(handle ->
-      handle.createUpdate(SqlQueries.PRESET_REMOVE_FOR_ID.query()).bind(0, preset.id()).execute()
-    );
-  }
-
-  private void saveBoard(PlayerBenderProfile profile) {
-    DB.useHandle(handle ->
-      handle.createUpdate(SqlQueries.PLAYER_UPDATE_PROFILE.query())
-        .bind(0, profile.board()).bind(1, profile.id()).execute()
-    );
-  }
-
-  private void saveElements(PlayerBenderProfile profile) {
-    DB.useHandle(handle -> {
-      int id = profile.id();
-      handle.createUpdate(SqlQueries.PLAYER_ELEMENTS_REMOVE.query()).bind(0, id).execute();
-      PreparedBatch batch = handle.prepareBatch(SqlQueries.PLAYER_ELEMENTS_INSERT.query());
-      for (Element element : profile.elements()) {
-        batch.bind(0, id).bind(1, element.name().toLowerCase(Locale.ROOT)).add();
-      }
-      batch.execute();
-    });
-  }
-
-  private void saveSlots(PlayerBenderProfile profile) {
-    DB.useHandle(handle -> {
-      int id = profile.id();
-      List<AbilityDescription> abilities = profile.slots();
-      handle.createUpdate(SqlQueries.PLAYER_SLOTS_REMOVE.query()).bind(0, id).execute();
-      PreparedBatch batch = handle.prepareBatch(SqlQueries.PLAYER_SLOTS_INSERT.query());
-      int size = abilities.size();
-      for (int slot = 0; slot < size; slot++) {
-        int abilityId = getAbilityId(abilities.get(slot));
-        if (abilityId <= 0) {
-          continue;
-        }
-        batch.bind(0, id).bind(1, slot + 1).bind(2, abilityId).add();
-      }
-      batch.execute();
-    });
-  }
-
-  private int getAbilityId(@Nullable AbilityDescription desc) {
-    return desc == null ? 0 : abilityMap.getOrDefault(desc, 0);
-  }
-
-  private List<AbilityDescription> getSlots(int playerId) {
-    return DB.withHandle(handle -> {
-      Query query = handle.createQuery(SqlQueries.PLAYER_SLOTS_SELECT.query()).bind(0, playerId);
-      return Arrays.asList(slotMapper(query.mapToMap()));
-    });
-  }
-
-  private Set<Element> getElements(int playerId) {
+  private Set<Element> getElements(UUID uuid) {
     return DB.withHandle(handle ->
-      handle.createQuery(SqlQueries.PLAYER_ELEMENTS_SELECT.query()).bind(0, playerId)
-        .mapTo(String.class).stream().map(Element::fromName).filter(Objects::nonNull).collect(Collectors.toUnmodifiableSet())
+      handle.createQuery(dialect.SELECT_USER_ELEMENTS).bind(0, uuid)
+        .mapTo(String.class).map(Element::fromName).filter(Objects::nonNull).toCollection(ElementSet::mutable)
     );
   }
 
-  private Set<Preset> getPresets(int playerId) {
-    Set<Preset> presets = new HashSet<>();
-    return DB.withHandle(handle -> {
-      List<Entry<Integer, String>> presetEntries = handle.createQuery(SqlQueries.PRESET_SELECT.query())
-        .bind(0, playerId).map(this::presetRowMapper).list();
-      for (var entry : presetEntries) {
-        int id = entry.getKey();
-        String name = entry.getValue();
-        if (id > 0) {
-          Query query = handle.createQuery(SqlQueries.PRESET_SLOTS_SELECT.query()).bind(0, id);
-          AbilityDescription[] abilities = slotMapper(query.mapToMap());
-          presets.add(Preset.create(id, name, abilities));
+  private Map<String, Preset> getSlotsAndPresets(UUID uuid) {
+    return DB.withHandle(handle ->
+      handle.createQuery(dialect.SELECT_USER_PRESETS).bind(0, uuid)
+        .reduceRows(new PresetAccumulator(this::getAbilityFromId))
+        .collect(Collectors.toMap(Preset::name, Function.identity()))
+    );
+  }
+
+  private void saveBoard(BenderProfile profile) {
+    DB.useTransaction(handle ->
+      handle.createUpdate(dialect.insertUser()).bind(0, profile.uuid())
+        .bind(1, profile.board()).execute()
+    );
+  }
+
+  private void saveElements(BenderProfile profile) {
+    DB.useTransaction(handle -> {
+      handle.createUpdate(dialect.REMOVE_USER_ELEMENTS).bind(0, profile.uuid()).execute();
+      if (!profile.elements().isEmpty()) {
+        PreparedBatch batch = handle.prepareBatch(dialect.INSERT_USER_ELEMENTS);
+        for (Element element : profile.elements()) {
+          batch.bind(0, profile.uuid()).bind(1, element.name().toLowerCase(Locale.ROOT)).add();
         }
+        batch.execute();
       }
-      return presets;
     });
   }
 
-  private AbilityDescription[] slotMapper(Iterable<Map<String, Object>> results) {
-    AbilityDescription[] abilities = new AbilityDescription[9];
-    for (Map<String, Object> map : results) {
-      int slot = (int) map.get("slot");
-      int id = (int) map.get("ability_id");
-      abilities[slot - 1] = abilityMap.inverse().get(id);
+  private void savePresets(BenderProfile old, BenderProfile profile) {
+    var oldPresets = old.presets().values();
+    var newPresets = profile.presets().values();
+
+    Set<Preset> removed = new HashSet<>(oldPresets);
+    removed.removeAll(newPresets);
+
+    Set<Preset> added = new HashSet<>(newPresets);
+    added.removeAll(oldPresets);
+
+    if (!profile.slots().matchesBinds(old.slots())) {
+      removed.add(old.slots());
+      added.add(profile.slots());
     }
-    return abilities;
+
+    UUID userId = profile.uuid();
+    removed.forEach(preset -> deletePreset(userId, preset));
+    added.forEach(preset -> savePreset(userId, preset));
   }
 
-  private boolean tableExists(String table) {
-    try {
-      return DB.withHandle(handle -> {
-        String catalog = handle.getConnection().getCatalog();
-        return handle.queryMetadata(d -> d.getTables(catalog, null, "%", null))
-          .map(x -> x.getColumn("TABLE_NAME", String.class)).stream().anyMatch(table::equalsIgnoreCase);
-      });
-    } catch (Exception e) {
-      logError(e);
+  private void savePreset(UUID userId, Preset preset) {
+    if (preset.isEmpty()) {
+      return;
     }
-    return false;
+    DB.useTransaction(handle -> {
+      UUID presetId = UUID.randomUUID();
+      handle.createUpdate(dialect.INSERT_USER_PRESET_WITH_ID)
+        .bind(0, presetId).bind(1, userId).bind(2, preset.name()).execute();
+      PreparedBatch batch = handle.prepareBatch(dialect.INSERT_USER_PRESET_SLOTS);
+      preset.forEach((desc, idx) -> batch
+        .bind(0, presetId)
+        .bind(1, idx + 1)
+        .bind(2, abilityIndex.get(desc))
+        .add()
+      );
+      batch.execute();
+    });
   }
 
-  private Entry<Integer, Boolean> profileRowMapper(ResultSet rs, StatementContext ctx) throws SQLException {
-    return Map.entry(rs.getInt("player_id"), rs.getBoolean("board"));
+  private void deletePreset(UUID userId, Preset preset) {
+    DB.useTransaction(handle ->
+      handle.createUpdate(dialect.REMOVE_USER_PRESET).bind(0, userId).bind(1, preset.name()).execute()
+    );
   }
 
-  private Entry<String, Integer> abilityRowMapper(ResultSet rs, StatementContext ctx) throws SQLException {
-    return Map.entry(rs.getString("ability_name"), rs.getInt("ability_id"));
+  private @Nullable AbilityDescription getAbilityFromId(UUID uuid) {
+    return abilityIndex.inverse().get(uuid);
   }
 
-  private Entry<Integer, String> presetRowMapper(ResultSet rs, StatementContext ctx) throws SQLException {
-    return Map.entry(rs.getInt("preset_id"), rs.getString("preset_name"));
+  private @Nullable Entry<AbilityDescription, UUID> abilityRowMapper(ResultSet rs, StatementContext ctx) throws SQLException {
+    AbilityDescription desc = Registries.ABILITIES.fromString(rs.getString("ability_name"));
+    return desc == null ? null : Map.entry(desc, mapUuid(rs, "ability_id", ctx));
   }
 
-  private boolean nativeUuid() {
-    return switch (dataSource.type()) {
-      case POSTGRESQL, H2, HSQL -> true;
-      default -> false;
-    };
+  private UUID mapUuid(ResultSet rs, String column, StatementContext ctx) throws SQLException {
+    return dialect.nativeUuid() ? rs.getObject(column, UUID.class) :
+      ctx.findColumnMapperFor(UUID.class).orElseThrow().map(rs, column, ctx);
   }
 
   private static final class UUIDArgumentFactory extends AbstractArgumentFactory<UUID> {

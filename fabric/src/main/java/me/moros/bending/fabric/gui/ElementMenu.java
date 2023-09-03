@@ -27,7 +27,8 @@ import me.moros.bending.api.ability.element.ElementHandler;
 import me.moros.bending.api.gui.ElementGui;
 import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.platform.entity.player.Player;
-import me.moros.bending.api.user.BendingPlayer;
+import me.moros.bending.api.registry.Registries;
+import me.moros.bending.api.user.User;
 import me.moros.bending.common.gui.AbstractGui;
 import me.moros.bending.fabric.platform.PlatformAdapter;
 import me.moros.bending.fabric.platform.item.ItemUtil;
@@ -40,13 +41,13 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 
 public final class ElementMenu extends AbstractGui<ItemStack, SimpleGui> {
-  private ElementMenu(ElementHandler handler, BendingPlayer user) {
-    super(handler, user);
+  private ElementMenu(ElementHandler handler, Player player) {
+    super(handler, player);
   }
 
   @Override
   protected SimpleGui construct(Map<Element, ItemStack> elementMap) {
-    var player = PlatformAdapter.toFabricEntity(user());
+    var player = PlatformAdapter.toFabricEntity(player());
     SimpleGui gui = new SimpleGui(MenuType.GENERIC_9x3, player, false);
     gui.setTitle(FabricServerAudiences.of(player.server).toNative(Message.ELEMENTS_GUI_TITLE.build()));
     var fill = PlatformAdapter.toFabricItem(BACKGROUND.get());
@@ -55,10 +56,11 @@ public final class ElementMenu extends AbstractGui<ItemStack, SimpleGui> {
     }
     gui.setSlot(4, PlatformAdapter.toFabricItem(generateHelpItem()));
     int offset = 10;
+    User user = Registries.BENDERS.getOrThrow(player().uuid());
     for (Element element : Element.VALUES) {
       var data = createElementButton(element);
       var item = PlatformAdapter.toFabricItem(data.item());
-      handleItemStackGlow(item, user().hasElement(element));
+      handleItemStackGlow(item, user.hasElement(element));
       elementMap.put(element, item);
       gui.setSlot(offset, PlatformAdapter.toFabricItem(data.item()), (idx, ct, ct2, g) -> {
         ActionType action = mapType(ct.shift, ct.isLeft, ct.isRight);
@@ -89,7 +91,7 @@ public final class ElementMenu extends AbstractGui<ItemStack, SimpleGui> {
     }
   }
 
-  public static ElementGui createMenu(ElementHandler handler, BendingPlayer player) {
+  public static ElementGui createMenu(ElementHandler handler, Player player) {
     return new ElementMenu(handler, player);
   }
 }

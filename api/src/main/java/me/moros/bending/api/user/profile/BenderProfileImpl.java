@@ -19,15 +19,12 @@
 
 package me.moros.bending.api.user.profile;
 
-import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.UUID;
 
-import me.moros.bending.api.ability.AbilityDescription;
-import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.preset.Preset;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import me.moros.bending.api.util.collect.ElementSet;
 
-record BenderProfileImpl(List<@Nullable AbilityDescription> slots, Set<Element> elements,
-                         Set<Preset> presets) implements BenderProfile {
-  static final BenderProfile EMPTY = new BenderProfileImpl(List.of(), Set.of(), Set.of());
+record BenderProfileImpl(UUID uuid, boolean board, ElementSet elements, Preset slots,
+                         Map<String, Preset> presets) implements BenderProfile {
 }

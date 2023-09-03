@@ -19,7 +19,6 @@
 
 package me.moros.bending.api.ability.element;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
@@ -108,6 +107,6 @@ public enum Element implements Keyed, Translatable {
   }
 
   public static final String NAMESPACE = "bending.element";
-  public static final Collection<Element> VALUES = List.of(values());
-  public static final Collection<String> NAMES = List.of("Air", "Water", "Earth", "Fire");
+  public static final List<Element> VALUES = List.of(values());
+  public static final List<String> NAMES = List.of("Air", "Water", "Earth", "Fire");
 }

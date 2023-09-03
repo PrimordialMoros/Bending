@@ -19,51 +19,61 @@
 
 package me.moros.bending.api.user.profile;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
-import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.preset.Preset;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import me.moros.bending.api.util.collect.ElementSet;
 
 /**
  * Represents bender data.
  */
-public interface BenderProfile {
+public sealed interface BenderProfile permits BenderProfileImpl {
+  UUID uuid();
+
+  boolean board();
+
   /**
    * The bender's bound abilities.
-   * @return an immutable list of the bender's bound abilities
+   * @return the bender's bound abilities as a dummy preset
    */
-  List<@Nullable AbilityDescription> slots();
+  Preset slots();
 
   /**
    * The bender's elements.
-   * @return an immutable set of the bender's elements
+   * @return an immutable collection of the bender's elements
    */
-  Set<Element> elements();
+  ElementSet elements();
 
   /**
    * The bender's presets.
-   * @return an immutable list of the bender's bound abilities
+   * @return an immutable collection of the bender's presets
    */
-  Set<Preset> presets();
+  Map<String, Preset> presets();
 
-  static BenderProfile empty() {
-    return BenderProfileImpl.EMPTY;
+  static BenderProfile of(UUID uuid) {
+    return new BenderProfileImpl(uuid, true, ElementSet.of(), Preset.empty(), Map.of());
   }
 
-  static BenderProfile of(List<@Nullable AbilityDescription> slots, Set<Element> elements, Set<Preset> presets) {
-    return new BenderProfileImpl(Collections.unmodifiableList(slots), Set.copyOf(elements), Set.copyOf(presets));
+  static BenderProfile of(UUID uuid, Collection<Element> elements, Preset slots, Collection<Preset> presets) {
+    return of(uuid, true, elements, slots, presets);
   }
 
-  static PlayerBenderProfile of(int id, UUID uuid, boolean board) {
-    return of(id, uuid, board, empty());
-  }
-
-  static PlayerBenderProfile of(int id, UUID uuid, boolean board, BenderProfile benderProfile) {
-    return new PlayerBenderProfileImpl(id, uuid, board, benderProfile);
+  static BenderProfile of(UUID uuid, boolean board, Collection<Element> elements, Preset slots, Collection<Preset> presets) {
+    Objects.requireNonNull(uuid);
+    ElementSet elementsCopy = ElementSet.copyOf(elements);
+    // Ensure unique, valid names for presets in stable order
+    Map<String, Preset> map = new LinkedHashMap<>();
+    presets.stream()
+      .filter(p -> !p.name().isEmpty() && !p.isEmpty())
+      .sorted(Comparator.comparing(Preset::name))
+      .forEach(p -> map.put(p.name(), p));
+    return new BenderProfileImpl(uuid, board, elementsCopy, slots.withName(""), Collections.unmodifiableMap(map));
   }
 }

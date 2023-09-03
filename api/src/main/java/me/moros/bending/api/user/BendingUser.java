@@ -20,7 +20,6 @@
 package me.moros.bending.api.user;
 
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,6 +31,7 @@ import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.Activation;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.preset.Preset;
+import me.moros.bending.api.ability.preset.PresetRegisterResult;
 import me.moros.bending.api.config.attribute.AttributeModifier;
 import me.moros.bending.api.event.ElementChangeEvent.ElementAction;
 import me.moros.bending.api.game.Game;
@@ -39,6 +39,8 @@ import me.moros.bending.api.gui.Board;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.temporal.Cooldown;
 import me.moros.bending.api.user.profile.BenderProfile;
+import me.moros.bending.api.util.Tasker;
+import me.moros.bending.api.util.collect.ElementSet;
 import me.moros.bending.api.util.data.DataContainer;
 import me.moros.bending.api.util.functional.BendingConditions;
 import net.kyori.adventure.util.TriState;
@@ -47,34 +49,31 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * Base {@link User} implementation for all living entities.
  */
-public sealed class BendingUser implements User permits BendingPlayer {
-  private final LivingEntity entity;
+sealed class BendingUser implements User permits BendingPlayer {
   private final Game game;
+  private final LivingEntity entity;
   private final DataContainer container;
-  private final Set<Element> elements;
   private final Map<String, TriState> virtualPermissions;
   private final Collection<AttributeModifier> attributes;
-  private final AbilityDescription[] slots;
   private final BiPredicate<User, AbilityDescription> condition;
+
+  private final ElementSet elements;
+  private final SlotContainer slots;
+  private final Set<Preset> presets;
 
   private boolean canBend = true;
   private int index = 1;
 
-  protected BendingUser(Game game, LivingEntity entity, BenderProfile data) {
-    this.entity = entity;
+  protected BendingUser(Game game, LivingEntity entity) {
     this.game = game;
-    container = DataContainer.blocking(500, TimeUnit.MILLISECONDS);
-    virtualPermissions = new ConcurrentHashMap<>();
-    attributes = ConcurrentHashMap.newKeySet();
-    slots = new AbilityDescription[9];
-    int size = Math.min(data.slots().size(), 9);
-    for (int i = 0; i < size; i++) {
-      slots[i] = data.slots().get(i);
-    }
-    elements = EnumSet.noneOf(Element.class);
-    elements.addAll(data.elements());
-    condition = BendingConditions.all();
-    validateSlots();
+    this.entity = entity;
+    this.container = DataContainer.blocking(500, TimeUnit.MILLISECONDS);
+    this.virtualPermissions = new ConcurrentHashMap<>();
+    this.attributes = ConcurrentHashMap.newKeySet();
+    this.condition = BendingConditions.all();
+    this.elements = ElementSet.mutable();
+    this.slots = new SlotContainer();
+    this.presets = ConcurrentHashMap.newKeySet(6);
   }
 
   @Override
@@ -94,7 +93,11 @@ public sealed class BendingUser implements User permits BendingPlayer {
 
   @Override
   public Set<Element> elements() {
-    return EnumSet.copyOf(elements);
+    return ElementSet.copyOf(elements);
+  }
+
+  protected boolean hasElements() {
+    return !elements.isEmpty();
   }
 
   @Override
@@ -120,8 +123,8 @@ public sealed class BendingUser implements User permits BendingPlayer {
   public boolean removeElement(Element element) {
     if (hasElement(element) && game().eventBus().postElementChangeEvent(this, element, ElementAction.REMOVE)) {
       elements.remove(element);
+      slots.validate(desc -> hasElement(desc.element()));
       validateAbilities();
-      validateSlots();
       board().updateAll();
       return true;
     }
@@ -131,10 +134,9 @@ public sealed class BendingUser implements User permits BendingPlayer {
   @Override
   public boolean chooseElement(Element element) {
     if (game().eventBus().postElementChangeEvent(this, element, ElementAction.CHOOSE)) {
-      elements.clear();
-      elements.add(element);
+      elements.set(ElementSet.of(element));
+      slots.validate(desc -> hasElement(desc.element()));
       validateAbilities();
-      validateSlots();
       board().updateAll();
       return true;
     }
@@ -151,19 +153,17 @@ public sealed class BendingUser implements User permits BendingPlayer {
   }
 
   @Override
-  public Preset createPresetFromSlots(String name) {
-    return Preset.create(0, name, slots);
+  public Preset slots() {
+    return slots.toPreset();
   }
 
   @Override
   public boolean bindPreset(Preset preset) {
     if (game().eventBus().postMultiBindChangeEvent(this, preset)) {
-      Preset oldBinds = createPresetFromSlots("");
-      preset.copyTo(slots);
-      validateSlots();
+      Preset oldBinds = slots();
+      slots.fromPreset(preset, this::validate);
       board().updateAll();
-      Preset newBinds = createPresetFromSlots("");
-      return oldBinds.compare(newBinds) > 0;
+      return !oldBinds.matchesBinds(slots.getArray());
     }
     return false;
   }
@@ -173,7 +173,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
     if (slot < 1 || slot > 9) {
       return null;
     }
-    return slots[slot - 1];
+    return slots.get(slot - 1);
   }
 
   @Override
@@ -182,7 +182,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
       return;
     }
     if (game().eventBus().postSingleBindChangeEvent(this, slot, desc)) {
-      slots[slot - 1] = desc;
+      slots.set(slot - 1, desc);
       board().updateAll();
     }
   }
@@ -201,7 +201,7 @@ public sealed class BendingUser implements User permits BendingPlayer {
 
   @Override
   public @Nullable AbilityDescription selectedAbility() {
-    return slots[index];
+    return boundAbility(currentSlot());
   }
 
   @Override
@@ -290,16 +290,61 @@ public sealed class BendingUser implements User permits BendingPlayer {
     }
   }
 
-  /**
-   * Checks bound abilities and clears any invalid ability slots.
-   */
-  private void validateSlots() {
-    for (int i = 0; i < 9; i++) {
-      AbilityDescription desc = slots[i];
-      if (desc != null && (!hasElement(desc.element()) || !hasPermission(desc) || !desc.canBind())) {
-        slots[i] = null;
-      }
+  private boolean validate(AbilityDescription desc) {
+    return desc.canBind() && hasElement(desc.element()) && hasPermission(desc);
+  }
+
+  // Presets
+  @Override
+  public Set<Preset> presets() {
+    return Set.copyOf(presets);
+  }
+
+  @Override
+  public @Nullable Preset presetByName(String name) {
+    return presets.stream().filter(p -> p.name().equalsIgnoreCase(name)).findAny().orElse(null);
+  }
+
+  @Override
+  public PresetRegisterResult addPreset(Preset preset) {
+    String n = preset.name();
+    if (presets.contains(preset) || presets.stream().map(Preset::name).anyMatch(n::equalsIgnoreCase)) {
+      return PresetRegisterResult.EXISTS;
     }
+    if (n.isEmpty() || preset.isEmpty() || !game().eventBus().postPresetRegisterEvent(this, preset)) {
+      return PresetRegisterResult.CANCELLED;
+    }
+    presets.add(preset);
+    return PresetRegisterResult.SUCCESS;
+  }
+
+  @Override
+  public boolean removePreset(Preset preset) {
+    return presets.remove(preset);
+  }
+
+  @Override
+  public BenderProfile toProfile() {
+    return BenderProfile.of(uuid(), !store().has(Board.HIDDEN), elements(), slots(), presets);
+  }
+
+  @Override
+  public boolean fromProfile(BenderProfile profile) {
+    if (!uuid().equals(profile.uuid())) {
+      return false;
+    }
+    if (elements.set(profile.elements())) {
+      validateAbilities();
+    }
+    slots.fromPreset(profile.slots(), this::validate);
+    presets.clear();
+    presets.addAll(profile.presets().values());
+    if (profile.board()) {
+      Tasker.sync().submit(() -> board().updateAll());
+    } else {
+      store().add(Board.HIDDEN, Board.dummy());
+    }
+    return true;
   }
 
   @Override

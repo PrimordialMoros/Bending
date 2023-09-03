@@ -35,7 +35,6 @@ import me.moros.bending.api.protection.ProtectionCache;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.temporal.TempBlock;
 import me.moros.bending.api.user.profile.BenderProfile;
-import me.moros.bending.api.user.profile.PlayerBenderProfile;
 import me.moros.bending.api.util.GridIterator;
 import me.moros.bending.api.util.data.DataContainer;
 import me.moros.math.FastMath;
@@ -46,7 +45,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * Represents a user that can bend.
  */
-public sealed interface User extends DelegateLivingEntity, ElementUser, AttributeUser permits BendingUser {
+public sealed interface User extends DelegateLivingEntity, ElementUser, AttributeUser, PresetUser permits BendingUser {
   String NAMESPACE = "bending.user";
 
   /**
@@ -85,16 +84,15 @@ public sealed interface User extends DelegateLivingEntity, ElementUser, Attribut
   boolean addCooldown(AbilityDescription desc, long duration);
 
   /**
-   * Makes a preset out of this user's current slots.
-   * @param name the name of the preset to be created
-   * @return the constructed preset
+   * Create a snapshot of this user's current slots as a preset.
+   * @return the preset
    */
-  Preset createPresetFromSlots(String name);
+  Preset slots();
 
   /**
    * Bind a preset to slots.
    * @param preset the preset of abilities to bind
-   * @return whether binding was successful
+   * @return true is at least 1 ability from the preset was bound, false otherwise
    */
   boolean bindPreset(Preset preset);
 
@@ -253,19 +251,30 @@ public sealed interface User extends DelegateLivingEntity, ElementUser, Attribut
     return null;
   }
 
-  private static <E extends LivingEntity, T extends BenderProfile> Optional<User> create(Game game, E entity, T data, UserFactory<E, T> factory) {
-    Objects.requireNonNull(game);
+  BenderProfile toProfile();
+
+  boolean fromProfile(BenderProfile profile);
+
+  private static <E extends LivingEntity> Optional<User> create(Game game, E entity, BenderProfile profile, UserFactory<E> factory) {
     if (!Registries.BENDERS.containsKey(entity.uuid())) {
-      return Optional.of(factory.create(game, entity, data));
+      User user = factory.create(game, entity);
+      user.fromProfile(profile);
+      return Optional.of(user);
     }
     return Optional.empty();
   }
 
-  static Optional<User> create(Game game, LivingEntity entity, BenderProfile data) {
-    return entity instanceof Player ? Optional.empty() : create(game, entity, data, BendingUser::new);
-  }
-
-  static Optional<User> create(Game game, Player player, PlayerBenderProfile profile) {
-    return create(game, player, profile, BendingPlayer::new);
+  static Optional<User> create(Game game, LivingEntity entity, BenderProfile profile) {
+    Objects.requireNonNull(game);
+    Objects.requireNonNull(entity);
+    Objects.requireNonNull(profile);
+    if (!entity.uuid().equals(profile.uuid())) {
+      throw new IllegalStateException("Entity uuid does not match profile uuid!");
+    }
+    if (entity instanceof Player player) {
+      return create(game, player, profile, BendingPlayer::new);
+    } else {
+      return create(game, entity, profile, BendingUser::new);
+    }
   }
 }

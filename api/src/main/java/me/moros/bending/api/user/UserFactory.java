@@ -21,9 +21,8 @@ package me.moros.bending.api.user;
 
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.platform.entity.LivingEntity;
-import me.moros.bending.api.user.profile.BenderProfile;
 
 @FunctionalInterface
-interface UserFactory<E extends LivingEntity, T extends BenderProfile> {
-  User create(Game game, E entity, T data);
+interface UserFactory<E extends LivingEntity> {
+  User create(Game game, E entity);
 }

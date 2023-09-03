@@ -35,6 +35,7 @@ tasks {
                 excluded.contains(it.moduleName)
             }
         }
+        mergeServiceFiles()
     }
     val copyJar = register("copyJar", CopyFile::class) {
         fileToCopy.set(platformExt.productionJar)

@@ -80,7 +80,7 @@ public class LBVH<E extends Boundable> {
     int leafLength = length - 1;
     final Node<E>[] treeNodes = new Node[leafLength];
     final Node<E>[] leafNodes = new Node[length];
-    for (int i = 0; i < length; ++i) {
+    for (int i = 0; i < length; i++) {
       if (i < leafLength) {
         treeNodes[i] = new Node<>();
       }
@@ -89,7 +89,7 @@ public class LBVH<E extends Boundable> {
       node.box = node.element.box();
       leafNodes[i] = node;
     }
-    for (int i = 0; i < treeNodes.length; ++i) {
+    for (int i = 0; i < treeNodes.length; i++) {
       generateNode(elements, treeNodes, leafNodes, i);
     }
     calculateVolumeHierarchy(treeNodes[0]);

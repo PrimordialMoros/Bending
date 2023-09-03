@@ -22,8 +22,8 @@ package me.moros.bending.api.registry;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.registry.SimpleRegistry.SimpleMutableRegistry;
-import me.moros.bending.api.user.BendingPlayer;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.TextUtil;
 
@@ -53,7 +53,15 @@ public final class UserRegistry extends SimpleMutableRegistry<UUID, User> {
    * Provides a stream of the currently registered players.
    * @return stream of online players
    */
-  public Stream<BendingPlayer> players() {
-    return stream().filter(BendingPlayer.class::isInstance).map(BendingPlayer.class::cast);
+  public Stream<User> players() {
+    return stream().filter(Player.class::isInstance);
+  }
+
+  public int playersCount() {
+    return (int) players().count();
+  }
+
+  public int nonPlayerCount() {
+    return size() - playersCount();
   }
 }

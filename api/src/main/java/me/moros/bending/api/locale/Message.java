@@ -49,13 +49,13 @@ public interface Message {
   Args0 EMPTY_PRESET = () -> translatable("bending.command.preset.create-empty", WARN);
   Args0 HOVER_PRESET = () -> translatable("bending.command.preset.hover", NEUTRAL);
 
-  Args1<String> PRESET_SUCCESS = preset -> translatable("bending.command.preset.create-success", SUCCESS)
+  Args1<String> PRESET_SUCCESS = preset -> translatable("bending.command.preset.register-success", SUCCESS)
     .args(text(preset));
-  Args1<String> PRESET_EXISTS = preset -> translatable("bending.command.preset.create-exists", WARN)
+  Args1<String> PRESET_EXISTS = preset -> translatable("bending.command.preset.register-exists", WARN)
     .args(text(preset));
-  Args1<String> PRESET_CANCELLED = preset -> translatable("bending.command.preset.create-cancelled", WARN)
+  Args1<String> PRESET_CANCELLED = preset -> translatable("bending.command.preset.register-cancelled", WARN)
     .args(text(preset));
-  Args1<String> PRESET_FAIL = preset -> translatable("bending.command.preset.create-fail", FAIL)
+  Args1<String> PRESET_FAIL = preset -> translatable("bending.command.preset.register-fail", FAIL)
     .args(text(preset));
 
   Args1<String> PRESET_REMOVE_SUCCESS = preset -> translatable("bending.command.preset.remove-success", SUCCESS)
@@ -150,6 +150,16 @@ public interface Message {
     .args(text(author, HEADER), text("GNU AGPLv3", TextColor.fromHexString("#007EC6")), text(link, LINK_COLOR))
     .append(newline()).append(newline())
     .append(translatable("bending.command.version.hover.open-link", NEUTRAL));
+
+  Args0 BACKUP_ALREADY_RUNNING = () -> brand(translatable("bending.command.backup.running", FAIL));
+  Args1<Integer> EXPORT_PROGRESS = percent -> brand(translatable("bending.command.export.progress", NEUTRAL)
+    .args(text(percent, ACCENT)));
+  Args2<String, Double> EXPORT_SUCCESS = (path, seconds) -> brand(translatable("bending.command.export.success", SUCCESS)
+    .args(text(path, ACCENT), text(seconds)));
+  Args1<Integer> IMPORT_PROGRESS = percent -> brand(translatable("bending.command.import.progress", NEUTRAL)
+    .args(text(percent, ACCENT)));
+  Args1<Double> IMPORT_SUCCESS = seconds -> brand(translatable("bending.command.import.success", SUCCESS)
+    .args(text(seconds)));
 
   Args0 BENDING_BOARD_TITLE = () -> translatable("bending.board.title", Style.style(TEXT_COLOR, TextDecoration.BOLD));
 

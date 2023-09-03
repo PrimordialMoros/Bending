@@ -21,6 +21,7 @@ package me.moros.bending;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
@@ -59,6 +60,7 @@ public class CollisionBenchmark {
   public void setup() {
     // Generate up to 10 extra colliders per ability to stress the BVH
     abilities = CollisionUtil.generateColliders(size, true);
+    Collections.shuffle(Arrays.asList(abilities));
   }
 
   @Benchmark

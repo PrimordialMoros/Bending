@@ -44,7 +44,7 @@ public final class ConnectionListener extends AbstractConnectionListener impleme
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerJoin(PlayerJoinEvent event) {
     Player player = event.getPlayer();
-    syncJoin(player.getUniqueId(), player.getName(), () -> new BukkitPlayer(player));
+    syncJoin(player.getUniqueId(), () -> new BukkitPlayer(player));
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

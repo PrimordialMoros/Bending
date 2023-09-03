@@ -32,14 +32,15 @@ import me.moros.bending.api.game.Game;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
-import me.moros.bending.api.user.profile.PlayerBenderProfile;
+import me.moros.bending.api.user.profile.BenderProfile;
+import me.moros.bending.api.util.Tasker;
 import me.moros.bending.api.util.functional.Suppliers;
 import me.moros.bending.common.logging.Logger;
 
 public abstract class AbstractConnectionListener {
   private final Logger logger;
   protected final Supplier<Game> gameSupplier;
-  protected final AsyncLoadingCache<UUID, PlayerBenderProfile> profileCache;
+  protected final AsyncLoadingCache<UUID, BenderProfile> profileCache;
 
   protected AbstractConnectionListener(Logger logger, Game game) {
     this(logger, Suppliers.cached(game));
@@ -48,19 +49,20 @@ public abstract class AbstractConnectionListener {
   protected AbstractConnectionListener(Logger logger, Supplier<Game> gameSupplier) {
     this.logger = logger;
     this.gameSupplier = gameSupplier;
-    this.profileCache = Caffeine.newBuilder().maximumSize(100).expireAfterWrite(Duration.ofMinutes(2))
-      .buildAsync(this::cacheLoad);
+    this.profileCache = Caffeine.newBuilder().maximumSize(64).executor(Tasker.async())
+      .expireAfterWrite(Duration.ofMinutes(2)).buildAsync(this::cacheLoad);
   }
 
   private Game game() {
     return gameSupplier.get();
   }
 
-  private PlayerBenderProfile cacheLoad(UUID uuid) {
-    return game().storage().loadOrCreateProfile(uuid);
+  private BenderProfile cacheLoad(UUID uuid) {
+    BenderProfile profile = game().storage().loadProfile(uuid);
+    return profile == null ? BenderProfile.of(uuid) : profile;
   }
 
-  protected CompletableFuture<PlayerBenderProfile> asyncJoin(UUID uuid) {
+  protected CompletableFuture<BenderProfile> asyncJoin(UUID uuid) {
     long startTime = System.currentTimeMillis();
     return profileCache.get(uuid).orTimeout(1000, TimeUnit.MILLISECONDS).thenApply(profile -> {
       long deltaTime = System.currentTimeMillis() - startTime;
@@ -78,16 +80,12 @@ public abstract class AbstractConnectionListener {
     });
   }
 
-  protected void syncJoin(UUID uuid, String name, Supplier<Player> playerSupplier) {
-    PlayerBenderProfile profile = profileCache.synchronous().get(uuid);
-    if (profile != null) {
-      User user = User.create(game(), playerSupplier.get(), profile).orElse(null);
-      if (user != null) {
-        Registries.BENDERS.register(user);
-        game().abilityManager(user.worldKey()).createPassives(user);
-      }
-    } else {
-      logger.error("Could not create bending profile for: %s (%s)".formatted(uuid, name));
+  protected void syncJoin(UUID uuid, Supplier<Player> playerSupplier) {
+    BenderProfile profile = profileCache.synchronous().get(uuid);
+    User user = User.create(game(), playerSupplier.get(), profile).orElse(null);
+    if (user != null) {
+      Registries.BENDERS.register(user);
+      game().abilityManager(user.worldKey()).createPassives(user);
     }
   }
 

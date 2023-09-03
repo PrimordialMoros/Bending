@@ -30,7 +30,6 @@ import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
-import me.moros.bending.api.user.BendingPlayer;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.command.CommandPermissions;
 import me.moros.bending.common.command.CommandUtil;
@@ -86,8 +85,8 @@ public record ElementCommand<C extends Audience>(Commander<C> commander) impleme
     );
   }
 
-  private void onElementChooseGUI(BendingPlayer player) {
-    Platform.instance().factory().buildMenu(this, player).ifPresent(g -> g.show(player));
+  private void onElementChooseGUI(User user) {
+    Platform.instance().factory().buildMenu(this, user).ifPresent(g -> g.show((Player) user));
   }
 
   @Override

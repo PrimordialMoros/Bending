@@ -19,77 +19,125 @@
 
 package me.moros.bending.common.storage;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.LongAdder;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
-import me.moros.bending.api.ability.preset.Preset;
 import me.moros.bending.api.storage.BendingStorage;
 import me.moros.bending.api.user.profile.BenderProfile;
-import me.moros.bending.api.user.profile.Identifiable;
-import me.moros.bending.api.user.profile.PlayerBenderProfile;
 import me.moros.bending.api.util.Tasker;
 import me.moros.bending.common.logging.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.PolyNull;
 
 abstract class AbstractStorage implements BendingStorage {
   protected final Logger logger;
+  private final Executor executor;
 
   protected AbstractStorage(Logger logger) {
     this.logger = logger;
+    this.executor = Tasker.async(); // TODO replace with loom in JDK 21
+  }
+
+  private <R> CompletableFuture<R> async(Supplier<R> supplier) {
+    return CompletableFuture.supplyAsync(supplier, executor);
+  }
+
+  private CompletableFuture<Void> async(Runnable runnable) {
+    return CompletableFuture.runAsync(runnable, executor);
   }
 
   @Override
-  public PlayerBenderProfile loadOrCreateProfile(UUID uuid) {
-    PlayerBenderProfile profile = loadProfile(uuid);
-    if (profile == null) {
-      return BenderProfile.of(createNewProfileId(uuid), uuid, true);
+  public final CompletableFuture<Set<UUID>> loadUuidsAsync() {
+    return async(this::loadUuids).exceptionally(logError(Set.of()));
+  }
+
+  @Override
+  public final CompletableFuture<@Nullable BenderProfile> loadProfileAsync(UUID uuid) {
+    return async(() -> loadProfile(uuid)).exceptionally(logError(null));
+  }
+
+  @Override
+  public final Map<UUID, BenderProfile> loadProfiles(Set<UUID> uuids) {
+    Map<UUID, BenderProfile> results = new HashMap<>(uuids.size());
+    for (UUID uuid : uuids) {
+      results.computeIfAbsent(uuid, this::loadProfile);
     }
-    return profile;
+    return results;
   }
 
   @Override
-  public CompletableFuture<@Nullable PlayerBenderProfile> loadProfileAsync(UUID uuid) {
-    return Tasker.async().submit(() -> loadProfile(uuid)).exceptionally(this::logError);
-  }
-
-  @Override
-  public void saveProfilesAsync(Iterable<PlayerBenderProfile> profiles) {
-    Tasker.async().submit(() -> profiles.forEach(this::saveProfile)).exceptionally(this::logError);
-  }
-
-  @Override
-  public CompletableFuture<Integer> savePresetAsync(Identifiable user, Preset preset) {
-    if (preset.id() > 0 || preset.name().isEmpty()) {
-      return CompletableFuture.completedFuture(0);
+  public final CompletableFuture<Map<UUID, BenderProfile>> loadProfilesAsync(Set<UUID> uuids, LongAdder progressCounter) {
+    final int size = uuids.size();
+    Map<UUID, BenderProfile> results = new ConcurrentHashMap<>(size);
+    CompletableFuture<?>[] futures = new CompletableFuture[size];
+    AtomicInteger counter = new AtomicInteger();
+    for (UUID uuid : uuids) {
+      futures[counter.getAndIncrement()] = async(() -> {
+        results.computeIfAbsent(uuid, this::loadProfile);
+        progressCounter.increment();
+      });
     }
-    return Tasker.async().submit(() -> savePreset(user, preset)).exceptionally(this::logError0);
+    return CompletableFuture.allOf(futures).handle((ignore, t) -> {
+      if (t != null) {
+        logger.warn(t.getMessage(), t);
+      }
+      return results;
+    });
   }
 
   @Override
-  public void deletePresetAsync(Identifiable user, Preset preset) {
-    if (preset.id() <= 0) {
-      return;
+  public final CompletableFuture<Boolean> saveProfileAsync(BenderProfile profile) {
+    return async(() -> saveProfile(profile)).exceptionally(logError(false));
+  }
+
+  @Override
+  public final boolean saveProfiles(Collection<BenderProfile> profiles) {
+    boolean result = false;
+    for (var profile : profiles) {
+      result |= saveProfile(profile);
     }
-    Tasker.async().submit(() -> deletePreset(user, preset)).exceptionally(this::logError);
+    return result;
   }
 
-  protected abstract int createNewProfileId(UUID uuid);
-
-  protected abstract @Nullable PlayerBenderProfile loadProfile(UUID uuid);
-
-  protected abstract void saveProfile(PlayerBenderProfile profile);
-
-  protected abstract int savePreset(Identifiable user, Preset preset);
-
-  protected abstract void deletePreset(Identifiable user, Preset preset);
-
-  protected <R> @Nullable R logError(Throwable t) {
-    logger.error(t.getMessage(), t);
-    return null;
+  @Override
+  public final CompletableFuture<Boolean> saveProfilesAsync(Collection<BenderProfile> profiles, LongAdder progressCounter) {
+    final int size = profiles.size();
+    CompletableFuture<?>[] futures = new CompletableFuture[size];
+    AtomicInteger counter = new AtomicInteger();
+    LongAdder successful = new LongAdder();
+    for (var profile : profiles) {
+      futures[counter.getAndIncrement()] = async(() -> {
+        if (saveProfile(profile)) {
+          successful.increment();
+        }
+        progressCounter.increment();
+      });
+    }
+    if (futures.length == 0) {
+      return CompletableFuture.completedFuture(false);
+    }
+    return CompletableFuture.allOf(futures).handle((ignore, t) -> {
+      if (t != null) {
+        logger.warn(t.getMessage(), t);
+      }
+      return successful.intValue() == size;
+    });
   }
 
-  protected Integer logError0(Throwable t) {
-    logger.error(t.getMessage(), t);
-    return 0;
+  private <R> Function<Throwable, @PolyNull R> logError(@PolyNull R def) {
+    return t -> {
+      logger.error(t.getMessage(), t);
+      return def;
+    };
   }
 }

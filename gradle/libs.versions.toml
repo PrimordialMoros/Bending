@@ -1,6 +1,6 @@
 [versions]
 math = "2.0.0"
-tasker = "1.0.0"
+tasker = "1.0.1"
 adventure = "4.14.0"
 adventure-fabric = "5.9.0"
 configurate = "4.1.2"
@@ -15,6 +15,8 @@ fabric-loom = "1.3.9"
 fabric-api = "0.87.0+1.20.1"
 fabric-loader = "0.14.22"
 shadow = "8.1.1"
+flyway = "9.22.0"
+junit = "5.10.0"
 
 [libraries]
 storage = { module = "me.moros:storage", version = "3.2.0" }
@@ -33,7 +35,12 @@ caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.8
 guava = { module = "com.google.guava:guava", version = "32.1.2-jre" }
 jdbi = { module = "org.jdbi:jdbi3-core", version = "3.41.0" }
 hikari = { module = "com.zaxxer:HikariCP", version = "5.0.1" }
+flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
+flyway-mysql = { module = "org.flywaydb:flyway-mysql", version.ref = "flyway" }
 eventbus = { module = "net.kyori:event-api", version = "5.0.0-SNAPSHOT" }
+
+junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
+junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
 
 adventure-api = { module = "net.kyori:adventure-api", version.ref = "adventure" }
 adventure-minimessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "adventure" }
@@ -60,7 +67,6 @@ cloud-sponge = { module = "cloud.commandframework:cloud-sponge", version.ref = "
 mysql = { module = "com.mysql:mysql-connector-j", version = "8.1.0" }
 mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.1.4" }
 postgresql = { module = "org.postgresql:postgresql", version = "42.6.0" }
-sqlite = { module = "org.xerial:sqlite-jdbc", version = "3.42.0.0" }
 h2 = { module = "com.h2database:h2", version = "2.2.220" }
 hsql = { module = "org.hsqldb:hsqldb", version = "2.7.2" }
 
@@ -95,14 +101,16 @@ checker = { module = "org.checkerframework:checkerframework-gradle-plugin", vers
 [bundles]
 cloud = ["cloud-core", "cloud-minecraft"]
 configurate = ["configurate-core", "configurate-hocon", "configurate-gson"]
-drivers-local = ["sqlite", "h2", "hsql"]
+drivers-local = ["h2", "hsql"]
 drivers-remote = ["mysql", "mariadb", "postgresql"]
 drivers-nonstandard = ["mariadb", "postgresql", "h2", "hsql"]
+flyway = ["flyway-core", "flyway-mysql"]
+junit = ["junit-api", "junit-engine"]
 
 [plugins]
 jmh = { id = "me.champeau.jmh", version = "0.7.1" }
 fabric-loom = { id = "fabric-loom", version.ref = "fabric-loom" }
 userdev = { id = "io.papermc.paperweight.userdev", version = "1.5.5" }
 sponge = { id = "org.spongepowered.gradle.plugin", version = "2.1.1" }
-hangar = { id = "io.papermc.hangar-publish-plugin", version = "0.0.5" }
+hangar = { id = "io.papermc.hangar-publish-plugin", version = "0.1.0" }
 run-paper = { id = "xyz.jpenilla.run-paper", version = "2.1.0" }

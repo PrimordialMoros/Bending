@@ -21,7 +21,6 @@ package me.moros.bending.api.temporal;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -65,7 +64,7 @@ public final class ActionLimiter extends Temporary {
   private ActionLimiter(LivingEntity entity, Collection<ActionType> limitedActions, int ticks) {
     this.uuid = entity.uuid();
     this.entity = entity;
-    this.limitedActions = Collections.unmodifiableSet(EnumSet.copyOf(limitedActions));
+    this.limitedActions = EnumSet.copyOf(limitedActions);
     hadAI = entity.ai();
     if (entity instanceof Player player) {
       if (ticks > 2) {

@@ -246,8 +246,7 @@ public class FireWall extends AbilityInstance {
     }
 
     if (!cachedEntities.contains(entity)) {
-      User entityUser = Registries.BENDERS.get(entity.uuid());
-      if (entityUser == null || HeatControl.canBurn(entityUser)) {
+      if (Registries.BENDERS.getIfExists(entity.uuid()).map(HeatControl::canBurn).orElse(true)) {
         BendingEffect.FIRE_TICK.apply(user, entity);
         if (!damagedEntities.contains(entity)) {
           damagedEntities.add(entity);

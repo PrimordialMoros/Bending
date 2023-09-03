@@ -41,7 +41,7 @@ import me.moros.bending.api.temporal.TempDisplayEntity;
 import me.moros.bending.api.temporal.TempEntity;
 import me.moros.bending.api.temporal.TempLight;
 import me.moros.bending.api.temporal.TemporalManager;
-import me.moros.bending.api.user.BendingPlayer;
+import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.BendingEffect;
 import me.moros.bending.api.util.Tasker;
 import me.moros.bending.api.util.TextUtil;
@@ -53,35 +53,36 @@ public final class GameImpl implements Game {
   private final Bending plugin;
   private final ConfigProcessor configProcessor;
   private final EventBus eventBus;
-  private final BendingStorage storage;
-
   private final FlightManager flightManager;
   private final WorldManager worldManager;
-
   private final ActivationController activationController;
-
   private final Collection<TemporalManager<?, ?>> temporal;
+  private final BendingStorage storage;
 
   public GameImpl(Bending plugin) {
     this.plugin = plugin;
     this.configProcessor = plugin.configManager().processor();
     this.eventBus = new EventBusImpl();
-    this.storage = new StorageFactory(plugin).createInstance();
-
-    flightManager = new FlightManagerImpl();
-    worldManager = new WorldManagerImpl(plugin.logger());
-
-    activationController = new ActivationControllerImpl();
-    temporal = initTemporary();
+    this.flightManager = new FlightManagerImpl();
+    this.worldManager = new WorldManagerImpl(plugin.logger());
+    this.activationController = new ActivationControllerImpl();
+    this.temporal = List.of(Cooldown.MANAGER, TempLight.MANAGER, TempEntity.MANAGER, TempDisplayEntity.MANAGER,
+      ActionLimiter.MANAGER, TempArmor.MANAGER, TempBlock.MANAGER);
 
     lockRegistries();
+    this.storage = new StorageFactory(plugin).createInstance();
     plugin.configManager().save();
-    storage.init();
 
     Tasker.sync().repeat(this::update, 1);
     Tasker.sync().repeat(BendingEffect::cleanup, 5);
 
     printInfo();
+  }
+
+  private void lockRegistries() {
+    var keys = Registries.keys().toList();
+    eventBus.postRegistryLockEvent(keys);
+    keys.stream().map(Registries::get).forEach(Registry::lock);
   }
 
   private void printInfo() {
@@ -92,12 +93,6 @@ public final class GameImpl implements Game {
     plugin.logger().info("Found %d registered collisions!".formatted(collisionAmount));
     plugin.logger().info("Registered protection plugins: " + TextUtil.collect(Registries.PROTECTIONS));
     plugin.logger().info("Registered translations: " + TextUtil.collect(plugin.translationManager(), Locale::getLanguage));
-  }
-
-  private void lockRegistries() {
-    var keys = Registries.keys().toList();
-    eventBus.postRegistryLockEvent(keys);
-    keys.stream().map(Registries::get).forEach(Registry::lock);
   }
 
   private void update() {
@@ -122,12 +117,8 @@ public final class GameImpl implements Game {
     worldManager.forEach(AbilityManager::destroyAllInstances);
     flightManager.removeAll();
     temporal.forEach(TemporalManager::removeAll);
-    storage.saveProfilesAsync(Registries.BENDERS.players().map(BendingPlayer::toProfile).toList());
-  }
-
-  private Collection<TemporalManager<?, ?>> initTemporary() {
-    return List.of(Cooldown.MANAGER, TempLight.MANAGER, TempEntity.MANAGER, TempDisplayEntity.MANAGER,
-      ActionLimiter.MANAGER, TempArmor.MANAGER, TempBlock.MANAGER);
+    var profiles = Registries.BENDERS.players().map(User::toProfile).toList();
+    storage.saveProfilesAsync(profiles);
   }
 
   @Override

@@ -30,9 +30,11 @@ import cloud.commandframework.meta.CommandMeta;
 import cloud.commandframework.minecraft.extras.AudienceProvider;
 import cloud.commandframework.minecraft.extras.MinecraftExceptionHandler;
 import me.moros.bending.api.locale.Message;
+import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.registry.Registries;
-import me.moros.bending.api.user.BendingPlayer;
+import me.moros.bending.api.user.User;
 import me.moros.bending.common.Bending;
+import me.moros.bending.common.command.commands.BackupCommand;
 import me.moros.bending.common.command.commands.BindCommand;
 import me.moros.bending.common.command.commands.BoardCommand;
 import me.moros.bending.common.command.commands.ElementCommand;
@@ -53,7 +55,7 @@ record CommanderImpl<C extends Audience>(CommandManager<C> manager, Class<? exte
     registerExceptionHandler();
     manager().registerCommandPreProcessor(this::preprocessor);
     Collection<Function<Commander<C>, Initializer>> cmds = List.of(
-      HelpCommand::new, VersionCommand::new, ReloadCommand::new,
+      HelpCommand::new, VersionCommand::new, ReloadCommand::new, BackupCommand::new,
       BoardCommand::new, ToggleCommand::new,
       BindCommand::new, ElementCommand::new,
       ModifierCommand::new, PresetCommand::new
@@ -79,8 +81,9 @@ record CommanderImpl<C extends Audience>(CommandManager<C> manager, Class<? exte
 
   private void preprocessor(CommandPreprocessingContext<C> context) {
     context.getCommandContext().getSender().get(Identity.UUID).ifPresent(uuid -> {
-      if (Registries.BENDERS.get(uuid) instanceof BendingPlayer bendingPlayer) {
-        context.getCommandContext().store(ContextKeys.BENDING_PLAYER, bendingPlayer);
+      User user = Registries.BENDERS.get(uuid);
+      if (user instanceof Player) {
+        context.getCommandContext().store(ContextKeys.BENDING_PLAYER, user);
       }
     });
   }

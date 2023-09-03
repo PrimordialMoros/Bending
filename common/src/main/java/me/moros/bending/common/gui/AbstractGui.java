@@ -37,11 +37,14 @@ import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
-import me.moros.bending.api.user.BendingPlayer;
+import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.TextUtil;
 import me.moros.bending.api.util.functional.Suppliers;
 import me.moros.bending.common.command.CommandPermissions;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.permission.PermissionChecker;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -56,14 +59,14 @@ public abstract class AbstractGui<E, T> implements ElementGui {
   );
 
   private final Map<Element, E> map;
-  private final BendingPlayer user;
   private final ElementHandler handler;
+  private final Player player;
   private final T gui;
 
-  protected AbstractGui(ElementHandler handler, BendingPlayer user) {
+  protected AbstractGui(ElementHandler handler, Player player) {
     this.map = new EnumMap<>(Element.class);
     this.handler = handler;
-    this.user = user;
+    this.player = player;
     this.gui = construct(map);
   }
 
@@ -71,23 +74,24 @@ public abstract class AbstractGui<E, T> implements ElementGui {
     return gui;
   }
 
-  protected BendingPlayer user() {
-    return user;
+  protected Player player() {
+    return player;
   }
 
   protected abstract T construct(Map<Element, E> elementMap);
 
   protected DataWrapper createElementButton(Element element) {
-    Component itemName = GlobalTranslator.render(element.displayName(), user.locale())
+    Component itemName = GlobalTranslator.render(element.displayName(), player.locale())
       .decoration(TextDecoration.ITALIC, false);
-    List<Component> lore = generateLore(user.locale(), element);
+    List<Component> lore = generateLore(player.locale(), element);
     var item = Platform.instance().factory().itemBuilder(mapElement(element))
       .name(itemName).lore(lore).build();
     return new DataWrapper(element, item);
   }
 
   protected TriState handleAction(ActionType action, DataWrapper meta) {
-    if (action.executeCommand(handler, user, meta.element())) {
+    User user = Registries.BENDERS.get(player.uuid());
+    if (user != null && action.executeCommand(handler, user, meta.element())) {
       if (action.keepOpen()) {
         handleItemStackGlow(map.get(meta.element()), user.hasElement(meta.element()));
         return TriState.TRUE;
@@ -118,9 +122,9 @@ public abstract class AbstractGui<E, T> implements ElementGui {
   }
 
   protected ItemSnapshot generateHelpItem() {
-    Component itemName = GlobalTranslator.render(Message.ELEMENTS_GUI_HELP_TITLE.build(), user.locale())
+    Component itemName = GlobalTranslator.render(Message.ELEMENTS_GUI_HELP_TITLE.build(), player.locale())
       .decoration(TextDecoration.ITALIC, false);
-    List<Component> lore = ActionType.VALUES.stream().map(type -> type.toEntry(user)).toList();
+    List<Component> lore = ActionType.VALUES.stream().map(type -> type.toEntry(player)).toList();
     return Platform.instance().factory().itemBuilder(Item.BOOK)
       .name(itemName).lore(lore).build();
   }
@@ -178,10 +182,12 @@ public abstract class AbstractGui<E, T> implements ElementGui {
       return true;
     }
 
-    private Component toEntry(Player player) {
-      return GlobalTranslator.render(message.build(), player.locale())
+    private Component toEntry(Audience audience) {
+      boolean strikethrough = audience.get(PermissionChecker.POINTER)
+        .map(checker -> !checker.test(permission)).orElse(false);
+      return GlobalTranslator.render(message.build(), audience.getOrDefault(Identity.LOCALE, Message.DEFAULT_LOCALE))
         .decoration(TextDecoration.ITALIC, false)
-        .decoration(TextDecoration.STRIKETHROUGH, !player.hasPermission(permission));
+        .decoration(TextDecoration.STRIKETHROUGH, strikethrough);
     }
 
     private static final Collection<ActionType> VALUES = List.of(values());

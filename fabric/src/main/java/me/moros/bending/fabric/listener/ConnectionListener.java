@@ -58,7 +58,7 @@ public final class ConnectionListener extends AbstractConnectionListener impleme
 
   private void onPlayerJoin(ServerGamePacketListenerImpl handler, PacketSender sender, MinecraftServer server) {
     ServerPlayer player = handler.getPlayer();
-    syncJoin(player.getUUID(), player.getGameProfile().getName(), () -> new FabricPlayer(player));
+    syncJoin(player.getUUID(), () -> new FabricPlayer(player));
   }
 
   private void onPlayerLogout(ServerGamePacketListenerImpl handler, MinecraftServer server) {

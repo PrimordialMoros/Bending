@@ -28,10 +28,12 @@ import me.moros.bending.api.gui.ElementGui;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.PlatformFactory;
 import me.moros.bending.api.platform.PlatformType;
+import me.moros.bending.api.platform.entity.DelegatePlayer;
+import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemBuilder;
 import me.moros.bending.api.platform.item.ItemSnapshot;
-import me.moros.bending.api.user.BendingPlayer;
+import me.moros.bending.api.user.User;
 import me.moros.bending.fabric.adapter.NativeAdapterImpl;
 import me.moros.bending.fabric.gui.BoardImpl;
 import me.moros.bending.fabric.gui.ElementMenu;
@@ -69,13 +71,19 @@ public class FabricPlatform implements Platform, PlatformFactory {
   }
 
   @Override
-  public Optional<Board> buildBoard(BendingPlayer player) {
-    return Optional.of(new BoardImpl(player));
+  public Optional<Board> buildBoard(User user) {
+    if (user instanceof DelegatePlayer player) {
+      return Optional.of(new BoardImpl(player));
+    }
+    return Optional.empty();
   }
 
   @Override
-  public Optional<ElementGui> buildMenu(ElementHandler handler, BendingPlayer player) {
-    return Optional.of(ElementMenu.createMenu(handler, player));
+  public Optional<ElementGui> buildMenu(ElementHandler handler, User user) {
+    if (user instanceof Player player) {
+      return Optional.of(ElementMenu.createMenu(handler, player));
+    }
+    return Optional.empty();
   }
 
   @Override

@@ -129,6 +129,7 @@ public final class TempBlock extends Temporary {
     return false;
   }
 
+  @Override
   public int repeat() {
     return repeat;
   }

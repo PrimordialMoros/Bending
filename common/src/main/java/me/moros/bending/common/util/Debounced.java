@@ -21,22 +21,24 @@ package me.moros.bending.common.util;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
+import me.moros.bending.api.util.Tasker;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public final class Debouncer<R> {
+public final class Debounced<R> {
   private final Supplier<R> supplier;
-  private final Executor executor;
+  private final long delay;
+  private final TimeUnit timeUnit;
   private final CompletableFuture<R> future;
   private final AtomicReference<CompletableFuture<R>> taskRef;
 
-  private Debouncer(Supplier<R> supplier, Executor executor) {
+  private Debounced(Supplier<R> supplier, long delay, TimeUnit timeUnit) {
     this.supplier = supplier;
-    this.executor = executor;
+    this.delay = delay;
+    this.timeUnit = timeUnit;
     this.future = new CompletableFuture<>();
     this.taskRef = new AtomicReference<>();
   }
@@ -54,17 +56,17 @@ public final class Debouncer<R> {
     if (taskFuture != null) {
       taskFuture.cancel(false);
     }
-    CompletableFuture<R> newFuture = CompletableFuture.supplyAsync(supplier, executor);
+    CompletableFuture<R> newFuture = Tasker.async().submit(supplier, delay, timeUnit);
     newFuture.thenAccept(future::complete);
     return newFuture;
   }
 
-  public static <R> Debouncer<R> create(Supplier<R> supplier, long delay, TimeUnit timeUnit) {
+  public static <R> Debounced<R> create(Supplier<R> supplier, long delay, TimeUnit timeUnit) {
     Objects.requireNonNull(supplier);
-    return new Debouncer<>(supplier, CompletableFuture.delayedExecutor(delay, timeUnit));
+    return new Debounced<>(supplier, delay, timeUnit);
   }
 
-  public static Debouncer<?> create(Runnable runnable, long delay, TimeUnit timeUnit) {
+  public static Debounced<?> create(Runnable runnable, long delay, TimeUnit timeUnit) {
     Objects.requireNonNull(runnable);
     return create(() -> {
       runnable.run();

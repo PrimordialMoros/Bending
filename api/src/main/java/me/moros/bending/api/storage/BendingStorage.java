@@ -19,64 +19,98 @@
 
 package me.moros.bending.api.storage;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.LongAdder;
 
-import me.moros.bending.api.ability.preset.Preset;
-import me.moros.bending.api.user.profile.Identifiable;
-import me.moros.bending.api.user.profile.PlayerBenderProfile;
+import me.moros.bending.api.user.profile.BenderProfile;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Handles all Storage tasks and their concurrency.
  */
 public interface BendingStorage {
-  void init();
-
-  void close();
-
   /**
-   * Tries to load the bender profile for the user identified by the given uuid.
-   * If the data doesn't exist, it will create a new profile.
-   * @param uuid the player's uuid
-   * @return the player's bender profile
+   * Load all stored uuids.
+   * @return a set of all stored uuids
    */
-  PlayerBenderProfile loadOrCreateProfile(UUID uuid);
+  Set<UUID> loadUuids();
 
   /**
-   * This method will attempt to load a profile from storage.
-   * @param uuid the player's uuid
-   * @see #loadOrCreateProfile(UUID)
+   * Asynchronously load all stored uuids.
+   * @return a future with a set of all stored uuids
    */
-  CompletableFuture<@Nullable PlayerBenderProfile> loadProfileAsync(UUID uuid);
+  CompletableFuture<Set<UUID>> loadUuidsAsync();
 
   /**
-   * Asynchronously saves the given profile's data to storage.
-   * It updates the stored profile and saves the current elements and bound abilities.
+   * Attempt to load a stored profile.
+   * @param uuid the user's uuid
+   * @return the stored profile or null if not found
+   */
+  @Nullable BenderProfile loadProfile(UUID uuid);
+
+  /**
+   * Asynchronously attempt to load a stored profile.
+   * @param uuid the user's uuid
+   * @return a future with the stored profile
+   */
+  CompletableFuture<@Nullable BenderProfile> loadProfileAsync(UUID uuid);
+
+  /**
+   * Bulk version of {@link #loadProfile(UUID)}.
+   * @param uuids the users' uuids
+   * @return a map with all matching stored profiles, will not include null values
+   */
+  Map<UUID, BenderProfile> loadProfiles(Set<UUID> uuids);
+
+  /**
+   * Bulk version of {@link #loadProfileAsync(UUID)}.
+   * @param uuids the users' uuids
+   * @param progressCounter a counter that will be incremented for every processed profile
+   * @return a future with the result
+   */
+  CompletableFuture<Map<UUID, BenderProfile>> loadProfilesAsync(Set<UUID> uuids, LongAdder progressCounter);
+
+  /**
+   * Save the given profile.
    * @param profile the profile to save
+   * @return true if the profile was successfully saved, false otherwise
    */
-  default void saveProfileAsync(PlayerBenderProfile profile) {
-    saveProfilesAsync(List.of(profile));
+  boolean saveProfile(BenderProfile profile);
+
+  /**
+   * Asynchronously save the given profile.
+   * @param profile the profile to save
+   * @return a future with the result
+   */
+  CompletableFuture<Boolean> saveProfileAsync(BenderProfile profile);
+
+  /**
+   * Bulk version of {@link #saveProfile(BenderProfile)}.
+   * @param profiles the profiles to save
+   * @return true if all profiles were successfully saved, false otherwise
+   */
+  boolean saveProfiles(Collection<BenderProfile> profiles);
+
+  /**
+   * Bulk version of {@link #saveProfileAsync(BenderProfile)}.
+   * @param profiles the profiles to save
+   * @return a future with the result
+   */
+  default CompletableFuture<Boolean> saveProfilesAsync(Collection<BenderProfile> profiles) {
+    return saveProfilesAsync(profiles, new LongAdder());
   }
 
   /**
-   * Bulk version of {@link #saveProfileAsync}
+   * Bulk version of {@link #saveProfileAsync(BenderProfile)}.
    * @param profiles the profiles to save
+   * @param progressCounter a counter that will be incremented for every processed profile
+   * @return a future with the result
    */
-  void saveProfilesAsync(Iterable<PlayerBenderProfile> profiles);
+  CompletableFuture<Boolean> saveProfilesAsync(Collection<BenderProfile> profiles, LongAdder progressCounter);
 
-  /**
-   * Asynchronously saves the given player's preset to storage.
-   * @param user the preset owner
-   * @param preset the preset to save
-   */
-  CompletableFuture<Integer> savePresetAsync(Identifiable user, Preset preset);
-
-  /**
-   * Asynchronously deletes the specified preset.
-   * @param user the preset owner
-   * @param preset the preset to delete
-   */
-  void deletePresetAsync(Identifiable user, Preset preset);
+  void close();
 }

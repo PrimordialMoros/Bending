@@ -30,7 +30,7 @@ import cloud.commandframework.arguments.parser.ArgumentParser;
 import cloud.commandframework.context.CommandContext;
 import cloud.commandframework.exceptions.parsing.NoInputProvidedException;
 import me.moros.bending.api.ability.preset.Preset;
-import me.moros.bending.api.user.BendingPlayer;
+import me.moros.bending.api.user.User;
 import me.moros.bending.common.command.ContextKeys;
 import net.kyori.adventure.audience.Audience;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -94,7 +94,7 @@ public final class PresetArgument<C extends Audience> extends CommandArgument<C,
 
     @Override
     public List<String> suggestions(CommandContext<C> commandContext, String input) {
-      return commandContext.getOptional(ContextKeys.BENDING_PLAYER).map(BendingPlayer::presets)
+      return commandContext.getOptional(ContextKeys.BENDING_PLAYER).map(User::presets)
         .map(p -> p.stream().map(Preset::name).toList()).orElseGet(List::of);
     }
   }

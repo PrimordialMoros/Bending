@@ -19,13 +19,6 @@
 
 package me.moros.bending.common.storage.file.serializer;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
@@ -42,25 +35,5 @@ public abstract class AbstractSerializer<T> implements TypeSerializer<T> {
       throw new SerializationException("Required field " + path + " was not present in node");
     }
     return node;
-  }
-
-  public static <E, R> List<@Nullable R> mapToList(Map<Integer, E> input, Function<E, @Nullable R> mapper, int maxIndex) {
-    List<R> output = new ArrayList<>(maxIndex);
-    for (int i = 0; i < maxIndex; i++) {
-      var current = input.get(i + 1);
-      output.add(current == null ? null : mapper.apply(current));
-    }
-    return output;
-  }
-
-  public static <E, R> Map<Integer, R> listToMap(List<@Nullable E> input, Function<@NonNull E, R> mapper, int maxIndex) {
-    Map<Integer, R> output = new LinkedHashMap<>(maxIndex);
-    for (int i = 0; i < Math.min(input.size(), maxIndex); i++) {
-      var current = input.get(i);
-      if (current != null) {
-        output.put(i + 1, mapper.apply(current));
-      }
-    }
-    return output;
   }
 }

@@ -20,11 +20,10 @@
 package me.moros.bending.common.storage.file.loader;
 
 import org.spongepowered.configurate.gson.GsonConfigurationLoader;
-import org.spongepowered.configurate.loader.AbstractConfigurationLoader.Builder;
 
-public class JsonLoader implements Loader<GsonConfigurationLoader> {
+public final class JsonLoader implements Loader<GsonConfigurationLoader.Builder> {
   @Override
-  public Builder<?, GsonConfigurationLoader> loaderBuilder() {
+  public GsonConfigurationLoader.Builder loaderBuilder() {
     return GsonConfigurationLoader.builder();
   }
 }

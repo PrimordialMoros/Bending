@@ -168,7 +168,7 @@ public class PlayerScoreboard extends Scoreboard implements PlayerBoard {
   public List<Packet<?>> getStartTrackingPackets(Objective objective) {
     ArrayList<Packet<?>> list = Lists.newArrayList();
     list.add(new ClientboundSetObjectivePacket(objective, 0));
-    for (int i = 0; i < 19; ++i) {
+    for (int i = 0; i < 19; i++) {
       if (this.getDisplayObjective(i) != objective) continue;
       list.add(new ClientboundSetDisplayObjectivePacket(i, objective));
     }
@@ -186,7 +186,7 @@ public class PlayerScoreboard extends Scoreboard implements PlayerBoard {
   public List<Packet<?>> getStopTrackingPackets(Objective objective) {
     ArrayList<Packet<?>> list = Lists.newArrayList();
     list.add(new ClientboundSetObjectivePacket(objective, 1));
-    for (int i = 0; i < 19; ++i) {
+    for (int i = 0; i < 19; i++) {
       if (this.getDisplayObjective(i) != objective) continue;
       list.add(new ClientboundSetDisplayObjectivePacket(i, objective));
     }
@@ -200,7 +200,7 @@ public class PlayerScoreboard extends Scoreboard implements PlayerBoard {
 
   public int getObjectiveDisplaySlotCount(Objective objective) {
     int i = 0;
-    for (int j = 0; j < 19; ++j) {
+    for (int j = 0; j < 19; j++) {
       if (this.getDisplayObjective(j) != objective) continue;
       ++i;
     }

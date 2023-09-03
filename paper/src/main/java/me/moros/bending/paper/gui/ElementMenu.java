@@ -32,7 +32,8 @@ import me.moros.bending.api.ability.element.ElementHandler;
 import me.moros.bending.api.gui.ElementGui;
 import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.platform.entity.player.Player;
-import me.moros.bending.api.user.BendingPlayer;
+import me.moros.bending.api.registry.Registries;
+import me.moros.bending.api.user.User;
 import me.moros.bending.common.gui.AbstractGui;
 import me.moros.bending.paper.platform.PlatformAdapter;
 import net.kyori.adventure.util.TriState;
@@ -41,8 +42,8 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
 public final class ElementMenu extends AbstractGui<ItemStack, ChestGui> {
-  private ElementMenu(ElementHandler handler, BendingPlayer user) {
-    super(handler, user);
+  private ElementMenu(ElementHandler handler, Player player) {
+    super(handler, player);
   }
 
   @Override
@@ -55,10 +56,11 @@ public final class ElementMenu extends AbstractGui<ItemStack, ChestGui> {
     gui.addPane(background);
     OutlinePane elementsPane = new OutlinePane(1, 1, 7, 1);
     elementsPane.setGap(1);
+    User user = Registries.BENDERS.getOrThrow(player().uuid());
     for (Element element : Element.VALUES) {
       var data = createElementButton(element);
       var item = PlatformAdapter.toBukkitItem(data.item());
-      handleItemStackGlow(item, user().hasElement(element));
+      handleItemStackGlow(item, user.hasElement(element));
       elementMap.put(element, item);
       elementsPane.addItem(new GuiItem(item, event -> {
         var click = event.getClick();
@@ -90,7 +92,7 @@ public final class ElementMenu extends AbstractGui<ItemStack, ChestGui> {
   }
 
   private void close() {
-    var bukkitPlayer = PlatformAdapter.toBukkitEntity(user());
+    var bukkitPlayer = PlatformAdapter.toBukkitEntity(player());
     bukkitPlayer.closeInventory();
     bukkitPlayer.updateInventory();
   }
@@ -105,7 +107,7 @@ public final class ElementMenu extends AbstractGui<ItemStack, ChestGui> {
     }
   }
 
-  public static ElementGui createMenu(ElementHandler handler, BendingPlayer player) {
+  public static ElementGui createMenu(ElementHandler handler, Player player) {
     return new ElementMenu(handler, player);
   }
 }

@@ -20,7 +20,7 @@
 package me.moros.bending.paper.gui;
 
 import me.moros.bending.api.locale.Message;
-import me.moros.bending.api.user.BendingPlayer;
+import me.moros.bending.api.registry.Registries;
 import me.moros.bending.common.gui.AbstractBoard;
 import me.moros.bending.paper.platform.PlatformAdapter;
 import net.kyori.adventure.text.Component;
@@ -37,9 +37,9 @@ public final class BoardImpl extends AbstractBoard<Team> {
   private final Scoreboard bendingBoard;
   private final Objective bendingSlots;
 
-  public BoardImpl(BendingPlayer user) {
-    super(user);
-    this.bukkitPlayer = PlatformAdapter.toBukkitEntity(user);
+  public BoardImpl(me.moros.bending.api.platform.entity.player.Player player) {
+    super(Registries.BENDERS.getOrThrow(player.uuid()));
+    this.bukkitPlayer = PlatformAdapter.toBukkitEntity(player);
     bendingBoard = bukkitPlayer.getServer().getScoreboardManager().getNewScoreboard();
     bendingSlots = bendingBoard.registerNewObjective("BendingBoard", Criteria.DUMMY, Message.BENDING_BOARD_TITLE.build(), RenderType.INTEGER);
     bendingSlots.setDisplaySlot(DisplaySlot.SIDEBAR);
