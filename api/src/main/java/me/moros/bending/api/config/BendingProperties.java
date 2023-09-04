@@ -120,4 +120,8 @@ public interface BendingProperties {
   default boolean canGenerateLight() {
     return true;
   }
+
+  default boolean lazyLoad() {
+    return false;
+  }
 }

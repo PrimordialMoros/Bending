@@ -19,10 +19,10 @@
 
 package me.moros.bending.common.storage;
 
-import java.nio.ByteBuffer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
@@ -42,11 +42,11 @@ import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.profile.BenderProfile;
 import me.moros.bending.api.util.collect.ElementSet;
 import me.moros.bending.common.logging.Logger;
-import me.moros.bending.common.storage.sql.BinaryUUIDColumnMapper;
 import me.moros.bending.common.storage.sql.PresetAccumulator;
 import me.moros.bending.common.storage.sql.dialect.SqlDialect;
 import me.moros.bending.common.storage.sql.migration.V1__Rename_legacy_tables;
 import me.moros.bending.common.storage.sql.migration.V3__Migrate_from_legacy;
+import me.moros.bending.common.util.UUIDUtil;
 import me.moros.storage.StorageDataSource;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.flywaydb.core.Flyway;
@@ -54,6 +54,7 @@ import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.argument.AbstractArgumentFactory;
 import org.jdbi.v3.core.argument.Argument;
 import org.jdbi.v3.core.config.ConfigRegistry;
+import org.jdbi.v3.core.mapper.ColumnMapper;
 import org.jdbi.v3.core.statement.PreparedBatch;
 import org.jdbi.v3.core.statement.StatementContext;
 
@@ -67,11 +68,12 @@ final class SqlStorage extends AbstractStorage {
   SqlStorage(Logger logger, StorageDataSource dataSource) {
     super(logger);
     this.dataSource = dataSource;
-    this.dialect = SqlDialect.createFor(dataSource);
+    this.dialect = SqlDialect.createFor(logger, dataSource);
     migrateWithFlyway();
     this.DB = Jdbi.create(this.dataSource.source());
     if (!dialect.nativeUuid()) {
-      DB.registerArgument(new UUIDArgumentFactory()).registerColumnMapper(UUID.class, new BinaryUUIDColumnMapper());
+      DB.registerArgument(new UUIDArgumentFactory());
+      DB.registerColumnMapper(UUID.class, new BinaryUUIDColumnMapper());
     }
     this.abilityIndex = createAbilities();
   }
@@ -81,6 +83,7 @@ final class SqlStorage extends AbstractStorage {
       .table("bending_schemahistory").loggers("slf4j").locations("classpath:bending/migrations")
       .javaMigrations(new V1__Rename_legacy_tables(), new V3__Migrate_from_legacy(logger, dialect.nativeUuid()))
       .dataSource(dataSource.source()).validateOnMigrate(true).validateMigrationNaming(true)
+      .baselineOnMigrate(true).baselineVersion("0")
       .placeholders(Map.of(
         "extraTableOptions", dialect.extraTableOptions(),
         "uuidType", dialect.uuidType(),
@@ -133,29 +136,25 @@ final class SqlStorage extends AbstractStorage {
 
   @Override
   public boolean saveProfile(BenderProfile profile) {
-    BenderProfile old = loadProfile(profile.uuid());
-    boolean wasNotStored = old == null;
-    if (wasNotStored) {
-      old = BenderProfile.of(profile.uuid());
-    }
-    if (wasNotStored || old.board() != profile.board()) {
-      saveBoard(profile);
-    }
-    if (!profile.elements().equals(old.elements())) {
-      saveElements(profile);
-    }
-    savePresets(old, profile);
+    saveBoard(profile);
+    saveElements(profile);
+    savePresets(profile);
     return true;
   }
 
   @Override
-  public String toString() {
-    return dataSource.type().toString();
+  public boolean isRemote() {
+    return !dataSource.type().isLocal();
   }
 
   @Override
   public void close() {
     dataSource.source().close();
+  }
+
+  @Override
+  public String toString() {
+    return dataSource.type().toString();
   }
 
   private Set<Element> getElements(UUID uuid) {
@@ -193,49 +192,58 @@ final class SqlStorage extends AbstractStorage {
     });
   }
 
-  private void savePresets(BenderProfile old, BenderProfile profile) {
-    var oldPresets = old.presets().values();
+  private void savePresets(BenderProfile profile) {
+    // Loading the currently stored presets to only save the difference
+    UUID userId = profile.uuid();
+    var oldPresets = getSlotsAndPresets(userId).values();
     var newPresets = profile.presets().values();
 
     Set<Preset> removed = new HashSet<>(oldPresets);
     removed.removeAll(newPresets);
+    removed.remove(profile.slots());
 
     Set<Preset> added = new HashSet<>(newPresets);
+    added.add(profile.slots());
     added.removeAll(oldPresets);
+    added.removeIf(Preset::isEmpty);
 
-    if (!profile.slots().matchesBinds(old.slots())) {
-      removed.add(old.slots());
-      added.add(profile.slots());
-    }
-
-    UUID userId = profile.uuid();
-    removed.forEach(preset -> deletePreset(userId, preset));
-    added.forEach(preset -> savePreset(userId, preset));
+    deletePresets(userId, removed);
+    savePresets(userId, added);
   }
 
-  private void savePreset(UUID userId, Preset preset) {
-    if (preset.isEmpty()) {
+  private void savePresets(UUID userId, Collection<Preset> presets) {
+    if (presets.isEmpty()) {
       return;
     }
     DB.useTransaction(handle -> {
-      UUID presetId = UUID.randomUUID();
-      handle.createUpdate(dialect.INSERT_USER_PRESET_WITH_ID)
-        .bind(0, presetId).bind(1, userId).bind(2, preset.name()).execute();
-      PreparedBatch batch = handle.prepareBatch(dialect.INSERT_USER_PRESET_SLOTS);
-      preset.forEach((desc, idx) -> batch
-        .bind(0, presetId)
-        .bind(1, idx + 1)
-        .bind(2, abilityIndex.get(desc))
-        .add()
-      );
-      batch.execute();
+      PreparedBatch presetBatch = handle.prepareBatch(dialect.INSERT_USER_PRESET_WITH_ID);
+      PreparedBatch presetSlotBatch = handle.prepareBatch(dialect.INSERT_USER_PRESET_SLOTS);
+      for (Preset preset : presets) {
+        UUID presetId = UUID.randomUUID();
+        presetBatch.bind(0, presetId).bind(1, userId).bind(2, preset.name()).add();
+        preset.forEach((desc, idx) -> presetSlotBatch
+          .bind(0, presetId)
+          .bind(1, idx + 1)
+          .bind(2, abilityIndex.get(desc))
+          .add()
+        );
+      }
+      presetBatch.execute();
+      presetSlotBatch.execute();
     });
   }
 
-  private void deletePreset(UUID userId, Preset preset) {
-    DB.useTransaction(handle ->
-      handle.createUpdate(dialect.REMOVE_USER_PRESET).bind(0, userId).bind(1, preset.name()).execute()
-    );
+  private void deletePresets(UUID userId, Collection<Preset> presets) {
+    if (presets.isEmpty()) {
+      return;
+    }
+    DB.useTransaction(handle -> {
+      PreparedBatch batch = handle.prepareBatch(dialect.REMOVE_USER_PRESET);
+      for (Preset preset : presets) {
+        batch.bind(0, userId).bind(1, preset.name()).add();
+      }
+      batch.execute();
+    });
   }
 
   private @Nullable AbilityDescription getAbilityFromId(UUID uuid) {
@@ -259,10 +267,15 @@ final class SqlStorage extends AbstractStorage {
 
     @Override
     protected Argument build(UUID value, ConfigRegistry config) {
-      ByteBuffer buffer = ByteBuffer.wrap(new byte[16]);
-      buffer.putLong(value.getMostSignificantBits());
-      buffer.putLong(value.getLeastSignificantBits());
-      return (position, statement, ctx) -> statement.setBytes(position, buffer.array());
+      return (position, statement, ctx) -> statement.setBytes(position, UUIDUtil.toBytes(value));
+    }
+  }
+
+  private static final class BinaryUUIDColumnMapper implements ColumnMapper<UUID> {
+    @Override
+    public @Nullable UUID map(ResultSet rs, int columnNumber, StatementContext ctx) throws SQLException {
+      byte[] bytes = rs.getBytes(columnNumber);
+      return bytes == null ? null : UUIDUtil.fromBytes(bytes);
     }
   }
 }

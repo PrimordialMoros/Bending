@@ -23,8 +23,10 @@ import java.sql.DatabaseMetaData;
 import java.util.Locale;
 
 import com.zaxxer.hikari.HikariDataSource;
+import me.moros.bending.common.logging.Logger;
 import me.moros.storage.StorageDataSource;
 import me.moros.storage.StorageType;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.flywaydb.core.api.MigrationVersion;
 
 public sealed interface SqlDialect extends SqlQueries permits SqlDialectImpl {
@@ -44,27 +46,36 @@ public sealed interface SqlDialect extends SqlQueries permits SqlDialectImpl {
 
   String insertUser();
 
-  static SqlDialect createFor(StorageDataSource source) {
+  static SqlDialect createFor(Logger logger, StorageDataSource source) {
     StorageType type = source.type();
     if (type == StorageType.SQLITE) {
       throw new IllegalArgumentException();
     }
+    boolean nativeUuidSupport = true;
     if (type == StorageType.MYSQL || type == StorageType.MARIADB) {
-      type = isMariaDb(source.source(), "10.7") ? StorageType.MARIADB : StorageType.MYSQL;
+      MigrationVersion version = mariaDBVersion(source.source());
+      boolean isMariaDB = version != null;
+      if (isMariaDB && type == StorageType.MYSQL) {
+        logger.warn("Connected database is MariaDB but you've specified MySql engine in config!");
+      }
+      if (!(isMariaDB && version.isAtLeast("10.7"))) {
+        logger.warn("You should consider upgrading your database to MariaDB 10.7+");
+        nativeUuidSupport = false;
+      }
     }
-    return new SqlDialectImpl(type);
+    return new SqlDialectImpl(type, nativeUuidSupport);
   }
 
-  private static boolean isMariaDb(HikariDataSource source, String minVersion) {
+  private static @Nullable MigrationVersion mariaDBVersion(HikariDataSource source) {
     try (var conn = source.getConnection()) {
       DatabaseMetaData meta = conn.getMetaData();
       String version = meta.getDatabaseProductVersion();
       if (version.toLowerCase(Locale.ROOT).contains("mariadb")) {
         String rawSemanticVersion = meta.getDatabaseMajorVersion() + "." + meta.getDatabaseMinorVersion();
-        return MigrationVersion.fromVersion(rawSemanticVersion).isAtLeast(minVersion);
+        return MigrationVersion.fromVersion(rawSemanticVersion);
       }
     } catch (Exception ignore) {
     }
-    return false;
+    return null;
   }
 }

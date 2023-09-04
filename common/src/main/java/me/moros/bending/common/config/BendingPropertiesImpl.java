@@ -40,6 +40,7 @@ public final class BendingPropertiesImpl extends Configurable implements Bending
   private double sunModifier = Holder.DEFAULTS.sunModifier();
 
   private boolean generateLight = Holder.DEFAULTS.canGenerateLight();
+  private boolean lazyLoad = Holder.DEFAULTS.lazyLoad();
 
   @Override
   public List<String> path() {
@@ -94,5 +95,10 @@ public final class BendingPropertiesImpl extends Configurable implements Bending
   @Override
   public boolean canGenerateLight() {
     return generateLight;
+  }
+
+  @Override
+  public boolean lazyLoad() {
+    return lazyLoad;
   }
 }

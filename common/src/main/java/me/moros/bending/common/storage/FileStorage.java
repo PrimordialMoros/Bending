@@ -93,6 +93,11 @@ final class FileStorage extends AbstractStorage {
     }, false);
   }
 
+  @Override
+  public boolean isRemote() {
+    return false;
+  }
+
   private <R> R loadDataFile(Path path, IOFunction<ConfigurationReference<?>, R> function, R onException) {
     ReentrantLock lock = locks.get(path);
     lock.lock();

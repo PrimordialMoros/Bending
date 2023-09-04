@@ -100,16 +100,17 @@ public final class ActivationControllerImpl implements ActivationController {
 
   @Override
   public void onUserDeconstruct(User user) {
-    ActionLimiter.MANAGER.get(user.uuid()).ifPresent(ActionLimiter::revert);
-    TempArmor.MANAGER.get(user.uuid()).ifPresent(TempArmor::revert);
+    UUID uuid = user.uuid();
+    ActionLimiter.MANAGER.get(uuid).ifPresent(ActionLimiter::revert);
+    TempArmor.MANAGER.get(uuid).ifPresent(TempArmor::revert);
     user.game().abilityManager(user.worldKey()).destroyUserInstances(user);
     if (user instanceof Player) {
       user.game().storage().saveProfileAsync(user.toProfile());
     }
     user.board().disableScoreboard();
-    user.game().flightManager().remove(user);
-    Registries.BENDERS.invalidateKey(user.uuid());
-    ProtectionCache.INSTANCE.invalidate(user);
+    user.game().flightManager().remove(uuid);
+    Registries.BENDERS.invalidateKey(uuid);
+    ProtectionCache.INSTANCE.invalidate(uuid);
   }
 
   @Override

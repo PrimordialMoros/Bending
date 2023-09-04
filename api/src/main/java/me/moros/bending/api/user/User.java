@@ -21,6 +21,7 @@ package me.moros.bending.api.user;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
 import me.moros.bending.api.ability.AbilityDescription;
@@ -255,26 +256,20 @@ public sealed interface User extends DelegateLivingEntity, ElementUser, Attribut
 
   boolean fromProfile(BenderProfile profile);
 
-  private static <E extends LivingEntity> Optional<User> create(Game game, E entity, BenderProfile profile, UserFactory<E> factory) {
-    if (!Registries.BENDERS.containsKey(entity.uuid())) {
-      User user = factory.create(game, entity);
-      user.fromProfile(profile);
-      return Optional.of(user);
-    }
-    return Optional.empty();
+  static Optional<User> create(Game game, LivingEntity entity, BenderProfile profile) {
+    return create(game, entity, CompletableFuture.completedFuture(profile));
   }
 
-  static Optional<User> create(Game game, LivingEntity entity, BenderProfile profile) {
+  static Optional<User> create(Game game, LivingEntity entity, CompletableFuture<BenderProfile> profileFuture) {
     Objects.requireNonNull(game);
-    Objects.requireNonNull(entity);
-    Objects.requireNonNull(profile);
-    if (!entity.uuid().equals(profile.uuid())) {
-      throw new IllegalStateException("Entity uuid does not match profile uuid!");
+    Objects.requireNonNull(profileFuture);
+    if (!Registries.BENDERS.containsKey(entity.uuid())) {
+      User user = entity instanceof Player player ? new BendingPlayer(game, player) : new BendingUser(game, entity);
+      if (Registries.BENDERS.register(user)) {
+        profileFuture.thenAccept(user::fromProfile);
+        return Optional.of(user);
+      }
     }
-    if (entity instanceof Player player) {
-      return create(game, player, profile, BendingPlayer::new);
-    } else {
-      return create(game, entity, profile, BendingUser::new);
-    }
+    return Optional.empty();
   }
 }

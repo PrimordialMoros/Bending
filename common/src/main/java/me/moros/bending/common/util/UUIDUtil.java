@@ -17,26 +17,24 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.common.storage.sql;
+package me.moros.bending.common.util;
 
 import java.nio.ByteBuffer;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.UUID;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.jdbi.v3.core.mapper.ColumnMapper;
-import org.jdbi.v3.core.statement.StatementContext;
-
-public final class BinaryUUIDColumnMapper implements ColumnMapper<UUID> {
-  @Override
-  public @Nullable UUID map(ResultSet rs, int columnNumber, StatementContext ctx) throws SQLException {
-    byte[] bytes = rs.getBytes(columnNumber);
-    return bytes == null ? null : fromByteArray(bytes);
+public final class UUIDUtil {
+  private UUIDUtil() {
   }
 
-  public static UUID fromByteArray(byte[] array) {
-    ByteBuffer buffer = ByteBuffer.wrap(array);
+  public static byte[] toBytes(UUID uuid) {
+    return ByteBuffer.wrap(new byte[16])
+      .putLong(uuid.getMostSignificantBits())
+      .putLong(uuid.getLeastSignificantBits())
+      .array();
+  }
+
+  public static UUID fromBytes(byte[] array) {
+    final ByteBuffer buffer = ByteBuffer.wrap(array);
     return new UUID(buffer.getLong(), buffer.getLong());
   }
 }

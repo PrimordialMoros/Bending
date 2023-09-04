@@ -19,6 +19,8 @@
 
 package me.moros.bending.api.game;
 
+import java.util.UUID;
+
 import me.moros.bending.api.ability.Updatable;
 import me.moros.bending.api.user.User;
 
@@ -32,7 +34,15 @@ public interface FlightManager extends Updatable {
 
   Flight get(User user);
 
-  void remove(User user);
+  /**
+   * @deprecated use {@link #remove(UUID)}
+   */
+  @Deprecated(forRemoval = true)
+  default void remove(User user) {
+    remove(user.uuid());
+  }
+
+  void remove(UUID uuid);
 
   void removeAll();
 

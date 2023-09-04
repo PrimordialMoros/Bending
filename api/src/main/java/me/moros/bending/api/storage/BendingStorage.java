@@ -112,5 +112,7 @@ public interface BendingStorage {
    */
   CompletableFuture<Boolean> saveProfilesAsync(Collection<BenderProfile> profiles, LongAdder progressCounter);
 
+  boolean isRemote();
+
   void close();
 }

@@ -28,6 +28,7 @@ import java.util.function.Supplier;
 
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import me.moros.bending.api.config.BendingProperties;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.registry.Registries;
@@ -62,38 +63,32 @@ public abstract class AbstractConnectionListener {
     return profile == null ? BenderProfile.of(uuid) : profile;
   }
 
-  protected CompletableFuture<BenderProfile> asyncJoin(UUID uuid) {
+  protected CompletableFuture<?> asyncJoin(UUID uuid) {
+    // Don't preload data if remote and lazy load is enabled to avoid sync issues in networks
+    if (BendingProperties.instance().lazyLoad() && game().storage().isRemote()) {
+      return CompletableFuture.completedFuture(null);
+    }
     long startTime = System.currentTimeMillis();
-    return profileCache.get(uuid).orTimeout(1000, TimeUnit.MILLISECONDS).thenApply(profile -> {
-      long deltaTime = System.currentTimeMillis() - startTime;
-      if (profile != null && deltaTime > 500) {
-        logger.warn("Processing login for %s took %dms.".formatted(uuid, deltaTime));
-      }
-      return profile;
-    }).exceptionally(t -> {
-      if (t instanceof TimeoutException) {
+    return profileCache.get(uuid).orTimeout(1000, TimeUnit.MILLISECONDS).whenComplete((ignore, t) -> {
+      if (t == null) {
+        long deltaTime = System.currentTimeMillis() - startTime;
+        if (deltaTime > 500) {
+          logger.warn("Processing login for %s took %dms.".formatted(uuid, deltaTime));
+        }
+      } else if (t instanceof TimeoutException) {
         logger.warn("Timed out while retrieving data for " + uuid);
       } else {
         logger.warn(t.getMessage(), t);
       }
-      return null;
     });
   }
 
   protected void syncJoin(UUID uuid, Supplier<Player> playerSupplier) {
-    BenderProfile profile = profileCache.synchronous().get(uuid);
-    User user = User.create(game(), playerSupplier.get(), profile).orElse(null);
-    if (user != null) {
-      Registries.BENDERS.register(user);
-      game().abilityManager(user.worldKey()).createPassives(user);
-    }
+    User.create(game(), playerSupplier.get(), profileCache.get(uuid));
   }
 
   protected void onQuit(UUID uuid) {
-    User user = Registries.BENDERS.get(uuid);
-    if (user != null) {
-      game().activationController().onUserDeconstruct(user);
-    }
+    Registries.BENDERS.getIfExists(uuid).ifPresent(game().activationController()::onUserDeconstruct);
     profileCache.synchronous().invalidate(uuid);
   }
 }

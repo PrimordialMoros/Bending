@@ -92,6 +92,11 @@ final class DummyStorage implements BendingStorage {
   }
 
   @Override
+  public boolean isRemote() {
+    return false;
+  }
+
+  @Override
   public String toString() {
     return "Dummy";
   }

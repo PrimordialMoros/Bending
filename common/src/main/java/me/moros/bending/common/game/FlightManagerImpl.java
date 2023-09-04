@@ -48,8 +48,8 @@ public final class FlightManagerImpl implements FlightManager {
   }
 
   @Override
-  public void remove(User user) {
-    FlightImpl instance = instances.remove(user.uuid());
+  public void remove(UUID uuid) {
+    FlightImpl instance = instances.remove(uuid);
     if (instance != null) {
       instance.revert();
     }
@@ -98,7 +98,7 @@ public final class FlightManagerImpl implements FlightManager {
     @Override
     public void release() {
       if (--references < 1) {
-        manager.remove(user);
+        manager.remove(user.uuid());
       }
     }
 

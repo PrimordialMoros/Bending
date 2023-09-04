@@ -19,6 +19,8 @@
 
 package me.moros.bending.fabric.game;
 
+import java.util.UUID;
+
 import me.moros.bending.api.game.FlightManager;
 import me.moros.bending.api.user.User;
 
@@ -44,7 +46,7 @@ final class DummyFlightManager implements FlightManager {
   }
 
   @Override
-  public void remove(User user) {
+  public void remove(UUID uuid) {
   }
 
   @Override

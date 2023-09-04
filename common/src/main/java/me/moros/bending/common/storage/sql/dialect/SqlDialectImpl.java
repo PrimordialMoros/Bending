@@ -21,11 +21,12 @@ package me.moros.bending.common.storage.sql.dialect;
 
 import me.moros.storage.StorageType;
 
-record SqlDialectImpl(StorageType type) implements SqlDialect {
+record SqlDialectImpl(StorageType type, boolean nativeUuidSupport) implements SqlDialect {
   @Override
   public boolean nativeUuid() {
     return switch (type()) {
-      case POSTGRESQL, H2, MARIADB, HSQL -> true;
+      case POSTGRESQL, H2, HSQL -> true;
+      case MARIADB -> nativeUuidSupport;
       default -> false;
     };
   }

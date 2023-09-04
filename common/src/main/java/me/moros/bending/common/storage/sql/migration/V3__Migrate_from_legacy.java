@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import me.moros.bending.common.logging.Logger;
-import me.moros.bending.common.storage.sql.BinaryUUIDColumnMapper;
+import me.moros.bending.common.util.UUIDUtil;
 import org.flywaydb.core.api.migration.BaseJavaMigration;
 import org.flywaydb.core.api.migration.Context;
 
@@ -218,6 +218,6 @@ public class V3__Migrate_from_legacy extends BaseJavaMigration {
   }
 
   private UUID mapUuid(ResultSet rs, String column) throws SQLException {
-    return nativeUuid ? rs.getObject(column, UUID.class) : BinaryUUIDColumnMapper.fromByteArray(rs.getBytes(column));
+    return nativeUuid ? rs.getObject(column, UUID.class) : UUIDUtil.fromBytes(rs.getBytes(column));
   }
 }
