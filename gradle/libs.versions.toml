@@ -12,7 +12,7 @@ sponge-api = "11.0.0-SNAPSHOT"
 sponge-common = "1.20.1-11.0.0-SNAPSHOT"
 minecraft = "1.20.1"
 fabric-loom = "1.3.9"
-fabric-api = "0.87.0+1.20.1"
+fabric-api = "0.88.2+1.20.2"
 fabric-loader = "0.14.22"
 shadow = "8.1.1"
 flyway = "9.22.0"
@@ -65,9 +65,9 @@ cloud-sponge = { module = "cloud.commandframework:cloud-sponge", version.ref = "
 
 # Databases
 mysql = { module = "com.mysql:mysql-connector-j", version = "8.1.0" }
-mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.1.4" }
+mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.2.0" }
 postgresql = { module = "org.postgresql:postgresql", version = "42.6.0" }
-h2 = { module = "com.h2database:h2", version = "2.2.220" }
+h2 = { module = "com.h2database:h2", version = "2.2.222" }
 hsql = { module = "org.hsqldb:hsqldb", version = "2.7.2" }
 
 # Fabric
@@ -82,8 +82,8 @@ fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.
 paper = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
 inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.11" }
 grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.1" }
-towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.99.5.11" }
-lwc = { module = "com.griefcraft:lwc", version = "2.3.0" }
+towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.99.5.17" }
+lwc = { module = "com.griefcraft:lwc", version = "2.3.1" }
 worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.9" }
 papi = { module = "me.clip:placeholderapi", version = "2.11.3" }
 
@@ -96,7 +96,7 @@ sponge-mixin = { module = "org.spongepowered:mixin", version = "0.8.5" }
 shadow = { module = "com.github.johnrengelman:shadow", version.ref = "shadow" }
 vanilla = { module = "org.spongepowered:vanillagradle", version = "0.2.1-SNAPSHOT" }
 minotaur = { module = "com.modrinth.minotaur:Minotaur", version = "2.8.3" }
-checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.30" }
+checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.33" }
 
 [bundles]
 cloud = ["cloud-core", "cloud-minecraft"]
