@@ -36,7 +36,15 @@ public interface AbilityManager extends Updatable, Iterable<Ability> {
 
   void addUpdatable(Updatable instance);
 
-  void addAbility(User user, Ability instance);
+  /**
+   * @deprecated use {@link #addAbility(Ability)}
+   */
+  @Deprecated(forRemoval = true)
+  default void addAbility(User user, Ability instance) {
+    addAbility(instance);
+  }
+
+  void addAbility(Ability instance);
 
   void createPassives(User user);
 

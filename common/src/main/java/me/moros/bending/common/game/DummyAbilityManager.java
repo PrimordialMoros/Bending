@@ -50,7 +50,7 @@ public final class DummyAbilityManager implements AbilityManager {
   }
 
   @Override
-  public void addAbility(User user, Ability instance) {
+  public void addAbility(Ability instance) {
   }
 
   @Override

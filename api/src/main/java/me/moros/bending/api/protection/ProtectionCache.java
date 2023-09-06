@@ -24,8 +24,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
@@ -38,7 +38,7 @@ import me.moros.bending.api.user.User;
 public enum ProtectionCache {
   INSTANCE;
 
-  private final Map<UUID, Cache<Block, Boolean>> cache;
+  private final Map<UUID, LoadingCache<Block, Boolean>> cache;
 
   ProtectionCache() {
     cache = new ConcurrentHashMap<>();
@@ -71,7 +71,7 @@ public enum ProtectionCache {
    * @see #canBuildPostCache(User, Block)
    */
   public boolean canBuild(User user, Block block) {
-    return cache.computeIfAbsent(user.uuid(), u -> buildCache()).get(block, b -> canBuildPostCache(user, b));
+    return cache.computeIfAbsent(user.uuid(), u -> buildCache(user)).get(block);
   }
 
   /**
@@ -89,7 +89,7 @@ public enum ProtectionCache {
    * @return the created cache
    * @see Caffeine
    */
-  private Cache<Block, Boolean> buildCache() {
-    return Caffeine.newBuilder().expireAfterAccess(Duration.ofMillis(5000)).build();
+  private LoadingCache<Block, Boolean> buildCache(User user) {
+    return Caffeine.newBuilder().expireAfterAccess(Duration.ofMillis(5000)).build(b -> canBuildPostCache(user, b));
   }
 }

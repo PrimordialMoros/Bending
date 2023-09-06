@@ -41,6 +41,7 @@ import me.moros.bending.common.collision.CollisionQuery;
 import me.moros.bending.common.collision.CollisionQuery.Pair;
 import me.moros.bending.common.collision.LBVH;
 import me.moros.bending.common.collision.MortonEncoded;
+import me.moros.math.FastMath;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class CollisionManager implements Updatable {
@@ -51,7 +52,7 @@ public final class CollisionManager implements Updatable {
   }
 
   private CachedAbility[] filterAndCollect() {
-    Collection<CachedAbility> instances = new ArrayList<>(manager.size());
+    Collection<CachedAbility> instances = new ArrayList<>(FastMath.ceil(0.5 * manager.size()));
     for (Ability ability : manager) {
       Collection<Collider> colliders = ability.colliders();
       if (!colliders.isEmpty()) {

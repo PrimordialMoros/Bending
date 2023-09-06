@@ -330,7 +330,7 @@ sealed class BendingUser implements User permits BendingPlayer {
 
   @Override
   public boolean fromProfile(BenderProfile profile) {
-    if (!uuid().equals(profile.uuid())) {
+    if (!uuid().equals(profile.uuid()) || !valid()) {
       return false;
     }
     if (elements.set(profile.elements())) {

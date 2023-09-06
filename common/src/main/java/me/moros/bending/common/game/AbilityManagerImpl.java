@@ -21,17 +21,15 @@ package me.moros.bending.common.game;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import me.moros.bending.api.ability.Ability;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.Activation;
@@ -46,41 +44,49 @@ import net.kyori.adventure.key.Key;
 public class AbilityManagerImpl implements AbilityManager {
   private final Logger logger;
   private final Key world;
-  private final Multimap<UUID, Ability> globalInstances;
-  private final Collection<Entry<UUID, Ability>> addQueue;
+  private final Map<UUID, Queue<Ability>> globalInstances;
+
+  private final Collection<Updatable> pending;
   private final MultiUpdatable<Updatable> generics;
+
+  private int size;
 
   AbilityManagerImpl(Logger logger, Key world) {
     this.logger = logger;
     this.world = world;
-    globalInstances = Multimaps.newMultimap(new ConcurrentHashMap<>(32), () -> new ArrayList<>(8));
-    addQueue = new ArrayList<>(16);
+    globalInstances = new ConcurrentHashMap<>(32);
+    pending = new ArrayList<>();
     generics = MultiUpdatable.empty();
+  }
+
+  private void addAbilityInternal(UUID uuid, Ability instance) {
+    globalInstances.computeIfAbsent(uuid, k -> new ConcurrentLinkedQueue<>()).add(instance);
   }
 
   @Override
   public int size() {
-    return globalInstances.size();
+    return size;
   }
 
   @Override
   public Iterator<Ability> iterator() {
-    return Collections.unmodifiableCollection(globalInstances.values()).iterator();
+    return instances().iterator();
   }
 
   @Override
   public void addUpdatable(Updatable instance) {
     if (instance instanceof Ability ability) {
-      addAbility(ability.user(), ability);
+      addAbility(ability);
     } else {
-      generics.add(instance);
+      pending.add(instance);
     }
   }
 
   @Override
-  public void addAbility(User user, Ability instance) {
+  public void addAbility(Ability instance) {
+    User user = instance.user();
     if (world.equals(user.worldKey())) {
-      addQueue.add(Map.entry(user.uuid(), instance));
+      addAbilityInternal(user.uuid(), instance);
     }
   }
 
@@ -96,7 +102,7 @@ public class AbilityManagerImpl implements AbilityManager {
       if (user.hasElement(passive.element()) && user.hasPermission(passive)) {
         Ability ability = passive.createAbility();
         if (ability.activate(user, Activation.PASSIVE)) {
-          addAbility(user, ability);
+          addAbility(ability);
         }
       }
     }
@@ -107,47 +113,56 @@ public class AbilityManagerImpl implements AbilityManager {
     if (ability.user().equals(user) || !ability.user().worldKey().equals(user.worldKey()) || !world.equals(user.worldKey())) {
       return;
     }
-    if (globalInstances.remove(ability.user().uuid(), ability)) {
+    Collection<Ability> holder = globalInstances.get(ability.user().uuid());
+    if (holder != null && holder.remove(ability)) {
       ability.onUserChange(user);
       ability.loadConfig();
-      globalInstances.put(user.uuid(), ability);
+      addAbilityInternal(user.uuid(), ability);
     }
   }
 
   @Override
   public Stream<Ability> userInstances(User user) {
-    return globalInstances.get(user.uuid()).stream();
+    Collection<Ability> holder = globalInstances.get(user.uuid());
+    return holder != null ? holder.stream() : Stream.of();
   }
 
   @Override
   public Stream<Ability> instances() {
-    return globalInstances.values().stream();
+    return globalInstances.values().stream().flatMap(Collection::stream);
   }
 
   @Override
   public UpdateResult update() {
-    // Add any queued abilities to global instances
-    addQueue.forEach(entry -> globalInstances.put(entry.getKey(), entry.getValue()));
-    addQueue.clear();
     // Update all instances and remove invalid instances
+    pending.forEach(generics::add);
+    pending.clear();
     generics.update();
-    Collection<Ability> copy = new ArrayList<>(globalInstances.values());
-    Iterator<Ability> copyIterator = copy.iterator();
+
     Collection<Exception> exceptions = new ArrayList<>();
-    while (copyIterator.hasNext()) {
-      Ability ability = copyIterator.next();
-      UUID uuid = ability.user().uuid();
-      UpdateResult result = UpdateResult.REMOVE;
-      try {
-        result = ability.update();
-      } catch (Exception e) {
-        exceptions.add(e);
-      } finally {
-        if (result == UpdateResult.REMOVE) {
-          copyIterator.remove();
-          globalInstances.remove(uuid, ability);
-          ability.onDestroy();
+    var iterator = globalInstances.values().iterator();
+    size = 0;
+    while (iterator.hasNext()) {
+      Collection<Ability> abilities = iterator.next();
+      Iterator<Ability> innerIterator = abilities.iterator();
+      while (innerIterator.hasNext()) {
+        Ability ability = innerIterator.next();
+        UpdateResult result = UpdateResult.REMOVE;
+        try {
+          result = ability.update();
+        } catch (Exception e) {
+          exceptions.add(e);
+        } finally {
+          if (result == UpdateResult.REMOVE) {
+            innerIterator.remove();
+            ability.onDestroy();
+          } else {
+            size++;
+          }
         }
+      }
+      if (abilities.isEmpty()) {
+        iterator.remove();
       }
     }
     for (Exception e : exceptions) {
@@ -159,13 +174,16 @@ public class AbilityManagerImpl implements AbilityManager {
   @Override
   public boolean destroyUserInstances(User user, Predicate<Ability> predicate) {
     boolean destroyed = false;
-    Iterator<Ability> iterator = globalInstances.get(user.uuid()).iterator();
-    while (iterator.hasNext()) {
-      Ability ability = iterator.next();
-      if (predicate.test(ability)) {
-        iterator.remove();
-        ability.onDestroy();
-        destroyed = true;
+    Collection<Ability> holder = globalInstances.get(user.uuid());
+    if (holder != null) {
+      Iterator<Ability> iterator = holder.iterator();
+      while (iterator.hasNext()) {
+        Ability ability = iterator.next();
+        if (predicate.test(ability)) {
+          iterator.remove();
+          ability.onDestroy();
+          destroyed = true;
+        }
       }
     }
     return destroyed;
@@ -173,20 +191,29 @@ public class AbilityManagerImpl implements AbilityManager {
 
   @Override
   public void destroyUserInstances(User user) {
-    globalInstances.removeAll(user.uuid()).forEach(Ability::onDestroy);
+    Collection<Ability> holder = globalInstances.remove(user.uuid());
+    if (holder != null) {
+      holder.forEach(Ability::onDestroy);
+      holder.clear();
+    }
   }
 
   @Override
   public void destroyInstance(Ability ability) {
-    if (globalInstances.remove(ability.user().uuid(), ability)) {
+    Collection<Ability> holder = globalInstances.get(ability.user().uuid());
+    if (holder != null && holder.remove(ability)) {
       ability.onDestroy();
     }
   }
 
   @Override
   public void destroyAllInstances() {
+    pending.clear();
     generics.clear();
-    globalInstances.values().forEach(Ability::onDestroy);
+    for (Collection<Ability> holder : globalInstances.values()) {
+      holder.forEach(Ability::onDestroy);
+      holder.clear();
+    }
     globalInstances.clear();
   }
 }

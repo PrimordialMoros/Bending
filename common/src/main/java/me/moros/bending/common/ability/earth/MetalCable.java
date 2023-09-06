@@ -235,7 +235,7 @@ public class MetalCable extends AbilityInstance {
       TempBlock.air().duration(BendingProperties.instance().earthRevertTime()).build(block);
       var entity = TempFallingBlock.fallingBlock(state).velocity(dir.multiply(0.2)).buildReal(block.world(), location);
       var ability = new Projectile(user, description(), entity, userConfig.projectileRange, userConfig.damage);
-      user.game().abilityManager(user.worldKey()).addAbility(user, ability);
+      user.game().abilityManager(user.worldKey()).addAbility(ability);
       attached = new AttachedEntity(entity, 0.5);
     } else {
       dir = dir.negate();
