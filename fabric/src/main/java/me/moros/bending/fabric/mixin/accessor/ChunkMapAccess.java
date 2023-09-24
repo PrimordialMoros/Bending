@@ -25,6 +25,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(ChunkMap.class)
 public interface ChunkMapAccess {
-  @Accessor("viewDistance")
+  @Accessor("serverViewDistance")
   int viewDistance();
 }

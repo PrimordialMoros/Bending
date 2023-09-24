@@ -24,6 +24,7 @@ import java.util.List;
 
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.ServerScoreboard;
+import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerTeam;
 import org.jetbrains.annotations.Nullable;
@@ -40,7 +41,7 @@ record PlayerBoardImpl(ServerScoreboard handle) implements PlayerBoard {
   }
 
   @Override
-  public @Nullable Objective getDisplayObjective(int i) {
-    return handle().getDisplayObjective(i);
+  public @Nullable Objective getDisplayObjective(DisplaySlot displaySlot) {
+    return handle().getDisplayObjective(displaySlot);
   }
 }

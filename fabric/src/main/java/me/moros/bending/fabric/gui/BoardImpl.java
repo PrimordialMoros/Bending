@@ -31,6 +31,7 @@ import me.moros.bending.fabric.platform.scoreboard.PlayerScoreboard;
 import me.moros.bending.fabric.platform.scoreboard.ScoreboardUtil;
 import net.kyori.adventure.platform.fabric.FabricServerAudiences;
 import net.kyori.adventure.text.Component;
+import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
@@ -48,14 +49,14 @@ public final class BoardImpl extends AbstractBoard<PlayerTeam> {
     bendingBoard = new PlayerScoreboard(fabricPlayer);
     var displayName = toNative(Message.BENDING_BOARD_TITLE.build());
     bendingSlots = bendingBoard.addObjective("BendingBoard", ObjectiveCriteria.DUMMY, displayName, RenderType.INTEGER);
-    bendingBoard.setDisplayObjective(Scoreboard.DISPLAY_SLOT_SIDEBAR, bendingSlots);
+    bendingBoard.setDisplayObjective(DisplaySlot.SIDEBAR, bendingSlots);
     ScoreboardUtil.setScoreboard(fabricPlayer.handle(), (PlayerBoard) bendingBoard);
     init();
   }
 
   @Override
   public void disableScoreboard() {
-    bendingBoard.setDisplayObjective(Scoreboard.DISPLAY_SLOT_SIDEBAR, null);
+    bendingBoard.setDisplayObjective(DisplaySlot.SIDEBAR, null);
     List.copyOf(bendingBoard.getPlayerTeams()).forEach(bendingBoard::removePlayerTeam);
     bendingBoard.removeObjective(bendingSlots);
     ScoreboardUtil.resetScoreboard(fabricPlayer.handle());

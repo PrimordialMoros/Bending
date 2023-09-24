@@ -45,8 +45,10 @@ import me.moros.math.adapter.Adapters;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
-import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.AdvancementRequirements;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.FrameType;
+import net.minecraft.advancements.critereon.ImpossibleTrigger;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.PacketListener;
@@ -187,11 +189,12 @@ public abstract class AbstractPacketUtil implements PacketUtil {
     net.minecraft.network.chat.Component nmsTitle = adapt(title);
     net.minecraft.network.chat.Component nmsDesc = net.minecraft.network.chat.Component.empty();
     FrameType type = FrameType.TASK;
-    var advancement = Advancement.Builder.advancement()
+    var criterion = CriteriaTriggers.IMPOSSIBLE.createCriterion(new ImpossibleTrigger.TriggerInstance());
+    var advancement = new Advancement.Builder()
       .display(icon, nmsTitle, nmsDesc, null, type, true, false, true)
-      .addCriterion(criteriaId, new Criterion()).build(id);
+      .addCriterion(criteriaId, criterion).build(id);
     AdvancementProgress progress = new AdvancementProgress();
-    progress.update(Map.of(criteriaId, new Criterion()), new String[][]{});
+    progress.update(AdvancementRequirements.allOf(List.of(criteriaId)));
     progress.grantProgress(criteriaId);
     var progressMap = Map.of(id, progress);
     return new ClientboundUpdateAdvancementsPacket(false, List.of(advancement), Set.of(), progressMap);

@@ -21,7 +21,6 @@ package me.moros.bending.fabric.platform;
 
 import java.util.Objects;
 
-import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.damage.DamageCause;
@@ -42,7 +41,6 @@ import me.moros.bending.fabric.platform.entity.FabricPlayer;
 import me.moros.bending.fabric.platform.item.FabricItem;
 import me.moros.bending.fabric.platform.world.FabricWorld;
 import net.kyori.adventure.key.Key;
-import net.minecraft.core.BlockSource;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -116,11 +114,6 @@ public final class PlatformAdapter {
 
   public static ServerLevel toFabricWorld(World world) {
     return ((FabricWorld) world).handle();
-  }
-
-  public static Block fromFabricWorld(BlockSource block) {
-    var pos = block.getPos();
-    return fromFabricWorld(block.getLevel()).blockAt(pos.getX(), pos.getY(), pos.getZ());
   }
 
   public static me.moros.bending.api.platform.entity.Entity fromFabricEntity(Entity entity) {

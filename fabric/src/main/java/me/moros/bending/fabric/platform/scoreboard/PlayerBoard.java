@@ -24,6 +24,7 @@ import java.util.List;
 
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.ServerScoreboard;
+import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerTeam;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -33,7 +34,7 @@ public interface PlayerBoard {
 
   Collection<PlayerTeam> getPlayerTeams();
 
-  @Nullable Objective getDisplayObjective(int i);
+  @Nullable Objective getDisplayObjective(DisplaySlot displaySlot);
 
   static PlayerBoard from(ServerScoreboard serverScoreboard) {
     return new PlayerBoardImpl(serverScoreboard);

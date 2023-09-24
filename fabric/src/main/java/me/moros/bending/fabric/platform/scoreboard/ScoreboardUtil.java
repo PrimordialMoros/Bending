@@ -28,6 +28,7 @@ import java.util.UUID;
 import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
 
 public class ScoreboardUtil {
@@ -53,7 +54,7 @@ public class ScoreboardUtil {
 
     // Remove old
     for (int i = 0; i < 3; i++) {
-      Objective obj = previous.getDisplayObjective(i);
+      Objective obj = previous.getDisplayObjective(DisplaySlot.BY_ID.apply(i));
       if (obj != null && temp.add(obj)) {
         player.connection.send(new ClientboundSetObjectivePacket(obj, 1));
       }
@@ -68,8 +69,8 @@ public class ScoreboardUtil {
     for (var team : scoreboard.getPlayerTeams()) {
       player.connection.send(ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(team, true));
     }
-    for (int i = 0; i < 19; i++) {
-      Objective obj = scoreboard.getDisplayObjective(i);
+    for (DisplaySlot displaySlot : DisplaySlot.values()) {
+      Objective obj = scoreboard.getDisplayObjective(displaySlot);
       if (obj != null && temp.add(obj)) {
         scoreboard.getStartTrackingPackets(obj).forEach(player.connection::send);
       }

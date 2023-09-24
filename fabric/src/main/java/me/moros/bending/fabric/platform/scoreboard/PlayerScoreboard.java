@@ -33,6 +33,7 @@ import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket;
 import net.minecraft.network.protocol.game.ClientboundSetScorePacket;
 import net.minecraft.server.ServerScoreboard.Method;
+import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Score;
@@ -64,8 +65,8 @@ public class PlayerScoreboard extends Scoreboard implements PlayerBoard {
   }
 
   @Override
-  public @Nullable Objective getDisplayObjective(int i) {
-    return super.getDisplayObjective(i);
+  public @Nullable Objective getDisplayObjective(DisplaySlot displaySlot) {
+    return super.getDisplayObjective(displaySlot);
   }
 
   @Override
@@ -91,19 +92,19 @@ public class PlayerScoreboard extends Scoreboard implements PlayerBoard {
   }
 
   @Override
-  public void setDisplayObjective(int i, @Nullable Objective objective) {
-    Objective objective2 = this.getDisplayObjective(i);
-    super.setDisplayObjective(i, objective);
+  public void setDisplayObjective(DisplaySlot displaySlot, @Nullable Objective objective) {
+    Objective objective2 = this.getDisplayObjective(displaySlot);
+    super.setDisplayObjective(displaySlot, objective);
     if (objective2 != objective && objective2 != null) {
       if (this.getObjectiveDisplaySlotCount(objective2) > 0) {
-        broadcast(new ClientboundSetDisplayObjectivePacket(i, objective));
+        broadcast(new ClientboundSetDisplayObjectivePacket(displaySlot, objective));
       } else {
         this.stopTrackingObjective(objective2);
       }
     }
     if (objective != null) {
       if (this.trackedObjectives.contains(objective)) {
-        broadcast(new ClientboundSetDisplayObjectivePacket(i, objective));
+        broadcast(new ClientboundSetDisplayObjectivePacket(displaySlot, objective));
       } else {
         this.startTrackingObjective(objective);
       }
@@ -168,9 +169,9 @@ public class PlayerScoreboard extends Scoreboard implements PlayerBoard {
   public List<Packet<?>> getStartTrackingPackets(Objective objective) {
     ArrayList<Packet<?>> list = Lists.newArrayList();
     list.add(new ClientboundSetObjectivePacket(objective, 0));
-    for (int i = 0; i < 19; i++) {
-      if (this.getDisplayObjective(i) != objective) continue;
-      list.add(new ClientboundSetDisplayObjectivePacket(i, objective));
+    for (DisplaySlot displaySlot : DisplaySlot.values()) {
+      if (this.getDisplayObjective(displaySlot) != objective) continue;
+      list.add(new ClientboundSetDisplayObjectivePacket(displaySlot, objective));
     }
     for (Score score : this.getPlayerScores(objective)) {
       list.add(new ClientboundSetScorePacket(Method.CHANGE, score.getObjective().getName(), score.getOwner(), score.getScore()));
@@ -186,9 +187,9 @@ public class PlayerScoreboard extends Scoreboard implements PlayerBoard {
   public List<Packet<?>> getStopTrackingPackets(Objective objective) {
     ArrayList<Packet<?>> list = Lists.newArrayList();
     list.add(new ClientboundSetObjectivePacket(objective, 1));
-    for (int i = 0; i < 19; i++) {
-      if (this.getDisplayObjective(i) != objective) continue;
-      list.add(new ClientboundSetDisplayObjectivePacket(i, objective));
+    for (DisplaySlot displaySlot : DisplaySlot.values()) {
+      if (this.getDisplayObjective(displaySlot) != objective) continue;
+      list.add(new ClientboundSetDisplayObjectivePacket(displaySlot, objective));
     }
     return list;
   }
@@ -200,8 +201,8 @@ public class PlayerScoreboard extends Scoreboard implements PlayerBoard {
 
   public int getObjectiveDisplaySlotCount(Objective objective) {
     int i = 0;
-    for (int j = 0; j < 19; j++) {
-      if (this.getDisplayObjective(j) != objective) continue;
+    for (DisplaySlot displaySlot : DisplaySlot.values()) {
+      if (this.getDisplayObjective(displaySlot) != objective) continue;
       ++i;
     }
     return i;
