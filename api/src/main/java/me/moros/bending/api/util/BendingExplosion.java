@@ -45,7 +45,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * Represents an explosion with pre-configured parameters.
  * BendingExplosions are visually similar to vanilla explosions but work slightly differently.
- * For an explanation of vanilla explosion mechanics check the <a href="https://minecraft.fandom.com/wiki/Explosion">wiki</a>.
+ * For an explanation of vanilla explosion mechanics check the <a href="https://minecraft.wiki/w/Explosion">wiki</a>.
  * BendingExplosions utilize a simplified block breaking model which destroys all blocks
  * (except {@link MaterialUtil#isUnbreakable(Block)}) within the specified radius no matter their blast resistance.
  * Moreover, there are 2 main damage zones for the explosion. Every entity within half the radius distance from the

@@ -192,11 +192,11 @@ public class EarthLine extends AbilityInstance {
     public void render() {
       double x = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
       double z = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
-      Vector3d spawnLoc = location.add(x, 0, z);
+      Vector3d spawnLoc = location.add(x, -0.75, z);
       BlockState type = user.world().blockAt(location).offset(Direction.DOWN).state();
       TempDisplayEntity.builder(type).gravity(true).duration(700)
         .velocity(Vector3d.of(0, 0.2, 0))
-        .edit(d -> d.transformation(new Transformation(Vector3d.of(0, -0.75, 0), Vector3d.of(0.75, 0.75, 0.75))))
+        .edit(d -> d.transformation(Transformation.scaled(0.75)))
         .build(user.world(), spawnLoc);
       type.asParticle(location).count(6).offset(0.25, 0.125, 0.25).spawn(user.world());
     }
@@ -282,11 +282,9 @@ public class EarthLine extends AbilityInstance {
 
       imprisoned = true;
       entity.applyVelocity(EarthLine.this, Vector3d.MINUS_J);
-      Vector3d center = entity.location();
+      Vector3d center = entity.location().add(0, -0.2, 0);
       Vector3d offset = Vector3d.of(0, 0.6, 0);
-      var builder = TempDisplayEntity.builder(material)
-        .duration(userConfig.prisonDuration)
-        .edit(d -> d.transformation(new Transformation(Vector3d.of(0, -0.2, 0), Vector3d.ONE)));
+      var builder = TempDisplayEntity.builder(material).duration(userConfig.prisonDuration);
       VectorUtil.circle(Vector3d.PLUS_I.multiply(0.8), Vector3d.PLUS_J, 8).forEach(v -> {
         builder.build(user.world(), center.add(v));
         builder.build(user.world(), center.add(offset).add(v));

@@ -132,16 +132,19 @@ public abstract class AbstractBoard<Team> implements Board {
   }
 
   private static final String[] CHAT_CODES;
+  private static final String RESET;
 
   static {
     CHAT_CODES = new String[16];
     for (int i = 0; i < CHAT_CODES.length; i++) {
-      CHAT_CODES[i] = "§%s§r".formatted(Integer.toHexString(i));
+      CHAT_CODES[i] = "§%s".formatted(Integer.toHexString(i));
     }
+    RESET = "§r";
   }
 
   protected static String generateInvisibleLegacyString(int slot) {
     String hidden = CHAT_CODES[slot % CHAT_CODES.length];
-    return slot <= CHAT_CODES.length ? hidden : hidden + generateInvisibleLegacyString(slot - CHAT_CODES.length);
+    int delta = slot - CHAT_CODES.length;
+    return delta <= 0 ? (hidden + RESET) : hidden + generateInvisibleLegacyString(delta);
   }
 }

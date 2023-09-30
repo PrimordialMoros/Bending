@@ -35,7 +35,8 @@ sealed class AbstractDisplayBuilder<V, T extends AbstractDisplayBuilder<V, T>> i
   private float shadowRadius = 0;
   private float shadowStrength = 1;
   private int interpolationDelay = 0;
-  private int interpolationDuration = 0;
+  private int transformationInterpolationDuration = 0;
+  private int positionInterpolationDuration = 0;
   private int brightness = -1;
   private int glowColor = -1;
   private Billboard billboard = Billboard.FIXED;
@@ -54,7 +55,8 @@ sealed class AbstractDisplayBuilder<V, T extends AbstractDisplayBuilder<V, T>> i
     shadowRadius(display.shadowRadius());
     shadowStrength(display.shadowStrength());
     interpolationDelay(display.interpolationDelay());
-    interpolationDuration(display.interpolationDuration());
+    transformationInterpolationDuration(display.transformationInterpolationDuration());
+    positionInterpolationDuration(display.positionInterpolationDuration());
     brightness(display.brightness());
     glowColor(display.glowColor());
     billboard(display.billboard());
@@ -139,13 +141,24 @@ sealed class AbstractDisplayBuilder<V, T extends AbstractDisplayBuilder<V, T>> i
   }
 
   @Override
-  public int interpolationDuration() {
-    return interpolationDuration;
+  public int transformationInterpolationDuration() {
+    return transformationInterpolationDuration;
   }
 
   @Override
-  public T interpolationDuration(int interpolationDuration) {
-    this.interpolationDuration = interpolationDuration;
+  public T transformationInterpolationDuration(int transformationInterpolationDuration) {
+    this.transformationInterpolationDuration = transformationInterpolationDuration;
+    return (T) this;
+  }
+
+  @Override
+  public int positionInterpolationDuration() {
+    return positionInterpolationDuration;
+  }
+
+  @Override
+  public T positionInterpolationDuration(int positionInterpolationDuration) {
+    this.positionInterpolationDuration = positionInterpolationDuration;
     return (T) this;
   }
 

@@ -23,14 +23,14 @@ import me.moros.bending.api.platform.item.Item;
 
 record ItemDisplayImpl(
   Item data, float width, float height, float viewRange, float shadowRadius, float shadowStrength,
-  int interpolationDelay, int interpolationDuration, int brightness, int glowColor,
-  Billboard billboard, Transformation transformation, DisplayType displayType
+  int interpolationDelay, int transformationInterpolationDuration, int positionInterpolationDuration,
+  int brightness, int glowColor, Billboard billboard, Transformation transformation, DisplayType displayType
 ) implements ItemDisplay {
   ItemDisplayImpl(ItemDisplayBuilder builder) {
     this(builder.data(), builder.width(), builder.height(), builder.viewRange(),
       builder.shadowRadius(), builder.shadowStrength(),
-      builder.interpolationDelay(), builder.interpolationDuration(), builder.brightness(), builder.glowColor(),
-      builder.billboard(), builder.transformation(), builder.displayType());
+      builder.interpolationDelay(), builder.transformationInterpolationDuration(), builder.positionInterpolationDuration(),
+      builder.brightness(), builder.glowColor(), builder.billboard(), builder.transformation(), builder.displayType());
   }
 
   @Override

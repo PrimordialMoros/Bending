@@ -23,14 +23,14 @@ import me.moros.bending.api.platform.block.BlockState;
 
 record BlockDisplayImpl(
   BlockState data, float width, float height, float viewRange, float shadowRadius, float shadowStrength,
-  int interpolationDelay, int interpolationDuration, int brightness, int glowColor,
-  Billboard billboard, Transformation transformation
+  int interpolationDelay, int transformationInterpolationDuration, int positionInterpolationDuration,
+  int brightness, int glowColor, Billboard billboard, Transformation transformation
 ) implements BlockDisplay {
   BlockDisplayImpl(BlockDisplayBuilder builder) {
     this(builder.data(), builder.width(), builder.height(), builder.viewRange(),
       builder.shadowRadius(), builder.shadowStrength(),
-      builder.interpolationDelay(), builder.interpolationDuration(), builder.brightness(), builder.glowColor(),
-      builder.billboard(), builder.transformation());
+      builder.interpolationDelay(), builder.transformationInterpolationDuration(), builder.positionInterpolationDuration(),
+      builder.brightness(), builder.glowColor(), builder.billboard(), builder.transformation());
   }
 
   @Override

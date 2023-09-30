@@ -21,6 +21,7 @@ package me.moros.bending.api.platform.entity.display;
 
 import me.moros.math.Position;
 import me.moros.math.Quaternion;
+import me.moros.math.Vector3d;
 
 public record Transformation(Position translation, Quaternion left, Position scale, Quaternion right) {
   public Transformation(Position translation, Position scale) {
@@ -41,6 +42,10 @@ public record Transformation(Position translation, Quaternion left, Position sca
 
   public Transformation withRightRotation(Quaternion right) {
     return new Transformation(translation, left, scale, right);
+  }
+
+  public static Transformation scaled(double scale) {
+    return new Transformation(Vector3d.ZERO, Vector3d.ONE.multiply(scale));
   }
 
   private record QuaternionRotation(double q0, double q1, double q2, double q3) implements Quaternion {

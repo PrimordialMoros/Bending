@@ -40,7 +40,17 @@ public sealed interface Display<V> permits BlockDisplay, ItemDisplay, TextDispla
 
   int interpolationDelay();
 
-  int interpolationDuration();
+  /**
+   * @deprecated use {@link #transformationInterpolationDuration()} and {@link #positionInterpolationDuration()}
+   */
+  @Deprecated(forRemoval = true)
+  default int interpolationDuration() {
+    return transformationInterpolationDuration();
+  }
+
+  int transformationInterpolationDuration();
+
+  int positionInterpolationDuration();
 
   int brightness();
 

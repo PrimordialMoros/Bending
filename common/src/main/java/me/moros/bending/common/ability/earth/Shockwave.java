@@ -43,7 +43,6 @@ import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.entity.Entity;
-import me.moros.bending.api.platform.entity.display.Transformation;
 import me.moros.bending.api.platform.particle.Particle;
 import me.moros.bending.api.platform.sound.SoundEffect;
 import me.moros.bending.api.platform.world.WorldUtil;
@@ -237,9 +236,9 @@ public class Shockwave extends AbilityInstance {
       double deltaY = Math.min(0.38, 0.18 + distanceTravelled / (3 * range));
       Block below = block.offset(Direction.DOWN);
       BlockState data = below.state();
-      TempDisplayEntity.builder(data).gravity(true).velocity(Vector3d.of(0, deltaY, 0)).duration(1200)
-        .edit(d -> d.transformation(new Transformation(Vector3d.MINUS_J, Vector3d.ONE))).build(block);
-      data.asParticle(block.center().add(0, 0.75, 0)).count(5).offset(0.5, 0.25, 0.5).spawn(user.world());
+      TempDisplayEntity.builder(data).gravity(true).velocity(Vector3d.of(0, deltaY, 0)).duration(1200).build(below);
+      data.asParticle(block.center().add(0, deltaY, 0)).count(5)
+        .offset(0.5, 0.25, 0.5).spawn(user.world());
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
         SoundEffect.EARTH.play(block);
       }

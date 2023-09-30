@@ -157,22 +157,8 @@ public abstract class AbstractPacketUtil implements PacketUtil {
   }
 
   @Override
-  public ClientboundPacket updateDisplay(Position center, int id, Display<?> properties) {
-    // TODO filter changed properties only (currently sending all)
-    Packet<ClientGamePacketListener> packet = null;
-    var transformation = properties.transformation();
-    var translation = transformation.translation().toVector3d();
-    if (translation.lengthSq() > 32 * 32) {
-      properties = properties.toBuilder().transformation(transformation.withTranslation(Vector3d.ZERO)).build();
-      center = translation.add(center);
-      packet = teleportEntity(id, center);
-    }
-    var meta = new EntityDataBuilder(id);
-    if (properties.glowColor() != -1) {
-      meta.withStatus(EntityStatus.GLOWING);
-    }
-    DisplayUtil.mapProperties(this, meta, properties);
-    return wrap(id, packet == null ? meta.build() : new ClientboundBundlePacket(List.of(packet, meta.build())));
+  public ClientboundPacket updateDisplayPosition(int id, Vector3d position) {
+    return wrap(id, teleportEntity(id, position));
   }
 
   @Override

@@ -86,13 +86,12 @@ public interface PacketUtil {
   }
 
   /**
-   * Update a packet display entity's properties.
-   * @param center the center location to broadcast packets from
+   * Update a packet display entity's position.
    * @param id the display entity's id
-   * @param properties the display entity's new properties
+   * @param position the display entity's new position
    * @return the constructed packet
    */
-  default ClientboundPacket updateDisplay(Position center, int id, Display<?> properties) {
+  default ClientboundPacket updateDisplayPosition(int id, Vector3d position) {
     return DummyPacket.INSTANCE;
   }
 

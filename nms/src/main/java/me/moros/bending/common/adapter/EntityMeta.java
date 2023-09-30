@@ -35,30 +35,31 @@ record EntityMeta<T>(int index, EntityDataSerializer<T> serializer) {
 
   // Display
   static final EntityMeta<Integer> INTERPOLATION_DELAY = create(8, EntityDataSerializers.INT);
-  static final EntityMeta<Integer> INTERPOLATION_DURATION = create(9, EntityDataSerializers.INT);
-  static final EntityMeta<Vector3f> TRANSLATION = create(10, EntityDataSerializers.VECTOR3);
-  static final EntityMeta<Vector3f> SCALE = create(11, EntityDataSerializers.VECTOR3);
-  static final EntityMeta<Quaternionf> ROTATION_LEFT = create(12, EntityDataSerializers.QUATERNION);
-  static final EntityMeta<Quaternionf> ROTATION_RIGHT = create(13, EntityDataSerializers.QUATERNION);
-  static final EntityMeta<Byte> BILLBOARD = create(14, EntityDataSerializers.BYTE);
-  static final EntityMeta<Integer> BRIGHTNESS = create(15, EntityDataSerializers.INT);
-  static final EntityMeta<Float> VIEW_RANGE = create(16, EntityDataSerializers.FLOAT);
-  static final EntityMeta<Float> SHADOW_RADIUS = create(17, EntityDataSerializers.FLOAT);
-  static final EntityMeta<Float> SHADOW_STRENGTH = create(18, EntityDataSerializers.FLOAT);
-  static final EntityMeta<Float> WIDTH = create(19, EntityDataSerializers.FLOAT);
-  static final EntityMeta<Float> HEIGHT = create(20, EntityDataSerializers.FLOAT);
-  static final EntityMeta<Integer> GLOW_COLOR_OVERRIDE = create(21, EntityDataSerializers.INT);
+  static final EntityMeta<Integer> TRANSFORMATION_INTERPOLATION_DURATION = create(9, EntityDataSerializers.INT);
+  static final EntityMeta<Integer> POSITION_INTERPOLATION_DURATION = create(10, EntityDataSerializers.INT);
+  static final EntityMeta<Vector3f> TRANSLATION = create(11, EntityDataSerializers.VECTOR3);
+  static final EntityMeta<Vector3f> SCALE = create(12, EntityDataSerializers.VECTOR3);
+  static final EntityMeta<Quaternionf> ROTATION_LEFT = create(13, EntityDataSerializers.QUATERNION);
+  static final EntityMeta<Quaternionf> ROTATION_RIGHT = create(14, EntityDataSerializers.QUATERNION);
+  static final EntityMeta<Byte> BILLBOARD = create(15, EntityDataSerializers.BYTE);
+  static final EntityMeta<Integer> BRIGHTNESS = create(16, EntityDataSerializers.INT);
+  static final EntityMeta<Float> VIEW_RANGE = create(17, EntityDataSerializers.FLOAT);
+  static final EntityMeta<Float> SHADOW_RADIUS = create(18, EntityDataSerializers.FLOAT);
+  static final EntityMeta<Float> SHADOW_STRENGTH = create(19, EntityDataSerializers.FLOAT);
+  static final EntityMeta<Float> WIDTH = create(20, EntityDataSerializers.FLOAT);
+  static final EntityMeta<Float> HEIGHT = create(21, EntityDataSerializers.FLOAT);
+  static final EntityMeta<Integer> GLOW_COLOR_OVERRIDE = create(22, EntityDataSerializers.INT);
   // BlockDisplay
-  static final EntityMeta<BlockState> BLOCK_STATE_ID = create(22, EntityDataSerializers.BLOCK_STATE);
+  static final EntityMeta<BlockState> BLOCK_STATE_ID = create(23, EntityDataSerializers.BLOCK_STATE);
   // ItemDisplay
-  static final EntityMeta<ItemStack> DISPLAYED_ITEM = create(22, EntityDataSerializers.ITEM_STACK);
-  static final EntityMeta<Byte> DISPLAY_TYPE = create(23, EntityDataSerializers.BYTE);
+  static final EntityMeta<ItemStack> DISPLAYED_ITEM = create(23, EntityDataSerializers.ITEM_STACK);
+  static final EntityMeta<Byte> DISPLAY_TYPE = create(24, EntityDataSerializers.BYTE);
   // TextDisplay
-  static final EntityMeta<Component> TEXT = create(22, EntityDataSerializers.COMPONENT);
-  static final EntityMeta<Integer> LINE_WIDTH = create(23, EntityDataSerializers.INT);
-  static final EntityMeta<Integer> BACKGROUND_COLOR = create(24, EntityDataSerializers.INT);
-  static final EntityMeta<Byte> OPACITY = create(25, EntityDataSerializers.BYTE);
-  static final EntityMeta<Byte> TEXT_FLAGS = create(26, EntityDataSerializers.BYTE);
+  static final EntityMeta<Component> TEXT = create(23, EntityDataSerializers.COMPONENT);
+  static final EntityMeta<Integer> LINE_WIDTH = create(24, EntityDataSerializers.INT);
+  static final EntityMeta<Integer> BACKGROUND_COLOR = create(25, EntityDataSerializers.INT);
+  static final EntityMeta<Byte> OPACITY = create(26, EntityDataSerializers.BYTE);
+  static final EntityMeta<Byte> TEXT_FLAGS = create(27, EntityDataSerializers.BYTE);
 
   private static <T> EntityMeta<T> create(int index, EntityDataSerializer<T> serializer) {
     return new EntityMeta<>(index, serializer);

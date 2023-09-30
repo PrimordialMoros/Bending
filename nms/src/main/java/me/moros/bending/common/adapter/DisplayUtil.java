@@ -64,7 +64,8 @@ final class DisplayUtil {
   static EntityDataBuilder applyCommon(EntityDataBuilder builder, Display<?> properties) {
     return applyTransformation(builder, properties.transformation())
       .setRaw(EntityMeta.INTERPOLATION_DELAY, properties.interpolationDelay())
-      .setRaw(EntityMeta.INTERPOLATION_DURATION, properties.interpolationDuration())
+      .setRaw(EntityMeta.TRANSFORMATION_INTERPOLATION_DURATION, properties.transformationInterpolationDuration())
+      .setRaw(EntityMeta.POSITION_INTERPOLATION_DURATION, properties.positionInterpolationDuration())
       .setRaw(EntityMeta.BILLBOARD, properties.billboard().getId())
       .setRaw(EntityMeta.BRIGHTNESS, properties.brightness())
       .setRaw(EntityMeta.VIEW_RANGE, properties.viewRange())

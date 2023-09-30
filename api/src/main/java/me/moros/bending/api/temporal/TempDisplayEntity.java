@@ -35,7 +35,6 @@ import me.moros.bending.api.platform.entity.display.ItemDisplayBuilder;
 import me.moros.bending.api.platform.entity.display.TextDisplayBuilder;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.world.World;
-import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -125,6 +124,10 @@ public class TempDisplayEntity extends Temporary {
     }
 
     private @Nullable TempDisplayEntity displayEntity(World world, Vector3d center) {
+      boolean hasPhysics = gravity || velocity.lengthSq() > 0;
+      if (hasPhysics) {
+        data.positionInterpolationDuration(1);
+      }
       var properties = data.build();
       var packet = Platform.instance().nativeAdapter().createDisplayEntity(center, properties);
       var id = packet.id();
@@ -137,8 +140,9 @@ public class TempDisplayEntity extends Temporary {
         packet.send(Set.copyOf(viewers));
       }
       var result = new TempDisplayEntity(id, MANAGER.fromMillis(duration));
-      if (gravity || velocity.lengthSq() > 0) {
-        TICKING_PHYSICS.put(id, new DisplayMeta(id, world, center, properties, velocity, minYOffset));
+      if (hasPhysics) {
+        Vector3d pos = center.add(properties.transformation().translation());
+        TICKING_PHYSICS.put(id, new DisplayMeta(id, world, pos, velocity, minYOffset));
       }
       return result;
     }
@@ -151,20 +155,16 @@ public class TempDisplayEntity extends Temporary {
 
     private final int id;
     private final World world;
-    private final Position origin;
-    private final Display<?> meta;
     private final double minYOffset;
 
-    private Vector3d relativePosition;
+    private Vector3d position;
     private Vector3d velocity;
 
-    private DisplayMeta(int id, World world, Vector3d origin, Display<?> meta, Vector3d velocity, double minYOffset) {
+    private DisplayMeta(int id, World world, Vector3d position, Vector3d velocity, double minYOffset) {
       this.id = id;
       this.world = world;
-      this.origin = origin;
-      this.meta = meta;
-      this.relativePosition = meta.transformation().translation().toVector3d();
-      this.minYOffset = relativePosition.y() + minYOffset;
+      this.position = position;
+      this.minYOffset = position.y() + minYOffset;
       this.velocity = velocity;
     }
 
@@ -175,16 +175,12 @@ public class TempDisplayEntity extends Temporary {
     }
 
     private void move() {
-      relativePosition = relativePosition.add(velocity);
-      if (relativePosition.y() < minYOffset) {
-        relativePosition = relativePosition.withY(minYOffset);
+      position = position.add(velocity);
+      if (position.y() < minYOffset) {
+        position = position.withY(minYOffset);
         return;
       }
-      // TODO change in 1.20.2 (position is interpolated)
-      var properties = meta.toBuilder()
-        .transformation(meta.transformation().withTranslation(relativePosition))
-        .interpolationDuration(1).build();
-      Platform.instance().nativeAdapter().updateDisplay(origin, id, properties).broadcast(world, origin);
+      Platform.instance().nativeAdapter().updateDisplayPosition(id, position).broadcast(world, position);
     }
   }
 }

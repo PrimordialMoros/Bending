@@ -33,7 +33,6 @@ import me.moros.bending.api.config.attribute.Modifiable;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.entity.Entity;
-import me.moros.bending.api.platform.entity.display.Transformation;
 import me.moros.bending.api.platform.particle.Particle;
 import me.moros.bending.api.platform.sound.Sound;
 import me.moros.bending.api.temporal.TempDisplayEntity;
@@ -163,8 +162,8 @@ public class EarthSurf extends AbilityInstance {
         return;
       }
       var builder = TempDisplayEntity.builder(data).gravity(true).velocity(Vector3d.of(0, 0.25, 0))
-        .minYOffset(-1.25).duration(750).edit(d -> d.transformation(new Transformation(Vector3d.MINUS_J, Vector3d.ONE)));
-      Vector3d center = user.location();
+        .minYOffset(-1.25).duration(750);
+      Vector3d center = user.location().add(Vector3d.MINUS_J);
       Vector3d dir = user.direction().withY(0).normalize(user.velocity().withY(0).normalize());
       VectorUtil.createArc(dir, Vector3d.PLUS_J, Math.PI / 3, 3).forEach(v -> {
         builder.build(user.world(), center.add(v.multiply(0.6)));
