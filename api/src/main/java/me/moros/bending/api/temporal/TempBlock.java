@@ -334,8 +334,10 @@ public final class TempBlock extends Temporary {
 
     private BlockState correctData(Block block) {
       BlockState newData = state;
+      boolean infiniteWater = false;
       if (fixWater) {
-        BlockType mat = WorldUtil.isInfiniteWater(block) ? BlockType.WATER : BlockType.AIR;
+        infiniteWater = WorldUtil.isInfiniteWater(block);
+        BlockType mat = infiniteWater ? BlockType.WATER : BlockType.AIR;
         Block above = block.offset(Direction.UP);
         if (mat == BlockType.AIR && MaterialUtil.isWater(above)) {
           newData = calculateWaterData(above);
@@ -348,7 +350,7 @@ public final class TempBlock extends Temporary {
       if (waterlogged != null) {
         if (waterlogged && newData.type().isAir()) {
           return old.withProperty(StateProperty.WATERLOGGED, false);
-        } else if (!waterlogged && newData.type() == BlockType.WATER) {
+        } else if (infiniteWater || (!waterlogged && newData.type() == BlockType.WATER)) {
           return old.withProperty(StateProperty.WATERLOGGED, true);
         }
       }

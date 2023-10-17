@@ -20,6 +20,7 @@
 package me.moros.bending.api.user;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -135,8 +136,13 @@ sealed class BendingUser implements User permits BendingPlayer {
   public boolean chooseElement(Element element) {
     if (game().eventBus().postElementChangeEvent(this, element, ElementAction.CHOOSE)) {
       elements.set(ElementSet.of(element));
-      slots.validate(desc -> hasElement(desc.element()));
-      validateAbilities();
+      Preset elementPreset = presetByName(element.name().toLowerCase(Locale.ROOT));
+      if (elementPreset != null) {
+        slots.fromPreset(elementPreset, this::validate);
+      } else {
+        slots.validate(desc -> hasElement(desc.element()));
+        validateAbilities();
+      }
       board().updateAll();
       return true;
     }

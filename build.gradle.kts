@@ -3,4 +3,4 @@ plugins {
 }
 
 group = "me.moros"
-version = "3.4.1-SNAPSHOT"
+version = "3.4.1"
