@@ -110,11 +110,8 @@ public class Torrent extends AbilityInstance {
           user.addCooldown(description(), userConfig.cooldown);
         }
       }
-    } else {
-      State current = states.current();
-      if (current instanceof TorrentStream torrentStream) {
-        torrentStream.clicked = true;
-      }
+    } else if (states.current() instanceof TorrentStream torrentStream) {
+      torrentStream.clicked = true;
     }
   }
 

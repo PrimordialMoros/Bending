@@ -130,7 +130,7 @@ public class FireBreath extends AbilityInstance {
 
     public FireStream(Ray ray) {
       super(user, ray, 0.4, 0.5);
-      canCollide = BlockType::isLiquid;
+      canCollide = t -> t.isLiquid() || t == BlockType.SNOW;
     }
 
     @Override

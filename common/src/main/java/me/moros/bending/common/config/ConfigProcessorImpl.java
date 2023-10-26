@@ -36,9 +36,7 @@ import me.moros.bending.api.config.attribute.ModifierOperation;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.logging.Logger;
 import org.spongepowered.configurate.CommentedConfigurationNode;
-import org.spongepowered.configurate.NodePath;
 import org.spongepowered.configurate.reference.ConfigurationReference;
-import org.spongepowered.configurate.reference.ValueReference;
 import org.spongepowered.configurate.serialize.SerializationException;
 
 @SuppressWarnings("unchecked")
@@ -55,22 +53,16 @@ record ConfigProcessorImpl(Logger logger,
 
   @Override
   public <T extends Configurable> T calculate(Ability ability, T config) {
-    T copied = config.external() ? config : get(config);
-    return process(ability, copied);
+    return process(ability, config);
   }
 
   <T extends Configurable> T get(T def) {
+    if (def.external()) {
+      return def;
+    }
     CommentedConfigurationNode node = root.node().node(def.path());
     try {
       return (T) node.get(def.getClass(), def);
-    } catch (SerializationException e) {
-      throw new UncheckedIOException(e);
-    }
-  }
-
-  <T extends Configurable> ValueReference<T, CommentedConfigurationNode> getReference(T def) {
-    try {
-      return root.referenceTo((Class<T>) def.getClass(), NodePath.of(def.path().toArray()), def);
     } catch (SerializationException e) {
       throw new UncheckedIOException(e);
     }
