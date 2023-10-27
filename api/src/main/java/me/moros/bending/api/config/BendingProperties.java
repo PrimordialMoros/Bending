@@ -124,4 +124,8 @@ public interface BendingProperties {
   default boolean lazyLoad() {
     return false;
   }
+
+  default int maxPresets() {
+    return 0;
+  }
 }

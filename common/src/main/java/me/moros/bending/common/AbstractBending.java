@@ -99,6 +99,17 @@ public abstract class AbstractBending<T> implements Bending {
     }
   }
 
+  protected void softDisable() {
+    if (game != null) {
+      addonLoader.unloadAll();
+      game.cleanup();
+      game.storage().close();
+      Tasker.sync().clear(); // Clear any sync tasks
+      GameProviderUtil.unregisterProvider();
+      game = null;
+    }
+  }
+
   protected void disable() {
     if (game != null) {
       addonLoader.unloadAll();

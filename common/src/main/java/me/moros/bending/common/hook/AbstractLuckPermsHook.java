@@ -25,14 +25,17 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
 
 import me.moros.bending.api.ability.element.Element;
+import me.moros.bending.api.config.BendingProperties;
 import me.moros.bending.api.user.User;
 import net.luckperms.api.context.ContextCalculator;
 import net.luckperms.api.context.ContextConsumer;
 import net.luckperms.api.context.ContextManager;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
+import net.luckperms.api.model.user.UserManager;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -109,6 +112,16 @@ public abstract class AbstractLuckPermsHook<T> {
 
     private ContextSet createContextSet(boolean value) {
       return ImmutableContextSet.of("bending:" + key, String.valueOf(value));
+    }
+  }
+
+  public record LPPresetMeta(UserManager userManager) implements ToIntFunction<User> {
+    @Override
+    public int applyAsInt(User user) {
+      var lpUser = userManager.getUser(user.uuid());
+      return lpUser != null ? lpUser.getCachedData().getMetaData(lpUser.getQueryOptions())
+        .getMetaValue("bending-max-presets", Integer::parseInt)
+        .orElseGet(BendingProperties.instance()::maxPresets) : 0;
     }
   }
 }

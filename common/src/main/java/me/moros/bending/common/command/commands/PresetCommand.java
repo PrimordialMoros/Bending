@@ -73,7 +73,7 @@ public record PresetCommand<C extends Audience>(Commander<C> commander) implemen
     if (presets.isEmpty()) {
       Message.NO_PRESETS.send(user);
     } else {
-      Message.PRESET_LIST_HEADER.send(user);
+      Message.PRESET_LIST_HEADER.send(user, user.presetSize());
       JoinConfiguration sep = JoinConfiguration.commas(true);
       user.sendMessage(Component.join(sep, presets.stream().map(Preset::meta).toList()).colorIfAbsent(ColorPalette.TEXT_COLOR));
     }

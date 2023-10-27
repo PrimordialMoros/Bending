@@ -42,6 +42,8 @@ public final class BendingPropertiesImpl extends Configurable implements Bending
   private boolean generateLight = Holder.DEFAULTS.canGenerateLight();
   private boolean lazyLoad = Holder.DEFAULTS.lazyLoad();
 
+  private int maxPresets = Holder.DEFAULTS.maxPresets();
+
   @Override
   public List<String> path() {
     return List.of("properties");
@@ -100,5 +102,10 @@ public final class BendingPropertiesImpl extends Configurable implements Bending
   @Override
   public boolean lazyLoad() {
     return lazyLoad;
+  }
+
+  @Override
+  public int maxPresets() {
+    return maxPresets;
   }
 }

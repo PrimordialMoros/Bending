@@ -19,6 +19,8 @@
 
 package me.moros.bending.paper.hook;
 
+import java.util.function.ToIntFunction;
+
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.hook.AbstractLuckPermsHook;
@@ -39,12 +41,13 @@ public final class LuckPermsHook extends AbstractLuckPermsHook<Player> {
     return Registries.BENDERS.get(user.getUniqueId());
   }
 
-  public static boolean register(ServicesManager manager) {
+  public static @Nullable ToIntFunction<User> register(ServicesManager manager) {
     RegisteredServiceProvider<LuckPerms> provider = manager.getRegistration(LuckPerms.class);
     if (provider != null) {
-      new LuckPermsHook(provider.getProvider().getContextManager());
-      return true;
+      var luckPerms = provider.getProvider();
+      new LuckPermsHook(luckPerms.getContextManager());
+      return new LPPresetMeta(luckPerms.getUserManager());
     }
-    return false;
+    return null;
   }
 }

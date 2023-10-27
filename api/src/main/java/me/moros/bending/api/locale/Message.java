@@ -45,7 +45,8 @@ public interface Message {
 
   Args0 INVALID_PRESET_NAME = () -> translatable("bending.command.preset.invalid-name", FAIL);
   Args0 NO_PRESETS = () -> translatable("bending.command.preset.list-not-found", WARN);
-  Args0 PRESET_LIST_HEADER = () -> translatable("bending.command.preset.list.header", HEADER);
+  Args1<Integer> PRESET_LIST_HEADER = count -> translatable("bending.command.preset.list.header", HEADER)
+    .args(text(count, NEUTRAL));
   Args0 EMPTY_PRESET = () -> translatable("bending.command.preset.create-empty", WARN);
   Args0 HOVER_PRESET = () -> translatable("bending.command.preset.hover", NEUTRAL);
 
@@ -57,6 +58,8 @@ public interface Message {
     .args(text(preset));
   Args1<String> PRESET_FAIL = preset -> translatable("bending.command.preset.register-fail", FAIL)
     .args(text(preset));
+  Args1<Integer> PRESET_LIMIT = limit -> translatable("bending.command.preset.register-limit", WARN)
+    .args(text(limit, NEUTRAL));
 
   Args1<String> PRESET_REMOVE_SUCCESS = preset -> translatable("bending.command.preset.remove-success", SUCCESS)
     .args(text(preset));

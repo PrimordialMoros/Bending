@@ -37,6 +37,12 @@ public interface PresetUser {
   Set<Preset> presets();
 
   /**
+   * Get the current number of presets for this user.
+   * @return the number of registered presets
+   */
+  int presetSize();
+
+  /**
    * Get this user's preset by its name.
    * @param name the preset name to find
    * @return the specified preset if found, null otherwise

@@ -307,6 +307,11 @@ sealed class BendingUser implements User permits BendingPlayer {
   }
 
   @Override
+  public int presetSize() {
+    return presets.size();
+  }
+
+  @Override
   public @Nullable Preset presetByName(String name) {
     return presets.stream().filter(p -> p.name().equalsIgnoreCase(name)).findAny().orElse(null);
   }

@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Locale;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
 import cloud.commandframework.execution.CommandExecutionCoordinator;
@@ -35,6 +36,7 @@ import me.moros.bending.api.user.User;
 import me.moros.bending.common.AbstractBending;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.hook.MiniPlaceholdersHook;
+import me.moros.bending.common.listener.PresetLimits;
 import me.moros.bending.common.logging.Logger;
 import me.moros.bending.common.util.ReflectionUtil;
 import me.moros.bending.paper.hook.LuckPermsHook;
@@ -100,9 +102,11 @@ final class PaperBending extends AbstractBending<BendingBootstrap> {
     if (server.getPluginManager().isPluginEnabled("MiniPlaceholders")) {
       new MiniPlaceholdersHook().init();
     }
+    ToIntFunction<User> limiter = null;
     if (server.getPluginManager().isPluginEnabled("LuckPerms")) {
-      LuckPermsHook.register(server.getServicesManager());
+      limiter = LuckPermsHook.register(server.getServicesManager());
     }
+    PresetLimits.register(game.eventBus(), limiter);
     setupCustomCharts(new Metrics(parent, 8717));
   }
 

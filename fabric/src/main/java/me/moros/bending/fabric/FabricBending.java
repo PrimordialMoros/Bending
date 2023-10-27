@@ -38,7 +38,6 @@ import me.moros.bending.common.AbstractBending;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.hook.MiniPlaceholdersHook;
 import me.moros.bending.common.logging.Slf4jLogger;
-import me.moros.bending.common.util.GameProviderUtil;
 import me.moros.bending.common.util.Initializer;
 import me.moros.bending.common.util.ReflectionUtil;
 import me.moros.bending.fabric.game.DummyGame;
@@ -118,11 +117,7 @@ final class FabricBending extends AbstractBending<ModContainer> {
       if (fullShutdown) {
         disable();
       } else {
-        game.cleanup();
-        game.storage().close();
-        Tasker.sync().clear(); // Clear any sync tasks
-        GameProviderUtil.unregisterProvider();
-        game = null;
+        softDisable();
       }
       phase = LoadPhase.LOADING;
     }

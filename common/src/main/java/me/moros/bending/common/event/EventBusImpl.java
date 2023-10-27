@@ -30,6 +30,7 @@ import me.moros.bending.api.event.ActionLimitEvent;
 import me.moros.bending.api.event.BendingDamageEvent;
 import me.moros.bending.api.event.BendingEvent;
 import me.moros.bending.api.event.BendingExplosionEvent;
+import me.moros.bending.api.event.Cancellable;
 import me.moros.bending.api.event.ElementChangeEvent.ElementAction;
 import me.moros.bending.api.event.EventBus;
 import me.moros.bending.api.event.TickEffectEvent;
@@ -42,7 +43,6 @@ import me.moros.bending.api.util.BendingEffect;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.key.Key;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
 
 public class EventBusImpl implements EventBus {
   private final net.kyori.event.EventBus<BendingEvent> eventBus;
@@ -70,7 +70,7 @@ public class EventBusImpl implements EventBus {
     if (closed) {
       throw new IllegalStateException("Eventbus has been terminated, cannot post new events!");
     }
-    return eventBus.post(event).wasSuccessful();
+    return eventBus.post(event).wasSuccessful() && (!(event instanceof Cancellable c) || !c.cancelled());
   }
 
   @Override
