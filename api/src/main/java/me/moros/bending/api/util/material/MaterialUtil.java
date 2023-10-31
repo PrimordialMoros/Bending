@@ -72,14 +72,14 @@ public final class MaterialUtil {
     );
 
     ORES = Map.ofEntries(
-      entry(BlockType.COPPER_ORE, Item.COAL), entry(BlockType.DEEPSLATE_COPPER_ORE, Item.COAL),
       entry(BlockType.COAL_ORE, Item.COAL), entry(BlockType.DEEPSLATE_COAL_ORE, Item.COAL),
       entry(BlockType.LAPIS_ORE, Item.LAPIS_LAZULI), entry(BlockType.DEEPSLATE_LAPIS_ORE, Item.LAPIS_LAZULI),
       entry(BlockType.REDSTONE_ORE, Item.REDSTONE), entry(BlockType.DEEPSLATE_REDSTONE_ORE, Item.REDSTONE),
       entry(BlockType.DIAMOND_ORE, Item.DIAMOND), entry(BlockType.DEEPSLATE_DIAMOND_ORE, Item.DIAMOND),
       entry(BlockType.EMERALD_ORE, Item.EMERALD), entry(BlockType.DEEPSLATE_EMERALD_ORE, Item.EMERALD),
-      entry(BlockType.IRON_ORE, Item.IRON_INGOT), entry(BlockType.DEEPSLATE_IRON_ORE, Item.IRON_INGOT),
-      entry(BlockType.GOLD_ORE, Item.GOLD_INGOT), entry(BlockType.DEEPSLATE_GOLD_ORE, Item.GOLD_INGOT),
+      entry(BlockType.IRON_ORE, Item.RAW_IRON), entry(BlockType.DEEPSLATE_IRON_ORE, Item.RAW_IRON),
+      entry(BlockType.GOLD_ORE, Item.RAW_GOLD), entry(BlockType.DEEPSLATE_GOLD_ORE, Item.RAW_GOLD),
+      entry(BlockType.COPPER_ORE, Item.RAW_COPPER), entry(BlockType.DEEPSLATE_COPPER_ORE, Item.RAW_COPPER),
       entry(BlockType.NETHER_QUARTZ_ORE, Item.QUARTZ), entry(BlockType.NETHER_GOLD_ORE, Item.GOLD_NUGGET)
     );
 

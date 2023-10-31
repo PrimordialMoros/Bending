@@ -168,9 +168,9 @@ public class EarthTunnel extends AbilityInstance {
   }
 
   private int getAmount(Item type) {
-    if (type == Item.COAL || type == Item.DIAMOND || type == Item.EMERALD || type == Item.QUARTZ || type == Item.IRON_INGOT || type == Item.GOLD_INGOT) {
+    if (type == Item.COAL || type == Item.DIAMOND || type == Item.EMERALD || type == Item.QUARTZ || type == Item.RAW_IRON || type == Item.RAW_GOLD) {
       return 1;
-    } else if (type == Item.REDSTONE) {
+    } else if (type == Item.REDSTONE || type == Item.RAW_COPPER) {
       return 5;
     } else if (type == Item.GOLD_NUGGET) {
       return 6;
