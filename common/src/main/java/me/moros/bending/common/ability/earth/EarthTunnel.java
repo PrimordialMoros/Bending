@@ -42,10 +42,12 @@ import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.common.config.ConfigManager;
+import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 public class EarthTunnel extends AbilityInstance {
   private static final Config config = ConfigManager.load(Config::new);
@@ -96,7 +98,8 @@ public class EarthTunnel extends AbilityInstance {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-    for (int i = 0; i < 2; i++) {
+    int count = 0;
+    while (++count <= userConfig.speed) {
       if (distance > userConfig.range) {
         return UpdateResult.REMOVE;
       }
@@ -121,22 +124,19 @@ public class EarthTunnel extends AbilityInstance {
 
         if (++radius > userConfig.radius) {
           radius = 0;
-          if (++distance > userConfig.range) {
-            return UpdateResult.REMOVE;
-          }
+          distance++;
         }
       } else {
         if (radius <= 0) {
           radius++;
         } else {
-          angle += 22.5 / radius;
+          angle += FastMath.ceil(22.5 / radius);
         }
       }
     }
     return UpdateResult.CONTINUE;
   }
 
-  // TODO tweak drop rates
   private void extract(Block block) {
     if (TempBlock.MANAGER.isTemp(block)) {
       return;
@@ -199,6 +199,9 @@ public class EarthTunnel extends AbilityInstance {
     private double range = 10;
     @Modifiable(Attribute.RADIUS)
     private double radius = 1;
+    @Comment("How many blocks to excavate every tick")
+    @Modifiable(Attribute.SPEED)
+    private int speed = 2;
     private boolean extractOres = true;
 
     @Override

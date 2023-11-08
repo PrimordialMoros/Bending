@@ -71,7 +71,7 @@ public final class ParticleMapper {
     if (p == ITEM_SLIME) return org.bukkit.Particle.SLIME;
     if (p == HEART) return org.bukkit.Particle.HEART;
     if (p == ITEM) return org.bukkit.Particle.ITEM_CRACK;
-    if (p == BLOCK) return org.bukkit.Particle.BLOCK_DUST;
+    if (p == BLOCK) return org.bukkit.Particle.BLOCK_CRACK;
     if (p == RAIN) return org.bukkit.Particle.WATER_DROP;
     if (p == ELDER_GUARDIAN) return org.bukkit.Particle.MOB_APPEARANCE;
     if (p == DRAGON_BREATH) return org.bukkit.Particle.DRAGON_BREATH;

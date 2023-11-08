@@ -53,7 +53,7 @@ record ConfigProcessorImpl(Logger logger,
 
   @Override
   public <T extends Configurable> T calculate(Ability ability, T config) {
-    return process(ability, config);
+    return process(ability, get(config));
   }
 
   <T extends Configurable> T get(T def) {

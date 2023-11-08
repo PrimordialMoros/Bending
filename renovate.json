@@ -6,7 +6,7 @@
   "schedule": [
     "after 6pm on the 6th day of the month"
   ],
-  "ignoreDeps": ["articdata", "towny"],
+  "ignoreDeps": ["articdata", "fabric-api"],
   "packageRules": [
     {
       "groupName": "all non-major dependencies",
