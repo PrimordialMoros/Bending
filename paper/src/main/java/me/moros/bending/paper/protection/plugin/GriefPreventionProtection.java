@@ -21,9 +21,9 @@ package me.moros.bending.paper.protection.plugin;
 
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.LivingEntity;
+import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.protection.AbstractProtection;
 import me.moros.bending.paper.platform.PlatformAdapter;
-import me.moros.bending.paper.platform.entity.BukkitPlayer;
 import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import org.bukkit.Location;
@@ -39,9 +39,9 @@ public final class GriefPreventionProtection extends AbstractProtection {
 
   @Override
   public boolean canBuild(LivingEntity entity, Block block) {
-    if (entity instanceof BukkitPlayer player) {
+    if (entity instanceof Player player) {
       var loc = new Location(PlatformAdapter.toBukkitWorld(block.world()), block.blockX(), block.blockY(), block.blockZ());
-      String reason = griefPrevention.allowBuild(player.handle(), loc);
+      String reason = griefPrevention.allowBuild(PlatformAdapter.toBukkitEntity(player), loc);
       Claim claim = griefPrevention.dataStore.getClaimAt(loc, true, null);
       return reason == null || claim == null || claim.siegeData != null;
     }

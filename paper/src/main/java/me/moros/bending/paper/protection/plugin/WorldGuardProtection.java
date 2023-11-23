@@ -21,7 +21,6 @@ package me.moros.bending.paper.protection.plugin;
 
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.util.Location;
-import com.sk89q.worldedit.world.World;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
@@ -31,9 +30,9 @@ import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.LivingEntity;
+import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.protection.AbstractProtection;
 import me.moros.bending.paper.platform.PlatformAdapter;
-import me.moros.bending.paper.platform.entity.BukkitPlayer;
 import org.bukkit.plugin.Plugin;
 
 public final class WorldGuardProtection extends AbstractProtection {
@@ -52,10 +51,9 @@ public final class WorldGuardProtection extends AbstractProtection {
     var w = PlatformAdapter.toBukkitWorld(block.world());
     Location location = BukkitAdapter.adapt(new org.bukkit.Location(w, block.blockX(), block.blockY(), block.blockZ()));
     StateFlag flagToCheck = bendingFlag == null ? Flags.BUILD : bendingFlag;
-    if (entity instanceof BukkitPlayer player) {
-      LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player.handle());
-      World world = BukkitAdapter.adapt(w);
-      if (worldGuard.getPlatform().getSessionManager().hasBypass(localPlayer, world)) {
+    if (entity instanceof Player player) {
+      LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(PlatformAdapter.toBukkitEntity(player));
+      if (worldGuard.getPlatform().getSessionManager().hasBypass(localPlayer, localPlayer.getWorld())) {
         return true;
       }
       return query.testState(location, localPlayer, flagToCheck);

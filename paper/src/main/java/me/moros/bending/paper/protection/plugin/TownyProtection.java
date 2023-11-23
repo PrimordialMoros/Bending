@@ -25,9 +25,9 @@ import com.palmergames.bukkit.towny.object.TownyPermission;
 import com.palmergames.bukkit.towny.utils.PlayerCacheUtil;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.LivingEntity;
+import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.protection.AbstractProtection;
 import me.moros.bending.paper.platform.PlatformAdapter;
-import me.moros.bending.paper.platform.entity.BukkitPlayer;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.plugin.Plugin;
@@ -43,8 +43,9 @@ public final class TownyProtection extends AbstractProtection {
   @Override
   public boolean canBuild(LivingEntity entity, Block block) {
     var loc = new Location(PlatformAdapter.toBukkitWorld(block.world()), block.blockX(), block.blockY(), block.blockZ());
-    if (entity instanceof BukkitPlayer player) {
-      return PlayerCacheUtil.getCachePermission(player.handle(), loc, Material.DIRT, TownyPermission.ActionType.BUILD);
+    if (entity instanceof Player player) {
+      var bukkitPlayer = PlatformAdapter.toBukkitEntity(player);
+      return PlayerCacheUtil.getCachePermission(bukkitPlayer, loc, Material.DIRT, TownyPermission.ActionType.BUILD);
     }
     TownBlock townBlock = api.getTownBlock(loc);
     return townBlock == null || !townBlock.hasTown();

@@ -24,9 +24,9 @@ import com.griefcraft.lwc.LWCPlugin;
 import com.griefcraft.model.Protection;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.LivingEntity;
+import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.protection.AbstractProtection;
 import me.moros.bending.paper.platform.PlatformAdapter;
-import me.moros.bending.paper.platform.entity.BukkitPlayer;
 import org.bukkit.plugin.Plugin;
 
 public final class LWCProtection extends AbstractProtection {
@@ -39,10 +39,10 @@ public final class LWCProtection extends AbstractProtection {
 
   @Override
   public boolean canBuild(LivingEntity entity, Block block) {
-    if (entity instanceof BukkitPlayer player) {
+    if (entity instanceof Player player) {
       var b = PlatformAdapter.toBukkitWorld(block.world()).getBlockAt(block.blockX(), block.blockY(), block.blockZ());
       Protection protection = lwc.getProtectionCache().getProtection(b);
-      return protection == null || lwc.canAccessProtection(player.handle(), protection);
+      return protection == null || lwc.canAccessProtection(PlatformAdapter.toBukkitEntity(player), protection);
     }
     return true;
   }

@@ -2,7 +2,7 @@
 math = "2.0.0"
 tasker = "1.0.1"
 adventure = "4.14.0"
-adventure-fabric = "5.10.0"
+adventure-fabric = "5.10.1"
 configurate = "4.1.2"
 cloud = "1.8.4"
 cloud-snapshot = "1.8.0-SNAPSHOT"
@@ -15,7 +15,7 @@ fabric-loom = "1.4.4"
 fabric-api = "0.90.7+1.20.2"
 fabric-loader = "0.14.24"
 shadow = "8.1.1"
-flyway = "10.0.0"
+flyway = "10.0.1"
 junit = "5.10.1"
 
 [libraries]
@@ -48,7 +48,7 @@ adventure-fabric = { module = "net.kyori:adventure-platform-fabric", version.ref
 adventure-legacy = { module = "net.kyori:adventure-text-serializer-legacy", version.ref = "adventure" }
 
 luckperms-api = { module = "net.luckperms:api", version = "5.4" }
-mini-placeholders = { module = "io.github.miniplaceholders:miniplaceholders-api", version = "2.2.2" }
+mini-placeholders = { module = "io.github.miniplaceholders:miniplaceholders-api", version = "2.2.3" }
 
 configurate-core = { module = "org.spongepowered:configurate-core", version.ref = "configurate" }
 configurate-hocon = { module = "org.spongepowered:configurate-hocon", version.ref = "configurate" }
@@ -65,8 +65,8 @@ cloud-sponge = { module = "cloud.commandframework:cloud-sponge", version.ref = "
 
 # Databases
 mysql = { module = "com.mysql:mysql-connector-j", version = "8.2.0" }
-mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.2.0" }
-postgresql = { module = "org.postgresql:postgresql", version = "42.6.0" }
+mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.3.0" }
+postgresql = { module = "org.postgresql:postgresql", version = "42.7.0" }
 h2 = { module = "com.h2database:h2", version = "2.2.224" }
 hsql = { module = "org.hsqldb:hsqldb", version = "2.7.2" }
 
@@ -82,7 +82,7 @@ fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.
 paper = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
 inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.12" }
 grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.1" }
-towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.100.0.1" }
+towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.100.0.5" }
 lwc = { module = "com.griefcraft:lwc", version = "2.3.1" }
 worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.9" }
 papi = { module = "me.clip:placeholderapi", version = "2.11.5" }
@@ -95,7 +95,7 @@ sponge-mixin = { module = "org.spongepowered:mixin", version = "0.8.5" }
 # Plugins for build-logic
 shadow = { module = "com.github.johnrengelman:shadow", version.ref = "shadow" }
 vanilla = { module = "org.spongepowered:vanillagradle", version = "0.2.1-SNAPSHOT" }
-minotaur = { module = "com.modrinth.minotaur:Minotaur", version = "2.8.4" }
+minotaur = { module = "com.modrinth.minotaur:Minotaur", version = "2.8.5" }
 checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.35" }
 
 [bundles]
@@ -113,4 +113,4 @@ fabric-loom = { id = "fabric-loom", version.ref = "fabric-loom" }
 userdev = { id = "io.papermc.paperweight.userdev", version = "1.5.9" }
 sponge = { id = "org.spongepowered.gradle.plugin", version = "2.2.0" }
 hangar = { id = "io.papermc.hangar-publish-plugin", version = "0.1.0" }
-run-paper = { id = "xyz.jpenilla.run-paper", version = "2.2.0" }
+run-paper = { id = "xyz.jpenilla.run-paper", version = "2.2.2" }
