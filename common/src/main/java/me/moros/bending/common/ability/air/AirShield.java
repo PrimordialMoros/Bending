@@ -22,11 +22,13 @@ package me.moros.bending.common.ability.air;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
 
 import me.moros.bending.api.ability.Ability;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.AbilityInstance;
 import me.moros.bending.api.ability.Activation;
+import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.collision.Collision;
 import me.moros.bending.api.collision.CollisionUtil;
 import me.moros.bending.api.collision.geometry.Collider;
@@ -146,20 +148,41 @@ public class AirShield extends AbilityInstance {
     return List.of(Sphere.of(center, userConfig.radius));
   }
 
+  private void forEachSurfaceBlock(Consumer<Block> consumer) {
+    int r = FastMath.ceil(userConfig.radius);
+    double rMinSq = (userConfig.radius - 1) * (userConfig.radius - 1);
+    double rMaxSq = userConfig.radius * userConfig.radius;
+    for (double x = center.x() - r; x <= center.x() + r; x++) {
+      for (double y = center.y() - r; y <= center.y() + r; y++) {
+        for (double z = center.z() - r; z <= center.z() + r; z++) {
+          Vector3d loc = Vector3d.of(x, y, z);
+          double distSq = center.distanceSq(loc);
+          if (distSq < rMinSq || distSq > rMaxSq) {
+            continue;
+          }
+          consumer.accept(user.world().blockAt(loc));
+        }
+      }
+    }
+  }
+
   @Override
   public void onCollision(Collision collision) {
     Ability collidedAbility = collision.collidedAbility();
     if (collidedAbility instanceof FrostBreath) {
-      for (Block block : user.world().nearbyBlocks(center, userConfig.radius, MaterialUtil::isTransparentOrWater)) {
-        if (!user.canBuild(block)) {
-          continue;
+      forEachSurfaceBlock(block -> {
+        if (MaterialUtil.isTransparentOrWater(block) && user.canBuild(block)) {
+          WorldUtil.tryBreakPlant(block);
+          if (MaterialUtil.isAir(block) || MaterialUtil.isWater(block)) {
+            TempBlock.ice().duration(BendingProperties.instance().iceRevertTime(1500)).build(block);
+          }
         }
-        WorldUtil.tryBreakPlant(block);
-        if (MaterialUtil.isAir(block) || MaterialUtil.isWater(block)) {
-          long iceDuration = BendingProperties.instance().iceRevertTime(1500);
-          TempBlock.ice().duration(iceDuration).build(block);
-        }
-      }
+      });
+    } else if (collidedAbility.description().element() == Element.FIRE) {
+      double r = userConfig.radius;
+      Vector3d pos = center.add(collision.colliderOther().position().subtract(center).normalize().multiply(r));
+      ParticleBuilder.fire(collidedAbility.user(), pos).count(20).offset(0.1).extra(0.05).spawn(user.world());
+      SoundEffect.FIRE_EXTINGUISH.play(user.world(), pos);
     }
   }
 
