@@ -39,13 +39,11 @@ import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.common.ability.air.sequence.AirWheel;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class AirScooter extends AbilityInstance {
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -110,11 +108,6 @@ public class AirScooter extends AbilityInstance {
     user.addCooldown(description(), userConfig.cooldown);
   }
 
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
   private final class Scooter extends AbstractRide {
     private static final double RADIUS = 0.8;
     private double verticalPosition = 0;
@@ -153,7 +146,7 @@ public class AirScooter extends AbilityInstance {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.SPEED)
     private double speed = 0.7;
     @Modifiable(Attribute.COOLDOWN)

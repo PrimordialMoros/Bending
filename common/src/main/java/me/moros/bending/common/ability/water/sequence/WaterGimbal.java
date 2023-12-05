@@ -61,13 +61,11 @@ import me.moros.bending.common.ability.water.WaterRing;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class WaterGimbal extends AbilityInstance {
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -163,11 +161,6 @@ public class WaterGimbal extends AbilityInstance {
     if (current instanceof GimbalStream gimbalStream) {
       gimbalStream.cleanAll();
     }
-  }
-
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
   }
 
   @Override
@@ -316,7 +309,7 @@ public class WaterGimbal extends AbilityInstance {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 10000;
     @Modifiable(Attribute.SELECTION)

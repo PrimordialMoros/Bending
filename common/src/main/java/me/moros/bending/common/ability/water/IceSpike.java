@@ -52,13 +52,11 @@ import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.api.util.material.WaterMaterials;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class IceSpike extends AbilityInstance {
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -170,11 +168,6 @@ public class IceSpike extends AbilityInstance {
     }
   }
 
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
   private final class IcePillar implements Updatable {
     private final Block origin;
     private final BlockType material;
@@ -257,7 +250,7 @@ public class IceSpike extends AbilityInstance {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.SELECTION)
     private double selectRange = 10;
     @Modifiable(Attribute.DAMAGE)

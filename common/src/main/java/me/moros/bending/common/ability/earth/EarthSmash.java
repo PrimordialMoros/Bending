@@ -19,11 +19,9 @@
 
 package me.moros.bending.common.ability.earth;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,20 +29,17 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import me.moros.bending.api.ability.Ability;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.AbilityInstance;
 import me.moros.bending.api.ability.Activation;
 import me.moros.bending.api.ability.Updatable;
-import me.moros.bending.api.ability.common.FragileStructure;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.collision.Collision;
 import me.moros.bending.api.collision.CollisionUtil;
 import me.moros.bending.api.collision.geometry.AABB;
 import me.moros.bending.api.collision.geometry.Collider;
-import me.moros.bending.api.collision.geometry.Ray;
 import me.moros.bending.api.config.BendingProperties;
 import me.moros.bending.api.config.Configurable;
 import me.moros.bending.api.config.attribute.Attribute;
@@ -58,7 +53,6 @@ import me.moros.bending.api.platform.entity.EntityUtil;
 import me.moros.bending.api.platform.particle.Particle;
 import me.moros.bending.api.platform.potion.PotionEffect;
 import me.moros.bending.api.platform.sound.SoundEffect;
-import me.moros.bending.api.platform.world.World;
 import me.moros.bending.api.platform.world.WorldUtil;
 import me.moros.bending.api.temporal.TempBlock;
 import me.moros.bending.api.temporal.TempEntity;
@@ -71,22 +65,19 @@ import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.api.util.material.WaterMaterials;
+import me.moros.bending.common.ability.earth.util.Boulder;
 import me.moros.bending.common.ability.fire.FlameRush;
 import me.moros.bending.common.ability.water.FrostBreath;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.FastMath;
-import me.moros.math.Position;
 import me.moros.math.Vector3d;
-import me.moros.math.Vector3i;
 import me.moros.math.VectorUtil;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class EarthSmash extends AbilityInstance {
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
   private RemovalPolicy swappedSlotsPolicy;
@@ -139,7 +130,7 @@ public class EarthSmash extends AbilityInstance {
     if (!state.canSlotSwitch() && swappedSlotsPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-    if (boulder != null && boulder.data.isEmpty()) {
+    if (boulder != null && boulder.isEmpty()) {
       return UpdateResult.REMOVE;
     }
     return state.update();
@@ -165,7 +156,7 @@ public class EarthSmash extends AbilityInstance {
     boulder = new Boulder(user, center, radius, userConfig.maxDuration);
 
     int minRequired = FastMath.ceil(Math.pow(radius, 3) * 0.375);
-    if (boulder.data.size() < minRequired) {
+    if (boulder.dataSize() < minRequired) {
       boulder = null;
       return false;
     }
@@ -210,7 +201,7 @@ public class EarthSmash extends AbilityInstance {
     AABB blockBounds = AABB.BLOCK_BOUNDS.at(block);
     return user.game().abilityManager(user.worldKey()).instances(EarthSmash.class)
       .filter(filter)
-      .filter(s -> s.boulder != null && s.boulder.preciseBounds.at(s.boulder.center).intersects(blockBounds))
+      .filter(s -> s.boulder != null && s.boulder.preciseBounds().at(s.boulder.center()).intersects(blockBounds))
       .findAny().orElse(null);
   }
 
@@ -236,7 +227,7 @@ public class EarthSmash extends AbilityInstance {
   }
 
   private void shatter() {
-    if (boulder != null && !boulder.data.isEmpty()) {
+    if (boulder != null && !boulder.isEmpty()) {
       Map<TempFallingBlock, ShardType> shards = new HashMap<>();
       for (var entry : boulder.data().entrySet()) {
         Vector3d velocity = VectorUtil.gaussianOffset(Vector3d.ZERO, 0.2, 0.1, 0.2);
@@ -250,7 +241,7 @@ public class EarthSmash extends AbilityInstance {
           blockData.type().soundGroup().breakSound().asEffect().play(block);
         }
       }
-      boulder.data.clear();
+      boulder.clearData();
       if (userConfig.shatterEffects) {
         boulder = null;
         state = new ShatteredState(shards);
@@ -266,14 +257,9 @@ public class EarthSmash extends AbilityInstance {
   }
 
   @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
-  @Override
   public void onUserChange(User newUser) {
     this.user = newUser;
-    boulder.user = newUser;
+    boulder.user(newUser);
   }
 
   @Override
@@ -292,12 +278,12 @@ public class EarthSmash extends AbilityInstance {
       shatter = true;
     } else if (collidedAbility instanceof FrostBreath) {
       ThreadLocalRandom rand = ThreadLocalRandom.current();
-      boulder.data.replaceAll((k, v) -> rand.nextBoolean() ? BlockType.ICE.defaultState() : BlockType.PACKED_ICE.defaultState());
+      boulder.updateData((k, v) -> rand.nextBoolean() ? BlockType.ICE.defaultState() : BlockType.PACKED_ICE.defaultState());
       shatter = true;
     }
     if (shatter) {
       if (collidedAbility.description().element() == Element.FIRE || collidedAbility instanceof LavaDisk) {
-        boulder.data.replaceAll((k, v) -> BlockType.MAGMA_BLOCK.defaultState());
+        boulder.updateData((k, v) -> BlockType.MAGMA_BLOCK.defaultState());
       }
       collision.removeSelf(false);
       shatter();
@@ -358,12 +344,12 @@ public class EarthSmash extends AbilityInstance {
     private long nextLiftTime = 0;
 
     private LiftState() {
-      this.origin = boulder.center;
+      this.origin = boulder.center();
     }
 
     @Override
     public UpdateResult update() {
-      Collider liftCollider = boulder.bounds.at(boulder.center.add(Vector3d.PLUS_J));
+      Collider liftCollider = boulder.bounds().at(boulder.center().add(Vector3d.PLUS_J));
       CollisionUtil.handle(user, liftCollider, entity -> {
         Vector3d push = entity.velocity().withY(userConfig.raiseEntityPush);
         return entity.applyVelocity(EarthSmash.this, push);
@@ -375,8 +361,8 @@ public class EarthSmash extends AbilityInstance {
       }
       nextLiftTime = time + 70;
       cleanAll();
-      boulder.center(boulder.center.add(Vector3d.PLUS_J));
-      SoundEffect.EARTH.play(boulder.world, boulder.center);
+      boulder.center(boulder.center().add(Vector3d.PLUS_J));
+      SoundEffect.EARTH.play(boulder.world(), boulder.center());
       render();
       clearSourceArea();
       return UpdateResult.CONTINUE;
@@ -384,11 +370,11 @@ public class EarthSmash extends AbilityInstance {
 
     private void clearSourceArea() {
       tick++;
-      int half = (boulder.size - 1) / 2;
-      if (tick >= boulder.size) {
+      int half = (boulder.size() - 1) / 2;
+      if (tick >= boulder.size()) {
         state = new IdleState();
       } else if (tick == half) {
-        Block originBlock = boulder.world.blockAt(origin);
+        Block originBlock = boulder.world().blockAt(origin);
         for (int z = -half; z <= half; z++) {
           for (int x = -half; x <= half; x++) {
             // Remove bottom layer
@@ -413,15 +399,15 @@ public class EarthSmash extends AbilityInstance {
     private final double grabbedDistance;
 
     private GrabState() {
-      this.grabbedDistance = Math.min(boulder.center.distance(user.eyeLocation()), userConfig.grabRange);
+      this.grabbedDistance = Math.min(boulder.center().distance(user.eyeLocation()), userConfig.grabRange);
     }
 
     @Override
     public UpdateResult update() {
       if (user.sneaking()) {
         Vector3d dir = user.direction().normalize().multiply(grabbedDistance);
-        Block newCenter = boulder.world.blockAt(user.eyeLocation().add(dir));
-        if (newCenter.equals(boulder.world.blockAt(boulder.center))) {
+        Block newCenter = boulder.world().blockAt(user.eyeLocation().add(dir));
+        if (newCenter.equals(boulder.world().blockAt(boulder.center()))) {
           return UpdateResult.CONTINUE;
         }
         boulder.updateData();
@@ -452,10 +438,10 @@ public class EarthSmash extends AbilityInstance {
 
     private ShotState() {
       affectedEntities = new HashSet<>();
-      origin = boulder.center;
+      origin = boulder.center();
       location = origin;
       direction = user.direction();
-      SoundEffect.EARTH.play(boulder.world, boulder.center);
+      SoundEffect.EARTH.play(boulder.world(), boulder.center());
       buffer = speed;
     }
 
@@ -469,13 +455,13 @@ public class EarthSmash extends AbilityInstance {
       CollisionUtil.handle(user, boulder.collider(), this::onEntityHit);
       cleanAll();
       location = location.add(direction);
-      Block newCenter = boulder.world.blockAt(location);
+      Block newCenter = boulder.world().blockAt(location);
       if (!boulder.isValidBlock(newCenter)) {
         shatter();
         return UpdateResult.CONTINUE;
       }
       boulder.center(newCenter);
-      if (origin.distanceSq(boulder.center) > userConfig.shootRange * userConfig.shootRange) {
+      if (origin.distanceSq(boulder.center()) > userConfig.shootRange * userConfig.shootRange) {
         return UpdateResult.REMOVE;
       }
       if (!boulder.blendSmash(direction)) {
@@ -492,7 +478,7 @@ public class EarthSmash extends AbilityInstance {
       }
       affectedEntities.add(entity);
       entity.damage(userConfig.damage, user, description());
-      Vector3d velocity = entity.center().subtract(boulder.center).withY(userConfig.knockup).normalize();
+      Vector3d velocity = entity.center().subtract(boulder.center()).withY(userConfig.knockup).normalize();
       entity.applyVelocity(EarthSmash.this, velocity.multiply(userConfig.knockback));
       return false;
     }
@@ -506,7 +492,7 @@ public class EarthSmash extends AbilityInstance {
   private class IdleState implements EarthSmashState {
     @Override
     public UpdateResult update() {
-      return System.currentTimeMillis() > boulder.expireTime ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+      return System.currentTimeMillis() > boulder.expireTime() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
     }
 
     @Override
@@ -578,106 +564,8 @@ public class EarthSmash extends AbilityInstance {
     }
   }
 
-  private static final class Boulder {
-    private final Map<Vector3i, BlockState> data;
-    private final AABB bounds;
-    private final AABB preciseBounds;
-    private final World world;
-    private User user;
-    private Vector3d center;
-
-    private final int size;
-    private final long expireTime;
-
-    private Boulder(User user, Block centerBlock, int size, long duration) {
-      this.user = user;
-      this.world = user.world();
-      this.size = size;
-      expireTime = System.currentTimeMillis() + duration;
-      data = new HashMap<>();
-      center = centerBlock.center();
-      double hr = size / 2.0;
-      preciseBounds = AABB.of(Vector3d.of(-hr, -hr, -hr), Vector3d.of(hr, hr, hr));
-      bounds = preciseBounds.grow(Vector3d.ONE);
-      int half = (size - 1) / 2;
-      Block temp = centerBlock.offset(Direction.DOWN, half);
-      List<BlockType> earthData = new ArrayList<>();
-      for (int dy = -half; dy <= half; dy++) {
-        for (int dz = -half; dz <= half; dz++) {
-          for (int dx = -half; dx <= half; dx++) {
-            Block block = temp.offset(dx, dy, dz);
-            if (!user.canBuild(block)) {
-              continue;
-            }
-            BlockState bd = null;
-            if (EarthMaterials.isEarthNotLava(user, block)) {
-              bd = MaterialUtil.solidType(block.type()).defaultState();
-              earthData.add(bd.type());
-            } else if (MaterialUtil.isTransparent(block)) {
-              if (earthData.isEmpty()) {
-                bd = BlockType.DIRT.defaultState();
-              } else {
-                bd = earthData.get(ThreadLocalRandom.current().nextInt(earthData.size())).defaultState();
-              }
-            }
-            if (bd != null && (Math.abs(dx) + Math.abs(dy) + Math.abs(dz)) % 2 == 0) {
-              data.put(Vector3i.of(dx, dy, dz), bd);
-            }
-          }
-        }
-      }
-    }
-
-    private boolean isValidBlock(Block block) {
-      if (!MaterialUtil.isTransparent(block) || !TempBlock.isBendable(block)) {
-        return false;
-      }
-      return user.canBuild(block);
-    }
-
-    private void updateData() {
-      data.entrySet().removeIf(entry -> {
-        BlockType type = world.getBlockType(center.add(entry.getKey()));
-        return type != entry.getValue().type();
-      });
-    }
-
-    private boolean blendSmash(Vector3d direction) {
-      int originalSize = data.size();
-      Collection<Block> removed = new ArrayList<>();
-      Iterator<Vector3i> iterator = data.keySet().iterator();
-      while (iterator.hasNext()) {
-        Block block = world.blockAt(center.add(iterator.next()));
-        if (!isValidBlock(block)) {
-          removed.add(block);
-          iterator.remove();
-        }
-      }
-      FragileStructure.tryDamageStructure(removed, 4 * removed.size(), Ray.of(center, direction));
-      return !data.isEmpty() && originalSize - data.size() <= size;
-    }
-
-    private boolean isValidCenter(Block check) {
-      Vector3d temp = check.center();
-      return data.keySet().stream().map(v -> world.blockAt(temp.add(v))).allMatch(this::isValidBlock);
-    }
-
-    private void center(Position position) {
-      this.center = position.center();
-    }
-
-    private Collider collider() {
-      return bounds.at(center);
-    }
-
-    private Map<Block, BlockState> data() {
-      return data.entrySet().stream()
-        .collect(Collectors.toMap(e -> world.blockAt(center.add(e.getKey())), Entry::getValue));
-    }
-  }
-
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 7000;
     @Modifiable(Attribute.RADIUS)

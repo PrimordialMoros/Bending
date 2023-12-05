@@ -55,14 +55,12 @@ import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class FireWall extends AbilityInstance {
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -279,17 +277,12 @@ public class FireWall extends AbilityInstance {
   }
 
   @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
-  @Override
   public Collection<Collider> colliders() {
     return List.of(collider);
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 20_000;
     @Modifiable(Attribute.HEIGHT)

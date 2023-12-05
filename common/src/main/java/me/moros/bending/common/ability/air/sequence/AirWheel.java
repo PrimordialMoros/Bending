@@ -46,7 +46,6 @@ import me.moros.bending.common.ability.air.AirScooter;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class AirWheel extends AbilityInstance {
@@ -54,7 +53,6 @@ public class AirWheel extends AbilityInstance {
   private static final Config config = ConfigManager.load(Config::new);
   private static AbilityDescription scooterDesc;
 
-  private User user;
   private Config userConfig;
 
   private final ExpiringSet<Entity> affectedEntities = new ExpiringSet<>(500);
@@ -145,13 +143,8 @@ public class AirWheel extends AbilityInstance {
     return List.of(collider);
   }
 
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 8000;
     @Modifiable(Attribute.DAMAGE)

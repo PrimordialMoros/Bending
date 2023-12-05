@@ -43,20 +43,21 @@ public final class CommandUtil {
   }
 
   public static <C extends Audience> List<String> combinedSuggestions(C sender) {
-    return Stream.of(Element.NAMES, abilityCompletions(sender, false)).flatMap(Collection::stream).toList();
+    return Stream.of(Element.NAMES, abilityCompletions(sender, false, true)).flatMap(Collection::stream).toList();
   }
 
-  public static <C extends Audience> List<String> abilityCompletions(C sender, boolean validOnly) {
+  public static <C extends Audience> List<String> abilityCompletions(C sender, boolean validOnly, boolean sequenceSuggestions) {
     Predicate<AbilityDescription> predicate = d -> !d.hidden();
+    if (!sequenceSuggestions) {
+      predicate = predicate.and(AbilityDescription::canBind);
+    }
     if (validOnly) {
-      predicate = AbilityDescription::canBind;
       User user = sender.get(Identity.UUID).map(Registries.BENDERS::get).orElse(null);
       if (user != null) {
         predicate = predicate.and(user::hasPermission).and(d -> user.hasElement(d.element()));
       }
     }
-    return Registries.ABILITIES.stream().filter(desc -> !desc.hidden())
-      .filter(predicate).map(AbilityDescription::name).toList();
+    return Registries.ABILITIES.stream().filter(predicate).map(AbilityDescription::name).toList();
   }
 
   public static AbilityDisplay collectAll(Predicate<AbilityDescription> permissionChecker, Element element) {

@@ -26,11 +26,8 @@ import me.moros.bending.api.collision.geometry.AABB;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.material.WaterMaterials;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 public class HydroSink extends AbilityInstance {
-  private User user;
-
   public HydroSink(AbilityDescription desc) {
     super(desc);
   }
@@ -64,10 +61,5 @@ public class HydroSink extends AbilityInstance {
   public static boolean canHydroSink(User user) {
     return user.game().abilityManager(user.worldKey()).firstInstance(user, HydroSink.class)
       .map(HydroSink::canHydroSink).orElse(false);
-  }
-
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
   }
 }

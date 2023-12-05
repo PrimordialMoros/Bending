@@ -49,13 +49,11 @@ import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Combustion extends AbilityInstance implements Explosive {
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -99,11 +97,6 @@ public class Combustion extends AbilityInstance implements Explosive {
       return UpdateResult.REMOVE;
     }
     return beam.update();
-  }
-
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
   }
 
   @Override
@@ -220,7 +213,7 @@ public class Combustion extends AbilityInstance implements Explosive {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 12_000;
     @Modifiable(Attribute.DAMAGE)

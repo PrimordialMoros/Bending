@@ -38,12 +38,10 @@ import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 public class Projectile extends AbilityInstance {
   private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(Vector3d.of(0.25, 0.25, 0.25));
 
-  private final User user;
   private final RemovalPolicy removalPolicy;
 
   private final TempFallingBlock projectile;
@@ -87,11 +85,6 @@ public class Projectile extends AbilityInstance {
   @Override
   public void onDestroy() {
     projectile.revert();
-  }
-
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
   }
 
   @Override

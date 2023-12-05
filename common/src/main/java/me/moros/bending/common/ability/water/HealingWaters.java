@@ -42,7 +42,6 @@ import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.FastMath;
 import net.kyori.adventure.text.Component;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class HealingWaters extends AbilityInstance {
@@ -50,7 +49,6 @@ public class HealingWaters extends AbilityInstance {
 
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -141,13 +139,8 @@ public class HealingWaters extends AbilityInstance {
     }
   }
 
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 3000;
     @Modifiable(Attribute.DURATION)

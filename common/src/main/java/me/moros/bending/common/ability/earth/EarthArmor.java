@@ -48,7 +48,6 @@ import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class EarthArmor extends AbilityInstance {
@@ -56,7 +55,6 @@ public class EarthArmor extends AbilityInstance {
 
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -174,18 +172,13 @@ public class EarthArmor extends AbilityInstance {
     data.asParticle(center).count(8).offset(0.5).spawn(user.world());
   }
 
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
   public static boolean hasArmor(User user) {
     return user.game().abilityManager(user.worldKey()).firstInstance(user, EarthArmor.class)
       .map(e -> e.formed).orElse(false);
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 20_000;
     @Modifiable(Attribute.DURATION)

@@ -54,7 +54,7 @@ public abstract class PermissionInitializer implements Initializer {
 
   private void initAdminNodes() {
     var children = Stream.of(CommandPermissions.ADD, CommandPermissions.REMOVE, CommandPermissions.MODIFY,
-        CommandPermissions.RELOAD, CommandPermissions.IMPORT, CommandPermissions.EXPORT)
+        CommandPermissions.RELOAD, CommandPermissions.IMPORT, CommandPermissions.EXPORT, CommandPermissions.ATTRIBUTE)
       .map(CommandPermission::toString).collect(Collectors.toSet());
     children.add("bending.player");
     children.add("bending.bluefire");

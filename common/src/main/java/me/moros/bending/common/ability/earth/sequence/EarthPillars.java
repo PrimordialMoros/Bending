@@ -47,7 +47,6 @@ import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class EarthPillars extends AbilityInstance {
@@ -55,7 +54,6 @@ public class EarthPillars extends AbilityInstance {
 
   private static AbilityDescription pillarsDesc;
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -138,11 +136,6 @@ public class EarthPillars extends AbilityInstance {
     }
   }
 
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
   private final class EarthPillar extends Pillar {
     private EarthPillar(Builder<EarthPillar> builder) {
       super(builder);
@@ -163,7 +156,7 @@ public class EarthPillars extends AbilityInstance {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 6000;
     @Modifiable(Attribute.RADIUS)

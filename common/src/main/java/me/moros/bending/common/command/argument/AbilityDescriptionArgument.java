@@ -36,10 +36,10 @@ import net.kyori.adventure.audience.Audience;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class AbilityDescriptionArgument<C extends Audience> extends CommandArgument<C, AbilityDescription> {
-  private AbilityDescriptionArgument(boolean required, String name, String defaultValue,
+  private AbilityDescriptionArgument(boolean required, String name, boolean sequenceSuggestions, String defaultValue,
                                      @Nullable BiFunction<CommandContext<C>, String, List<String>> suggestionsProvider,
                                      ArgumentDescription defaultDescription) {
-    super(required, name, new Parser<>(), defaultValue, AbilityDescription.class, suggestionsProvider, defaultDescription);
+    super(required, name, new Parser<>(sequenceSuggestions), defaultValue, AbilityDescription.class, suggestionsProvider, defaultDescription);
   }
 
   public static <C extends Audience> Builder<C> builder(String name) {
@@ -59,8 +59,15 @@ public final class AbilityDescriptionArgument<C extends Audience> extends Comman
   }
 
   public static final class Builder<C extends Audience> extends TypedBuilder<C, AbilityDescription, Builder<C>> {
+    private boolean sequenceSuggestions = false;
+
     private Builder(String name) {
       super(AbilityDescription.class, name);
+    }
+
+    public Builder<C> withSequenceSuggestions(boolean sequenceSuggestions) {
+      this.sequenceSuggestions = sequenceSuggestions;
+      return this;
     }
 
     @Override
@@ -68,6 +75,7 @@ public final class AbilityDescriptionArgument<C extends Audience> extends Comman
       return new AbilityDescriptionArgument<>(
         this.isRequired(),
         this.getName(),
+        this.sequenceSuggestions,
         this.getDefaultValue(),
         this.getSuggestionsProvider(),
         this.getDefaultDescription()
@@ -76,6 +84,12 @@ public final class AbilityDescriptionArgument<C extends Audience> extends Comman
   }
 
   public static final class Parser<C extends Audience> implements ArgumentParser<C, AbilityDescription> {
+    private final boolean sequenceSuggestions;
+
+    public Parser(boolean sequenceSuggestions) {
+      this.sequenceSuggestions = sequenceSuggestions;
+    }
+
     @Override
     public ArgumentParseResult<AbilityDescription> parse(CommandContext<C> commandContext, Queue<String> inputQueue) {
       String input = inputQueue.peek();
@@ -93,12 +107,7 @@ public final class AbilityDescriptionArgument<C extends Audience> extends Comman
 
     @Override
     public List<String> suggestions(CommandContext<C> commandContext, String input) {
-      return CommandUtil.abilityCompletions(commandContext.getSender(), true);
-    }
-
-    @Override
-    public boolean isContextFree() {
-      return true;
+      return CommandUtil.abilityCompletions(commandContext.getSender(), true, sequenceSuggestions);
     }
   }
 }

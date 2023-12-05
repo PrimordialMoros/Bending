@@ -51,14 +51,12 @@ import me.moros.bending.common.ability.AbilityInitializer;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 public class AirSwipe extends AbilityInstance {
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -167,11 +165,6 @@ public class AirSwipe extends AbilityInstance {
     return streams.stream().map(ParticleStream::collider).toList();
   }
 
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
   private class AirStream extends ParticleStream {
     public AirStream(Ray ray) {
       super(user, ray, userConfig.speed, 0.5);
@@ -214,7 +207,7 @@ public class AirSwipe extends AbilityInstance {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 1500;
     @Modifiable(Attribute.DAMAGE)

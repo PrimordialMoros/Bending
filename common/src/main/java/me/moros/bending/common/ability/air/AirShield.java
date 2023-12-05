@@ -53,13 +53,11 @@ import me.moros.bending.common.ability.water.FrostBreath;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class AirShield extends AbilityInstance {
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -139,11 +137,6 @@ public class AirShield extends AbilityInstance {
   }
 
   @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
-  @Override
   public Collection<Collider> colliders() {
     return List.of(Sphere.of(center, userConfig.radius));
   }
@@ -187,7 +180,7 @@ public class AirShield extends AbilityInstance {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 4000;
     @Modifiable(Attribute.DURATION)

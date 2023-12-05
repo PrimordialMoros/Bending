@@ -46,7 +46,6 @@ import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.text.Component;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Tornado extends AbilityInstance {
@@ -54,7 +53,6 @@ public class Tornado extends AbilityInstance {
 
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -175,11 +173,6 @@ public class Tornado extends AbilityInstance {
     user.addCooldown(description(), userConfig.cooldown);
   }
 
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
   public static void switchMode(User user) {
     if (user.selectedAbilityName().equals("Tornado")) {
       var key = KeyUtil.data("tornado-mode", Mode.class);
@@ -192,7 +185,7 @@ public class Tornado extends AbilityInstance {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 4000;
     @Modifiable(Attribute.DURATION)

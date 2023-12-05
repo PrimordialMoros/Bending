@@ -48,14 +48,12 @@ import me.moros.bending.common.ability.air.sequence.AirWheel;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 public class AirBlade extends AbilityInstance {
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -157,11 +155,6 @@ public class AirBlade extends AbilityInstance {
   }
 
   @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
-  @Override
   public Collection<Collider> colliders() {
     return blade == null ? List.of() : List.of(blade.collider());
   }
@@ -217,7 +210,7 @@ public class AirBlade extends AbilityInstance {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 4000;
     @Modifiable(Attribute.RADIUS)

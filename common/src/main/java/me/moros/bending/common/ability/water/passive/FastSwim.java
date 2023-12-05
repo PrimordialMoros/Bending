@@ -27,11 +27,8 @@ import me.moros.bending.api.platform.potion.PotionEffect;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 public class FastSwim extends AbilityInstance {
-
-  private User user;
   private RemovalPolicy removalPolicy;
 
   public FastSwim(AbilityDescription desc) {
@@ -62,10 +59,5 @@ public class FastSwim extends AbilityInstance {
   @Override
   public void onDestroy() {
     EntityUtil.tryRemovePotion(user, PotionEffect.DOLPHINS_GRACE, 100, 0);
-  }
-
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
   }
 }

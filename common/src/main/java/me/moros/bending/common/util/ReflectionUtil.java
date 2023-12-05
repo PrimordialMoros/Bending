@@ -30,6 +30,25 @@ public final class ReflectionUtil {
   private ReflectionUtil() {
   }
 
+  public static <T> @Nullable T findStaticField(Object instance, Class<T> clazz) {
+    T result = null;
+    for (Field field : instance.getClass().getDeclaredFields()) {
+      if (Modifier.isStatic(field.getModifiers()) && clazz.isAssignableFrom(field.getType())) {
+        boolean wasAccessible = field.canAccess(null);
+        try {
+          field.setAccessible(true);
+          result = (T) field.get(null);
+        } catch (IllegalAccessException e) {
+          e.printStackTrace();
+        } finally {
+          field.setAccessible(wasAccessible);
+        }
+        break;
+      }
+    }
+    return result;
+  }
+
   public static Class<?> getClassOrThrow(String fullName) {
     try {
       return Class.forName(fullName);

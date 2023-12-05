@@ -49,7 +49,6 @@ import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 // TODO make tentacle extension animation
@@ -58,7 +57,6 @@ public class OctopusForm extends AbilityInstance {
   private static final double RADIUS = 3.0;
   private static final AABB TENTACLE_BOX = AABB.of(Vector3d.of(-1, 0.0, -1), Vector3d.of(1, 2.5, 1));
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -224,11 +222,6 @@ public class OctopusForm extends AbilityInstance {
     }
   }
 
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
   private final class Tentacle {
     private final Collection<Block> blocks;
     private final double cos, sin;
@@ -263,7 +256,7 @@ public class OctopusForm extends AbilityInstance {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 1000;
     @Modifiable(Attribute.DAMAGE)

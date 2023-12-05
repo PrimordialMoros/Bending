@@ -19,8 +19,13 @@
 
 package me.moros.bending.api.config;
 
+import java.util.Collection;
+
 import me.moros.bending.api.ability.Ability;
+import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.config.attribute.AttributeModifier;
+import me.moros.bending.api.config.attribute.AttributeValue;
+import me.moros.bending.api.user.AttributeUser;
 
 /**
  * Processes {@link Configurable}s by applying attribute modifiers.
@@ -37,5 +42,30 @@ public interface ConfigProcessor {
    * @param <T> the type of config
    * @return the modified config
    */
-  <T extends Configurable> T calculate(Ability ability, T config);
+  default <T extends Configurable> T calculate(Ability ability, T config) {
+    return calculate(ability.user(), ability.description(), config);
+  }
+
+  /**
+   * Calculates new values for the given config after applying {@link AttributeModifier}s.
+   * <p>Note: By default, this method will return a copy of the supplied object, that is loaded from the
+   * main configuration file. For abilities with external configs, they must override
+   * {@link Configurable#external()} to return true. In that case, the method will operate on the same object
+   * that is supplied, so you should make sure to always pass a fresh copy yourself.
+   * @param user the attribute user
+   * @param desc the ability description
+   * @param config the config to process
+   * @param <T> the type of config
+   * @return the modified config
+   */
+  <T extends Configurable> T calculate(AttributeUser user, AbilityDescription desc, T config);
+
+  /**
+   * Utility method that calculates all attributes in a given config.
+   * @param user the attribute user
+   * @param desc the ability description
+   * @param config the config to process
+   * @return a collection of all attributes found
+   */
+  Collection<AttributeValue> listAttributes(AttributeUser user, AbilityDescription desc, Configurable config);
 }

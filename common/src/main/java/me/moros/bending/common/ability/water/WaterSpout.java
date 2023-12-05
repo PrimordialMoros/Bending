@@ -52,13 +52,11 @@ import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.util.TriState;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class WaterSpout extends AbilityInstance implements SpoutAbility {
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -110,11 +108,6 @@ public class WaterSpout extends AbilityInstance implements SpoutAbility {
     column.forEach(spout::clean);
     spout.onDestroy();
     user.addCooldown(description(), userConfig.cooldown);
-  }
-
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
   }
 
   @Override
@@ -176,7 +169,7 @@ public class WaterSpout extends AbilityInstance implements SpoutAbility {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 0;
     @Modifiable(Attribute.HEIGHT)

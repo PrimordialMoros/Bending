@@ -41,13 +41,11 @@ import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.FastMath;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Collapse extends AbilityInstance {
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -142,13 +140,8 @@ public class Collapse extends AbilityInstance {
       .predicate(predicate).build(height);
   }
 
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.SELECTION)
     private double selectRange = 18;
     @Modifiable(Attribute.RADIUS)

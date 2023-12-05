@@ -55,13 +55,11 @@ import me.moros.bending.common.ability.fire.Lightning;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class EarthBlast extends AbilityInstance {
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -182,11 +180,6 @@ public class EarthBlast extends AbilityInstance {
   }
 
   @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
-  @Override
   public Collection<Collider> colliders() {
     return blast == null ? List.of() : List.of(blast.collider());
   }
@@ -250,7 +243,7 @@ public class EarthBlast extends AbilityInstance {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 1000;
     @Modifiable(Attribute.RANGE)

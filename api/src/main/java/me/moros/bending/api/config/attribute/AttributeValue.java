@@ -17,30 +17,28 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.ability;
+package me.moros.bending.api.config.attribute;
 
-import me.moros.bending.api.user.User;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import java.util.Objects;
 
-/**
- * Represents a base ability instance.
- */
-public abstract class AbilityInstance implements Ability {
-  private final AbilityDescription desc;
+public sealed interface AttributeValue permits AttributeValueImpl {
+  Attribute attribute();
 
-  protected User user;
+  String name();
 
-  protected AbilityInstance(AbilityDescription desc) {
-    this.desc = desc;
+  Number baseValue();
+
+  Number finalValue();
+
+  default boolean modified() {
+    return !baseValue().equals(finalValue());
   }
 
-  @Override
-  public AbilityDescription description() {
-    return desc;
-  }
-
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
+  static AttributeValue of(Attribute attribute, String name, Number baseValue, Number finalValue) {
+    Objects.requireNonNull(attribute);
+    Objects.requireNonNull(name);
+    Objects.requireNonNull(baseValue);
+    Objects.requireNonNull(finalValue);
+    return new AttributeValueImpl(attribute, name, baseValue, finalValue);
   }
 }

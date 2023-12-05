@@ -23,11 +23,8 @@ import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.AbilityInstance;
 import me.moros.bending.api.ability.Activation;
 import me.moros.bending.api.user.User;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 public class GracefulDescent extends AbilityInstance {
-  private User user;
-
   public GracefulDescent(AbilityDescription desc) {
     super(desc);
   }
@@ -51,10 +48,5 @@ public class GracefulDescent extends AbilityInstance {
   public static boolean isGraceful(User user) {
     return user.game().abilityManager(user.worldKey()).firstInstance(user, GracefulDescent.class)
       .map(a -> user.canBend(a.description())).orElse(false);
-  }
-
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
   }
 }

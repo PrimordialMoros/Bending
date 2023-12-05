@@ -21,19 +21,20 @@ package me.moros.bending.common.config;
 
 import java.io.UncheckedIOException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.DoubleFunction;
 
-import me.moros.bending.api.ability.Ability;
+import com.google.common.collect.Iterables;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.config.ConfigProcessor;
 import me.moros.bending.api.config.Configurable;
 import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.AttributeModifier;
+import me.moros.bending.api.config.attribute.AttributeValue;
 import me.moros.bending.api.config.attribute.Modifiable;
-import me.moros.bending.api.config.attribute.ModifierOperation;
-import me.moros.bending.api.user.User;
+import me.moros.bending.api.user.AttributeUser;
 import me.moros.bending.common.logging.Logger;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.reference.ConfigurationReference;
@@ -52,8 +53,8 @@ record ConfigProcessorImpl(Logger logger,
   );
 
   @Override
-  public <T extends Configurable> T calculate(Ability ability, T config) {
-    return process(ability, get(config));
+  public <T extends Configurable> T calculate(AttributeUser user, AbilityDescription desc, T config) {
+    return process(user, desc, get(config));
   }
 
   <T extends Configurable> T get(T def) {
@@ -68,60 +69,65 @@ record ConfigProcessorImpl(Logger logger,
     }
   }
 
-  private <T extends Configurable> T process(Ability ability, T copy) {
-    User user = ability.user();
-    AbilityDescription desc = ability.description();
+  private <T extends Configurable> T process(AttributeUser user, AbilityDescription desc, T copy) {
     Collection<AttributeModifier> activeModifiers = user.attributes()
       .filter(modifier -> modifier.policy().shouldModify(desc)).toList();
-    if (activeModifiers.isEmpty()) {
-      return copy;
-    }
-    for (Field field : copy.getClass().getDeclaredFields()) {
-      if (field.isAnnotationPresent(Modifiable.class)) {
-        boolean wasAccessible = field.canAccess(copy);
-        field.setAccessible(true);
-        modifyField(field, copy, activeModifiers);
-        field.setAccessible(wasAccessible);
-      }
+    if (!activeModifiers.isEmpty()) {
+      forEachAttribute(activeModifiers, copy, (f, a, b, m) -> f.set(copy, m));
     }
     return copy;
   }
 
-  private void modifyField(Field field, Object config, Iterable<AttributeModifier> activeModifiers) {
-    double value;
-    try {
-      value = ((Number) field.get(config)).doubleValue();
-    } catch (IllegalAccessException e) {
-      logger.warn(e.getMessage(), e);
-      return;
-    }
+  @Override
+  public Collection<AttributeValue> listAttributes(AttributeUser user, AbilityDescription desc, Configurable config) {
+    Collection<AttributeModifier> activeModifiers = user.attributes()
+      .filter(modifier -> modifier.policy().shouldModify(desc)).toList();
+    Collection<AttributeValue> attributes = new ArrayList<>();
+    forEachAttribute(activeModifiers, config, (f, a, b, m) -> attributes.add(AttributeValue.of(a, f.getName(), b, m)));
+    return attributes;
+  }
 
-    double[] operations = new double[]{0, 1, 1};
-    for (AttributeModifier modifier : activeModifiers) {
-      if (hasAttribute(field, modifier.attribute())) {
-        if (modifier.type() == ModifierOperation.ADDITIVE) {
-          operations[0] += modifier.value();
-        } else if (modifier.type() == ModifierOperation.SUMMED_MULTIPLICATIVE) {
-          operations[1] += modifier.value();
-        } else if (modifier.type() == ModifierOperation.MULTIPLICATIVE) {
-          operations[2] *= modifier.value();
+  private void forEachAttribute(Collection<AttributeModifier> activeModifiers, Configurable instance, MultiConsumer consumer) {
+    for (Field field : instance.getClass().getDeclaredFields()) {
+      Modifiable annotation = field.getAnnotation(Modifiable.class);
+      if (annotation != null) {
+        Attribute attribute = annotation.value();
+        boolean wasAccessible = field.canAccess(instance);
+        try {
+          field.setAccessible(true);
+          Number baseValue = ((Number) field.get(instance));
+          Number finalValue = baseValue;
+          if (!activeModifiers.isEmpty()) {
+            double base = baseValue.doubleValue();
+            double modified = modifyAttribute(base, Iterables.filter(activeModifiers, a -> a.attribute() == attribute));
+            if (base != modified) {
+              finalValue = CONVERTERS.getOrDefault(field.getType(), x -> x).apply(modified);
+            }
+          }
+          consumer.accept(field, attribute, baseValue, finalValue);
+        } catch (IllegalAccessException e) {
+          logger.warn(e.getMessage(), e);
+        } finally {
+          field.setAccessible(wasAccessible);
         }
       }
     }
-    value = (value + operations[0]) * operations[1] * operations[2];
-    try {
-      field.set(config, CONVERTERS.getOrDefault(field.getType(), x -> x).apply(value));
-    } catch (IllegalAccessException e) {
-      logger.warn(e.getMessage(), e);
-    }
   }
 
-  private boolean hasAttribute(Field field, Attribute attribute) {
-    for (Modifiable a : field.getAnnotationsByType(Modifiable.class)) {
-      if (attribute.equals(a.value())) {
-        return true;
+  private double modifyAttribute(double baseValue, Iterable<AttributeModifier> filteredModifiers) {
+    double[] operations = new double[]{0, 1, 1};
+    for (AttributeModifier modifier : filteredModifiers) {
+      switch (modifier.type()) {
+        case ADDITIVE -> operations[0] += modifier.value();
+        case SUMMED_MULTIPLICATIVE -> operations[1] += modifier.value();
+        case MULTIPLICATIVE -> operations[2] *= modifier.value();
       }
     }
-    return false;
+    return (baseValue + operations[0]) * operations[1] * operations[2];
+  }
+
+  @FunctionalInterface
+  private interface MultiConsumer {
+    void accept(Field field, Attribute attribute, Number baseValue, Number finalValue) throws IllegalAccessException;
   }
 }

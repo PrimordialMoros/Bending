@@ -87,7 +87,7 @@ public record StorageFactory(Bending plugin) {
   }
 
   @ConfigSerializable
-  private static final class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Comment("""
       Available options:
        - Remote:

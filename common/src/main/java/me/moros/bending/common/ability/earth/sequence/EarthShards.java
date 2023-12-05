@@ -44,14 +44,12 @@ import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 // TODO restrictions based on earthglove cooldown, add bleed effect
 public class EarthShards extends AbilityInstance {
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -113,11 +111,6 @@ public class EarthShards extends AbilityInstance {
     return streams.stream().map(ParticleStream::collider).toList();
   }
 
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
   private class ShardStream extends ParticleStream {
     private final Vector3d smallDir;
     private final int renderSteps;
@@ -151,7 +144,7 @@ public class EarthShards extends AbilityInstance {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 10000;
     @Modifiable(Attribute.DAMAGE)

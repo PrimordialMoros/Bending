@@ -55,14 +55,12 @@ import me.moros.bending.common.ability.AbilityInitializer;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 public class FireBlast extends AbilityInstance implements Explosive {
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -188,11 +186,6 @@ public class FireBlast extends AbilityInstance implements Explosive {
   }
 
   @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
-  @Override
   public void explode() {
     createExplosion(stream.location(), userConfig.explosionRadius, userConfig.damage * factor);
   }
@@ -282,7 +275,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 1500;
     @Modifiable(Attribute.DAMAGE)

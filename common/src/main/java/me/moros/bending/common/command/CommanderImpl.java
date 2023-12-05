@@ -34,6 +34,7 @@ import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.Bending;
+import me.moros.bending.common.command.commands.AttributeCommand;
 import me.moros.bending.common.command.commands.BackupCommand;
 import me.moros.bending.common.command.commands.BindCommand;
 import me.moros.bending.common.command.commands.BoardCommand;
@@ -58,7 +59,7 @@ record CommanderImpl<C extends Audience>(CommandManager<C> manager, Class<? exte
       HelpCommand::new, VersionCommand::new, ReloadCommand::new, BackupCommand::new,
       BoardCommand::new, ToggleCommand::new,
       BindCommand::new, ElementCommand::new,
-      ModifierCommand::new, PresetCommand::new
+      ModifierCommand::new, AttributeCommand::new, PresetCommand::new
     );
     cmds.forEach(cmd -> cmd.apply(this).init());
   }

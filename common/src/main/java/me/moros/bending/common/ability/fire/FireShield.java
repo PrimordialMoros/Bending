@@ -51,13 +51,11 @@ import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Rotation;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class FireShield extends AbilityInstance {
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -153,11 +151,6 @@ public class FireShield extends AbilityInstance {
   }
 
   @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
-  @Override
   public Collection<Collider> colliders() {
     return List.of(shield.collider());
   }
@@ -216,7 +209,7 @@ public class FireShield extends AbilityInstance {
         for (double j = 0.2; j <= 1; j += 0.2) {
           Vector3d spawnLoc = location.add(Vector3d.from(array).multiply(j * userConfig.diskRadius));
           ParticleBuilder.fire(user, spawnLoc).offset(0.15).extra(0.01).spawn(user.world());
-          if (rand.nextInt(12) == 0) {
+          if (rand.nextInt(20) == 0) {
             SoundEffect.FIRE.play(user.world(), spawnLoc);
           }
         }
@@ -304,7 +297,7 @@ public class FireShield extends AbilityInstance {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.DAMAGE)
     private double damage = 0.5;
     @Modifiable(Attribute.COOLDOWN)

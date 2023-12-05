@@ -55,13 +55,11 @@ import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class FireBurst extends AbilityInstance {
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -117,11 +115,6 @@ public class FireBurst extends AbilityInstance {
       return UpdateResult.CONTINUE;
     }
     return streams.update();
-  }
-
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
   }
 
   @Override
@@ -219,7 +212,7 @@ public class FireBurst extends AbilityInstance {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 6000;
     @Modifiable(Attribute.CHARGE_TIME)

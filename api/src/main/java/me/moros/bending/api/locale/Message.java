@@ -76,6 +76,11 @@ public interface Message {
   Args1<Component> MODIFIER_CLEAR = name -> translatable("bending.command.modifier.clear", SUCCESS)
     .args(name);
 
+  Args1<Component> ATTRIBUTE_LIST_HEADER = name -> translatable("bending.command.attribute.list.header", HEADER)
+    .args(name);
+  Args1<Component> ATTRIBUTE_LIST_EMPTY = name -> translatable("bending.command.attribute.list.empty", WARN)
+    .args(name);
+
   Args0 TOGGLE_ON = () -> translatable("bending.command.toggle.on", SUCCESS);
   Args0 TOGGLE_OFF = () -> translatable("bending.command.toggle.off", FAIL);
 

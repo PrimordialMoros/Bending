@@ -46,13 +46,11 @@ import me.moros.bending.api.util.material.WaterMaterials;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class IceWall extends AbilityInstance {
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -152,11 +150,6 @@ public class IceWall extends AbilityInstance {
     FragileStructure.builder().health(userConfig.wallHealth).predicate(WaterMaterials::isIceBendable).add(wallBlocks).build();
   }
 
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
   private final class IceWallColumn implements Updatable {
     private final Block origin;
 
@@ -201,7 +194,7 @@ public class IceWall extends AbilityInstance {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 6000;
     @Modifiable(Attribute.SELECTION)

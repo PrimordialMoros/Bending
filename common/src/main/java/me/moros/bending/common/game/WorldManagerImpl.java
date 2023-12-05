@@ -126,7 +126,7 @@ public final class WorldManagerImpl implements WorldManager {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Comment("You can specify worlds by their name")
     private List<String> disabledWorlds = List.of("DisabledBendingWorld");
 

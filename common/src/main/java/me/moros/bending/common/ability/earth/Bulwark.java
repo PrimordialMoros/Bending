@@ -39,13 +39,11 @@ import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.bending.common.config.ConfigManager;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Bulwark extends AbilityInstance {
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -113,13 +111,8 @@ public class Bulwark extends AbilityInstance {
     }
   }
 
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long wallCooldown = 3000;
     @Modifiable(Attribute.DURATION)

@@ -33,13 +33,11 @@ import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.common.config.ConfigManager;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class AirAgility extends AbilityInstance {
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -77,13 +75,8 @@ public class AirAgility extends AbilityInstance {
     EntityUtil.tryRemovePotion(user, PotionEffect.SPEED, 100, userConfig.speedAmplifier - 1);
   }
 
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.STRENGTH)
     private int speedAmplifier = 2;
     @Modifiable(Attribute.STRENGTH)

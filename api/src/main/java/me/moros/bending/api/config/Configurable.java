@@ -25,24 +25,21 @@ import java.util.List;
 import me.moros.bending.api.ability.Ability;
 
 /**
- * This is an abstract class that defines a serializable config.
+ * This is an interface that defines a serializable config.
  */
-public abstract class Configurable implements Serializable {
-  protected Configurable() {
-  }
-
+public interface Configurable extends Serializable {
   /**
    * Provides the path that serves as the root node for this configuration when serialized.
    * @return the path of this configuration's root node.
    */
-  public abstract List<String> path();
+  List<String> path();
 
   /**
    * Controls if this configuration external and cannot be loaded from the main configuration file.
    * @return whether this configuration is external
    * @see ConfigProcessor#calculate(Ability, Configurable)
    */
-  public boolean external() {
+  default boolean external() {
     return false;
   }
 }

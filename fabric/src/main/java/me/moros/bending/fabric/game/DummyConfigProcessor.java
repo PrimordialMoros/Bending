@@ -19,9 +19,14 @@
 
 package me.moros.bending.fabric.game;
 
-import me.moros.bending.api.ability.Ability;
+import java.util.Collection;
+import java.util.List;
+
+import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.config.ConfigProcessor;
 import me.moros.bending.api.config.Configurable;
+import me.moros.bending.api.config.attribute.AttributeValue;
+import me.moros.bending.api.user.AttributeUser;
 
 final class DummyConfigProcessor implements ConfigProcessor {
   static final ConfigProcessor INSTANCE = new DummyConfigProcessor();
@@ -30,7 +35,12 @@ final class DummyConfigProcessor implements ConfigProcessor {
   }
 
   @Override
-  public <T extends Configurable> T calculate(Ability ability, T config) {
+  public <T extends Configurable> T calculate(AttributeUser user, AbilityDescription desc, T config) {
     return config;
+  }
+
+  @Override
+  public Collection<AttributeValue> listAttributes(AttributeUser user, AbilityDescription desc, Configurable config) {
+    return List.of();
   }
 }

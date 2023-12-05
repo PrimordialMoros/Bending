@@ -39,13 +39,11 @@ import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.common.ability.SpoutAbility;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class AirSpout extends AbilityInstance implements SpoutAbility {
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -97,11 +95,6 @@ public class AirSpout extends AbilityInstance implements SpoutAbility {
   }
 
   @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
-  @Override
   public Collection<Collider> colliders() {
     return List.of(spout.collider());
   }
@@ -142,7 +135,7 @@ public class AirSpout extends AbilityInstance implements SpoutAbility {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 2000;
     @Modifiable(Attribute.HEIGHT)

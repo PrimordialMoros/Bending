@@ -63,7 +63,6 @@ import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.FastMath;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
@@ -74,7 +73,6 @@ public class WaterRing extends AbilityInstance {
   private static AbilityDescription ringDesc;
   private static AbilityDescription waveDesc;
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -302,11 +300,6 @@ public class WaterRing extends AbilityInstance {
     }
   }
 
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
   public static @Nullable WaterRing getOrCreateInstance(User user) {
     if (ringDesc == null) {
       ringDesc = Objects.requireNonNull(Registries.ABILITIES.fromString("WaterRing"));
@@ -367,7 +360,7 @@ public class WaterRing extends AbilityInstance {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.DURATION)
     private long duration = 30000;
     @Modifiable(Attribute.SELECTION)

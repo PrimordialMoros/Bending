@@ -31,10 +31,8 @@ import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 public class EarthCling extends AbilityInstance {
-  private User user;
   private RemovalPolicy removalPolicy;
 
   public EarthCling(AbilityDescription desc) {
@@ -72,11 +70,6 @@ public class EarthCling extends AbilityInstance {
       }
     }
     return UpdateResult.CONTINUE;
-  }
-
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
   }
 }
 

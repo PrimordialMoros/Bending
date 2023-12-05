@@ -59,7 +59,6 @@ import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
@@ -69,7 +68,6 @@ public class EarthShot extends AbilityInstance implements Explosive {
 
   private enum Mode {ROCK, METAL, MAGMA}
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -361,17 +359,12 @@ public class EarthShot extends AbilityInstance implements Explosive {
   }
 
   @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
-  @Override
   public Collection<Collider> colliders() {
     return (!launched || projectile == null) ? List.of() : List.of(BOX.at(projectile.center()));
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 2000;
     @Modifiable(Attribute.SELECTION)

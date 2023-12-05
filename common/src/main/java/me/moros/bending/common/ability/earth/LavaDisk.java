@@ -63,14 +63,12 @@ import me.moros.math.FastMath;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class LavaDisk extends AbilityInstance {
   private static final String[] colors = {"#2F1600", "#5E2C00", "#8C4200", "#B05300", "#C45D00", "#F05A00", "#F0A000", "#F0BE00"};
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -182,11 +180,6 @@ public class LavaDisk extends AbilityInstance {
   }
 
   @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
-  @Override
   public Collection<Collider> colliders() {
     return List.of(collider);
   }
@@ -251,7 +244,7 @@ public class LavaDisk extends AbilityInstance {
       }
       offset += 4;
       index = Math.min(colors.length - 1, ++index);
-      size -= 0.05;
+      size -= 0.05F;
     }
   }
 
@@ -265,7 +258,7 @@ public class LavaDisk extends AbilityInstance {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 9000;
     @Modifiable(Attribute.DAMAGE)

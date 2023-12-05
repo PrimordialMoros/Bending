@@ -36,13 +36,11 @@ import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class DensityShift extends AbilityInstance {
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
 
   public DensityShift(AbilityDescription desc) {
@@ -94,13 +92,8 @@ public class DensityShift extends AbilityInstance {
     }
   }
 
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.DURATION)
     private long duration = 6000;
     @Modifiable(Attribute.RADIUS)

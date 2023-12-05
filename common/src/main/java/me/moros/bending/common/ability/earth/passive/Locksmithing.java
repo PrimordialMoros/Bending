@@ -41,7 +41,6 @@ import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.api.util.metadata.Metadata;
 import me.moros.bending.common.config.ConfigManager;
 import net.kyori.adventure.text.Component;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Locksmithing extends AbilityInstance {
@@ -49,7 +48,6 @@ public class Locksmithing extends AbilityInstance {
 
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
 
   private long nextInteractTime;
@@ -135,13 +133,8 @@ public class Locksmithing extends AbilityInstance {
     return item.get(Metadata.METAL_KEY).map(lock::equals).orElse(false);
   }
 
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 500;
 

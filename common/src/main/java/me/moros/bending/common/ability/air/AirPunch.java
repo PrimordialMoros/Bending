@@ -45,13 +45,11 @@ import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class AirPunch extends AbilityInstance {
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -99,11 +97,6 @@ public class AirPunch extends AbilityInstance {
     return List.of(stream.collider());
   }
 
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
   private class AirStream extends ParticleStream {
     private final double factor;
 
@@ -146,7 +139,7 @@ public class AirPunch extends AbilityInstance {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 2500;
     @Modifiable(Attribute.DAMAGE)

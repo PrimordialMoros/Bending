@@ -101,11 +101,6 @@ public final class ModifyPolicyArgument<C extends Audience> extends CommandArgum
     public List<String> suggestions(CommandContext<C> commandContext, String input) {
       return CommandUtil.combinedSuggestions(commandContext.getSender());
     }
-
-    @Override
-    public boolean isContextFree() {
-      return true;
-    }
   }
 }
 

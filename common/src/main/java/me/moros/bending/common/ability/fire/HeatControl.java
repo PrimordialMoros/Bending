@@ -51,7 +51,6 @@ import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.text.Component;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class HeatControl extends AbilityInstance {
@@ -59,7 +58,6 @@ public class HeatControl extends AbilityInstance {
 
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -245,11 +243,6 @@ public class HeatControl extends AbilityInstance {
     resetLight();
   }
 
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
   private class Solidify extends PhaseTransformer {
     @Override
     protected boolean processBlock(Block block) {
@@ -271,7 +264,7 @@ public class HeatControl extends AbilityInstance {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 2000;
     @Modifiable(Attribute.RANGE)

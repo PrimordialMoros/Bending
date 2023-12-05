@@ -70,7 +70,6 @@ import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Rotation;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
@@ -79,7 +78,6 @@ public class Lightning extends AbilityInstance {
 
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -320,11 +318,6 @@ public class Lightning extends AbilityInstance {
   }
 
   @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
-  @Override
   public void onDestroy() {
     if (!launched && userConfig.overchargeTime > 0 && System.currentTimeMillis() > startTime + userConfig.overchargeTime) {
       SoundEffect.LIGHTNING.play(user.world(), user.location());
@@ -450,7 +443,7 @@ public class Lightning extends AbilityInstance {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 6000;
     @Modifiable(Attribute.DAMAGE)

@@ -39,6 +39,7 @@ public final class CommandPermissions {
   public static final CommandPermission RELOAD = create("reload");
   public static final CommandPermission IMPORT = create("import");
   public static final CommandPermission EXPORT = create("export");
+  public static final CommandPermission ATTRIBUTE = create("attribute");
 
   private static Permission create(String node) {
     return Permission.of("bending.command." + node);

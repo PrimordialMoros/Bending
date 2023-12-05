@@ -45,13 +45,11 @@ import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class EarthSurf extends AbilityInstance {
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -142,11 +140,6 @@ public class EarthSurf extends AbilityInstance {
     }
   }
 
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
   private final class Wave extends AbstractRide {
     private Vector3d center;
     private int ticks = 0;
@@ -165,9 +158,9 @@ public class EarthSurf extends AbilityInstance {
         .minYOffset(-1.25).duration(750);
       Vector3d center = user.location().add(Vector3d.MINUS_J);
       Vector3d dir = user.direction().withY(0).normalize(user.velocity().withY(0).normalize());
-      VectorUtil.createArc(dir, Vector3d.PLUS_J, Math.PI / 3, 3).forEach(v -> {
-        builder.build(user.world(), center.add(v.multiply(0.6)));
-      });
+      VectorUtil.createArc(dir, Vector3d.PLUS_J, Math.PI / 3, 3).forEach(v ->
+        builder.build(user.world(), center.add(v.multiply(0.6)))
+      );
     }
 
     @Override
@@ -192,7 +185,7 @@ public class EarthSurf extends AbilityInstance {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.SPEED)
     private double speed = 0.5;
     @Modifiable(Attribute.COOLDOWN)

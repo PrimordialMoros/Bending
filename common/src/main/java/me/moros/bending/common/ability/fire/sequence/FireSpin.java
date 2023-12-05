@@ -49,14 +49,12 @@ import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 public class FireSpin extends AbilityInstance {
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -97,11 +95,6 @@ public class FireSpin extends AbilityInstance {
   @Override
   public Collection<Collider> colliders() {
     return streams.stream().map(ParticleStream::collider).toList();
-  }
-
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
   }
 
   private class FireStream extends ParticleStream {
@@ -145,7 +138,7 @@ public class FireSpin extends AbilityInstance {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 6000;
     @Modifiable(Attribute.DAMAGE)

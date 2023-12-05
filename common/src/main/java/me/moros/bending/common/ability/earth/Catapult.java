@@ -46,7 +46,6 @@ import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
@@ -54,7 +53,6 @@ public class Catapult extends AbilityInstance {
   private static final Config config = ConfigManager.load(Config::new);
   private static final double ANGLE = Math.toRadians(60);
 
-  private User user;
   private Config userConfig;
 
   private BlockState data;
@@ -166,11 +164,6 @@ public class Catapult extends AbilityInstance {
     return userConfig.length;
   }
 
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
   private static final class EarthPillar extends Pillar {
     private EarthPillar(Builder<EarthPillar> builder) {
       super(builder);
@@ -187,7 +180,7 @@ public class Catapult extends AbilityInstance {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 3000;
     @Modifiable(Attribute.STRENGTH)

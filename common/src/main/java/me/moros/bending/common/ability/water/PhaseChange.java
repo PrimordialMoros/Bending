@@ -42,14 +42,12 @@ import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 public class PhaseChange extends AbilityInstance {
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -123,11 +121,6 @@ public class PhaseChange extends AbilityInstance {
     return newBlocks;
   }
 
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
   private class Freeze extends PhaseTransformer {
     @Override
     protected boolean processBlock(Block block) {
@@ -156,7 +149,7 @@ public class PhaseChange extends AbilityInstance {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.SELECTION)
     private double freezeRange = 7;
     @Modifiable(Attribute.RADIUS)

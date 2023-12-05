@@ -62,7 +62,6 @@ import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
 import net.kyori.adventure.text.Component;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class EarthLine extends AbilityInstance {
@@ -70,7 +69,6 @@ public class EarthLine extends AbilityInstance {
 
   private static final Config config = ConfigManager.load(Config::new);
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -166,11 +164,6 @@ public class EarthLine extends AbilityInstance {
     if (state instanceof SelectedSource selectedSource) {
       selectedSource.onDestroy();
     }
-  }
-
-  @Override
-  public @MonotonicNonNull User user() {
-    return user;
   }
 
   @Override
@@ -298,7 +291,7 @@ public class EarthLine extends AbilityInstance {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 5000;
     @Modifiable(Attribute.RANGE)

@@ -52,7 +52,6 @@ import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 
@@ -67,7 +66,6 @@ public class EarthGlove extends AbilityInstance {
   private static final double GLOVE_SPEED = 1.2;
   private static final double GLOVE_GRABBED_SPEED = 0.6;
 
-  private User user;
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -262,11 +260,6 @@ public class EarthGlove extends AbilityInstance {
   }
 
   @Override
-  public @MonotonicNonNull User user() {
-    return user;
-  }
-
-  @Override
   public void onDestroy() {
     if (glove != null && !isMetal) {
       glove.remove();
@@ -303,7 +296,7 @@ public class EarthGlove extends AbilityInstance {
   }
 
   @ConfigSerializable
-  private static class Config extends Configurable {
+  private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 750;
     @Modifiable(Attribute.RANGE)
