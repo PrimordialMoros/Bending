@@ -28,15 +28,17 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import me.moros.bending.fabric.platform.entity.FabricPlayer;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundResetScorePacket;
 import net.minecraft.network.protocol.game.ClientboundSetDisplayObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket;
 import net.minecraft.network.protocol.game.ClientboundSetScorePacket;
-import net.minecraft.server.ServerScoreboard.Method;
 import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
+import net.minecraft.world.scores.PlayerScoreEntry;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Score;
+import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Scoreboard;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -70,24 +72,24 @@ public class PlayerScoreboard extends Scoreboard implements PlayerBoard {
   }
 
   @Override
-  public void onScoreChanged(Score score) {
-    super.onScoreChanged(score);
-    if (this.trackedObjectives.contains(score.getObjective())) {
-      broadcast(new ClientboundSetScorePacket(Method.CHANGE, score.getObjective().getName(), score.getOwner(), score.getScore()));
+  public void onScoreChanged(ScoreHolder scoreHolder, Objective objective, Score score) {
+    super.onScoreChanged(scoreHolder, objective, score);
+    if (this.trackedObjectives.contains(objective)) {
+      broadcast(new ClientboundSetScorePacket(scoreHolder.getScoreboardName(), objective.getName(), score.value(), score.display(), score.numberFormat()));
     }
   }
 
   @Override
-  public void onPlayerRemoved(String string) {
-    super.onPlayerRemoved(string);
-    broadcast(new ClientboundSetScorePacket(Method.REMOVE, null, string, 0));
+  public void onPlayerRemoved(ScoreHolder scoreHolder) {
+    super.onPlayerRemoved(scoreHolder);
+    broadcast(new ClientboundResetScorePacket(scoreHolder.getScoreboardName(), null));
   }
 
   @Override
-  public void onPlayerScoreRemoved(String string, Objective objective) {
-    super.onPlayerScoreRemoved(string, objective);
+  public void onPlayerScoreRemoved(ScoreHolder scoreHolder, Objective objective) {
+    super.onPlayerScoreRemoved(scoreHolder, objective);
     if (this.trackedObjectives.contains(objective)) {
-      broadcast(new ClientboundSetScorePacket(Method.REMOVE, objective.getName(), string, 0));
+      broadcast(new ClientboundResetScorePacket(scoreHolder.getScoreboardName(), objective.getName()));
     }
   }
 
@@ -173,8 +175,8 @@ public class PlayerScoreboard extends Scoreboard implements PlayerBoard {
       if (this.getDisplayObjective(displaySlot) != objective) continue;
       list.add(new ClientboundSetDisplayObjectivePacket(displaySlot, objective));
     }
-    for (Score score : this.getPlayerScores(objective)) {
-      list.add(new ClientboundSetScorePacket(Method.CHANGE, score.getObjective().getName(), score.getOwner(), score.getScore()));
+    for (PlayerScoreEntry entry : this.listPlayerScores(objective)) {
+      list.add(new ClientboundSetScorePacket(entry.owner(), objective.getName(), entry.value(), entry.display(), entry.numberFormatOverride()));
     }
     return list;
   }

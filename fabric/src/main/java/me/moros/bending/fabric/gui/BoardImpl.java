@@ -31,9 +31,11 @@ import me.moros.bending.fabric.platform.scoreboard.PlayerScoreboard;
 import me.moros.bending.fabric.platform.scoreboard.ScoreboardUtil;
 import net.kyori.adventure.platform.fabric.FabricServerAudiences;
 import net.kyori.adventure.text.Component;
+import net.minecraft.network.chat.numbers.BlankFormat;
 import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria.RenderType;
@@ -48,7 +50,7 @@ public final class BoardImpl extends AbstractBoard<PlayerTeam> {
     this.fabricPlayer = (FabricPlayer) player.entity();
     bendingBoard = new PlayerScoreboard(fabricPlayer);
     var displayName = toNative(Message.BENDING_BOARD_TITLE.build());
-    bendingSlots = bendingBoard.addObjective("BendingBoard", ObjectiveCriteria.DUMMY, displayName, RenderType.INTEGER);
+    bendingSlots = bendingBoard.addObjective("BendingBoard", ObjectiveCriteria.DUMMY, displayName, RenderType.INTEGER, false, BlankFormat.INSTANCE);
     bendingBoard.setDisplayObjective(DisplaySlot.SIDEBAR, bendingSlots);
     ScoreboardUtil.setScoreboard(fabricPlayer.handle(), (PlayerBoard) bendingBoard);
     init();
@@ -83,13 +85,13 @@ public final class BoardImpl extends AbstractBoard<PlayerTeam> {
     PlayerTeam team = bendingBoard.addPlayerTeam(String.valueOf(textSlot));
     String hidden = generateInvisibleLegacyString(textSlot);
     bendingBoard.addPlayerToTeam(hidden, team);
-    bendingBoard.getOrCreatePlayerScore(hidden, bendingSlots).setScore(-slot);
+    bendingBoard.getOrCreatePlayerScore(ScoreHolder.forNameOnly(hidden), bendingSlots).set(-slot);
     return Indexed.create(team, textSlot);
   }
 
   @Override
   protected void removeTeam(PlayerTeam playerTeam) {
-    List.copyOf(playerTeam.getPlayers()).forEach(s -> bendingBoard.resetPlayerScore(s, bendingSlots));
+    List.copyOf(playerTeam.getPlayers()).forEach(s -> bendingBoard.resetSinglePlayerScore(ScoreHolder.forNameOnly(s), bendingSlots));
     bendingBoard.removePlayerTeam(playerTeam);
   }
 

@@ -17,7 +17,7 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.paper.adapter.v1_20_R2;
+package me.moros.bending.paper.adapter.v1_20_R3;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -35,8 +35,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import org.bukkit.Bukkit;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.craftbukkit.v1_20_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_20_R2.block.data.CraftBlockData;
+import org.bukkit.craftbukkit.v1_20_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_20_R3.block.data.CraftBlockData;
 
 public final class NativeAdapterImpl extends AbstractNativeAdapter {
   private final Function<me.moros.bending.api.platform.block.BlockState, BlockData> mapper;

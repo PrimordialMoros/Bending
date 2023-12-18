@@ -46,8 +46,8 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.AdvancementRequirements;
+import net.minecraft.advancements.AdvancementType;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.advancements.FrameType;
 import net.minecraft.advancements.critereon.ImpossibleTrigger;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -174,7 +174,7 @@ public abstract class AbstractPacketUtil implements PacketUtil {
     ItemStack icon = adapt(item);
     net.minecraft.network.chat.Component nmsTitle = adapt(title);
     net.minecraft.network.chat.Component nmsDesc = net.minecraft.network.chat.Component.empty();
-    FrameType type = FrameType.TASK;
+    AdvancementType type = AdvancementType.TASK;
     var criterion = CriteriaTriggers.IMPOSSIBLE.createCriterion(new ImpossibleTrigger.TriggerInstance());
     var advancement = new Advancement.Builder()
       .display(icon, nmsTitle, nmsDesc, null, type, true, false, true)

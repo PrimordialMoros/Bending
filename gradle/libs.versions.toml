@@ -7,15 +7,15 @@ configurate = "4.1.2"
 cloud = "1.8.4"
 cloud-snapshot = "1.8.0-SNAPSHOT"
 bstats = "3.0.2"
-paper = "1.20.2-R0.1-SNAPSHOT"
+paper = "1.20.4-R0.1-SNAPSHOT"
 sponge-api = "11.0.0-SNAPSHOT"
 sponge-common = "1.20.1-11.0.0-SNAPSHOT"
-minecraft = "1.20.2"
+minecraft = "1.20.4"
 fabric-loom = "1.4.4"
-fabric-api = "0.91.1+1.20.4"
-fabric-loader = "0.15.0"
+fabric-api = "0.91.2+1.20.4"
+fabric-loader = "0.15.1"
 shadow = "8.1.1"
-flyway = "10.1.0"
+flyway = "10.2.0"
 junit = "5.10.1"
 
 [libraries]
@@ -110,7 +110,7 @@ junit = ["junit-api", "junit-engine"]
 [plugins]
 jmh = { id = "me.champeau.jmh", version = "0.7.2" }
 fabric-loom = { id = "fabric-loom", version.ref = "fabric-loom" }
-userdev = { id = "io.papermc.paperweight.userdev", version = "1.5.10" }
+userdev = { id = "io.papermc.paperweight.userdev", version = "1.5.11" }
 sponge = { id = "org.spongepowered.gradle.plugin", version = "2.2.0" }
-hangar = { id = "io.papermc.hangar-publish-plugin", version = "0.1.0" }
+hangar = { id = "io.papermc.hangar-publish-plugin", version = "0.1.1" }
 run-paper = { id = "xyz.jpenilla.run-paper", version = "2.2.2" }

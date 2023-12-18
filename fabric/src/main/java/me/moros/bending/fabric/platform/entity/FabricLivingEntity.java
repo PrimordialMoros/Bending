@@ -45,6 +45,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.projectile.AbstractArrow.Pickup;
 import net.minecraft.world.entity.projectile.Arrow;
+import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class FabricLivingEntity extends FabricEntity implements LivingEntity {
@@ -166,7 +167,7 @@ public class FabricLivingEntity extends FabricEntity implements LivingEntity {
   @Override
   public Entity shootArrow(Position origin, Vector3d direction, double power) {
     var w = handle().level();
-    var arrow = new Arrow(w, origin.x(), origin.y(), origin.z());
+    var arrow = new Arrow(w, origin.x(), origin.y(), origin.z(), ItemStack.EMPTY);
     arrow.shoot(direction.x(), direction.y(), direction.z(), (float) power, 0);
     arrow.setOwner(handle());
     arrow.setNoGravity(true);

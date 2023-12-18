@@ -79,7 +79,7 @@ hangarPublish.publications.register("plugin") {
     id.set("Bending")
     changelog.set(releaseNotes)
     apiKey.set(providers.environmentVariable("HANGAR_TOKEN"))
-    platforms.register(io.papermc.hangarpublishplugin.model.Platforms.PAPER) {
+    platforms.paper {
         jar.set(bendingPlatform.productionJar)
         platformVersions.add(libs.versions.minecraft)
         dependencies.url("LuckPerms", "https://luckperms.net/") { required.set(false) }
