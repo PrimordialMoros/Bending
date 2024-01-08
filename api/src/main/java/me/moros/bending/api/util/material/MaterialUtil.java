@@ -112,7 +112,7 @@ public final class MaterialUtil {
       .add(BlockType.BROWN_MUSHROOM, BlockType.RED_MUSHROOM)
       .add(BlockTag.CORALS)
       .add(BlockTag.CORAL_BLOCKS)
-      .add(BlockType.GRASS, BlockType.TALL_GRASS, BlockType.LARGE_FERN, BlockType.GLOW_LICHEN,
+      .add(BlockType.SHORT_GRASS, BlockType.TALL_GRASS, BlockType.LARGE_FERN, BlockType.GLOW_LICHEN,
         BlockType.WEEPING_VINES, BlockType.WEEPING_VINES_PLANT, BlockType.TWISTING_VINES, BlockType.TWISTING_VINES_PLANT,
         BlockType.VINE, BlockType.FERN, BlockType.SUGAR_CANE, BlockType.DEAD_BUSH).buildAndRegister();
     BlockTag.builder(TRANSPARENT.key())

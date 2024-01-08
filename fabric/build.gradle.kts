@@ -32,7 +32,7 @@ dependencies {
     bendingImplementation(libs.hikari)
     bendingImplementation(libs.jdbi)
     bendingImplementation(libs.h2)
-    bendingImplementation(libs.bundles.flyway) { isTransitive = false }
+    bendingImplementation(libs.flyway.core) { exclude(module = "gson") }
 }
 
 loom {
@@ -49,6 +49,7 @@ tasks {
             reloc("org.jdbi", "jdbi")
             reloc("org.h2", "h2")
             reloc("org.flyway", "flyway")
+            reloc("com.fasterxml.jackson", "jackson")
         }
     }
     named<Copy>("processResources") {

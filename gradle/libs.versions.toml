@@ -2,7 +2,7 @@
 math = "2.0.0"
 tasker = "1.0.1"
 adventure = "4.15.0"
-adventure-fabric = "5.10.1"
+adventure-fabric = "5.11.0-SNAPSHOT"
 configurate = "4.1.2"
 cloud = "1.8.4"
 cloud-snapshot = "1.8.0-SNAPSHOT"
@@ -37,6 +37,8 @@ jdbi = { module = "org.jdbi:jdbi3-core", version = "3.43.0" }
 hikari = { module = "com.zaxxer:HikariCP", version = "5.1.0" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-mysql = { module = "org.flywaydb:flyway-mysql", version.ref = "flyway" }
+flyway-pgsql = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
+flyway-hsqldb = { module = "org.flywaydb:flyway-database-hsqldb", version.ref = "flyway" }
 eventbus = { module = "net.kyori:event-api", version = "5.0.0-SNAPSHOT" }
 
 junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
@@ -104,7 +106,7 @@ configurate = ["configurate-core", "configurate-hocon", "configurate-gson"]
 drivers-local = ["h2", "hsql"]
 drivers-remote = ["mysql", "mariadb", "postgresql"]
 drivers-nonstandard = ["mariadb", "postgresql", "h2", "hsql"]
-flyway = ["flyway-core", "flyway-mysql"]
+flyway = ["flyway-core", "flyway-mysql", "flyway-pgsql", "flyway-hsqldb"]
 junit = ["junit-api", "junit-engine"]
 
 [plugins]
