@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Moros
+ * Copyright 2020-2024 Moros
  *
  * This file is part of Bending.
  *
@@ -332,7 +332,7 @@ public record UserListener(Game game) implements Listener, BukkitListener {
     if (cause != null) {
       AbilityDescription ability = cause.ability();
       Component message = Component.translatable(ability.deathKey(), Message.ABILITY_GENERIC_DEATH_KEY)
-        .args(player.name(), cause.name(), ability.displayName());
+        .arguments(player.name(), cause.name(), ability.displayName());
       event.deathMessage(message);
     }
   }

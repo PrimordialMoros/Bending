@@ -33,7 +33,7 @@ dependencies {
 
 tasks {
     shadowJar {
-        archiveBaseName.set("${project.name}-mc${libs.versions.minecraft.get()}")
+        archiveBaseName = "${project.name}-mc${libs.versions.minecraft.get()}"
         dependencies {
             reloc("cloud.commandframework", "cloudframework")
         }
@@ -64,5 +64,5 @@ sponge {
 }
 
 bendingPlatform {
-    productionJar.set(tasks.shadowJar.flatMap { it.archiveFile })
+    productionJar = tasks.shadowJar.flatMap { it.archiveFile }
 }

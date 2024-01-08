@@ -4,7 +4,7 @@ plugins {
 }
 
 application {
-    mainClass.set("me.moros.codegen.Generators")
+    mainClass = "me.moros.codegen.Generators"
 }
 
 repositories {

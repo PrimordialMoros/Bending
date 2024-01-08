@@ -59,18 +59,18 @@ tasks {
     remapJar {
         val shadowJar = getByName<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar")
         dependsOn(shadowJar)
-        inputFile.set(shadowJar.archiveFile)
-        addNestedDependencies.set(true)
-        archiveFileName.set("${project.name}-mc${libs.versions.minecraft.get()}-${project.version}.jar")
+        inputFile = shadowJar.archiveFile
+        addNestedDependencies = true
+        archiveFileName = "${project.name}-mc${libs.versions.minecraft.get()}-${project.version}.jar"
     }
 }
 
 bendingPlatform {
-    productionJar.set(tasks.remapJar.flatMap { it.archiveFile })
+    productionJar = tasks.remapJar.flatMap { it.archiveFile }
 }
 
 modrinth {
-    versionName.set("fabric-$version")
+    versionName = "fabric-$version"
     gameVersions.add(libs.versions.minecraft)
     dependencies {
         required.project("fabric-api")

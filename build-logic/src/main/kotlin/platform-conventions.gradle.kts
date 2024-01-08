@@ -21,8 +21,8 @@ val runtimeDownload: Configuration by configurations.creating {
 tasks {
     shadowJar {
         configurations = listOf(project.configurations.getByName("bendingImplementation"))
-        archiveClassifier.set("")
-        archiveBaseName.set(project.name)
+        archiveClassifier = ""
+        archiveBaseName = project.name
         from("$rootDir/LICENSE") {
             rename { "${rootProject.name.uppercase()}_${it}" }
         }
@@ -38,8 +38,8 @@ tasks {
         mergeServiceFiles()
     }
     val copyJar = register("copyJar", CopyFile::class) {
-        fileToCopy.set(platformExt.productionJar)
-        destination.set(platformExt.productionJar.flatMap { rootProject.layout.buildDirectory.file(it.asFile.name) })
+        fileToCopy = platformExt.productionJar
+        destination = platformExt.productionJar.flatMap { rootProject.layout.buildDirectory.file(it.asFile.name) }
         dependsOn(jar)
     }
     assemble {
@@ -48,11 +48,11 @@ tasks {
 }
 
 modrinth {
-    projectId.set("DzD7S3mv")
-    versionType.set("release")
-    file.set(platformExt.productionJar)
-    changelog.set(releaseNotes)
-    token.set(providers.environmentVariable("MODRINTH_TOKEN"))
+    projectId = "DzD7S3mv"
+    versionType = "release"
+    file = platformExt.productionJar
+    changelog = releaseNotes
+    token = providers.environmentVariable("MODRINTH_TOKEN")
     dependencies {
         optional.project("luckperms")
         optional.project("miniplaceholders")

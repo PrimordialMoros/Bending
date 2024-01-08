@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Moros
+ * Copyright 2020-2024 Moros
  *
  * This file is part of Bending.
  *
@@ -51,6 +51,7 @@ final class AbilityDamageSource extends net.minecraft.world.damagesource.DamageS
     return ability;
   }
 
+  @Override
   public net.minecraft.network.chat.Component getLocalizedDeathMessage(LivingEntity livingEntity) {
     //noinspection DataFlowIssue
     return net.minecraft.network.chat.Component.translatableWithFallback(ability.deathKey(), // Key

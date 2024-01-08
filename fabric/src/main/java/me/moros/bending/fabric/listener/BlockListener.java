@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Moros
+ * Copyright 2020-2024 Moros
  *
  * This file is part of Bending.
  *
@@ -86,7 +86,7 @@ public record BlockListener(Supplier<Game> gameSupplier) implements FabricListen
   private boolean handleLockedContainer(ServerPlayer player, Block block, Lockable lockable) {
     if (!Locksmithing.canBreak(PlatformAdapter.fromFabricEntity(player), lockable)) {
       player.sendActionBar(Component.translatable("container.isLocked")
-        .args(((Nameable) lockable).getName().asComponent()));
+        .arguments(((Nameable) lockable).getName().asComponent()));
       Sound.BLOCK_CHEST_LOCKED.asEffect().play(block);
       return true;
     }

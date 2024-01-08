@@ -14,31 +14,31 @@ publishing {
         create<MavenPublication>("maven") {
             from(components["java"])
             pom {
-                name.set(project.name)
-                description.set("Modern Bending api for Minecraft")
-                url.set("https://github.com/PrimordialMoros/Bending")
-                inceptionYear.set("2020")
+                name = project.name
+                description = "Modern Bending api for Minecraft"
+                url = "https://github.com/PrimordialMoros/Bending"
+                inceptionYear = "2020"
                 licenses {
                     license {
-                        name.set("The GNU Affero General Public License, Version 3.0")
-                        url.set("https://www.gnu.org/licenses/agpl-3.0.txt")
-                        distribution.set("repo")
+                        name = "The GNU Affero General Public License, Version 3.0"
+                        url = "https://www.gnu.org/licenses/agpl-3.0.txt"
+                        distribution = "repo"
                     }
                 }
                 developers {
                     developer {
-                        id.set("moros")
-                        name.set("Moros")
+                        id = "moros"
+                        name = "Moros"
                     }
                 }
                 scm {
-                    connection.set("scm:git:https://github.com/PrimordialMoros/Bending.git")
-                    developerConnection.set("scm:git:ssh://git@github.com/PrimordialMoros/Bending.git")
-                    url.set("https://github.com/PrimordialMoros/Bending")
+                    connection = "scm:git:https://github.com/PrimordialMoros/Bending.git"
+                    developerConnection = "scm:git:ssh://git@github.com/PrimordialMoros/Bending.git"
+                    url = "https://github.com/PrimordialMoros/Bending"
                 }
                 issueManagement {
-                    system.set("Github")
-                    url.set("https://github.com/PrimordialMoros/Bending/issues")
+                    system = "Github"
+                    url = "https://github.com/PrimordialMoros/Bending/issues"
                 }
             }
         }

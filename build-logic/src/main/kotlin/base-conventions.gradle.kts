@@ -15,7 +15,7 @@ repositories {
 }
 
 configure<JavaPluginExtension> {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+    toolchain.languageVersion = JavaLanguageVersion.of(17)
 }
 
 tasks {
@@ -23,7 +23,7 @@ tasks {
         options.compilerArgs.addAll(listOf("-Xlint:unchecked", "-Xlint:deprecation"))
         options.encoding = "UTF-8"
     }
-    withType<AbstractArchiveTask> {
+    withType<AbstractArchiveTask>().configureEach {
         isPreserveFileTimestamps = false
         isReproducibleFileOrder = true
     }

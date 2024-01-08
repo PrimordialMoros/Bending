@@ -15,7 +15,7 @@ repositories {
 
 dependencies {
     bendingImplementation(projects.bendingCommon)
-    bendingImplementation(projects.adapterV120R2) { targetConfiguration = "reobf" }
+    bendingImplementation(projects.adapterV120R3) { targetConfiguration = "reobf" }
     bendingImplementation(libs.tasker.bukkit)
     bendingImplementation(libs.bstats.bukkit)
     bendingImplementation(libs.cloud.minecraft) { isTransitive = false }
@@ -57,10 +57,10 @@ tasks {
 
 val generateRuntimeDependencies = tasks.register("writeDependencies", WriteDependencies::class) {
     val runtimeDownloadConfig = configurations.getByName("runtimeDownload")
-    tree.set(runtimeDownloadConfig.incoming.resolutionResult.rootComponent)
+    tree = runtimeDownloadConfig.incoming.resolutionResult.rootComponent
     files.from(runtimeDownloadConfig)
-    outputFileName.set("bending-dependencies")
-    outputDir.set(layout.buildDirectory.dir("generated/dependencies"))
+    outputFileName = "bending-dependencies"
+    outputDir = layout.buildDirectory.dir("generated/dependencies")
 }
 
 sourceSets.main {
@@ -70,30 +70,30 @@ sourceSets.main {
 }
 
 bendingPlatform {
-    productionJar.set(tasks.shadowJar.flatMap { it.archiveFile })
+    productionJar = tasks.shadowJar.flatMap { it.archiveFile }
 }
 
 hangarPublish.publications.register("plugin") {
-    version.set(project.version as String)
-    channel.set("Release")
-    id.set("Bending")
-    changelog.set(releaseNotes)
-    apiKey.set(providers.environmentVariable("HANGAR_TOKEN"))
+    version = project.version as String
+    channel = "Release"
+    id = "Bending"
+    changelog = releaseNotes
+    apiKey = providers.environmentVariable("HANGAR_TOKEN")
     platforms.paper {
-        jar.set(bendingPlatform.productionJar)
+        jar = bendingPlatform.productionJar
         platformVersions.add(libs.versions.minecraft)
-        dependencies.url("LuckPerms", "https://luckperms.net/") { required.set(false) }
-        dependencies.url("WorldGuard", "https://enginehub.org/worldguard/") { required.set(false) }
-        dependencies.url("PlaceholderAPI", "https://www.spigotmc.org/resources/placeholderapi.6245/") { required.set(false) }
-        dependencies.url("LWC Extended", "https://www.spigotmc.org/resources/lwc-extended.69551/") { required.set(false) }
-        dependencies.hangar("MiniPlaceholders") { required.set(false) }
-        dependencies.hangar("Towny") { required.set(false) }
-        dependencies.hangar("GriefPrevention") { required.set(false) }
+        dependencies.url("LuckPerms", "https://luckperms.net/") { required = false }
+        dependencies.url("WorldGuard", "https://enginehub.org/worldguard/") { required = false }
+        dependencies.url("PlaceholderAPI", "https://www.spigotmc.org/resources/placeholderapi.6245/"){ required = false }
+        dependencies.url("LWC Extended", "https://www.spigotmc.org/resources/lwc-extended.69551/") { required = false }
+        dependencies.hangar("MiniPlaceholders") { required = false }
+        dependencies.hangar("Towny") { required = false }
+        dependencies.hangar("GriefPrevention") { required = false }
     }
 }
 
 modrinth {
-    versionName.set("paper-$version")
-    loaders.set(listOf("paper", "purpur"))
+    versionName = "paper-$version"
+    loaders = listOf("paper", "purpur")
     gameVersions.add(libs.versions.minecraft)
 }

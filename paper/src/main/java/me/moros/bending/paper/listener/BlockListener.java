@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Moros
+ * Copyright 2020-2024 Moros
  *
  * This file is part of Bending.
  *
@@ -130,7 +130,7 @@ public record BlockListener(Game game) implements Listener, BukkitListener {
       if (name == null) {
         name = Component.translatable(block.type().translationKey());
       }
-      player.sendActionBar(Component.translatable("container.isLocked").args(name));
+      player.sendActionBar(Component.translatable("container.isLocked").arguments(name));
       Sound.BLOCK_CHEST_LOCKED.asEffect().play(block);
       return true;
     }

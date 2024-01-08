@@ -4,7 +4,7 @@ plugins {
 }
 
 minecraft {
-    version(libs.versions.minecraft.get())
+    version().set(libs.versions.minecraft)
     platform(org.spongepowered.gradle.vanilla.repository.MinecraftPlatform.SERVER)
 }
 
