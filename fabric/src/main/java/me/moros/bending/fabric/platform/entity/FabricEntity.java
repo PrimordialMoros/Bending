@@ -19,13 +19,18 @@
 
 package me.moros.bending.fabric.platform.entity;
 
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.EntityType;
+import me.moros.bending.api.platform.property.BooleanProperty;
 import me.moros.bending.api.platform.world.World;
 import me.moros.bending.api.util.data.DataKey;
+import me.moros.bending.api.util.functional.Suppliers;
 import me.moros.bending.fabric.mixin.accessor.EntityAccess;
 import me.moros.bending.fabric.platform.FabricMetadata;
 import me.moros.bending.fabric.platform.world.FabricWorld;
@@ -34,6 +39,7 @@ import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.util.TriState;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -41,9 +47,11 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FabricEntity implements Entity {
   private net.minecraft.world.entity.Entity handle;
+  private final Supplier<Map<BooleanProperty, Boolean>> properties;
 
   public FabricEntity(net.minecraft.world.entity.Entity handle) {
     this.handle = handle;
+    this.properties = Suppliers.lazy(IdentityHashMap::new);
   }
 
   public void setHandle(net.minecraft.world.entity.Entity handle) {
@@ -247,6 +255,25 @@ public class FabricEntity implements Entity {
   @Override
   public @NonNull UUID uuid() {
     return handle().getUUID();
+  }
+
+  @Override
+  public TriState checkProperty(BooleanProperty property) {
+    var vanillaProperty = PropertyMapper.PROPERTIES.get(property);
+    if (vanillaProperty == null) {
+      return TriState.byBoolean(properties.get().get(property));
+    }
+    return vanillaProperty.get(handle());
+  }
+
+  @Override
+  public void setProperty(BooleanProperty property, boolean value) {
+    var vanillaProperty = PropertyMapper.PROPERTIES.get(property);
+    if (vanillaProperty != null) {
+      vanillaProperty.set(handle(), value);
+    } else {
+      properties.get().put(property, value);
+    }
   }
 
   @Override

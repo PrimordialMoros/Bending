@@ -20,10 +20,7 @@
 package me.moros.bending.paper.platform.entity;
 
 import java.util.Collection;
-import java.util.IdentityHashMap;
-import java.util.Map;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.DamageSource;
@@ -35,15 +32,12 @@ import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.item.Inventory;
 import me.moros.bending.api.platform.potion.Potion;
 import me.moros.bending.api.platform.potion.PotionEffect;
-import me.moros.bending.api.platform.property.BooleanProperty;
 import me.moros.bending.api.user.User;
-import me.moros.bending.api.util.functional.Suppliers;
 import me.moros.bending.paper.platform.DamageUtil;
 import me.moros.bending.paper.platform.PlatformAdapter;
 import me.moros.bending.paper.platform.item.BukkitInventory;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
-import net.kyori.adventure.util.TriState;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -53,11 +47,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class BukkitLivingEntity extends BukkitEntity implements LivingEntity {
   private AttributeInstance maxHealth;
-  private final Supplier<Map<BooleanProperty, Boolean>> properties;
 
   public BukkitLivingEntity(org.bukkit.entity.LivingEntity handle) {
     super(handle);
-    this.properties = Suppliers.lazy(IdentityHashMap::new);
   }
 
   @Override
@@ -175,24 +167,5 @@ public class BukkitLivingEntity extends BukkitEntity implements LivingEntity {
     arrow.setInvulnerable(true);
     arrow.setPickupStatus(PickupStatus.DISALLOWED);
     return PlatformAdapter.fromBukkitEntity(arrow);
-  }
-
-  @Override
-  public TriState checkProperty(BooleanProperty property) {
-    var bukkitProperty = PropertyMapper.PROPERTIES.get(property);
-    if (bukkitProperty == null) {
-      return TriState.byBoolean(properties.get().get(property));
-    }
-    return bukkitProperty.get(handle());
-  }
-
-  @Override
-  public void setProperty(BooleanProperty property, boolean value) {
-    var bukkitProperty = PropertyMapper.PROPERTIES.get(property);
-    if (bukkitProperty != null) {
-      bukkitProperty.set(handle(), value);
-    } else {
-      properties.get().put(property, value);
-    }
   }
 }

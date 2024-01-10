@@ -26,10 +26,8 @@ import me.moros.bending.api.collision.raytrace.ContextBuilder;
 import me.moros.bending.api.platform.item.Inventory;
 import me.moros.bending.api.platform.potion.Potion;
 import me.moros.bending.api.platform.potion.PotionEffect;
-import me.moros.bending.api.platform.property.BooleanProperty;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
-import net.kyori.adventure.util.TriState;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -157,15 +155,5 @@ public interface DelegateLivingEntity extends DelegateEntity, LivingEntity {
   @Override
   default boolean isProjectile() {
     return entity().isProjectile();
-  }
-
-  @Override
-  default TriState checkProperty(BooleanProperty property) {
-    return entity().checkProperty(property);
-  }
-
-  @Override
-  default void setProperty(BooleanProperty property, boolean value) {
-    entity().setProperty(property, value);
   }
 }

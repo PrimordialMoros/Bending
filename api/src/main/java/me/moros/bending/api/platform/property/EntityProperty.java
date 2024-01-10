@@ -26,6 +26,7 @@ public interface EntityProperty {
   BooleanProperty FLYING = bool("flying");
   BooleanProperty GLIDING = bool("gliding");
   BooleanProperty CHARGED = bool("charged");
+  BooleanProperty ALLOW_PICKUP = bool("allowpickup");
 
   private static IntegerProperty integer(String name, int min, int max) {
     return new IntegerProperty(name, min, max);

@@ -30,7 +30,6 @@ import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.item.Inventory;
 import me.moros.bending.api.platform.potion.Potion;
 import me.moros.bending.api.platform.potion.PotionEffect;
-import me.moros.bending.api.platform.property.BooleanProperty;
 import me.moros.bending.api.platform.property.EntityProperty;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
@@ -172,14 +171,4 @@ public interface LivingEntity extends Entity {
   void remainingAir(int amount);
 
   Entity shootArrow(Position origin, Vector3d direction, double power);
-
-  TriState checkProperty(BooleanProperty property);
-
-  default void setProperty(BooleanProperty property, TriState value) {
-    if (value != TriState.NOT_SET) {
-      setProperty(property, value == TriState.TRUE);
-    }
-  }
-
-  void setProperty(BooleanProperty property, boolean value);
 }

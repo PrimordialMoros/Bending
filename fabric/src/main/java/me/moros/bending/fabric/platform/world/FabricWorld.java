@@ -201,7 +201,9 @@ public record FabricWorld(ServerLevel handle) implements World {
   public Entity dropItem(Position position, ItemSnapshot item, boolean canPickup) {
     var type = PlatformAdapter.toFabricItem(item);
     ItemEntity droppedItem = new ItemEntity(handle(), position.x(), position.y(), position.z(), type);
-    droppedItem.setNeverPickUp();
+    if (!canPickup) {
+      droppedItem.setNeverPickUp();
+    }
     handle().addFreshEntity(droppedItem);
     return PlatformAdapter.fromFabricEntity(droppedItem);
   }

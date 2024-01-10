@@ -19,12 +19,15 @@
 
 package me.moros.bending.paper.platform.entity;
 
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.EntityType;
+import me.moros.bending.api.platform.property.BooleanProperty;
 import me.moros.bending.api.platform.world.World;
 import me.moros.bending.api.util.data.DataHolder;
 import me.moros.bending.api.util.data.DataKey;
@@ -36,6 +39,7 @@ import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.util.TriState;
 import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Projectile;
@@ -45,10 +49,12 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public class BukkitEntity implements Entity {
   private final org.bukkit.entity.Entity handle;
   private final Supplier<DataHolder> holder;
+  private final Supplier<Map<BooleanProperty, Boolean>> properties;
 
   public BukkitEntity(org.bukkit.entity.Entity handle) {
     this.handle = handle;
     this.holder = Suppliers.lazy(() -> BukkitDataHolder.combined(handle()));
+    this.properties = Suppliers.lazy(IdentityHashMap::new);
   }
 
   public org.bukkit.entity.Entity handle() {
@@ -229,6 +235,25 @@ public class BukkitEntity implements Entity {
   @Override
   public @NonNull UUID uuid() {
     return handle().getUniqueId();
+  }
+
+  @Override
+  public TriState checkProperty(BooleanProperty property) {
+    var bukkitProperty = PropertyMapper.PROPERTIES.get(property);
+    if (bukkitProperty == null) {
+      return TriState.byBoolean(properties.get().get(property));
+    }
+    return bukkitProperty.get(handle());
+  }
+
+  @Override
+  public void setProperty(BooleanProperty property, boolean value) {
+    var bukkitProperty = PropertyMapper.PROPERTIES.get(property);
+    if (bukkitProperty != null) {
+      bukkitProperty.set(handle(), value);
+    } else {
+      properties.get().put(property, value);
+    }
   }
 
   @Override

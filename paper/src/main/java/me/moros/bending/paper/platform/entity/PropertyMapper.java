@@ -27,13 +27,15 @@ import me.moros.bending.api.platform.property.BooleanProperty;
 import me.moros.bending.api.platform.property.EntityProperty;
 import net.kyori.adventure.util.TriState;
 import org.bukkit.entity.Creeper;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import static java.util.Map.entry;
 
 final class PropertyMapper {
-  static final Map<BooleanProperty, BukkitProperty<? extends LivingEntity>> PROPERTIES;
+  static final Map<BooleanProperty, BukkitProperty<? extends Entity>> PROPERTIES;
 
   static {
     PROPERTIES = Map.ofEntries(
@@ -42,23 +44,24 @@ final class PropertyMapper {
       entry(EntityProperty.ALLOW_FLIGHT, boolProp(Player.class, Player::getAllowFlight, Player::setAllowFlight)),
       entry(EntityProperty.FLYING, boolProp(Player.class, Player::isFlying, Player::setFlying)),
       entry(EntityProperty.GLIDING, boolProp(LivingEntity.class, LivingEntity::isGliding, LivingEntity::setGliding)),
-      entry(EntityProperty.CHARGED, boolProp(Creeper.class, Creeper::isPowered, Creeper::setPowered))
+      entry(EntityProperty.CHARGED, boolProp(Creeper.class, Creeper::isPowered, Creeper::setPowered)),
+      entry(EntityProperty.ALLOW_PICKUP, boolProp(Item.class, Item::canPlayerPickup, Item::setCanPlayerPickup))
     );
   }
 
-  static <E extends LivingEntity> BukkitProperty<E> boolProp(Class<E> type, Predicate<E> getter, BiConsumer<E, Boolean> setter) {
+  static <E extends Entity> BukkitProperty<E> boolProp(Class<E> type, Predicate<E> getter, BiConsumer<E, Boolean> setter) {
     return new BukkitProperty<>(type, getter, setter);
   }
 
-  record BukkitProperty<E extends LivingEntity>(Class<E> type, Predicate<E> getter, BiConsumer<E, Boolean> setter) {
-    TriState get(LivingEntity data) {
+  record BukkitProperty<E extends Entity>(Class<E> type, Predicate<E> getter, BiConsumer<E, Boolean> setter) {
+    TriState get(Entity data) {
       if (type.isInstance(data)) {
         return TriState.byBoolean(getter.test(type.cast(data)));
       }
       return TriState.NOT_SET;
     }
 
-    void set(LivingEntity entity, boolean value) {
+    void set(Entity entity, boolean value) {
       if (type.isInstance(entity)) {
         setter.accept(type.cast(entity), value);
       }

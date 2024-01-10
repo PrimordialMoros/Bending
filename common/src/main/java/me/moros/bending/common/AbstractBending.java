@@ -87,6 +87,7 @@ public abstract class AbstractBending<T> implements Bending {
 
   protected void load() {
     addonLoader.loadAll(addonProviders());
+    translationManager.refresh(); // Refresh to load addon translations
     game = new GameImpl(this);
     GameProviderUtil.registerProvider(game);
     addonLoader.enableAll(game);

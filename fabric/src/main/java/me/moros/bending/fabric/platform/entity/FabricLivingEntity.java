@@ -20,9 +20,6 @@
 package me.moros.bending.fabric.platform.entity;
 
 import java.util.Collection;
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.function.Supplier;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.event.BendingDamageEvent;
@@ -32,14 +29,11 @@ import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.item.Inventory;
 import me.moros.bending.api.platform.potion.Potion;
 import me.moros.bending.api.platform.potion.PotionEffect;
-import me.moros.bending.api.platform.property.BooleanProperty;
 import me.moros.bending.api.user.User;
-import me.moros.bending.api.util.functional.Suppliers;
 import me.moros.bending.fabric.platform.PlatformAdapter;
 import me.moros.bending.fabric.platform.item.FabricInventory;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
-import net.kyori.adventure.util.TriState;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Mob;
@@ -49,11 +43,8 @@ import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class FabricLivingEntity extends FabricEntity implements LivingEntity {
-  private final Supplier<Map<BooleanProperty, Boolean>> properties;
-
   public FabricLivingEntity(net.minecraft.world.entity.LivingEntity handle) {
     super(handle);
-    this.properties = Suppliers.lazy(IdentityHashMap::new);
   }
 
   @Override
@@ -175,24 +166,5 @@ public class FabricLivingEntity extends FabricEntity implements LivingEntity {
     arrow.pickup = Pickup.DISALLOWED;
     w.addFreshEntity(arrow);
     return PlatformAdapter.fromFabricEntity(arrow);
-  }
-
-  @Override
-  public TriState checkProperty(BooleanProperty property) {
-    var vanillaProperty = PropertyMapper.PROPERTIES.get(property);
-    if (vanillaProperty == null) {
-      return TriState.byBoolean(properties.get().get(property));
-    }
-    return vanillaProperty.get(handle());
-  }
-
-  @Override
-  public void setProperty(BooleanProperty property, boolean value) {
-    var vanillaProperty = PropertyMapper.PROPERTIES.get(property);
-    if (vanillaProperty != null) {
-      vanillaProperty.set(handle(), value);
-    } else {
-      properties.get().put(property, value);
-    }
   }
 }

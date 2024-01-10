@@ -71,7 +71,11 @@ public final class TranslationManager implements Iterable<Locale> {
     this.registryReference = new AtomicReference<>(registry);
     GlobalTranslator.translator().addSource(registry);
     this.buffer = Debounced.create(this::reload, 2, TimeUnit.SECONDS);
-    listener.listenToDirectory(translationsDirectory, e -> buffer.request());
+    listener.listenToDirectory(translationsDirectory, e -> refresh());
+  }
+
+  public void refresh() {
+    buffer.request();
   }
 
   private void reload() {

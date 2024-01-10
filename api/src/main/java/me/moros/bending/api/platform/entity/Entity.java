@@ -27,6 +27,7 @@ import me.moros.bending.api.event.VelocityEvent;
 import me.moros.bending.api.platform.Direction;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.block.Block;
+import me.moros.bending.api.platform.property.BooleanProperty;
 import me.moros.bending.api.platform.world.World;
 import me.moros.bending.api.util.data.DataHolder;
 import me.moros.math.Position;
@@ -34,6 +35,7 @@ import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.util.TriState;
 
 public interface Entity extends ForwardingAudience.Single, Damageable, DataHolder {
   int id();
@@ -203,4 +205,14 @@ public interface Entity extends ForwardingAudience.Single, Damageable, DataHolde
   void invulnerable(boolean value);
 
   boolean teleport(Position position);
+
+  TriState checkProperty(BooleanProperty property);
+
+  default void setProperty(BooleanProperty property, TriState value) {
+    if (value != TriState.NOT_SET) {
+      setProperty(property, value == TriState.TRUE);
+    }
+  }
+
+  void setProperty(BooleanProperty property, boolean value);
 }

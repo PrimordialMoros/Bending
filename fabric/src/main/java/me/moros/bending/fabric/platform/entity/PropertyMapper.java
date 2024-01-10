@@ -31,6 +31,7 @@ import net.kyori.adventure.util.TriState;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Creeper;
 
 import static java.util.Map.entry;
@@ -45,7 +46,14 @@ final class PropertyMapper {
       entry(EntityProperty.ALLOW_FLIGHT, boolProp(ServerPlayer.class, p -> p.getAbilities().mayfly, PlayerUtil::setAllowFlight)),
       entry(EntityProperty.FLYING, boolProp(ServerPlayer.class, e -> e.getAbilities().flying, PlayerUtil::setFlying)),
       entry(EntityProperty.GLIDING, boolProp(LivingEntity.class, LivingEntity::isFallFlying, (e, v) -> ((EntityAccess) e).bending$setSharedFlag(7, v))),
-      entry(EntityProperty.CHARGED, boolProp(Creeper.class, Creeper::isPowered, (e, v) -> e.getEntityData().set(CreeperAccess.getDataIsPowered(), v)))
+      entry(EntityProperty.CHARGED, boolProp(Creeper.class, Creeper::isPowered, (e, v) -> e.getEntityData().set(CreeperAccess.getDataIsPowered(), v))),
+      entry(EntityProperty.ALLOW_PICKUP, boolProp(ItemEntity.class, ItemEntity::hasPickUpDelay, (e, v) -> {
+        if (v) {
+          e.setDefaultPickUpDelay();
+        } else {
+          e.setNeverPickUp();
+        }
+      }))
     );
   }
 

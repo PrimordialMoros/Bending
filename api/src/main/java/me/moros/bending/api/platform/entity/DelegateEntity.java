@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import me.moros.bending.api.ability.AbilityDescription;
+import me.moros.bending.api.platform.property.BooleanProperty;
 import me.moros.bending.api.platform.world.World;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.data.DataKey;
@@ -30,6 +31,7 @@ import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.util.TriState;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
@@ -256,6 +258,16 @@ public interface DelegateEntity extends Entity {
   @Override
   default boolean teleport(Position position) {
     return entity().teleport(position);
+  }
+
+  @Override
+  default TriState checkProperty(BooleanProperty property) {
+    return entity().checkProperty(property);
+  }
+
+  @Override
+  default void setProperty(BooleanProperty property, boolean value) {
+    entity().setProperty(property, value);
   }
 
   @Override
