@@ -2,7 +2,7 @@
 math = "2.0.0"
 tasker = "1.0.1"
 adventure = "4.15.0"
-adventure-fabric = "5.11.0-SNAPSHOT"
+adventure-fabric = "5.11.0"
 configurate = "4.1.2"
 cloud = "1.8.4"
 cloud-snapshot = "1.8.0-SNAPSHOT"
@@ -11,11 +11,11 @@ paper = "1.20.4-R0.1-SNAPSHOT"
 sponge-api = "11.0.0-SNAPSHOT"
 sponge-common = "1.20.1-11.0.0-SNAPSHOT"
 minecraft = "1.20.4"
-fabric-loom = "1.5.3"
-fabric-api = "0.92.1+1.20.4"
-fabric-loader = "0.15.3"
+fabric-loom = "1.5.6"
+fabric-api = "0.95.1+1.20.4"
+fabric-loader = "0.15.6"
 shadow = "8.1.1"
-flyway = "10.4.1"
+flyway = "10.6.0"
 junit = "5.10.1"
 
 [libraries]
@@ -66,7 +66,7 @@ cloud-fabric = { module = "cloud.commandframework:cloud-fabric", version.ref = "
 cloud-sponge = { module = "cloud.commandframework:cloud-sponge", version.ref = "cloud-snapshot" }
 
 # Databases
-mysql = { module = "com.mysql:mysql-connector-j", version = "8.2.0" }
+mysql = { module = "com.mysql:mysql-connector-j", version = "8.3.0" }
 mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.3.2" }
 postgresql = { module = "org.postgresql:postgresql", version = "42.7.1" }
 h2 = { module = "com.h2database:h2", version = "2.2.224" }
@@ -84,7 +84,7 @@ fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.
 paper = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
 inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.13" }
 grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.1" }
-towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.100.0.19" }
+towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.100.1.4" }
 lwc = { module = "com.griefcraft:lwc", version = "2.3.1" }
 worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.9" }
 papi = { module = "me.clip:placeholderapi", version = "2.11.5" }
