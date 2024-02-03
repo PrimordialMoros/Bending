@@ -26,9 +26,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-import cloud.commandframework.CommandManager;
-import cloud.commandframework.execution.CommandExecutionCoordinator;
-import cloud.commandframework.fabric.FabricServerCommandManager;
 import me.moros.bending.api.addon.Addon;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.platform.Platform;
@@ -60,6 +57,10 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.Person;
 import net.minecraft.server.MinecraftServer;
+import org.incendo.cloud.CommandManager;
+import org.incendo.cloud.SenderMapper;
+import org.incendo.cloud.execution.ExecutionCoordinator;
+import org.incendo.cloud.fabric.FabricServerCommandManager;
 import org.slf4j.LoggerFactory;
 
 final class FabricBending extends AbstractBending<ModContainer> {
@@ -83,8 +84,8 @@ final class FabricBending extends AbstractBending<ModContainer> {
     registerLifecycleListeners();
 
     CommandManager<CommandSender> manager = new FabricServerCommandManager<>(
-      CommandExecutionCoordinator.simpleCoordinator(),
-      CommandSender::from, CommandSender::stack
+      ExecutionCoordinator.simpleCoordinator(),
+      SenderMapper.create(CommandSender::from, CommandSender::stack)
     );
     Commander.create(manager, PlayerCommandSender.class, this).init();
   }

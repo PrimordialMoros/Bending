@@ -24,12 +24,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import cloud.commandframework.permission.CommandPermission;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.common.command.CommandPermissions;
 import net.kyori.adventure.util.TriState;
+import org.incendo.cloud.permission.Permission;
 
 public abstract class PermissionInitializer implements Initializer {
   protected PermissionInitializer() {
@@ -46,7 +46,7 @@ public abstract class PermissionInitializer implements Initializer {
     var elementNodes = initAbilityNodes();
     var children = Stream.of(CommandPermissions.BIND, CommandPermissions.BOARD, CommandPermissions.CHOOSE,
         CommandPermissions.HELP, CommandPermissions.PRESET, CommandPermissions.TOGGLE, CommandPermissions.VERSION)
-      .map(CommandPermission::toString).collect(Collectors.toSet());
+      .map(Permission::permissionString).collect(Collectors.toSet());
     children.addAll(elementNodes);
     children.add("bending.board");
     registerDefault("bending.player", children);
@@ -55,7 +55,7 @@ public abstract class PermissionInitializer implements Initializer {
   private void initAdminNodes() {
     var children = Stream.of(CommandPermissions.ADD, CommandPermissions.REMOVE, CommandPermissions.MODIFY,
         CommandPermissions.RELOAD, CommandPermissions.IMPORT, CommandPermissions.EXPORT, CommandPermissions.ATTRIBUTE)
-      .map(CommandPermission::toString).collect(Collectors.toSet());
+      .map(Permission::permissionString).collect(Collectors.toSet());
     children.add("bending.player");
     children.add("bending.bluefire");
     children.add(CommandPermissions.CHOOSE + ".other");

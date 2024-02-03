@@ -19,8 +19,6 @@
 
 package me.moros.bending.common.command.commands;
 
-import cloud.commandframework.Command.Builder;
-import cloud.commandframework.meta.CommandMeta;
 import me.moros.bending.api.gui.Board;
 import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.user.User;
@@ -29,13 +27,14 @@ import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.command.ContextKeys;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
+import org.incendo.cloud.description.Description;
 
 public record BoardCommand<C extends Audience>(Commander<C> commander) implements Initializer {
   @Override
   public void init() {
-    Builder<C> builder = commander().rootBuilder();
-    commander().register(builder.literal("board")
-      .meta(CommandMeta.DESCRIPTION, "Toggle bending board visibility")
+    commander().register(commander().rootBuilder()
+      .literal("board")
+      .commandDescription(Description.of("Toggle bending board visibility"))
       .permission(CommandPermissions.BOARD)
       .senderType(commander().playerType())
       .handler(c -> onBoard(c.get(ContextKeys.BENDING_PLAYER)))

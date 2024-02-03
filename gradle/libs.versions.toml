@@ -4,7 +4,7 @@ tasker = "1.0.1"
 adventure = "4.15.0"
 adventure-fabric = "5.11.0"
 configurate = "4.1.2"
-cloud = "1.8.4"
+cloud = "2.0.0-beta.1"
 cloud-snapshot = "1.8.0-SNAPSHOT"
 bstats = "3.0.2"
 paper = "1.20.4-R0.1-SNAPSHOT"
@@ -59,10 +59,10 @@ configurate-gson = { module = "org.spongepowered:configurate-gson", version.ref 
 bstats-bukkit = { module = "org.bstats:bstats-bukkit", version.ref = "bstats" }
 bstats-sponge = { module = "org.bstats:bstats-sponge", version.ref = "bstats" }
 
-cloud-core = { module = "cloud.commandframework:cloud-core", version.ref = "cloud" }
-cloud-minecraft = { module = "cloud.commandframework:cloud-minecraft-extras", version.ref = "cloud" }
-cloud-paper = { module = "cloud.commandframework:cloud-paper", version.ref = "cloud" }
-cloud-fabric = { module = "cloud.commandframework:cloud-fabric", version.ref = "cloud" }
+cloud-core = { module = "org.incendo:cloud-core", version.ref = "cloud" }
+cloud-minecraft = { module = "org.incendo:cloud-minecraft-extras", version.ref = "cloud" }
+cloud-paper = { module = "org.incendo:cloud-paper", version.ref = "cloud" }
+cloud-fabric = { module = "org.incendo:cloud-fabric", version.ref = "cloud" }
 cloud-sponge = { module = "cloud.commandframework:cloud-sponge", version.ref = "cloud-snapshot" }
 
 # Databases

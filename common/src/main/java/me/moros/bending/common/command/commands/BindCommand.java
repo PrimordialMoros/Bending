@@ -21,9 +21,6 @@ package me.moros.bending.common.command.commands;
 
 import java.util.Collection;
 
-import cloud.commandframework.Command.Builder;
-import cloud.commandframework.arguments.standard.IntegerArgument;
-import cloud.commandframework.meta.CommandMeta;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.preset.Preset;
@@ -33,40 +30,44 @@ import me.moros.bending.api.util.ColorPalette;
 import me.moros.bending.common.command.CommandPermissions;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.command.ContextKeys;
-import me.moros.bending.common.command.argument.AbilityDescriptionArgument;
-import me.moros.bending.common.command.argument.UserArgument;
+import me.moros.bending.common.command.parser.AbilityDescriptionParser;
+import me.moros.bending.common.command.parser.UserParser;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.event.HoverEvent;
+import org.incendo.cloud.component.DefaultValue;
+import org.incendo.cloud.description.Description;
+import org.incendo.cloud.parser.standard.IntegerParser;
 
 public record BindCommand<C extends Audience>(Commander<C> commander) implements Initializer {
   @Override
   public void init() {
-    Builder<C> builder = commander().rootBuilder();
-    var slotArg = IntegerArgument.<C>builder("slot")
-      .withMin(0).withMax(9).asOptionalWithDefault(0);
-    commander().register(builder.literal("bind", "b")
-      .meta(CommandMeta.DESCRIPTION, "Bind an ability to a slot")
+    var builder = commander().rootBuilder();
+    commander().register(builder
+      .literal("bind", "b")
+      .required("ability", AbilityDescriptionParser.parser(false))
+      .optional("slot", IntegerParser.integerParser(1, 9), DefaultValue.constant(0))
+      .commandDescription(Description.of("Bind an ability to a slot"))
       .permission(CommandPermissions.BIND)
       .senderType(commander().playerType())
-      .argument(AbilityDescriptionArgument.of("ability"))
-      .argument(slotArg.build())
       .handler(c -> onBind(c.get(ContextKeys.BENDING_PLAYER), c.get("ability"), c.get("slot")))
     );
-    commander().register(builder.literal("clear", "c")
-      .meta(CommandMeta.DESCRIPTION, "Clear an ability slot")
+    commander().register(builder
+      .literal("clear", "c")
+      .optional("slot", IntegerParser.integerParser(1, 9), DefaultValue.constant(0))
+      .commandDescription(Description.of("Clear an ability slot"))
       .permission(CommandPermissions.BIND)
       .senderType(commander().playerType())
-      .argument(slotArg.build())
       .handler(c -> onBindClear(c.get(ContextKeys.BENDING_PLAYER), c.get("slot")))
     );
-    commander().register(builder.literal("who", "w")
-      .meta(CommandMeta.DESCRIPTION, "Show all bound abilities")
+    commander().register(builder
+      .literal("who", "w")
+      .optional("target", UserParser.parser(), DefaultValue.parsed("me"))
+      .commandDescription(Description.of("Show all bound abilities"))
       .permission(CommandPermissions.HELP)
-      .argument(UserArgument.optional("target", "me"))
-      .handler(c -> onBindList(c.getSender(), c.get("target")))
+      .handler(c -> onBindList(c.sender(), c.get("target")))
     );
   }
 

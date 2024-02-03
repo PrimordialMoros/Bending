@@ -19,8 +19,6 @@
 
 package me.moros.bending.common.command.commands;
 
-import cloud.commandframework.Command.Builder;
-import cloud.commandframework.meta.CommandMeta;
 import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.util.ColorPalette;
 import me.moros.bending.common.command.CommandPermissions;
@@ -30,15 +28,16 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
+import org.incendo.cloud.description.Description;
 
 public record VersionCommand<C extends Audience>(Commander<C> commander) implements Initializer {
   @Override
   public void init() {
-    Builder<C> builder = commander().rootBuilder();
-    commander().register(builder.literal("version", "v")
-      .meta(CommandMeta.DESCRIPTION, "View version info about the bending plugin")
+    commander().register(commander().rootBuilder()
+      .literal("version", "v")
+      .commandDescription(Description.of("View version info about the bending plugin"))
       .permission(CommandPermissions.VERSION)
-      .handler(c -> onVersion(c.getSender()))
+      .handler(c -> onVersion(c.sender()))
     );
   }
 

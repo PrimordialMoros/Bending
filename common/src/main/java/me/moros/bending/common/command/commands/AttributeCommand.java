@@ -22,8 +22,6 @@ package me.moros.bending.common.command.commands;
 import java.util.ArrayList;
 import java.util.List;
 
-import cloud.commandframework.Command.Builder;
-import cloud.commandframework.meta.CommandMeta;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.config.Configurable;
 import me.moros.bending.api.config.attribute.AttributeValue;
@@ -34,23 +32,24 @@ import me.moros.bending.api.util.Tasker;
 import me.moros.bending.common.command.CommandPermissions;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.command.ContextKeys;
-import me.moros.bending.common.command.argument.AbilityDescriptionArgument;
+import me.moros.bending.common.command.parser.AbilityDescriptionParser;
 import me.moros.bending.common.util.Initializer;
 import me.moros.bending.common.util.ReflectionUtil;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.incendo.cloud.description.Description;
 
 public record AttributeCommand<C extends Audience>(Commander<C> commander) implements Initializer {
   @Override
   public void init() {
-    Builder<C> builder = commander().rootBuilder();
-    commander().register(builder.literal("attribute", "attributes")
-      .meta(CommandMeta.DESCRIPTION, "View all available attribute values for a specific ability")
+    commander().register(commander().rootBuilder()
+      .literal("attribute", "attributes")
+      .required("ability", AbilityDescriptionParser.parser(true))
+      .commandDescription(Description.of("View all available attribute values for a specific ability"))
       .permission(CommandPermissions.ATTRIBUTE)
       .senderType(commander().playerType())
-      .argument(AbilityDescriptionArgument.<C>builder("ability").withSequenceSuggestions(true))
       .handler(c -> onViewConfig(c.get(ContextKeys.BENDING_PLAYER), c.get("ability")))
     );
   }

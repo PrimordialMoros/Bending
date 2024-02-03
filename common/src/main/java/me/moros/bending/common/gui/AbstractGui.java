@@ -27,7 +27,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import cloud.commandframework.permission.CommandPermission;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.element.ElementHandler;
 import me.moros.bending.api.gui.ElementGui;
@@ -42,15 +41,13 @@ import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.TextUtil;
 import me.moros.bending.api.util.functional.Suppliers;
 import me.moros.bending.common.command.CommandPermissions;
-import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.identity.Identity;
-import net.kyori.adventure.permission.PermissionChecker;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.util.TriState;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.incendo.cloud.permission.Permission;
 
 public abstract class AbstractGui<ItemStack, T> implements ElementGui {
   protected static final Supplier<ItemSnapshot> BACKGROUND = Suppliers.lazy(() ->
@@ -162,7 +159,7 @@ public abstract class AbstractGui<ItemStack, T> implements ElementGui {
     private final MenuAction menuAction;
     private final boolean keepOpen;
 
-    ActionType(Args0 message, CommandPermission permission, MenuAction menuAction, boolean keepOpen) {
+    ActionType(Args0 message, Permission permission, MenuAction menuAction, boolean keepOpen) {
       this.message = message;
       this.permission = permission.toString();
       this.menuAction = menuAction;
@@ -182,12 +179,10 @@ public abstract class AbstractGui<ItemStack, T> implements ElementGui {
       return true;
     }
 
-    private Component toEntry(Audience audience) {
-      boolean strikethrough = audience.get(PermissionChecker.POINTER)
-        .map(checker -> !checker.test(permission)).orElse(false);
-      return GlobalTranslator.render(message.build(), audience.getOrDefault(Identity.LOCALE, Message.DEFAULT_LOCALE))
+    private Component toEntry(Player player) {
+      return GlobalTranslator.render(message.build(), player.locale())
         .decoration(TextDecoration.ITALIC, false)
-        .decoration(TextDecoration.STRIKETHROUGH, strikethrough);
+        .decoration(TextDecoration.STRIKETHROUGH, !player.hasPermission(permission));
     }
 
     private static final Collection<ActionType> VALUES = List.of(values());

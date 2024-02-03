@@ -21,9 +21,6 @@ package me.moros.bending.common.command.commands;
 
 import java.util.Collection;
 
-import cloud.commandframework.Command.Builder;
-import cloud.commandframework.arguments.standard.StringArgument;
-import cloud.commandframework.meta.CommandMeta;
 import me.moros.bending.api.ability.preset.Preset;
 import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.user.User;
@@ -32,38 +29,44 @@ import me.moros.bending.api.util.TextUtil;
 import me.moros.bending.common.command.CommandPermissions;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.command.ContextKeys;
-import me.moros.bending.common.command.argument.PresetArgument;
+import me.moros.bending.common.command.parser.PresetParser;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
+import org.incendo.cloud.description.Description;
+import org.incendo.cloud.parser.standard.StringParser;
 
 public record PresetCommand<C extends Audience>(Commander<C> commander) implements Initializer {
   @Override
   public void init() {
-    Builder<C> builder = commander().rootBuilder().literal("preset", "presets", "p")
+    var builder = commander().rootBuilder().literal("preset", "presets", "p")
       .permission(CommandPermissions.PRESET);
-    commander().register(builder.literal("list", "ls")
-      .meta(CommandMeta.DESCRIPTION, "List all available presets")
+    commander().register(builder
+      .literal("list", "ls")
+      .commandDescription(Description.of("List all available presets"))
       .senderType(commander().playerType())
       .handler(c -> onPresetList(c.get(ContextKeys.BENDING_PLAYER)))
     );
-    commander().register(builder.literal("create", "c")
-      .meta(CommandMeta.DESCRIPTION, "Create a new preset")
+    commander().register(builder
+      .literal("create", "c")
+      .required("name", StringParser.stringParser())
+      .commandDescription(Description.of("Create a new preset"))
       .senderType(commander().playerType())
-      .argument(StringArgument.single("name"))
       .handler(c -> onPresetCreate(c.get(ContextKeys.BENDING_PLAYER), c.get("name")))
     );
-    commander().register(builder.literal("remove", "rm")
-      .meta(CommandMeta.DESCRIPTION, "Remove an existing preset")
+    commander().register(builder
+      .literal("remove", "rm")
+      .required("preset", PresetParser.parser())
+      .commandDescription(Description.of("Remove an existing preset"))
       .senderType(commander().playerType())
-      .argument(PresetArgument.of("preset"))
       .handler(c -> onPresetRemove(c.get(ContextKeys.BENDING_PLAYER), c.get("preset")))
     );
-    commander().register(builder.literal("bind", "b")
-      .meta(CommandMeta.DESCRIPTION, "Bind an existing preset")
+    commander().register(builder
+      .literal("bind", "b")
+      .required("preset", PresetParser.parser())
+      .commandDescription(Description.of("Bind an existing preset"))
       .senderType(commander().playerType())
-      .argument(PresetArgument.of("preset"))
       .handler(c -> onPresetBind(c.get(ContextKeys.BENDING_PLAYER), c.get("preset")))
     );
   }

@@ -19,13 +19,12 @@
 
 package me.moros.bending.common.command;
 
-import cloud.commandframework.keys.CloudKey;
-import cloud.commandframework.keys.SimpleCloudKey;
 import io.leangen.geantyref.TypeToken;
 import me.moros.bending.api.user.User;
+import org.incendo.cloud.key.CloudKey;
 
 public final class ContextKeys {
-  public static final CloudKey<User> BENDING_PLAYER = SimpleCloudKey.of(
+  public static final CloudKey<User> BENDING_PLAYER = CloudKey.of(
     "bending:player",
     TypeToken.get(User.class)
   );

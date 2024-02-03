@@ -19,11 +19,11 @@
 
 package me.moros.bending.common.command;
 
-import cloud.commandframework.Command.Builder;
-import cloud.commandframework.CommandManager;
 import me.moros.bending.common.Bending;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
+import org.incendo.cloud.Command;
+import org.incendo.cloud.CommandManager;
 
 public interface Commander<C> extends Initializer {
   Bending plugin();
@@ -32,9 +32,9 @@ public interface Commander<C> extends Initializer {
 
   CommandManager<C> manager();
 
-  Builder<C> rootBuilder();
+  Command.Builder<C> rootBuilder();
 
-  void register(Builder<C> builder);
+  void register(Command.Builder<? extends C> builder);
 
   static <C extends Audience> Commander<C> create(CommandManager<C> manager, Class<? extends C> playerType, Bending plugin) {
     return new CommanderImpl<>(manager, playerType, plugin);

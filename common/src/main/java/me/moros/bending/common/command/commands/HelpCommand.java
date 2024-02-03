@@ -21,13 +21,6 @@ package me.moros.bending.common.command.commands;
 
 import java.util.function.Predicate;
 
-import cloud.commandframework.Command.Builder;
-import cloud.commandframework.CommandManager;
-import cloud.commandframework.arguments.standard.StringArgument;
-import cloud.commandframework.context.CommandContext;
-import cloud.commandframework.meta.CommandMeta;
-import cloud.commandframework.minecraft.extras.MinecraftHelp;
-import cloud.commandframework.minecraft.extras.MinecraftHelp.HelpColors;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.AbilityDescription.Sequence;
 import me.moros.bending.api.ability.element.Element;
@@ -40,6 +33,13 @@ import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import org.incendo.cloud.CommandManager;
+import org.incendo.cloud.context.CommandContext;
+import org.incendo.cloud.description.Description;
+import org.incendo.cloud.minecraft.extras.ImmutableMinecraftHelp;
+import org.incendo.cloud.minecraft.extras.MinecraftHelp;
+import org.incendo.cloud.parser.standard.StringParser;
+import org.incendo.cloud.suggestion.BlockingSuggestionProvider;
 
 public record HelpCommand<C extends Audience>(Commander<C> commander, MinecraftHelp<C> help) implements Initializer {
   public HelpCommand(Commander<C> commander) {
@@ -48,20 +48,20 @@ public record HelpCommand<C extends Audience>(Commander<C> commander, MinecraftH
 
   @Override
   public void init() {
-    Builder<C> builder = commander().rootBuilder();
-    var helpArg = StringArgument.<C>builder("query").greedy()
-      .withSuggestionsProvider((c, s) -> CommandUtil.combinedSuggestions(c.getSender())).asOptional().build();
+    var builder = commander().rootBuilder();
+    BlockingSuggestionProvider.Strings<C> suggestionsProvider = (c, s) -> CommandUtil.combinedSuggestions(c.sender());
     commander().register(builder.handler(c -> onHelp(c, "")));
-    commander().register(builder.literal("help", "h")
-      .meta(CommandMeta.DESCRIPTION, "View info about an element, ability or command")
+    commander().register(builder
+      .literal("help", "h")
+      .optional("query", StringParser.greedyStringParser(), suggestionsProvider)
+      .commandDescription(Description.of("View info about an element, ability or command"))
       .permission(CommandPermissions.HELP)
-      .argument(helpArg)
       .handler(c -> onHelp(c, c.getOrDefault("query", "")))
     );
   }
 
   private void onHelp(CommandContext<C> context, String rawQuery) {
-    C sender = context.getSender();
+    C sender = context.sender();
     if (!rawQuery.isEmpty()) {
       int index = rawQuery.indexOf(' ');
       String query = rawQuery.substring(0, index > 0 ? index : rawQuery.length());
@@ -101,7 +101,7 @@ public record HelpCommand<C extends Audience>(Commander<C> commander, MinecraftH
   }
 
   private void onElementInfo(CommandContext<C> context, Element element) {
-    var user = context.getSender();
+    var user = context.sender();
     var display = CommandUtil.collectAll(permissionPredicate(context), element);
     if (display.isEmpty()) {
       Message.ELEMENT_ABILITIES_EMPTY.send(user, element.displayName());
@@ -116,15 +116,14 @@ public record HelpCommand<C extends Audience>(Commander<C> commander, MinecraftH
   }
 
   private static <C extends Audience> MinecraftHelp<C> createHelp(CommandManager<C> manager) {
-    var help = MinecraftHelp.createNative("/bending help", manager);
-    help.setMaxResultsPerPage(9);
-    help.setHelpColors(HelpColors.of(
-      ColorPalette.NEUTRAL,
-      ColorPalette.TEXT_COLOR,
-      ColorPalette.ACCENT,
-      ColorPalette.HEADER,
-      ColorPalette.NEUTRAL)
-    );
-    return help;
+    return ImmutableMinecraftHelp.copyOf(MinecraftHelp.createNative("/bending help", manager))
+      .withMaxResultsPerPage(9)
+      .withColors(MinecraftHelp.helpColors(
+        ColorPalette.NEUTRAL,
+        ColorPalette.TEXT_COLOR,
+        ColorPalette.ACCENT,
+        ColorPalette.HEADER,
+        ColorPalette.NEUTRAL)
+      );
   }
 }

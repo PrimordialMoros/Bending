@@ -18,7 +18,7 @@ dependencies {
     bendingImplementation(projects.adapterV1204) { targetConfiguration = "reobf" }
     bendingImplementation(libs.tasker.bukkit)
     bendingImplementation(libs.bstats.bukkit)
-    bendingImplementation(libs.cloud.minecraft) { isTransitive = false }
+    bendingImplementation(libs.cloud.minecraft)
     bendingImplementation(libs.cloud.paper)
     bendingImplementation(libs.inventory.framework)
     bendingImplementation(libs.bundles.configurate) { exclude(module = "gson") }

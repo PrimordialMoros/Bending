@@ -21,10 +21,6 @@ package me.moros.bending.common.command.commands;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import cloud.commandframework.Command.Builder;
-import cloud.commandframework.arguments.standard.StringArgument;
-import cloud.commandframework.arguments.standard.StringArgument.StringMode;
-import cloud.commandframework.meta.CommandMeta;
 import me.moros.bending.api.GameProvider;
 import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.storage.BendingStorage;
@@ -33,6 +29,9 @@ import me.moros.bending.common.command.CommandPermissions;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
+import org.incendo.cloud.component.DefaultValue;
+import org.incendo.cloud.description.Description;
+import org.incendo.cloud.parser.standard.StringParser;
 
 public record BackupCommand<C extends Audience>(Commander<C> commander, AtomicBoolean running) implements Initializer {
   public BackupCommand(Commander<C> commander) {
@@ -41,18 +40,20 @@ public record BackupCommand<C extends Audience>(Commander<C> commander, AtomicBo
 
   @Override
   public void init() {
-    Builder<C> builder = commander().rootBuilder();
-    commander().register(builder.literal("export")
-      .meta(CommandMeta.DESCRIPTION, "Export all saved data")
+    var builder = commander().rootBuilder();
+    commander().register(builder
+      .literal("export")
+      .optional("file", StringParser.quotedStringParser(), DefaultValue.constant(""))
+      .commandDescription(Description.of("Export all saved data"))
       .permission(CommandPermissions.EXPORT)
-      .argument(StringArgument.optional("file", StringMode.QUOTED))
-      .handler(c -> onExport(c.getSender(), c.getOrDefault("file", "")))
+      .handler(c -> onExport(c.sender(), c.get("file")))
     );
-    commander().register(builder.literal("import")
-      .meta(CommandMeta.DESCRIPTION, "Import data from file")
+    commander().register(builder
+      .literal("import")
+      .required("file", StringParser.quotedStringParser())
+      .commandDescription(Description.of("Import data from file"))
       .permission(CommandPermissions.IMPORT)
-      .argument(StringArgument.of("file", StringMode.QUOTED))
-      .handler(c -> onImport(c.getSender(), c.get("file")))
+      .handler(c -> onImport(c.sender(), c.get("file")))
     );
   }
 

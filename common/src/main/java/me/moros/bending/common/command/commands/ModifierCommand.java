@@ -19,10 +19,6 @@
 
 package me.moros.bending.common.command.commands;
 
-import cloud.commandframework.Command.Builder;
-import cloud.commandframework.arguments.standard.DoubleArgument;
-import cloud.commandframework.arguments.standard.EnumArgument;
-import cloud.commandframework.meta.CommandMeta;
 import me.moros.bending.api.ability.Ability;
 import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.AttributeModifier;
@@ -31,32 +27,37 @@ import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.command.CommandPermissions;
 import me.moros.bending.common.command.Commander;
-import me.moros.bending.common.command.argument.ModifyPolicyArgument;
-import me.moros.bending.common.command.argument.UserArgument;
+import me.moros.bending.common.command.parser.ModifyPolicyParser;
+import me.moros.bending.common.command.parser.UserParser;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
+import org.incendo.cloud.component.DefaultValue;
+import org.incendo.cloud.description.Description;
+import org.incendo.cloud.parser.standard.DoubleParser;
+import org.incendo.cloud.parser.standard.EnumParser;
 
 public record ModifierCommand<C extends Audience>(Commander<C> commander) implements Initializer {
   @Override
   public void init() {
-    Builder<C> builder = commander().rootBuilder().literal("modifier", "modifiers")
+    var builder = commander().rootBuilder().literal("modifier", "modifiers")
       .permission(CommandPermissions.MODIFY);
-    commander().register(builder.literal("add", "a")
-      .meta(CommandMeta.DESCRIPTION, "Add a new modifier to the specified user")
-      .argument(ModifyPolicyArgument.of("policy"))
-      .argument(EnumArgument.of(Attribute.class, "attribute"))
-      .argument(EnumArgument.of(ModifierOperation.class, "operation"))
-      .argument(DoubleArgument.of("amount"))
-      .argument(UserArgument.optional("target", "me"))
+    commander().register(builder
+      .literal("add", "a")
+      .required("policy", ModifyPolicyParser.parser())
+      .required("attribute", EnumParser.enumParser(Attribute.class))
+      .required("operation", EnumParser.enumParser(ModifierOperation.class))
+      .required("amount", DoubleParser.doubleParser())
+      .optional("target", UserParser.parser(), DefaultValue.parsed("me"))
+      .commandDescription(Description.of("Add a new modifier to the specified user"))
       .handler(c -> {
         AttributeModifier modifier = new AttributeModifier(c.get("policy"), c.get("attribute"), c.get("operation"), c.get("amount"));
-        onModifierAdd(c.getSender(), modifier, c.get("target"));
+        onModifierAdd(c.sender(), modifier, c.get("target"));
       })
     );
     commander().register(builder.literal("clear", "c")
-      .meta(CommandMeta.DESCRIPTION, "Clear all existing modifiers for a user")
-      .argument(UserArgument.optional("target", "me"))
-      .handler(c -> onModifierClear(c.getSender(), c.get("target")))
+      .optional("target", UserParser.parser(), DefaultValue.parsed("me"))
+      .commandDescription(Description.of("Clear all existing modifiers for a user"))
+      .handler(c -> onModifierClear(c.sender(), c.get("target")))
     );
   }
 

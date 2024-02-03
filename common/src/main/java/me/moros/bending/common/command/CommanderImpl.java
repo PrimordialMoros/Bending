@@ -23,12 +23,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
-import cloud.commandframework.Command.Builder;
-import cloud.commandframework.CommandManager;
-import cloud.commandframework.execution.preprocessor.CommandPreprocessingContext;
-import cloud.commandframework.meta.CommandMeta;
-import cloud.commandframework.minecraft.extras.AudienceProvider;
-import cloud.commandframework.minecraft.extras.MinecraftExceptionHandler;
 import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.registry.Registries;
@@ -48,6 +42,11 @@ import me.moros.bending.common.command.commands.VersionCommand;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
+import org.incendo.cloud.Command;
+import org.incendo.cloud.CommandManager;
+import org.incendo.cloud.description.Description;
+import org.incendo.cloud.execution.preprocessor.CommandPreprocessingContext;
+import org.incendo.cloud.minecraft.extras.MinecraftExceptionHandler;
 
 record CommanderImpl<C extends Audience>(CommandManager<C> manager, Class<? extends C> playerType,
                                          Bending plugin) implements Commander<C> {
@@ -65,26 +64,27 @@ record CommanderImpl<C extends Audience>(CommandManager<C> manager, Class<? exte
   }
 
   @Override
-  public Builder<C> rootBuilder() {
-    return manager().commandBuilder("bending", "bend", "b", "avatar", "atla", "tla")
-      .meta(CommandMeta.DESCRIPTION, "Base command for bending");
+  public Command.Builder<C> rootBuilder() {
+    return manager().commandBuilder(
+      "bending",
+      Description.of("Base command for bending"),
+      "bend", "b", "avatar", "atla", "tla");
   }
 
   @Override
-  public void register(Builder<C> builder) {
+  public void register(Command.Builder<? extends C> builder) {
     manager().command(builder);
   }
 
   private void registerExceptionHandler() {
-    new MinecraftExceptionHandler<C>().withDefaultHandlers().withDecorator(Message::brand)
-      .apply(manager(), AudienceProvider.nativeAudience());
+    MinecraftExceptionHandler.<C>createNative().decorator(Message::brand).registerTo(manager());
   }
 
   private void preprocessor(CommandPreprocessingContext<C> context) {
-    context.getCommandContext().getSender().get(Identity.UUID).ifPresent(uuid -> {
+    context.commandContext().sender().get(Identity.UUID).ifPresent(uuid -> {
       User user = Registries.BENDERS.get(uuid);
       if (user instanceof Player) {
-        context.getCommandContext().store(ContextKeys.BENDING_PLAYER, user);
+        context.commandContext().store(ContextKeys.BENDING_PLAYER, user);
       }
     });
   }

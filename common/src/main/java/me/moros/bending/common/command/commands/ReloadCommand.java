@@ -19,22 +19,21 @@
 
 package me.moros.bending.common.command.commands;
 
-import cloud.commandframework.Command.Builder;
-import cloud.commandframework.meta.CommandMeta;
 import me.moros.bending.api.locale.Message;
 import me.moros.bending.common.command.CommandPermissions;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
+import org.incendo.cloud.description.Description;
 
 public record ReloadCommand<C extends Audience>(Commander<C> commander) implements Initializer {
   @Override
   public void init() {
-    Builder<C> builder = commander().rootBuilder();
-    commander().register(builder.literal("reload")
-      .meta(CommandMeta.DESCRIPTION, "Reloads the plugin")
+    commander().register(commander().rootBuilder()
+      .literal("reload")
+      .commandDescription(Description.of("Reloads the plugin"))
       .permission(CommandPermissions.RELOAD)
-      .handler(c -> onReload(c.getSender()))
+      .handler(c -> onReload(c.sender()))
     );
   }
 

@@ -21,9 +21,6 @@ package me.moros.bending.common.command.commands;
 
 import java.util.function.BiConsumer;
 
-import cloud.commandframework.Command.Builder;
-import cloud.commandframework.arguments.standard.EnumArgument;
-import cloud.commandframework.meta.CommandMeta;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.element.ElementHandler;
 import me.moros.bending.api.locale.Message;
@@ -35,52 +32,62 @@ import me.moros.bending.common.command.CommandPermissions;
 import me.moros.bending.common.command.CommandUtil;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.command.ContextKeys;
-import me.moros.bending.common.command.argument.UserArgument;
+import me.moros.bending.common.command.parser.UserParser;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
+import org.incendo.cloud.Command;
+import org.incendo.cloud.description.Description;
+import org.incendo.cloud.parser.standard.EnumParser;
 
 public record ElementCommand<C extends Audience>(Commander<C> commander) implements Initializer, ElementHandler {
   @Override
   public void init() {
-    Builder<C> builder = commander().rootBuilder();
-    commander().register(builder.literal("choose", "ch")
-      .meta(CommandMeta.DESCRIPTION, "Choose an element through the GUI")
+    var builder = commander().rootBuilder();
+    commander().register(builder
+      .literal("choose", "ch")
+      .commandDescription(Description.of("Choose an element through the GUI"))
       .permission(CommandPermissions.CHOOSE)
       .senderType(commander().playerType())
       .handler(c -> onElementChooseGUI(c.get(ContextKeys.BENDING_PLAYER)))
     );
 
-    commander().manager().command(builder.literal("choose", "ch")
-      .meta(CommandMeta.DESCRIPTION, "Choose an element")
+    commander().manager().command(builder
+      .literal("choose", "ch")
+      .required("element", EnumParser.enumParser(Element.class))
+      .commandDescription(Description.of("Choose an element"))
       .permission(CommandPermissions.CHOOSE)
       .senderType(commander().playerType())
-      .argument(EnumArgument.of(Element.class, "element"))
       .handler(c -> onElementChoose(c.get(ContextKeys.BENDING_PLAYER), c.get("element")))
     );
-    commander().manager().command(builder.literal("choose", "ch")
-      .meta(CommandMeta.DESCRIPTION, "Choose an element for a specific user")
+    commander().manager().command(builder
+      .literal("choose", "ch")
+      .required("element", EnumParser.enumParser(Element.class))
+      .required("target", UserParser.parser())
+      .commandDescription(Description.of("Choose an element for a specific user"))
       .permission(CommandPermissions.CHOOSE + ".other")
-      .argument(EnumArgument.of(Element.class, "element"))
-      .argument(UserArgument.of("target"))
       .handler(c -> onElementSet(c.get("target"), c.get("element")))
     );
 
-    dualRegister(builder.literal("add", "a")
-      .meta(CommandMeta.DESCRIPTION, "Add an element").permission(CommandPermissions.ADD), this::onElementAdd);
-    dualRegister(builder.literal("remove", "rm")
-      .meta(CommandMeta.DESCRIPTION, "Remove an element").permission(CommandPermissions.REMOVE), this::onElementRemove);
+    dualRegister(builder
+      .literal("add", "a")
+      .commandDescription(Description.of("Add an element"))
+      .permission(CommandPermissions.ADD), this::onElementAdd);
+    dualRegister(builder
+      .literal("remove", "rm")
+      .commandDescription(Description.of("Remove an element"))
+      .permission(CommandPermissions.REMOVE), this::onElementRemove);
   }
 
-  private void dualRegister(Builder<C> builder, BiConsumer<User, Element> handler) {
+  private void dualRegister(Command.Builder<C> builder, BiConsumer<User, Element> handler) {
     commander().manager().command(builder
+      .required("element", EnumParser.enumParser(Element.class))
       .senderType(commander().playerType())
-      .argument(EnumArgument.of(Element.class, "element"))
       .handler(c -> handler.accept(c.get(ContextKeys.BENDING_PLAYER), c.get("element")))
     );
     commander().manager().command(builder
-      .permission(builder.commandPermission() + ".other")
-      .argument(EnumArgument.of(Element.class, "element"))
-      .argument(UserArgument.of("target"))
+      .required("element", EnumParser.enumParser(Element.class))
+      .required("target", UserParser.parser())
+      .permission(builder.commandPermission().permissionString() + ".other")
       .handler(c -> handler.accept(c.get("target"), c.get("element")))
     );
   }

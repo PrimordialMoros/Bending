@@ -26,8 +26,6 @@ import java.util.Locale;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
-import cloud.commandframework.execution.CommandExecutionCoordinator;
-import cloud.commandframework.paper.PaperCommandManager;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.platform.Platform;
@@ -58,6 +56,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.ServicePriority;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.incendo.cloud.execution.ExecutionCoordinator;
+import org.incendo.cloud.paper.PaperCommandManager;
 
 final class PaperBending extends AbstractBending<BendingBootstrap> {
   PaperBending(BendingBootstrap parent, Path dir, Logger logger) {
@@ -78,7 +78,7 @@ final class PaperBending extends AbstractBending<BendingBootstrap> {
     pluginManager.registerEvents(new WorldListener(game), parent);
 
     try {
-      PaperCommandManager<CommandSender> manager = PaperCommandManager.createNative(parent, CommandExecutionCoordinator.simpleCoordinator());
+      PaperCommandManager<CommandSender> manager = PaperCommandManager.createNative(parent, ExecutionCoordinator.simpleCoordinator());
       manager.registerAsynchronousCompletions();
       Commander.create(manager, Player.class, this).init();
     } catch (Exception e) {
