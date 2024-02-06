@@ -43,6 +43,17 @@ public interface Message {
     .append(text("Bending", TEXT_COLOR))
     .append(text("] ", ACCENT));
 
+  Args1<String> ABILITY_PARSE_EXCEPTION = input -> translatable("bending.command.parse.ability")
+    .arguments(text(input));
+  Args1<String> PRESET_PARSE_EXCEPTION = input -> translatable("bending.command.parse.preset")
+    .arguments(text(input));
+  Args1<String> USER_PARSE_EXCEPTION = input -> translatable("bending.command.parse.user")
+    .arguments(text(input));
+
+  Args0 BASE_DESC = () -> translatable("bending.command.description");
+
+  Args0 PRESET_DESC = () -> translatable("bending.command.preset.description");
+  Args0 PRESET_LIST_DESC = () -> translatable("bending.command.preset.list.description");
   Args0 INVALID_PRESET_NAME = () -> translatable("bending.command.preset.invalid-name", FAIL);
   Args0 NO_PRESETS = () -> translatable("bending.command.preset.list-not-found", WARN);
   Args1<Integer> PRESET_LIST_HEADER = count -> translatable("bending.command.preset.list.header", HEADER)
@@ -50,6 +61,7 @@ public interface Message {
   Args0 EMPTY_PRESET = () -> translatable("bending.command.preset.create-empty", WARN);
   Args0 HOVER_PRESET = () -> translatable("bending.command.preset.hover", NEUTRAL);
 
+  Args0 PRESET_CREATE_DESC = () -> translatable("bending.command.preset.create.description");
   Args1<String> PRESET_SUCCESS = preset -> translatable("bending.command.preset.register-success", SUCCESS)
     .arguments(text(preset));
   Args1<String> PRESET_EXISTS = preset -> translatable("bending.command.preset.register-exists", WARN)
@@ -61,34 +73,43 @@ public interface Message {
   Args1<Integer> PRESET_LIMIT = limit -> translatable("bending.command.preset.register-limit", WARN)
     .arguments(text(limit, NEUTRAL));
 
+  Args0 PRESET_REMOVE_DESC = () -> translatable("bending.command.preset.remove.description");
   Args1<String> PRESET_REMOVE_SUCCESS = preset -> translatable("bending.command.preset.remove-success", SUCCESS)
     .arguments(text(preset));
   Args1<String> PRESET_REMOVE_FAIL = preset -> translatable("bending.command.preset.remove-fail", FAIL)
     .arguments(text(preset));
 
+  Args0 PRESET_BIND_DESC = () -> translatable("bending.command.preset.bind.description");
   Args1<String> PRESET_BIND_SUCCESS = preset -> translatable("bending.command.preset.bind-success", SUCCESS)
     .arguments(text(preset));
   Args1<String> PRESET_BIND_FAIL = preset -> translatable("bending.command.preset.bind-fail", WARN)
     .arguments(text(preset));
 
+  Args0 MODIFIER_DESC = () -> translatable("bending.command.modifier.description");
+  Args0 MODIFIER_ADD_DESC = () -> translatable("bending.command.modifier.add.description");
   Args1<Component> MODIFIER_ADD = name -> translatable("bending.command.modifier.add", SUCCESS)
     .arguments(name);
+  Args0 MODIFIER_CLEAR_DESC = () -> translatable("bending.command.modifier.clear.description");
   Args1<Component> MODIFIER_CLEAR = name -> translatable("bending.command.modifier.clear", SUCCESS)
     .arguments(name);
 
+  Args0 ATTRIBUTE_DESC = () -> translatable("bending.command.modifier.attribute.description");
   Args1<Component> ATTRIBUTE_LIST_HEADER = name -> translatable("bending.command.attribute.list.header", HEADER)
     .arguments(name);
   Args1<Component> ATTRIBUTE_LIST_EMPTY = name -> translatable("bending.command.attribute.list.empty", WARN)
     .arguments(name);
 
+  Args0 TOGGLE_DESC = () -> translatable("bending.command.toggle.description");
   Args0 TOGGLE_ON = () -> translatable("bending.command.toggle.on", SUCCESS);
   Args0 TOGGLE_OFF = () -> translatable("bending.command.toggle.off", FAIL);
 
+  Args0 RELOAD_DESC = () -> translatable("bending.command.reload.description");
   Args0 RELOAD = () -> translatable("bending.command.reload", SUCCESS);
 
   Args1<Component> ELEMENT_TOAST_NOTIFICATION = element -> translatable("bending.command.element.toast-notification", TEXT_COLOR)
     .arguments(element);
 
+  Args0 ELEMENT_CHOOSE_DESC = () -> translatable("bending.command.element.choose.description");
   Args1<Component> ELEMENT_CHOOSE_NO_PERMISSION = element -> translatable("bending.command.element.choose-no-permission", FAIL)
     .arguments(element);
   Args1<Component> ELEMENT_CHOOSE_SUCCESS = element -> translatable("bending.command.element.choose-success", SUCCESS)
@@ -96,20 +117,24 @@ public interface Message {
   Args1<Component> ELEMENT_CHOOSE_FAIL = element -> translatable("bending.command.element.choose-fail", WARN)
     .arguments(element);
 
+  Args0 ELEMENT_ADD_DESC = () -> translatable("bending.command.element.add.description");
   Args1<Component> ELEMENT_ADD_SUCCESS = element -> translatable("bending.command.element.add-success", SUCCESS)
     .arguments(element);
   Args1<Component> ELEMENT_ADD_FAIL = element -> translatable("bending.command.element.add-fail", WARN)
     .arguments(element);
 
+  Args0 ELEMENT_REMOVE_DESC = () -> translatable("bending.command.element.remove.description");
   Args1<Component> ELEMENT_REMOVE_SUCCESS = element -> translatable("bending.command.element.remove-success", SUCCESS)
     .arguments(element);
   Args1<Component> ELEMENT_REMOVE_FAIL = element -> translatable("bending.command.element.remove-fail", WARN)
     .arguments(element);
 
+  Args0 BOARD_DESC = () -> translatable("bending.command.board.description");
   Args0 BOARD_DISABLED = () -> translatable("bending.command.board.disabled", FAIL);
   Args0 BOARD_TOGGLED_ON = () -> translatable("bending.command.board.on", SUCCESS);
   Args0 BOARD_TOGGLED_OFF = () -> translatable("bending.command.board.off", WARN);
 
+  Args0 HELP_DESC = () -> translatable("bending.command.help.description");
   Args2<Component, Component> ELEMENT_ABILITIES_HEADER = (element, desc) -> translatable("bending.command.display.abilities-header", HEADER)
     .arguments(element.hoverEvent(HoverEvent.showText(desc)));
 
@@ -122,6 +147,7 @@ public interface Message {
 
   Args0 ABILITY_HOVER = () -> translatable("bending.command.display.ability-hover", NEUTRAL);
 
+  Args0 BIND_DESC = () -> translatable("bending.command.bind.description");
   Args2<Component, Component> ABILITY_BIND_REQUIRES_ELEMENT = (ability, element) -> translatable("bending.command.bind.require-element", WARN)
     .arguments(ability, element);
 
@@ -134,11 +160,13 @@ public interface Message {
   Args1<Component> ABILITY_BIND_NO_PERMISSION = ability -> translatable("bending.command.bind.no-permission", FAIL)
     .arguments(ability);
 
+  Args0 DISPLAY_DESC = () -> translatable("bending.command.display.description");
   Args1<Component> BOUND_SLOTS = name -> translatable("bending.command.binds.header", HEADER)
     .arguments(name);
 
   Args0 NO_ELEMENTS = () -> translatable("bending.command.binds.no-elements", NEUTRAL);
 
+  Args0 CLEAR_DESC = () -> translatable("bending.command.clear.description");
   Args0 CLEAR_ALL_SLOTS = () -> translatable("bending.command.clear.all", SUCCESS);
   Args1<Integer> CLEAR_SLOT = slot -> translatable("bending.command.clear.specific", SUCCESS)
     .arguments(text(slot));
@@ -154,16 +182,19 @@ public interface Message {
 
   String ABILITY_GENERIC_DEATH_KEY = "bending.ability.generic.death";
 
+  Args0 VERSION_DESC = () -> translatable("bending.command.version.description");
   Args2<String, String> VERSION_COMMAND_HOVER = (author, link) -> translatable("bending.command.version.hover", NEUTRAL)
     .arguments(text(author, HEADER), text("GNU AGPLv3", TextColor.fromHexString("#007EC6")), text(link, LINK_COLOR))
     .append(newline()).append(newline())
     .append(translatable("bending.command.version.hover.open-link", NEUTRAL));
 
+  Args0 EXPORT_DESC = () -> translatable("bending.command.export.description");
   Args0 BACKUP_ALREADY_RUNNING = () -> brand(translatable("bending.command.backup.running", FAIL));
   Args1<Integer> EXPORT_PROGRESS = percent -> brand(translatable("bending.command.export.progress", NEUTRAL)
     .arguments(text(percent, ACCENT)));
   Args2<String, Double> EXPORT_SUCCESS = (path, seconds) -> brand(translatable("bending.command.export.success", SUCCESS)
     .arguments(text(path, ACCENT), text(seconds)));
+  Args0 IMPORT_DESC = () -> translatable("bending.command.import.description");
   Args1<Integer> IMPORT_PROGRESS = percent -> brand(translatable("bending.command.import.progress", NEUTRAL)
     .arguments(text(percent, ACCENT)));
   Args1<Double> IMPORT_SUCCESS = seconds -> brand(translatable("bending.command.import.success", SUCCESS)

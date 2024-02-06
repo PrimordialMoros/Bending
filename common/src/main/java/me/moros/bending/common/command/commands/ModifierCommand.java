@@ -20,45 +20,60 @@
 package me.moros.bending.common.command.commands;
 
 import me.moros.bending.api.ability.Ability;
+import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.AttributeModifier;
 import me.moros.bending.api.config.attribute.ModifierOperation;
+import me.moros.bending.api.config.attribute.ModifyPolicy;
 import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.command.CommandPermissions;
 import me.moros.bending.common.command.Commander;
-import me.moros.bending.common.command.parser.ModifyPolicyParser;
+import me.moros.bending.common.command.parser.AbilityParser;
 import me.moros.bending.common.command.parser.UserParser;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
 import org.incendo.cloud.component.DefaultValue;
-import org.incendo.cloud.description.Description;
+import org.incendo.cloud.minecraft.extras.RichDescription;
+import org.incendo.cloud.parser.ArgumentParser;
+import org.incendo.cloud.parser.ParserDescriptor;
+import org.incendo.cloud.parser.aggregate.AggregateParser;
 import org.incendo.cloud.parser.standard.DoubleParser;
 import org.incendo.cloud.parser.standard.EnumParser;
+
+import static org.incendo.cloud.parser.ArgumentParseResult.successFuture;
 
 public record ModifierCommand<C extends Audience>(Commander<C> commander) implements Initializer {
   @Override
   public void init() {
     var builder = commander().rootBuilder().literal("modifier", "modifiers")
+      .commandDescription(RichDescription.of(Message.MODIFIER_DESC.build()))
       .permission(CommandPermissions.MODIFY);
     commander().register(builder
       .literal("add", "a")
-      .required("policy", ModifyPolicyParser.parser())
-      .required("attribute", EnumParser.enumParser(Attribute.class))
-      .required("operation", EnumParser.enumParser(ModifierOperation.class))
-      .required("amount", DoubleParser.doubleParser())
+      .required("modifier", modifierParser())
       .optional("target", UserParser.parser(), DefaultValue.parsed("me"))
-      .commandDescription(Description.of("Add a new modifier to the specified user"))
-      .handler(c -> {
-        AttributeModifier modifier = new AttributeModifier(c.get("policy"), c.get("attribute"), c.get("operation"), c.get("amount"));
-        onModifierAdd(c.sender(), modifier, c.get("target"));
-      })
+      .commandDescription(RichDescription.of(Message.MODIFIER_ADD_DESC.build()))
+      .handler(c -> onModifierAdd(c.sender(), c.get("modifier"), c.get("target")))
     );
     commander().register(builder.literal("clear", "c")
       .optional("target", UserParser.parser(), DefaultValue.parsed("me"))
-      .commandDescription(Description.of("Clear all existing modifiers for a user"))
+      .commandDescription(RichDescription.of(Message.MODIFIER_CLEAR_DESC.build()))
       .handler(c -> onModifierClear(c.sender(), c.get("target")))
     );
+  }
+
+  private ParserDescriptor<C, AttributeModifier> modifierParser() {
+    var policyParser = ArgumentParser.firstOf(EnumParser.enumParser(Element.class), AbilityParser.<C>parser(true))
+      .flatMapSuccess(ModifyPolicy.class, (ctx, r) -> successFuture(r.mapEither(ModifyPolicy::of, ModifyPolicy::of)));
+    return AggregateParser.<C>builder()
+      .withComponent("policy", policyParser)
+      .withComponent("attribute", EnumParser.enumParser(Attribute.class))
+      .withComponent("operation", EnumParser.enumParser(ModifierOperation.class))
+      .withComponent("amount", DoubleParser.doubleParser())
+      .withMapper(AttributeModifier.class, (cmdCtx, ctx) -> successFuture(
+        new AttributeModifier(ctx.get("policy"), ctx.get("attribute"), ctx.get("operation"), ctx.get("amount"))
+      )).build();
   }
 
   private void onModifierAdd(C sender, AttributeModifier modifier, User user) {

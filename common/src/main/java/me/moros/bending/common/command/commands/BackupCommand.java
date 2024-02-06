@@ -30,7 +30,7 @@ import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
 import org.incendo.cloud.component.DefaultValue;
-import org.incendo.cloud.description.Description;
+import org.incendo.cloud.minecraft.extras.RichDescription;
 import org.incendo.cloud.parser.standard.StringParser;
 
 public record BackupCommand<C extends Audience>(Commander<C> commander, AtomicBoolean running) implements Initializer {
@@ -44,14 +44,14 @@ public record BackupCommand<C extends Audience>(Commander<C> commander, AtomicBo
     commander().register(builder
       .literal("export")
       .optional("file", StringParser.quotedStringParser(), DefaultValue.constant(""))
-      .commandDescription(Description.of("Export all saved data"))
+      .commandDescription(RichDescription.of(Message.EXPORT_DESC.build()))
       .permission(CommandPermissions.EXPORT)
       .handler(c -> onExport(c.sender(), c.get("file")))
     );
     commander().register(builder
       .literal("import")
       .required("file", StringParser.quotedStringParser())
-      .commandDescription(Description.of("Import data from file"))
+      .commandDescription(RichDescription.of(Message.IMPORT_DESC.build()))
       .permission(CommandPermissions.IMPORT)
       .handler(c -> onImport(c.sender(), c.get("file")))
     );

@@ -39,14 +39,15 @@ import me.moros.bending.common.command.commands.PresetCommand;
 import me.moros.bending.common.command.commands.ReloadCommand;
 import me.moros.bending.common.command.commands.ToggleCommand;
 import me.moros.bending.common.command.commands.VersionCommand;
+import me.moros.bending.common.command.parser.ComponentException;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
 import org.incendo.cloud.Command;
 import org.incendo.cloud.CommandManager;
-import org.incendo.cloud.description.Description;
 import org.incendo.cloud.execution.preprocessor.CommandPreprocessingContext;
 import org.incendo.cloud.minecraft.extras.MinecraftExceptionHandler;
+import org.incendo.cloud.minecraft.extras.RichDescription;
 
 record CommanderImpl<C extends Audience>(CommandManager<C> manager, Class<? extends C> playerType,
                                          Bending plugin) implements Commander<C> {
@@ -65,10 +66,7 @@ record CommanderImpl<C extends Audience>(CommandManager<C> manager, Class<? exte
 
   @Override
   public Command.Builder<C> rootBuilder() {
-    return manager().commandBuilder(
-      "bending",
-      Description.of("Base command for bending"),
-      "bend", "b", "avatar", "atla", "tla");
+    return manager().commandBuilder("bending", RichDescription.of(Message.BASE_DESC.build()), "bend", "b");
   }
 
   @Override
@@ -77,7 +75,9 @@ record CommanderImpl<C extends Audience>(CommandManager<C> manager, Class<? exte
   }
 
   private void registerExceptionHandler() {
-    MinecraftExceptionHandler.<C>createNative().decorator(Message::brand).registerTo(manager());
+    MinecraftExceptionHandler.<C>createNative().defaultHandlers().decorator(Message::brand)
+      .handler(ComponentException.class, (f, ctx) -> ctx.exception().componentMessage())
+      .registerTo(manager());
   }
 
   private void preprocessor(CommandPreprocessingContext<C> context) {

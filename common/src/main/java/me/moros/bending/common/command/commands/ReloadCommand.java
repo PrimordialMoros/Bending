@@ -24,14 +24,14 @@ import me.moros.bending.common.command.CommandPermissions;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
-import org.incendo.cloud.description.Description;
+import org.incendo.cloud.minecraft.extras.RichDescription;
 
 public record ReloadCommand<C extends Audience>(Commander<C> commander) implements Initializer {
   @Override
   public void init() {
     commander().register(commander().rootBuilder()
       .literal("reload")
-      .commandDescription(Description.of("Reloads the plugin"))
+      .commandDescription(RichDescription.of(Message.RELOAD_DESC.build()))
       .permission(CommandPermissions.RELOAD)
       .handler(c -> onReload(c.sender()))
     );

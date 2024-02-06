@@ -20,6 +20,7 @@
 package me.moros.bending.common.command.parser;
 
 import me.moros.bending.api.ability.AbilityDescription;
+import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.common.command.CommandUtil;
 import net.kyori.adventure.audience.Audience;
@@ -30,21 +31,22 @@ import org.incendo.cloud.parser.ArgumentParser;
 import org.incendo.cloud.parser.ParserDescriptor;
 import org.incendo.cloud.suggestion.BlockingSuggestionProvider;
 
-public final class AbilityDescriptionParser<C extends Audience> implements ArgumentParser<C, AbilityDescription>, BlockingSuggestionProvider.Strings<C> {
+public final class AbilityParser<C extends Audience> implements ArgumentParser<C, AbilityDescription>, BlockingSuggestionProvider.Strings<C> {
   private final boolean sequenceSuggestions;
 
-  public AbilityDescriptionParser(boolean sequenceSuggestions) {
+  public AbilityParser(boolean sequenceSuggestions) {
     this.sequenceSuggestions = sequenceSuggestions;
   }
 
   @Override
   public ArgumentParseResult<AbilityDescription> parse(CommandContext<C> commandContext, CommandInput commandInput) {
-    String input = commandInput.readString();
+    String input = commandInput.peekString();
     AbilityDescription check = Registries.ABILITIES.fromString(input);
     if (check != null && !check.hidden()) {
+      commandInput.readString();
       return ArgumentParseResult.success(check);
     } else {
-      return ArgumentParseResult.failure(new Throwable("Could not find ability " + input));
+      return ArgumentParseResult.failure(new ComponentException(Message.ABILITY_PARSE_EXCEPTION.build(input)));
     }
   }
 
@@ -54,7 +56,7 @@ public final class AbilityDescriptionParser<C extends Audience> implements Argum
   }
 
   public static <C extends Audience> ParserDescriptor<C, AbilityDescription> parser(boolean sequenceSuggestions) {
-    return ParserDescriptor.of(new AbilityDescriptionParser<>(sequenceSuggestions), AbilityDescription.class);
+    return ParserDescriptor.of(new AbilityParser<>(sequenceSuggestions), AbilityDescription.class);
   }
 }
 

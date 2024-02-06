@@ -26,14 +26,14 @@ import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.command.ContextKeys;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
-import org.incendo.cloud.description.Description;
+import org.incendo.cloud.minecraft.extras.RichDescription;
 
 public record ToggleCommand<C extends Audience>(Commander<C> commander) implements Initializer {
   @Override
   public void init() {
     commander().register(commander().rootBuilder()
       .literal("toggle", "t")
-      .commandDescription(Description.of("Toggles bending"))
+      .commandDescription(RichDescription.of(Message.TOGGLE_DESC.build()))
       .permission(CommandPermissions.TOGGLE)
       .senderType(commander().playerType())
       .handler(c -> onToggle(c.get(ContextKeys.BENDING_PLAYER)))

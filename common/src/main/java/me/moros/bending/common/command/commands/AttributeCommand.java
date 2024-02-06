@@ -32,22 +32,22 @@ import me.moros.bending.api.util.Tasker;
 import me.moros.bending.common.command.CommandPermissions;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.command.ContextKeys;
-import me.moros.bending.common.command.parser.AbilityDescriptionParser;
+import me.moros.bending.common.command.parser.AbilityParser;
 import me.moros.bending.common.util.Initializer;
 import me.moros.bending.common.util.ReflectionUtil;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.incendo.cloud.description.Description;
+import org.incendo.cloud.minecraft.extras.RichDescription;
 
 public record AttributeCommand<C extends Audience>(Commander<C> commander) implements Initializer {
   @Override
   public void init() {
     commander().register(commander().rootBuilder()
       .literal("attribute", "attributes")
-      .required("ability", AbilityDescriptionParser.parser(true))
-      .commandDescription(Description.of("View all available attribute values for a specific ability"))
+      .required("ability", AbilityParser.parser(true))
+      .commandDescription(RichDescription.of(Message.ATTRIBUTE_DESC.build()))
       .permission(CommandPermissions.ATTRIBUTE)
       .senderType(commander().playerType())
       .handler(c -> onViewConfig(c.get(ContextKeys.BENDING_PLAYER), c.get("ability")))

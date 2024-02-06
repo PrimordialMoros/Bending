@@ -35,9 +35,9 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
-import org.incendo.cloud.description.Description;
 import org.incendo.cloud.minecraft.extras.ImmutableMinecraftHelp;
 import org.incendo.cloud.minecraft.extras.MinecraftHelp;
+import org.incendo.cloud.minecraft.extras.RichDescription;
 import org.incendo.cloud.parser.standard.StringParser;
 import org.incendo.cloud.suggestion.BlockingSuggestionProvider;
 
@@ -50,11 +50,14 @@ public record HelpCommand<C extends Audience>(Commander<C> commander, MinecraftH
   public void init() {
     var builder = commander().rootBuilder();
     BlockingSuggestionProvider.Strings<C> suggestionsProvider = (c, s) -> CommandUtil.combinedSuggestions(c.sender());
-    commander().register(builder.handler(c -> onHelp(c, "")));
+    commander().register(builder
+      .commandDescription(RichDescription.of(Message.BASE_DESC.build()))
+      .handler(c -> onHelp(c, ""))
+    );
     commander().register(builder
       .literal("help", "h")
       .optional("query", StringParser.greedyStringParser(), suggestionsProvider)
-      .commandDescription(Description.of("View info about an element, ability or command"))
+      .commandDescription(RichDescription.of(Message.HELP_DESC.build()))
       .permission(CommandPermissions.HELP)
       .handler(c -> onHelp(c, c.getOrDefault("query", "")))
     );

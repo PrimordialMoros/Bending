@@ -21,6 +21,7 @@ package me.moros.bending.common.command.parser;
 
 import java.util.function.Predicate;
 
+import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
@@ -38,7 +39,7 @@ import org.incendo.cloud.suggestion.BlockingSuggestionProvider;
 public final class UserParser<C extends Audience> implements ArgumentParser<C, User>, BlockingSuggestionProvider.Strings<C> {
   @Override
   public ArgumentParseResult<User> parse(CommandContext<C> commandContext, CommandInput commandInput) {
-    String input = commandInput.readString();
+    String input = commandInput.peekString();
     User result;
     if (input.equalsIgnoreCase("me")) {
       result = commandContext.getOrDefault(ContextKeys.BENDING_PLAYER, null);
@@ -54,9 +55,10 @@ public final class UserParser<C extends Audience> implements ArgumentParser<C, U
       }
     }
     if (result != null) {
+      commandInput.readString();
       return ArgumentParseResult.success(result);
     }
-    return ArgumentParseResult.failure(new Throwable("Could not find user " + input));
+    return ArgumentParseResult.failure(new ComponentException(Message.USER_PARSE_EXCEPTION.build(input)));
   }
 
   @Override

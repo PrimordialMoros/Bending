@@ -28,14 +28,14 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
-import org.incendo.cloud.description.Description;
+import org.incendo.cloud.minecraft.extras.RichDescription;
 
 public record VersionCommand<C extends Audience>(Commander<C> commander) implements Initializer {
   @Override
   public void init() {
     commander().register(commander().rootBuilder()
       .literal("version", "v")
-      .commandDescription(Description.of("View version info about the bending plugin"))
+      .commandDescription(RichDescription.of(Message.VERSION_DESC.build()))
       .permission(CommandPermissions.VERSION)
       .handler(c -> onVersion(c.sender()))
     );

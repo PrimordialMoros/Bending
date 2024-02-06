@@ -22,6 +22,7 @@ package me.moros.bending.common.command.parser;
 import java.util.List;
 
 import me.moros.bending.api.ability.preset.Preset;
+import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.command.ContextKeys;
 import net.kyori.adventure.audience.Audience;
@@ -35,13 +36,14 @@ import org.incendo.cloud.suggestion.BlockingSuggestionProvider;
 public final class PresetParser<C extends Audience> implements ArgumentParser<C, Preset>, BlockingSuggestionProvider.Strings<C> {
   @Override
   public ArgumentParseResult<Preset> parse(CommandContext<C> commandContext, CommandInput commandInput) {
-    String input = commandInput.readString();
+    String input = commandInput.peekString();
     Preset preset = commandContext.optional(ContextKeys.BENDING_PLAYER)
       .map(u -> u.presetByName(input)).orElse(null);
     if (preset != null) {
+      commandInput.readString();
       return ArgumentParseResult.success(preset);
     } else {
-      return ArgumentParseResult.failure(new Throwable("Could not find preset " + input));
+      return ArgumentParseResult.failure(new ComponentException(Message.PRESET_PARSE_EXCEPTION.build(input)));
     }
   }
 

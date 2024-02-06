@@ -20,13 +20,14 @@
 package me.moros.bending.fabric.platform;
 
 import me.moros.bending.fabric.mixin.accessor.CommandSourceStackAccess;
+import me.moros.bending.fabric.platform.CommandSender.PlayerCommandSender;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class CommandSender implements ForwardingAudience.Single {
+public sealed class CommandSender implements ForwardingAudience.Single permits PlayerCommandSender {
   private final CommandSourceStack stack;
 
   private CommandSender(CommandSourceStack source) {
@@ -40,22 +41,6 @@ public class CommandSender implements ForwardingAudience.Single {
   @Override
   public @NonNull Audience audience() {
     return stack;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj instanceof CommandSender other) {
-      return ((CommandSourceStackAccess) this.stack).source().equals(((CommandSourceStackAccess) other.stack).source());
-    }
-    return false;
-  }
-
-  @Override
-  public int hashCode() {
-    return ((CommandSourceStackAccess) this.stack).source().hashCode();
   }
 
   public static final class PlayerCommandSender extends CommandSender {

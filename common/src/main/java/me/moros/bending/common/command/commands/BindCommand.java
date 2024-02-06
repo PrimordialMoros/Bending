@@ -30,7 +30,7 @@ import me.moros.bending.api.util.ColorPalette;
 import me.moros.bending.common.command.CommandPermissions;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.command.ContextKeys;
-import me.moros.bending.common.command.parser.AbilityDescriptionParser;
+import me.moros.bending.common.command.parser.AbilityParser;
 import me.moros.bending.common.command.parser.UserParser;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
@@ -38,7 +38,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.event.HoverEvent;
 import org.incendo.cloud.component.DefaultValue;
-import org.incendo.cloud.description.Description;
+import org.incendo.cloud.minecraft.extras.RichDescription;
 import org.incendo.cloud.parser.standard.IntegerParser;
 
 public record BindCommand<C extends Audience>(Commander<C> commander) implements Initializer {
@@ -47,9 +47,9 @@ public record BindCommand<C extends Audience>(Commander<C> commander) implements
     var builder = commander().rootBuilder();
     commander().register(builder
       .literal("bind", "b")
-      .required("ability", AbilityDescriptionParser.parser(false))
+      .required("ability", AbilityParser.parser(false))
       .optional("slot", IntegerParser.integerParser(1, 9), DefaultValue.constant(0))
-      .commandDescription(Description.of("Bind an ability to a slot"))
+      .commandDescription(RichDescription.of(Message.BIND_DESC.build()))
       .permission(CommandPermissions.BIND)
       .senderType(commander().playerType())
       .handler(c -> onBind(c.get(ContextKeys.BENDING_PLAYER), c.get("ability"), c.get("slot")))
@@ -57,7 +57,7 @@ public record BindCommand<C extends Audience>(Commander<C> commander) implements
     commander().register(builder
       .literal("clear", "c")
       .optional("slot", IntegerParser.integerParser(1, 9), DefaultValue.constant(0))
-      .commandDescription(Description.of("Clear an ability slot"))
+      .commandDescription(RichDescription.of(Message.CLEAR_DESC.build()))
       .permission(CommandPermissions.BIND)
       .senderType(commander().playerType())
       .handler(c -> onBindClear(c.get(ContextKeys.BENDING_PLAYER), c.get("slot")))
@@ -65,7 +65,7 @@ public record BindCommand<C extends Audience>(Commander<C> commander) implements
     commander().register(builder
       .literal("who", "w")
       .optional("target", UserParser.parser(), DefaultValue.parsed("me"))
-      .commandDescription(Description.of("Show all bound abilities"))
+      .commandDescription(RichDescription.of(Message.DISPLAY_DESC.build()))
       .permission(CommandPermissions.HELP)
       .handler(c -> onBindList(c.sender(), c.get("target")))
     );

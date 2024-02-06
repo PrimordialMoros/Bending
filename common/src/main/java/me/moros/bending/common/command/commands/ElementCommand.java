@@ -36,7 +36,7 @@ import me.moros.bending.common.command.parser.UserParser;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
 import org.incendo.cloud.Command;
-import org.incendo.cloud.description.Description;
+import org.incendo.cloud.minecraft.extras.RichDescription;
 import org.incendo.cloud.parser.standard.EnumParser;
 
 public record ElementCommand<C extends Audience>(Commander<C> commander) implements Initializer, ElementHandler {
@@ -45,7 +45,7 @@ public record ElementCommand<C extends Audience>(Commander<C> commander) impleme
     var builder = commander().rootBuilder();
     commander().register(builder
       .literal("choose", "ch")
-      .commandDescription(Description.of("Choose an element through the GUI"))
+      .commandDescription(RichDescription.of(Message.ELEMENT_CHOOSE_DESC.build()))
       .permission(CommandPermissions.CHOOSE)
       .senderType(commander().playerType())
       .handler(c -> onElementChooseGUI(c.get(ContextKeys.BENDING_PLAYER)))
@@ -54,7 +54,7 @@ public record ElementCommand<C extends Audience>(Commander<C> commander) impleme
     commander().manager().command(builder
       .literal("choose", "ch")
       .required("element", EnumParser.enumParser(Element.class))
-      .commandDescription(Description.of("Choose an element"))
+      .commandDescription(RichDescription.of(Message.ELEMENT_CHOOSE_DESC.build()))
       .permission(CommandPermissions.CHOOSE)
       .senderType(commander().playerType())
       .handler(c -> onElementChoose(c.get(ContextKeys.BENDING_PLAYER), c.get("element")))
@@ -63,18 +63,18 @@ public record ElementCommand<C extends Audience>(Commander<C> commander) impleme
       .literal("choose", "ch")
       .required("element", EnumParser.enumParser(Element.class))
       .required("target", UserParser.parser())
-      .commandDescription(Description.of("Choose an element for a specific user"))
+      .commandDescription(RichDescription.of(Message.ELEMENT_CHOOSE_DESC.build()))
       .permission(CommandPermissions.CHOOSE + ".other")
       .handler(c -> onElementSet(c.get("target"), c.get("element")))
     );
 
     dualRegister(builder
       .literal("add", "a")
-      .commandDescription(Description.of("Add an element"))
+      .commandDescription(RichDescription.of(Message.ELEMENT_ADD_DESC.build()))
       .permission(CommandPermissions.ADD), this::onElementAdd);
     dualRegister(builder
       .literal("remove", "rm")
-      .commandDescription(Description.of("Remove an element"))
+      .commandDescription(RichDescription.of(Message.ELEMENT_REMOVE_DESC.build()))
       .permission(CommandPermissions.REMOVE), this::onElementRemove);
   }
 
