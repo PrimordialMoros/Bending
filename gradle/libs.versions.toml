@@ -83,7 +83,7 @@ fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.
 # Bukkit
 paper = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
 inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.13" }
-grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.1" }
+grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "17.0.0" }
 towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.100.1.4" }
 lwc = { module = "com.griefcraft:lwc", version = "2.3.1" }
 worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.9" }
