@@ -19,57 +19,42 @@
 
 package me.moros.bending.fabric.mixin.block;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 
-import me.moros.bending.fabric.event.ServerItemEvents;
+import me.moros.bending.fabric.event.ServerBlockEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Block.class)
 public abstract class BlockMixin {
-  @Redirect(
-    method = "dropResources(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/item/ItemStack;)V",
-    at = @At(value = "INVOKE", target = "Ljava/util/List;forEach(Ljava/util/function/Consumer;)V")
+  @Inject(
+    method = "getDrops(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntity;)Ljava/util/List;",
+    at = @At(value = "HEAD"), cancellable = true
   )
-  private static void bending$dropResources(List<ItemStack> stacks, Consumer<ItemStack> action, BlockState state, Level level, BlockPos blockPos, @Nullable BlockEntity blockEntity, Entity entity, ItemStack stack) {
-    bending$filterDrops(stacks, action, (ServerLevel) level, blockPos);
+  private static void bending$removeTempBlockDrops(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, @Nullable BlockEntity blockEntity, CallbackInfoReturnable<List<ItemStack>> cir) {
+    if (!ServerBlockEvents.BLOCK_DROP_LOOT.invoker().onDropLoot(serverLevel, blockPos)) {
+      cir.setReturnValue(Collections.emptyList());
+    }
   }
 
-  @Redirect(
-    method = "dropResources(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/LevelAccessor;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntity;)V",
-    at = @At(value = "INVOKE", target = "Ljava/util/List;forEach(Ljava/util/function/Consumer;)V")
+  @Inject(
+    method = "getDrops(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/item/ItemStack;)Ljava/util/List;",
+    at = @At(value = "HEAD"), cancellable = true
   )
-  private static void bending$dropResources(List<ItemStack> stacks, Consumer<ItemStack> action, BlockState state, LevelAccessor levelAccessor, BlockPos blockPos) {
-    bending$filterDrops(stacks, action, (ServerLevel) levelAccessor, blockPos);
-  }
-
-  @Redirect(
-    method = "dropResources(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)V",
-    at = @At(value = "INVOKE", target = "Ljava/util/List;forEach(Ljava/util/function/Consumer;)V")
-  )
-  private static void bending$dropResources(List<ItemStack> stacks, Consumer<ItemStack> action, BlockState state, Level level, BlockPos blockPos) {
-    bending$filterDrops(stacks, action, (ServerLevel) level, blockPos);
-  }
-
-  @Unique
-  private static void bending$filterDrops(List<ItemStack> stacks, Consumer<ItemStack> action, ServerLevel level, BlockPos pos) {
-    var result = ServerItemEvents.BLOCK_DROP_LOOT.invoker().onDropLoot(level, pos, stacks);
-    if (result.getResult() != InteractionResult.FAIL) {
-      result.getObject().forEach(action);
+  private static void bending$removeTempBlockDrops(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, @Nullable BlockEntity blockEntity, @Nullable Entity entity, ItemStack itemStack, CallbackInfoReturnable<List<ItemStack>> cir) {
+    if (!ServerBlockEvents.BLOCK_DROP_LOOT.invoker().onDropLoot(serverLevel, blockPos)) {
+      cir.setReturnValue(Collections.emptyList());
     }
   }
 }

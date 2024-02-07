@@ -30,7 +30,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(HopperBlockEntity.class)
 public abstract class HopperBlockEntityMixin {
-  @Inject(method = "addItem", at = @At("HEAD"), cancellable = true)
+  @Inject(
+    method = "addItem(Lnet/minecraft/world/Container;Lnet/minecraft/world/entity/item/ItemEntity;)Z",
+    at = @At("HEAD"), cancellable = true
+  )
   private static void bending$onAddItem(Container container, ItemEntity itemEntity, CallbackInfoReturnable<Boolean> ci) {
     if (!ServerInventoryEvents.HOPPER.invoker().onItemPull(container, itemEntity)) {
       ci.setReturnValue(false);

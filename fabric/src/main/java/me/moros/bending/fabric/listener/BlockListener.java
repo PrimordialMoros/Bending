@@ -32,7 +32,6 @@ import me.moros.bending.api.temporal.TempBlock;
 import me.moros.bending.common.ability.earth.passive.Locksmithing;
 import me.moros.bending.common.util.Initializer;
 import me.moros.bending.fabric.event.ServerBlockEvents;
-import me.moros.bending.fabric.event.ServerItemEvents;
 import me.moros.bending.fabric.event.ServerPlayerEvents;
 import me.moros.bending.fabric.platform.PlatformAdapter;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
@@ -40,10 +39,8 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -55,7 +52,7 @@ public record BlockListener(Supplier<Game> gameSupplier) implements FabricListen
     ServerPlayerEvents.PLACE_BLOCK.register(this::onBlockPlace);
     PlayerBlockBreakEvents.BEFORE.register(this::onBlockBreak);
     ServerBlockEvents.AFTER_BREAK.register(this::onAfterBlockBreak);
-    ServerItemEvents.BLOCK_DROP_LOOT.register(this::onBlockDropLoot);
+    ServerBlockEvents.BLOCK_DROP_LOOT.register(this::onBlockDropLoot);
     ServerBlockEvents.CHANGE.register(this::onBlockChange);
     ServerBlockEvents.SPREAD.register(this::onBlockSpread);
     ServerBlockEvents.PISTON.register(this::onBlockPistonEvent);
@@ -105,14 +102,12 @@ public record BlockListener(Supplier<Game> gameSupplier) implements FabricListen
     return true;
   }
 
-  private InteractionResultHolder<List<ItemStack>> onBlockDropLoot(ServerLevel level, BlockPos pos, List<ItemStack> dropStacks) {
+  private boolean onBlockDropLoot(ServerLevel level, BlockPos pos) {
     if (!disabledWorld(level)) {
       var block = PlatformAdapter.fromFabricWorld(level).blockAt(pos.getX(), pos.getY(), pos.getZ());
-      if (TempBlock.MANAGER.isTemp(block)) {
-        return InteractionResultHolder.fail(dropStacks);
-      }
+      return !TempBlock.MANAGER.isTemp(block);
     }
-    return InteractionResultHolder.pass(dropStacks);
+    return true;
   }
 
   private boolean onBlockChange(ServerLevel level, BlockPos pos) {

@@ -27,7 +27,7 @@ import net.minecraft.server.ServerScoreboard;
 import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerTeam;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 record PlayerBoardImpl(ServerScoreboard handle) implements PlayerBoard {
   @Override
