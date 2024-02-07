@@ -11,12 +11,12 @@ paper = "1.20.4-R0.1-SNAPSHOT"
 sponge-api = "11.0.0-SNAPSHOT"
 sponge-common = "1.20.1-11.0.0-SNAPSHOT"
 minecraft = "1.20.4"
-fabric-loom = "1.5.6"
-fabric-api = "0.95.1+1.20.4"
+fabric-loom = "1.5.7"
+fabric-api = "0.95.5+1.20.5"
 fabric-loader = "0.15.6"
 shadow = "8.1.1"
-flyway = "10.6.0"
-junit = "5.10.1"
+flyway = "10.7.1"
+junit = "5.10.2"
 
 [libraries]
 storage = { module = "me.moros:storage", version = "3.2.0" }
@@ -30,10 +30,10 @@ tasker-fabric = { module = "me.moros:tasker-fabric", version.ref = "tasker" }
 
 javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
 gson = { module = "com.google.code.gson:gson", version = "2.10.1" }
-articdata = { module = "de.articdive:articdata", version = "1.20.1-77b86bc4" }
+articdata = { module = "de.articdive:articdata", version = "1.20.4-cb27856f" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.8" }
 guava = { module = "com.google.guava:guava", version = "33.0.0-jre" }
-jdbi = { module = "org.jdbi:jdbi3-core", version = "3.43.0" }
+jdbi = { module = "org.jdbi:jdbi3-core", version = "3.44.0" }
 hikari = { module = "com.zaxxer:HikariCP", version = "5.1.0" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-mysql = { module = "org.flywaydb:flyway-mysql", version.ref = "flyway" }
@@ -84,7 +84,7 @@ fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.
 paper = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
 inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.13" }
 grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.1" }
-towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.100.1.4" }
+towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.100.1.10" }
 lwc = { module = "com.griefcraft:lwc", version = "2.3.1" }
 worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.9" }
 papi = { module = "me.clip:placeholderapi", version = "2.11.5" }
@@ -114,5 +114,5 @@ jmh = { id = "me.champeau.jmh", version = "0.7.2" }
 fabric-loom = { id = "fabric-loom", version.ref = "fabric-loom" }
 userdev = { id = "io.papermc.paperweight.userdev", version = "1.5.11" }
 sponge = { id = "org.spongepowered.gradle.plugin", version = "2.2.0" }
-hangar = { id = "io.papermc.hangar-publish-plugin", version = "0.1.1" }
-run-paper = { id = "xyz.jpenilla.run-paper", version = "2.2.2" }
+hangar = { id = "io.papermc.hangar-publish-plugin", version = "0.1.2" }
+run-paper = { id = "xyz.jpenilla.run-paper", version = "2.2.3" }
