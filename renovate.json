@@ -6,8 +6,15 @@
   "schedule": [
     "after 6pm on the 6th day of the month"
   ],
-  "ignoreDeps": ["articdata", "fabric-api"],
+  "ignoreDeps": ["de.articdive:articdata"],
   "packageRules": [
+    {
+      "description": "Correct version handling for dependencies with format major.minor.patch+mcver",
+      "matchPackageNames": [
+        "net.fabricmc.fabric-api:fabric-api"
+      ],
+      "versioning": "regex:^(?<major>\\d+)(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?(?:\\+(?<compatibility>.*))?$"
+    },
     {
       "groupName": "all non-major dependencies",
       "groupSlug": "all-minor-patch",
