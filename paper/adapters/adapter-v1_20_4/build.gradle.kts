@@ -10,6 +10,6 @@ dependencies {
 
 tasks.shadowJar {
     dependencies {
-        relocate("me.moros.bending.common.adapter", "me.moros.bending.paper.adapter.v1_20_R3")
+        relocate("me.moros.bending.common.adapter", "me.moros.bending.paper.adapter.v1_20_4")
     }
 }

@@ -184,7 +184,7 @@ sealed class BendingUser implements User permits BendingPlayer {
 
   @Override
   public void bindAbility(int slot, @Nullable AbilityDescription desc) {
-    if (slot < 1 || slot > 9) {
+    if (slot < 1 || slot > 9 || (desc != null && !desc.canBind())) {
       return;
     }
     if (game().eventBus().postSingleBindChangeEvent(this, slot, desc)) {
@@ -218,14 +218,14 @@ sealed class BendingUser implements User permits BendingPlayer {
   @Override
   public boolean addCooldown(AbilityDescription desc, long duration) {
     if (duration > 0 && game().eventBus().postCooldownAddEvent(this, desc, duration)) {
-      Cooldown.of(this, desc, () -> removeCooldown(desc), duration);
+      Cooldown.of(this, desc, () -> onRemoveCooldown(desc), duration);
       updateBoard(desc, true);
       return true;
     }
     return false;
   }
 
-  private void removeCooldown(AbilityDescription desc) {
+  private void onRemoveCooldown(AbilityDescription desc) {
     if (valid()) { // Ensure user is valid before processing
       updateBoard(desc, false);
       game().eventBus().postCooldownRemoveEvent(this, desc);

@@ -47,12 +47,12 @@ public final class AdapterLoader {
   }
 
   public static NativeAdapter loadAdapter(Logger logger) {
-    String fullName = Bukkit.getServer().getClass().getPackageName();
-    String nmsVersion = fullName.substring(1 + fullName.lastIndexOf("."));
-    String className = "me.moros.bending.paper.adapter." + nmsVersion + ".NativeAdapterImpl";
+    String mcVersion = Bukkit.getServer().getMinecraftVersion();
+    String pathVersion = "v" + mcVersion.replaceAll("\\.", "_");
+    String className = "me.moros.bending.paper.adapter." + pathVersion + ".NativeAdapterImpl";
     NativeAdapter adapter = findAdapter(className);
     if (adapter != null) {
-      logger.info("Successfully loaded native adapter for version " + nmsVersion);
+      logger.info("Successfully loaded native adapter for version " + mcVersion);
       return adapter;
     } else {
       String s = """
@@ -64,7 +64,7 @@ public final class AdapterLoader {
         * It is recommended you find a supported version.
         ****************************************************************
                 
-        """.formatted(nmsVersion);
+        """.formatted(mcVersion);
       logger.warn(s);
     }
     return NativeAdapterImpl.DUMMY;

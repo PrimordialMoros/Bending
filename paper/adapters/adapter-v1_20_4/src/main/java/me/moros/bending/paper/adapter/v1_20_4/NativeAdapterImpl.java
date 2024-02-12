@@ -17,7 +17,7 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.paper.adapter.v1_20_R3;
+package me.moros.bending.paper.adapter.v1_20_4;
 
 import java.util.Objects;
 import java.util.function.Function;

@@ -52,13 +52,13 @@ import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.util.TriState;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public abstract class AbstractGui<E, T> implements ElementGui {
+public abstract class AbstractGui<ItemStack, T> implements ElementGui {
   protected static final Supplier<ItemSnapshot> BACKGROUND = Suppliers.lazy(() ->
     Platform.instance().factory().itemBuilder(Item.BLACK_STAINED_GLASS_PANE)
       .name(Component.empty()).build()
   );
 
-  private final Map<Element, E> map;
+  private final Map<Element, ItemStack> map;
   private final ElementHandler handler;
   private final Player player;
   private final T gui;
@@ -78,7 +78,7 @@ public abstract class AbstractGui<E, T> implements ElementGui {
     return player;
   }
 
-  protected abstract T construct(Map<Element, E> elementMap);
+  protected abstract T construct(Map<Element, ItemStack> elementMap);
 
   protected DataWrapper createElementButton(Element element) {
     Component itemName = GlobalTranslator.render(element.displayName(), player.locale())
@@ -102,7 +102,7 @@ public abstract class AbstractGui<E, T> implements ElementGui {
     return TriState.NOT_SET;
   }
 
-  protected abstract void handleItemStackGlow(E itemStack, boolean glow);
+  protected abstract void handleItemStackGlow(ItemStack itemStack, boolean glow);
 
   protected static @Nullable ActionType mapType(boolean shift, boolean left, boolean right) {
     if (shift) {

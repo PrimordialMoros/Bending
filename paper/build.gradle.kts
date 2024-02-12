@@ -15,7 +15,7 @@ repositories {
 
 dependencies {
     bendingImplementation(projects.bendingCommon)
-    bendingImplementation(projects.adapterV120R3) { targetConfiguration = "reobf" }
+    bendingImplementation(projects.adapterV1204) { targetConfiguration = "reobf" }
     bendingImplementation(libs.tasker.bukkit)
     bendingImplementation(libs.bstats.bukkit)
     bendingImplementation(libs.cloud.minecraft) { isTransitive = false }
