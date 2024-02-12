@@ -21,6 +21,7 @@ package me.moros.bending.fabric.platform;
 
 import java.util.Optional;
 
+import com.mojang.serialization.Codec;
 import me.moros.bending.api.ability.element.ElementHandler;
 import me.moros.bending.api.adapter.NativeAdapter;
 import me.moros.bending.api.gui.Board;
@@ -34,13 +35,26 @@ import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemBuilder;
 import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.user.User;
+import me.moros.bending.api.util.metadata.Metadata;
 import me.moros.bending.fabric.adapter.NativeAdapterImpl;
 import me.moros.bending.fabric.gui.BoardImpl;
 import me.moros.bending.fabric.gui.ElementMenu;
 import me.moros.bending.fabric.platform.item.FabricItemBuilder;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.server.MinecraftServer;
 
 public class FabricPlatform implements Platform, PlatformFactory {
+  public static final AttachmentType<Boolean> NPC = AttachmentRegistry.createPersistent(
+    PlatformAdapter.rsl(Metadata.NPC), Codec.BOOL
+  );
+  public static final AttachmentType<Boolean> ARMOR = AttachmentRegistry.createPersistent(
+    PlatformAdapter.rsl(Metadata.ARMOR_KEY), Codec.BOOL
+  );
+  public static final AttachmentType<String> METAL_KEY = AttachmentRegistry.createPersistent(
+    PlatformAdapter.rsl(Metadata.ARMOR_KEY), Codec.STRING
+  );
+
   private final MinecraftServer server;
   private final NativeAdapter adapter;
 

@@ -22,7 +22,6 @@ package me.moros.bending.fabric;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -32,7 +31,6 @@ import cloud.commandframework.fabric.FabricServerCommandManager;
 import me.moros.bending.api.addon.Addon;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.platform.Platform;
-import me.moros.bending.api.util.Tasker;
 import me.moros.bending.api.util.functional.Suppliers;
 import me.moros.bending.common.AbstractBending;
 import me.moros.bending.common.command.Commander;
@@ -49,7 +47,6 @@ import me.moros.bending.fabric.listener.UserListener;
 import me.moros.bending.fabric.listener.WorldListener;
 import me.moros.bending.fabric.platform.CommandSender;
 import me.moros.bending.fabric.platform.CommandSender.PlayerCommandSender;
-import me.moros.bending.fabric.platform.FabricMetadata;
 import me.moros.bending.fabric.platform.FabricPermissionInitializer;
 import me.moros.bending.fabric.platform.FabricPlatform;
 import me.moros.tasker.fabric.FabricExecutor;
@@ -71,8 +68,6 @@ final class FabricBending extends AbstractBending<ModContainer> {
     super(container, path, new Slf4jLogger(LoggerFactory.getLogger(container.getMetadata().getName())));
 
     injectTasker(new FabricExecutor());
-
-    Tasker.async().repeat(FabricMetadata.INSTANCE::removeEmpty, 5, TimeUnit.MINUTES);
 
     listeners = List.of(
       new BlockListener(this::game),
@@ -113,7 +108,6 @@ final class FabricBending extends AbstractBending<ModContainer> {
 
   private void onDisable(boolean fullShutdown) {
     if (phase == LoadPhase.LOADED) {
-      FabricMetadata.INSTANCE.cleanup();
       if (fullShutdown) {
         disable();
       } else {

@@ -44,7 +44,6 @@ import me.moros.bending.fabric.event.ServerEntityEvents;
 import me.moros.bending.fabric.event.ServerInventoryEvents;
 import me.moros.bending.fabric.event.ServerItemEvents;
 import me.moros.bending.fabric.event.ServerPlayerEvents;
-import me.moros.bending.fabric.platform.FabricMetadata;
 import me.moros.bending.fabric.platform.PlatformAdapter;
 import me.moros.bending.fabric.platform.entity.FabricEntity;
 import me.moros.bending.fabric.platform.item.ItemUtil;
@@ -121,9 +120,8 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
 
   private boolean onArrowHit(Projectile projectile, HitResult hitResult) {
     if (!disabledWorld(projectile) && projectile instanceof Arrow) {
-      var data = FabricMetadata.INSTANCE.metadata(projectile).get(MetalCable.CABLE_KEY);
-      if (data.isPresent()) {
-        MetalCable cable = data.get();
+      MetalCable cable = projectile.getAttached(PlatformAdapter.dataType(MetalCable.CABLE_KEY));
+      if (cable != null) {
         if (hitResult instanceof BlockHitResult blockHit) {
           var pos = blockHit.getBlockPos();
           var world = PlatformAdapter.fromFabricWorld((ServerLevel) projectile.level());
@@ -286,7 +284,7 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
   }
 
   private boolean isNotGlove(Entity entity) {
-    return !FabricMetadata.INSTANCE.has(entity, EarthGlove.GLOVE_KEY);
+    return !entity.hasAttached(PlatformAdapter.dataType(EarthGlove.GLOVE_KEY));
   }
 
   private boolean onInventoryClick(ServerPlayer player, ItemStack stack) {
@@ -352,7 +350,7 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
     Vector3d origin = null;
     var sourceEntity = source.getEntity();
     if (sourceEntity != null) {
-      if (sourceEntity instanceof Arrow && FabricMetadata.INSTANCE.has(sourceEntity, MetalCable.CABLE_KEY)) {
+      if (sourceEntity instanceof Arrow && sourceEntity.hasAttached(PlatformAdapter.dataType(MetalCable.CABLE_KEY))) {
         return 0;
       } else if (ActionLimiter.isLimited(sourceEntity.getUUID(), ActionType.DAMAGE)) {
         return 0;

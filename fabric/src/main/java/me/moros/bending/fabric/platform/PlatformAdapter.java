@@ -34,12 +34,16 @@ import me.moros.bending.api.platform.potion.Potion;
 import me.moros.bending.api.platform.potion.PotionEffect;
 import me.moros.bending.api.platform.potion.PotionEffectTag;
 import me.moros.bending.api.platform.world.World;
+import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.fabric.platform.block.FabricBlockState;
 import me.moros.bending.fabric.platform.entity.FabricEntity;
 import me.moros.bending.fabric.platform.entity.FabricLivingEntity;
 import me.moros.bending.fabric.platform.entity.FabricPlayer;
 import me.moros.bending.fabric.platform.item.FabricItem;
 import me.moros.bending.fabric.platform.world.FabricWorld;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.impl.attachment.AttachmentRegistryImpl;
 import net.kyori.adventure.key.Key;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -53,6 +57,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class PlatformAdapter {
   private PlatformAdapter() {
@@ -106,6 +111,18 @@ public final class PlatformAdapter {
 
   public static ResourceLocation rsl(Key key) {
     return (ResourceLocation) key.key();
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> AttachmentType<T> dataType(DataKey<T> key) {
+    var id = rsl(key);
+    var type = AttachmentRegistryImpl.get(id);
+    return type == null ? AttachmentRegistry.create(id) : (AttachmentType<T>) type;
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> @Nullable AttachmentType<T> dataTypeIfExists(DataKey<T> key) {
+    return (AttachmentType<T>) AttachmentRegistryImpl.get(rsl(key));
   }
 
   public static World fromFabricWorld(ServerLevel world) {

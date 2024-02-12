@@ -26,7 +26,6 @@ import me.moros.bending.api.game.Game;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.util.Initializer;
-import me.moros.bending.fabric.platform.FabricMetadata;
 import me.moros.bending.fabric.platform.entity.FabricEntity;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
@@ -48,7 +47,6 @@ public record WorldListener(Supplier<Game> gameSupplier) implements FabricListen
   private void onWorldUnload(MinecraftServer server, ServerLevel world) {
     var key = world.dimension().location();
     game().worldManager().onWorldUnload(key);
-    FabricMetadata.INSTANCE.cleanup(key);
   }
 
   private void onChangeWorld(Entity originalEntity, Entity newEntity, ServerLevel origin, ServerLevel destination) {

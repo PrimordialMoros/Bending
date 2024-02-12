@@ -38,7 +38,7 @@ import me.moros.bending.api.platform.world.World;
 import me.moros.bending.api.util.data.DataHolder;
 import me.moros.bending.fabric.mixin.accessor.ChunkMapAccess;
 import me.moros.bending.fabric.mixin.accessor.FallingBlockEntityAccess;
-import me.moros.bending.fabric.platform.FabricMetadata;
+import me.moros.bending.fabric.platform.FabricDataHolder;
 import me.moros.bending.fabric.platform.PlatformAdapter;
 import me.moros.bending.fabric.platform.particle.ParticleMapper;
 import me.moros.math.Position;
@@ -90,7 +90,7 @@ public record FabricWorld(ServerLevel handle) implements World {
 
   @Override
   public DataHolder blockMetadata(int x, int y, int z) {
-    return FabricMetadata.INSTANCE.metadata(key(), x, y, z);
+    return new FabricDataHolder(handle());
   }
 
   private @Nullable BlockEntity blockEntity(int x, int y, int z) {

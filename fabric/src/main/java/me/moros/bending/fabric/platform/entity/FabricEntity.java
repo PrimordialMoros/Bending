@@ -32,7 +32,7 @@ import me.moros.bending.api.platform.world.World;
 import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.api.util.functional.Suppliers;
 import me.moros.bending.fabric.mixin.accessor.EntityAccess;
-import me.moros.bending.fabric.platform.FabricMetadata;
+import me.moros.bending.fabric.platform.PlatformAdapter;
 import me.moros.bending.fabric.platform.world.FabricWorld;
 import me.moros.math.FastMath;
 import me.moros.math.Position;
@@ -239,17 +239,24 @@ public class FabricEntity implements Entity {
 
   @Override
   public <T> Optional<T> get(DataKey<T> key) {
-    return FabricMetadata.INSTANCE.metadata(handle()).get(key);
+    var type = PlatformAdapter.dataTypeIfExists(key);
+    if (type == null) {
+      return Optional.empty();
+    }
+    return Optional.ofNullable(handle().getAttached(type));
   }
 
   @Override
   public <T> void add(DataKey<T> key, T value) {
-    FabricMetadata.INSTANCE.metadata(handle()).add(key, value);
+    handle().setAttached(PlatformAdapter.dataType(key), value);
   }
 
   @Override
   public <T> void remove(DataKey<T> key) {
-    FabricMetadata.INSTANCE.metadata(handle()).remove(key);
+    var type = PlatformAdapter.dataTypeIfExists(key);
+    if (type != null) {
+      handle().removeAttached(type);
+    }
   }
 
   @Override
