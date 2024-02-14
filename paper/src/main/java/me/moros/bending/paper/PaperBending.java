@@ -77,15 +77,9 @@ final class PaperBending extends AbstractBending<BendingBootstrap> {
     pluginManager.registerEvents(new ConnectionListener(logger(), game), parent);
     pluginManager.registerEvents(new WorldListener(game), parent);
 
-    try {
-      PaperCommandManager<CommandSender> manager = PaperCommandManager.createNative(parent, ExecutionCoordinator.simpleCoordinator());
-      manager.registerAsynchronousCompletions();
-      Commander.create(manager, Player.class, this).init();
-    } catch (Exception e) {
-      logger().error(e.getMessage(), e);
-      pluginManager.disablePlugin(parent);
-      return;
-    }
+    PaperCommandManager<CommandSender> manager = PaperCommandManager.createNative(parent, ExecutionCoordinator.simpleCoordinator());
+    manager.registerAsynchronousCompletions();
+    Commander.create(manager, Player.class, this).init();
 
     parent.getServer().getServicesManager().register(Game.class, game, parent, ServicePriority.Normal);
     registerHooks(parent.getServer());

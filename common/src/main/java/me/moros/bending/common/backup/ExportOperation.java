@@ -95,7 +95,7 @@ final class ExportOperation extends AbstractOperation {
     }
     try {
       Files.deleteIfExists(path);
-    } catch (IOException ignore2) {
+    } catch (IOException ignore) {
     }
   }
 
