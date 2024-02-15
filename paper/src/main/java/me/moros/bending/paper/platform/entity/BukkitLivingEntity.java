@@ -89,7 +89,7 @@ public class BukkitLivingEntity extends BukkitEntity implements LivingEntity {
     if (event.cancelled() || dmg <= 0) {
       return false;
     }
-    if (type() != EntityType.PLAYER) {
+    if (type() == EntityType.PLAYER) {
       DamageUtil.cacheDamageSource(uuid(), DamageSource.of(source.name(), desc));
     }
     return Platform.instance().nativeAdapter().damage(event);
