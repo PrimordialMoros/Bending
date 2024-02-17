@@ -47,6 +47,7 @@ import net.kyori.adventure.key.Key;
 import org.bukkit.Location;
 import org.bukkit.World.Environment;
 import org.bukkit.block.TileState;
+import org.bukkit.entity.FallingBlock;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
@@ -205,9 +206,11 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
   public Entity createFallingBlock(Position pos, BlockState state, boolean gravity) {
     var loc = new Location(handle(), pos.x(), pos.y(), pos.z());
     var data = PlatformAdapter.toBukkitData(state);
-    var bukkitEntity = handle().spawnFallingBlock(loc, data);
-    bukkitEntity.setGravity(gravity);
-    bukkitEntity.setDropItem(false);
+    var bukkitEntity = handle().spawn(loc, FallingBlock.class, fb -> {
+      fb.setBlockData(data);
+      fb.setGravity(gravity);
+      fb.setDropItem(false);
+    });
     return PlatformAdapter.fromBukkitEntity(bukkitEntity);
   }
 

@@ -33,6 +33,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -74,6 +75,7 @@ public abstract class LivingEntityMixin extends EntityMixin {
     ci.cancel();
   }
 
+  @Unique
   private LivingEntity get() {
     return (LivingEntity) (Object) this;
   }
