@@ -29,6 +29,7 @@ import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.ColorPalette;
 import me.moros.bending.api.util.KeyUtil;
+import me.moros.bending.common.locale.Message;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.key.KeyedValue;
 import net.kyori.adventure.text.Component;
@@ -87,13 +88,12 @@ interface Placeholders {
     if (desc == null) {
       return Component.empty();
     }
-    Component description = Component.translatable(desc.translationKey() + ".description");
     Component instructions;
     if (desc instanceof Sequence sequence) {
       instructions = sequence.instructions();
     } else {
-      instructions = Component.translatable(desc.translationKey() + ".instructions");
+      instructions = Message.ABILITY_INSTRUCTIONS.build(desc);
     }
-    return Component.join(JoinConfiguration.newlines(), description, instructions);
+    return Component.join(JoinConfiguration.newlines(), Message.ABILITY_DESCRIPTION.build(desc), instructions);
   }
 }

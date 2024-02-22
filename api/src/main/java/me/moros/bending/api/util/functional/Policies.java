@@ -36,11 +36,6 @@ public enum Policies implements RemovalPolicy {
    */
   DEAD((u, d) -> u.dead()),
   /**
-   * @deprecated renamed to {@link #INVALID}
-   */
-  @Deprecated(forRemoval = true)
-  OFFLINE((u, d) -> !u.valid()),
-  /**
    * Checks if the user is invalid or disconnected.
    */
   INVALID((u, d) -> !u.valid()),

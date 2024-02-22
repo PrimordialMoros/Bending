@@ -32,8 +32,8 @@ import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.BendingEffect;
+import me.moros.bending.api.util.data.DataKey;
 import me.moros.math.Vector3d;
-import net.kyori.adventure.key.Key;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -77,7 +77,7 @@ public interface EventBus {
    * Posts a new {@link RegistryLockEvent}.
    * @param keys the RegistryKeys of all Registries that are going to be locked
    */
-  void postRegistryLockEvent(Collection<Key> keys);
+  void postRegistryLockEvent(Collection<DataKey<?>> keys);
 
   /**
    * Posts a new {@link UserRegisterEvent}.
@@ -100,17 +100,6 @@ public interface EventBus {
    * @param desc the ability whose cooldown has expired
    */
   void postCooldownRemoveEvent(User user, AbilityDescription desc);
-
-  /**
-   * Posts a new {@link AbilityActivationEvent}.
-   * @param user the user who attempts to activate the ability
-   * @param desc the ability that is being activated
-   * @deprecated in favor of {@link #postAbilityActivationEvent(User, AbilityDescription, Activation)}
-   */
-  @Deprecated(forRemoval = true)
-  default void postAbilityActivationEvent(User user, AbilityDescription desc) {
-    postAbilityActivationEvent(user, desc, Activation.ATTACK);
-  }
 
   /**
    * Posts a new {@link AbilityActivationEvent}.

@@ -30,7 +30,6 @@ import me.moros.bending.sponge.platform.PlatformAdapter;
 import me.moros.bending.sponge.platform.item.SpongePlayerInventory;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.util.TriState;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandPreferences;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -98,7 +97,7 @@ public class SpongePlayer extends SpongeLivingEntity implements Player {
   }
 
   @Override
-  public @NonNull Audience audience() {
+  public Audience audience() {
     return handle();
   }
 }

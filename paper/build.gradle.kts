@@ -42,7 +42,7 @@ tasks {
     shadowJar {
         exclude("fonts/") // We aren't using any fonts from IF
         dependencies {
-            reloc("cloud.commandframework", "cloudframework")
+            reloc("org.incendo.cloud", "cloud")
             reloc("com.typesafe", "typesafe")
             reloc("org.spongepowered.configurate", "configurate")
             reloc("com.github.stefvanschie.inventoryframework", "inventoryframework")

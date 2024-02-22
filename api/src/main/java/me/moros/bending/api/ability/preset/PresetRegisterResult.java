@@ -19,39 +19,24 @@
 
 package me.moros.bending.api.ability.preset;
 
-import me.moros.bending.api.locale.Message;
-import me.moros.bending.api.locale.Message.Args1;
-import net.kyori.adventure.text.Component;
-
 /**
  * Represents the result of a preset registration query.
  */
-public enum PresetRegisterResult implements Args1<String> {
+public enum PresetRegisterResult {
   /**
    * Preset has been successfully registered.
    */
-  SUCCESS(Message.PRESET_SUCCESS),
+  SUCCESS,
   /**
    * Preset registration was unable to complete because it already exists.
    */
-  EXISTS(Message.PRESET_EXISTS),
+  EXISTS,
   /**
    * Preset registration was cancelled by an event listener.
    */
-  CANCELLED(Message.PRESET_CANCELLED),
+  CANCELLED,
   /**
    * Preset registration failed due to a storage error.
    */
-  FAIL(Message.PRESET_FAIL);
-
-  private final Args1<String> message;
-
-  PresetRegisterResult(Args1<String> message) {
-    this.message = message;
-  }
-
-  @Override
-  public Component build(String arg0) {
-    return message.build(arg0);
-  }
+  FAIL
 }

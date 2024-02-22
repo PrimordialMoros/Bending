@@ -23,17 +23,17 @@ import java.util.Collection;
 import java.util.List;
 
 import me.moros.bending.api.event.RegistryLockEvent;
-import net.kyori.adventure.key.Key;
+import me.moros.bending.api.util.data.DataKey;
 
 public class RegistryLockEventImpl implements RegistryLockEvent {
-  private final Collection<Key> keys;
+  private final Collection<DataKey<?>> keys;
 
-  public RegistryLockEventImpl(Collection<Key> keys) {
+  public RegistryLockEventImpl(Collection<DataKey<?>> keys) {
     this.keys = List.copyOf(keys);
   }
 
   @Override
-  public Collection<Key> registryKeys() {
+  public Collection<DataKey<?>> registryKeys() {
     return keys;
   }
 }

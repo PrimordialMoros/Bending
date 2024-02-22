@@ -58,9 +58,9 @@ public abstract class PermissionInitializer implements Initializer {
       .map(Permission::permissionString).collect(Collectors.toSet());
     children.add("bending.player");
     children.add("bending.bluefire");
-    children.add(CommandPermissions.CHOOSE + ".other");
-    children.add(CommandPermissions.ADD + ".other");
-    children.add(CommandPermissions.REMOVE + ".other");
+    children.add(CommandPermissions.CHOOSE.permissionString() + ".other");
+    children.add(CommandPermissions.ADD.permissionString() + ".other");
+    children.add(CommandPermissions.REMOVE.permissionString() + ".other");
     registerDefault("bending.admin", children, TriState.NOT_SET);
   }
 
@@ -76,7 +76,7 @@ public abstract class PermissionInitializer implements Initializer {
   private String registerAbilityNodes(Element element) {
     var node = elementParentNode(element);
     var abilityNodes = collect(element);
-    abilityNodes.add(CommandPermissions.CHOOSE + "." + element.key().value());
+    abilityNodes.add(CommandPermissions.CHOOSE.permissionString() + "." + element.key().value());
     registerDefault(node, abilityNodes);
     return node;
   }

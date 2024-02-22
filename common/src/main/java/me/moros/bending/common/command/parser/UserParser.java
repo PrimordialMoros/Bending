@@ -21,11 +21,11 @@ package me.moros.bending.common.command.parser;
 
 import java.util.function.Predicate;
 
-import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.command.ContextKeys;
+import me.moros.bending.common.locale.Message;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;

@@ -24,8 +24,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.gui.Board;
-import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.user.User;
+import me.moros.bending.common.locale.Message;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 

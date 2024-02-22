@@ -29,7 +29,7 @@ tasks {
         val excluded = setOf("checker-qual", "error_prone_annotations", "geantyref", "slf4j-api")
         dependencies {
             reloc("org.bstats", "bstats")
-            reloc("net.kyori.event", "eventbus")
+            reloc("com.seiama.event", "eventbus")
             reloc("me.moros.storage", "storage")
             exclude {
                 excluded.contains(it.moduleName)

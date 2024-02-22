@@ -23,4 +23,16 @@ package me.moros.bending.api.ability;
  * Pair representation of {@link AbilityDescription} and {@link Activation}.
  */
 public record SequenceStep(AbilityDescription ability, Activation activation) {
+  /**
+   * @deprecated use {@link #of(AbilityDescription, Activation)} instead
+   */
+  @Deprecated(forRemoval = true)
+  public SequenceStep(AbilityDescription ability, Activation activation) {
+    this.ability = ability;
+    this.activation = activation;
+  }
+
+  public static SequenceStep of(AbilityDescription ability, Activation activation) {
+    return new SequenceStep(ability, activation);
+  }
 }

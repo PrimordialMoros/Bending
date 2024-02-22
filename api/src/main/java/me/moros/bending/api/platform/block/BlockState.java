@@ -26,11 +26,10 @@ import me.moros.bending.api.platform.property.PropertyHolder;
 import me.moros.math.Position;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface BlockState extends Keyed, PropertyHolder {
   @Override
-  default @NonNull Key key() {
+  default Key key() {
     return type().key();
   }
 

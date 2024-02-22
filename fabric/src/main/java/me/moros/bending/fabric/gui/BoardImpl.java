@@ -21,10 +21,10 @@ package me.moros.bending.fabric.gui;
 
 import java.util.List;
 
-import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.platform.entity.DelegatePlayer;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.common.gui.AbstractBoard;
+import me.moros.bending.common.locale.Message;
 import me.moros.bending.fabric.platform.entity.FabricPlayer;
 import me.moros.bending.fabric.platform.scoreboard.PlayerBoard;
 import me.moros.bending.fabric.platform.scoreboard.PlayerScoreboard;

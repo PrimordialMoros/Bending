@@ -38,11 +38,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.zip.GZIPOutputStream;
 
-import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.storage.BendingStorage;
 import me.moros.bending.api.user.profile.BenderProfile;
 import me.moros.bending.api.util.ColorPalette;
 import me.moros.bending.common.Bending;
+import me.moros.bending.common.locale.Message;
 import me.moros.bending.common.storage.file.loader.JsonLoader;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;

@@ -72,7 +72,7 @@ final class PresetSerializer extends AbstractSerializer<Preset> {
       return;
     }
     Map<Integer, String> output = new LinkedHashMap<>(12); // 9 / 0.75 (load factor)
-    preset.forEach((desc, idx) -> output.put(idx + 1, desc.name()));
+    preset.forEach((desc, idx) -> output.put(idx + 1, desc.key().asString()));
     target.set(MAP_TOKEN, output);
   }
 }

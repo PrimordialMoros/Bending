@@ -186,7 +186,7 @@ public class EarthSmash extends AbilityInstance {
   }
 
   public static void tryDestroy(User user, Block block) {
-    if (user.sneaking() && user.selectedAbilityName().equals("EarthSmash")) {
+    if (user.sneaking() && user.hasAbilitySelected("earthsmash")) {
       EarthSmash earthSmash = getInstance(user, block, x -> true);
       if (earthSmash != null) {
         earthSmash.shatter();

@@ -51,22 +51,6 @@ public sealed interface DisplayBuilder<V, T extends DisplayBuilder<V, T>> permit
 
   T interpolationDelay(int interpolationDelay);
 
-  /**
-   * @deprecated use {@link #transformationInterpolationDuration()} and {@link #positionInterpolationDuration()}
-   */
-  @Deprecated(forRemoval = true)
-  default int interpolationDuration() {
-    return transformationInterpolationDuration();
-  }
-
-  /**
-   * @deprecated use {@link #transformationInterpolationDuration()} and {@link #positionInterpolationDuration()}
-   */
-  @Deprecated(forRemoval = true)
-  default T interpolationDuration(int interpolationDuration) {
-    return transformationInterpolationDuration(interpolationDuration);
-  }
-
   int transformationInterpolationDuration();
 
   T transformationInterpolationDuration(int transformationInterpolationDuration);

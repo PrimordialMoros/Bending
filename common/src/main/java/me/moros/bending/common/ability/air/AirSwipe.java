@@ -146,8 +146,7 @@ public class AirSwipe extends AbilityInstance {
   public void onCollision(Collision collision) {
     Ability collidedAbility = collision.collidedAbility();
     if (factor == userConfig.chargeFactor && collision.removeSelf()) {
-      String name = collidedAbility.description().name();
-      if (AbilityInitializer.layer2.contains(name)) {
+      if (AbilityInitializer.layer2.containsValue(collidedAbility.description().key())) {
         collision.removeOther(true);
       } else {
         collision.removeSelf(false);

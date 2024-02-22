@@ -19,13 +19,11 @@
 
 package me.moros.bending.common;
 
-import java.io.InputStream;
 import java.nio.file.Path;
 
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.bending.common.locale.TranslationManager;
 import me.moros.bending.common.logging.Logger;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface Bending {
   String author();
@@ -41,6 +39,4 @@ public interface Bending {
   ConfigManager configManager();
 
   TranslationManager translationManager();
-
-  @Nullable InputStream resource(String fileName);
 }

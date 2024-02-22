@@ -34,14 +34,6 @@ public interface FlightManager extends Updatable {
 
   Flight get(User user);
 
-  /**
-   * @deprecated use {@link #remove(UUID)}
-   */
-  @Deprecated(forRemoval = true)
-  default void remove(User user) {
-    remove(user.uuid());
-  }
-
   void remove(UUID uuid);
 
   void removeAll();

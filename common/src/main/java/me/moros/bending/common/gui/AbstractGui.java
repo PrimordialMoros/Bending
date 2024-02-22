@@ -30,8 +30,6 @@ import java.util.function.Supplier;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.element.ElementHandler;
 import me.moros.bending.api.gui.ElementGui;
-import me.moros.bending.api.locale.Message;
-import me.moros.bending.api.locale.Message.Args0;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
@@ -41,6 +39,8 @@ import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.TextUtil;
 import me.moros.bending.api.util.functional.Suppliers;
 import me.moros.bending.common.command.CommandPermissions;
+import me.moros.bending.common.locale.Message;
+import me.moros.bending.common.locale.Message.Args0;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -161,7 +161,7 @@ public abstract class AbstractGui<ItemStack, T> implements ElementGui {
 
     ActionType(Args0 message, Permission permission, MenuAction menuAction, boolean keepOpen) {
       this.message = message;
-      this.permission = permission.toString();
+      this.permission = permission.permissionString();
       this.menuAction = menuAction;
       this.keepOpen = keepOpen;
     }

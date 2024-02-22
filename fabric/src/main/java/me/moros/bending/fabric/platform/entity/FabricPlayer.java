@@ -22,7 +22,7 @@ package me.moros.bending.fabric.platform.entity;
 import java.util.Locale;
 
 import me.lucko.fabric.api.permissions.v0.Permissions;
-import me.moros.bending.api.locale.Message;
+import me.moros.bending.api.locale.Translation;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.platform.entity.player.Player;
@@ -33,7 +33,6 @@ import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.util.TriState;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.HumanoidArm;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FabricPlayer extends FabricLivingEntity implements Player {
   public FabricPlayer(ServerPlayer handle) {
@@ -57,7 +56,7 @@ public class FabricPlayer extends FabricLivingEntity implements Player {
 
   @Override
   public Locale locale() {
-    return handle().getOrDefault(Identity.LOCALE, Message.DEFAULT_LOCALE);
+    return handle().getOrDefault(Identity.LOCALE, Translation.DEFAULT_LOCALE);
   }
 
   @Override
@@ -101,7 +100,7 @@ public class FabricPlayer extends FabricLivingEntity implements Player {
   }
 
   @Override
-  public @NonNull Audience audience() {
+  public Audience audience() {
     return handle();
   }
 }

@@ -53,7 +53,7 @@ public class EarthCling extends AbilityInstance {
 
   @Override
   public UpdateResult update() {
-    if (removalPolicy.test(user, description()) || !user.selectedAbilityName().equals("EarthGlove") || user.isOnGround()) {
+    if (removalPolicy.test(user, description()) || !user.hasAbilitySelected("earthglove") || user.isOnGround()) {
       return UpdateResult.CONTINUE;
     }
     if (EntityUtil.isAgainstWall(user, b -> EarthMaterials.isEarthbendable(user, b) && !b.type().isLiquid())) {

@@ -25,7 +25,7 @@ import me.moros.bending.api.util.KeyUtil;
 import net.kyori.adventure.key.Key;
 
 record SoundImpl(Key key) implements Sound {
-  static final DefaultedRegistry<Key, Sound> REGISTRY = Registry.vanillaDefaulted("sound", SoundImpl::new);
+  static final DefaultedRegistry<Key, Sound> REGISTRY = Registry.vanillaDefaulted("sound", Sound.class, SoundImpl::new);
 
   static Sound get(String key) {
     return REGISTRY.get(KeyUtil.vanilla(key));

@@ -144,7 +144,7 @@ public class WaterWave extends AbilityInstance {
   }
 
   public static void freeze(User user) {
-    if (user.selectedAbilityName().equals("PhaseChange")) {
+    if (user.hasAbilitySelected("phasechange")) {
       user.game().abilityManager(user.worldKey()).firstInstance(user, WaterWave.class).ifPresent(WaterWave::freeze);
     }
   }

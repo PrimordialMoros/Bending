@@ -22,9 +22,9 @@ package me.moros.bending.common.command.parser;
 import java.util.List;
 
 import me.moros.bending.api.ability.preset.Preset;
-import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.command.ContextKeys;
+import me.moros.bending.common.locale.Message;
 import net.kyori.adventure.audience.Audience;
 import org.incendo.cloud.context.CommandContext;
 import org.incendo.cloud.context.CommandInput;

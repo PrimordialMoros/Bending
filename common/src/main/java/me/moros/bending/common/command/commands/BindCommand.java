@@ -24,14 +24,15 @@ import java.util.Collection;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.preset.Preset;
-import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.ColorPalette;
 import me.moros.bending.common.command.CommandPermissions;
+import me.moros.bending.common.command.CommandUtil;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.command.ContextKeys;
 import me.moros.bending.common.command.parser.AbilityParser;
 import me.moros.bending.common.command.parser.UserParser;
+import me.moros.bending.common.locale.Message;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -47,7 +48,7 @@ public record BindCommand<C extends Audience>(Commander<C> commander) implements
     var builder = commander().rootBuilder();
     commander().register(builder
       .literal("bind", "b")
-      .required("ability", AbilityParser.parser(false))
+      .required("ability", AbilityParser.parser())
       .optional("slot", IntegerParser.integerParser(1, 9), DefaultValue.constant(0))
       .commandDescription(RichDescription.of(Message.BIND_DESC.build()))
       .permission(CommandPermissions.BIND)
@@ -102,15 +103,17 @@ public record BindCommand<C extends Audience>(Commander<C> commander) implements
 
   private void onBindList(C sender, User user) {
     Collection<Element> elements = user.elements();
-    Component hover;
+    Component elementHover;
     if (elements.isEmpty()) {
-      hover = Message.NO_ELEMENTS.build();
+      elementHover = Message.NO_ELEMENTS.build();
     } else {
       JoinConfiguration sep = JoinConfiguration.commas(true);
-      hover = Component.join(sep, elements.stream().map(Element::displayName).toList())
+      elementHover = Component.join(sep, elements.stream().map(Element::displayName).toList())
         .colorIfAbsent(ColorPalette.TEXT_COLOR);
     }
-    Message.BOUND_SLOTS.send(sender, user.name().hoverEvent(HoverEvent.showText(hover)));
-    user.slots().display().forEach(sender::sendMessage);
+    Message.BOUND_SLOTS.send(sender, user.name().hoverEvent(HoverEvent.showText(elementHover)));
+    Component binds = Component.join(JoinConfiguration.newlines(), CommandUtil.presetSlots(user.slots()))
+      .hoverEvent(HoverEvent.showText(Message.ABILITY_HOVER.build()));
+    user.sendMessage(binds);
   }
 }

@@ -29,8 +29,6 @@ import net.kyori.adventure.key.Keyed;
  * Protections can be registered in {@link Registries#PROTECTIONS}.
  */
 public interface Protection extends Keyed {
-  String NAMESPACE = "bending.protection";
-
   /**
    * Test if a user can build at the specified block location.
    * @param entity the entity to check

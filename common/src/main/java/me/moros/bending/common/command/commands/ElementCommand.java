@@ -23,7 +23,6 @@ import java.util.function.BiConsumer;
 
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.element.ElementHandler;
-import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
@@ -33,6 +32,7 @@ import me.moros.bending.common.command.CommandUtil;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.command.ContextKeys;
 import me.moros.bending.common.command.parser.UserParser;
+import me.moros.bending.common.locale.Message;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
 import org.incendo.cloud.Command;
@@ -64,7 +64,7 @@ public record ElementCommand<C extends Audience>(Commander<C> commander) impleme
       .required("element", EnumParser.enumParser(Element.class))
       .required("target", UserParser.parser())
       .commandDescription(RichDescription.of(Message.ELEMENT_CHOOSE_DESC.build()))
-      .permission(CommandPermissions.CHOOSE + ".other")
+      .permission(CommandPermissions.CHOOSE.permissionString() + ".other")
       .handler(c -> onElementSet(c.get("target"), c.get("element")))
     );
 
@@ -98,7 +98,7 @@ public record ElementCommand<C extends Audience>(Commander<C> commander) impleme
 
   @Override
   public void onElementChoose(User user, Element element) {
-    if (!user.hasPermission(CommandPermissions.CHOOSE + "." + element.key().value())) {
+    if (!user.hasPermission(CommandPermissions.CHOOSE.permissionString() + "." + element.key().value())) {
       Message.ELEMENT_CHOOSE_NO_PERMISSION.send(user, element.displayName());
       return;
     }

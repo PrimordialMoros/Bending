@@ -26,15 +26,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import me.moros.bending.api.ability.element.Element;
+import me.moros.bending.api.util.KeyUtil;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.translation.Translatable;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -42,34 +43,33 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Assume that all collections returning AbilityDescription are also immutable
  */
 public sealed class AbilityDescription implements Keyed, Translatable permits AbilityDescription.Sequence {
-  public static final String NAMESPACE = "bending.ability";
-
   private final Key key;
   private final String name;
-  private final Function<AbilityDescription, ? extends Ability> constructor;
   private final Element element;
+  private final Component displayName;
+  private final Function<AbilityDescription, ? extends Ability> constructor;
   private final EnumSet<Activation> activations;
   private final Collection<String> requiredPermissions;
-  private final Component displayName;
   private final boolean canBind;
   private final boolean hidden;
   private final boolean bypassCooldown;
   private final int hashcode;
 
   private AbilityDescription(Builder builder) {
+    key = builder.key;
     name = builder.name;
-    constructor = builder.constructor;
     element = builder.element;
+    displayName = Component.text(name, element.color());
+    constructor = builder.constructor;
     activations = builder.activations;
     requiredPermissions = List.copyOf(builder.requiredPermissions);
     canBind = builder.canBind && !isActivatedBy(Activation.SEQUENCE);
     hidden = builder.hidden;
     bypassCooldown = builder.bypassCooldown;
-    displayName = Component.text(name, element.color());
-    hashcode = Objects.hash(name, element, activations);
-    key = Key.key(NAMESPACE, name.toLowerCase(Locale.ROOT));
+    hashcode = Objects.hash(key, element, activations);
   }
 
+  @Deprecated(forRemoval = true)
   public String name() {
     return name;
   }
@@ -106,28 +106,32 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
     return requiredPermissions;
   }
 
+  @Deprecated(forRemoval = true)
   public Component meta() {
-    return displayName().clickEvent(ClickEvent.runCommand("/bending help " + name()));
+    return displayName().clickEvent(ClickEvent.runCommand("/bending help " + key().asString()));
   }
 
   @Override
-  public @NonNull Key key() {
+  public Key key() {
     return key;
   }
 
   @Override
-  public @NonNull String translationKey() {
-    return NAMESPACE + "." + key().value();
+  public String translationKey() {
+    return key().namespace() + ".ability." + key().value();
   }
 
+  @Deprecated(forRemoval = true)
   public String descriptionKey() {
     return translationKey() + ".description";
   }
 
+  @Deprecated(forRemoval = true)
   public String instructionsKey() {
     return translationKey() + ".instructions";
   }
 
+  @Deprecated(forRemoval = true)
   public String deathKey() {
     return translationKey() + ".death";
   }
@@ -141,7 +145,7 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
       return false;
     }
     AbilityDescription other = (AbilityDescription) obj;
-    return name.equals(other.name) && element == other.element && activations.equals(other.activations);
+    return key.equals(other.key) && element == other.element && activations.equals(other.activations);
   }
 
   @Override
@@ -150,18 +154,29 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
   }
 
   public static <T extends Ability> Builder builder(String name, Function<AbilityDescription, T> constructor) {
+    return builder(KeyUtil.BENDING_NAMESPACE, name, constructor);
+  }
+
+  public static <T extends Ability> Builder builder(String namespace, String name, Function<AbilityDescription, T> constructor) {
+    Objects.requireNonNull(namespace);
     Objects.requireNonNull(name);
     Objects.requireNonNull(constructor);
-    if (name.isEmpty()) {
-      throw new IllegalArgumentException("Ability name cannot be empty!");
+    if (namespace.isEmpty()) {
+      namespace = KeyUtil.BENDING_NAMESPACE;
     }
-    return new Builder(name, constructor);
+    boolean validName = name.chars().allMatch(c -> (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'));
+    if (name.isEmpty() || !validName) {
+      throw new IllegalArgumentException("Name must be an alphabetical non-empty string!");
+    }
+    return new Builder(namespace, name, constructor);
   }
 
   /**
    * Immutable and thread-safe representation of a sequence
    */
   public static final class Sequence extends AbilityDescription {
+    public static final int MAX_STEPS = 16;
+
     private final List<SequenceStep> steps;
     private Component instructions;
 
@@ -204,11 +219,11 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
           // Check if the next instruction is to release sneak.
           SequenceStep next = steps.get(i + 1);
           if (desc.equals(next.ability()) && next.activation() == Activation.SNEAK_RELEASE) {
-            key = Activation.NAMESPACE + ".sneak-tap";
+            key = "bending.activation.sneak-tap";
             i++;
           }
         }
-        builder.append(Component.text(desc.name())).append(Component.text(" ("))
+        builder.append(desc.displayName()).append(Component.text(" ("))
           .append(Component.translatable(key)).append(Component.text(")"));
       }
       return builder.build();
@@ -241,19 +256,21 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
    * Builder to create {@link AbilityDescription}.
    */
   public static final class Builder {
+    private final Key key;
     private final String name;
-    private final Function<AbilityDescription, ? extends Ability> constructor;
     private Element element;
+    private final Function<AbilityDescription, ? extends Ability> constructor;
     private EnumSet<Activation> activations;
     private Collection<String> requiredPermissions;
     private boolean canBind = true;
     private boolean hidden = false;
     private boolean bypassCooldown = false;
 
-    private <T extends Ability> Builder(String name, Function<AbilityDescription, T> constructor) {
+    private <T extends Ability> Builder(String namespace, String name, Function<AbilityDescription, T> constructor) {
+      this.key = Key.key(namespace, name.toLowerCase(Locale.ROOT));
       this.name = name;
       this.constructor = constructor;
-      this.requiredPermissions = List.of(AbilityDescription.NAMESPACE + "." + name);
+      this.requiredPermissions = List.of(defaultPermission());
     }
 
     public Builder element(Element element) {
@@ -273,7 +290,7 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
 
     public Builder require(String @Nullable ... permissions) {
       Collection<String> c = new ArrayList<>();
-      c.add(AbilityDescription.NAMESPACE + "." + name);
+      c.add(defaultPermission());
       if (permissions != null) {
         c.addAll(List.of(permissions));
       }
@@ -304,6 +321,19 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
       return new AbilityDescription(this);
     }
 
+    public Sequence buildSequence(UnaryOperator<SequenceBuilder> function) {
+      validate();
+      if (!activations.contains(Activation.SEQUENCE)) {
+        throw new IllegalStateException("Ability must be activated by sequence");
+      }
+      List<SequenceStep> sequenceSteps = function.apply(new SequenceBuilder()).validateAndBuild();
+      return new Sequence(this, sequenceSteps);
+    }
+
+    /**
+     * @deprecated use {@link #buildSequence(UnaryOperator)} instead
+     */
+    @Deprecated(forRemoval = true)
     public Sequence buildSequence(SequenceStep step1, SequenceStep step2, SequenceStep @Nullable ... steps) {
       validate();
       if (!activations.contains(Activation.SEQUENCE)) {
@@ -324,6 +354,10 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
       if (activations.isEmpty()) {
         throw new IllegalStateException("Activation methods cannot be empty");
       }
+    }
+
+    private String defaultPermission() {
+      return "bending.ability." + key.value();
     }
   }
 }

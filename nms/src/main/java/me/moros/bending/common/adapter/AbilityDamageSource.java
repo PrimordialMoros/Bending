@@ -19,46 +19,20 @@
 
 package me.moros.bending.common.adapter;
 
-import java.util.function.Function;
-
-import me.moros.bending.api.ability.AbilityDescription;
-import me.moros.bending.api.ability.DamageSource;
-import me.moros.bending.api.locale.Message;
-import me.moros.bending.api.user.User;
-import net.kyori.adventure.text.Component;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
-final class AbilityDamageSource extends net.minecraft.world.damagesource.DamageSource implements DamageSource {
-  private final Component name;
-  private final AbilityDescription ability;
-  private final Function<Component, net.minecraft.network.chat.Component> mapper;
+final class AbilityDamageSource extends net.minecraft.world.damagesource.DamageSource {
+  private final Component deathMessage;
 
-  AbilityDamageSource(Entity userEntity, User user, AbilityDescription ability, Function<Component, net.minecraft.network.chat.Component> mapper) {
+  AbilityDamageSource(Entity userEntity, Component deathMessage) {
     super(userEntity.damageSources().generic().typeHolder(), userEntity);
-    this.name = user.name();
-    this.ability = ability;
-    this.mapper = mapper;
+    this.deathMessage = deathMessage;
   }
 
   @Override
-  public Component name() {
-    return name;
-  }
-
-  @Override
-  public AbilityDescription ability() {
-    return ability;
-  }
-
-  @Override
-  public net.minecraft.network.chat.Component getLocalizedDeathMessage(LivingEntity livingEntity) {
-    //noinspection DataFlowIssue
-    return net.minecraft.network.chat.Component.translatableWithFallback(ability.deathKey(), // Key
-      Message.ABILITY_GENERIC_DEATH_KEY, // Fallback
-      livingEntity.getDisplayName(),
-      getDirectEntity().getDisplayName(),
-      mapper.apply(ability.displayName())
-    );
+  public Component getLocalizedDeathMessage(LivingEntity livingEntity) {
+    return deathMessage;
   }
 }

@@ -25,7 +25,7 @@ import me.moros.bending.api.util.KeyUtil;
 import net.kyori.adventure.key.Key;
 
 record ParticleImpl(Key key) implements Particle {
-  static final DefaultedRegistry<Key, Particle> REGISTRY = Registry.vanillaDefaulted("particles", ParticleImpl::new);
+  static final DefaultedRegistry<Key, Particle> REGISTRY = Registry.vanillaDefaulted("particles", Particle.class, ParticleImpl::new);
 
   static Particle get(String key) {
     return REGISTRY.get(KeyUtil.vanilla(key));

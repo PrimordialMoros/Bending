@@ -19,7 +19,6 @@
 
 package me.moros.bending.paper;
 
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Locale;
@@ -55,7 +54,6 @@ import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.ServicePriority;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.incendo.cloud.execution.ExecutionCoordinator;
 import org.incendo.cloud.paper.PaperCommandManager;
 
@@ -124,10 +122,5 @@ final class PaperBending extends AbstractBending<BendingBootstrap> {
   @Override
   public String version() {
     return parent.getPluginMeta().getVersion();
-  }
-
-  @Override
-  public @Nullable InputStream resource(String fileName) {
-    return parent.getResource(fileName);
   }
 }

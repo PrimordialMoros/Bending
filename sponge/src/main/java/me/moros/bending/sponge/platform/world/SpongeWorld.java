@@ -49,7 +49,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.phys.Vec3;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.EntityTypes;
@@ -247,12 +246,12 @@ public record SpongeWorld(ServerWorld handle) implements World {
   }
 
   @Override
-  public @NonNull Iterable<? extends Audience> audiences() {
+  public Iterable<? extends Audience> audiences() {
     return handle().audiences();
   }
 
   @Override
-  public @NonNull Key key() {
+  public Key key() {
     return PlatformAdapter.fromRsk(handle().key());
   }
 }

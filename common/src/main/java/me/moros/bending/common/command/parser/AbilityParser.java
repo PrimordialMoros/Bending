@@ -19,10 +19,14 @@
 
 package me.moros.bending.common.command.parser;
 
+import java.util.function.Predicate;
+
 import me.moros.bending.api.ability.AbilityDescription;
-import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.registry.Registries;
+import me.moros.bending.api.user.User;
 import me.moros.bending.common.command.CommandUtil;
+import me.moros.bending.common.command.ContextKeys;
+import me.moros.bending.common.locale.Message;
 import net.kyori.adventure.audience.Audience;
 import org.incendo.cloud.context.CommandContext;
 import org.incendo.cloud.context.CommandInput;
@@ -32,10 +36,10 @@ import org.incendo.cloud.parser.ParserDescriptor;
 import org.incendo.cloud.suggestion.BlockingSuggestionProvider;
 
 public final class AbilityParser<C extends Audience> implements ArgumentParser<C, AbilityDescription>, BlockingSuggestionProvider.Strings<C> {
-  private final boolean sequenceSuggestions;
+  private final boolean validBindsOnly;
 
-  public AbilityParser(boolean sequenceSuggestions) {
-    this.sequenceSuggestions = sequenceSuggestions;
+  public AbilityParser(boolean validBindsOnly) {
+    this.validBindsOnly = validBindsOnly;
   }
 
   @Override
@@ -52,11 +56,26 @@ public final class AbilityParser<C extends Audience> implements ArgumentParser<C
 
   @Override
   public Iterable<String> stringSuggestions(CommandContext<C> commandContext, CommandInput commandInput) {
-    return CommandUtil.abilityCompletions(commandContext.sender(), true, sequenceSuggestions);
+    Predicate<AbilityDescription> predicate = d -> !d.hidden();
+    User user = commandContext.optional(ContextKeys.BENDING_PLAYER).orElse(null);
+    if (validBindsOnly) {
+      predicate = predicate.and(AbilityDescription::canBind);
+      if (user != null) {
+        predicate = predicate.and(desc -> user.hasElement(desc.element()));
+      }
+    }
+    if (user != null) {
+      predicate = predicate.and(user::hasPermission);
+    }
+    return Registries.ABILITIES.stream().filter(predicate).map(CommandUtil::mapToSuggestion).toList();
   }
 
-  public static <C extends Audience> ParserDescriptor<C, AbilityDescription> parser(boolean sequenceSuggestions) {
-    return ParserDescriptor.of(new AbilityParser<>(sequenceSuggestions), AbilityDescription.class);
+  public static <C extends Audience> ParserDescriptor<C, AbilityDescription> parser() {
+    return ParserDescriptor.of(new AbilityParser<>(true), AbilityDescription.class);
+  }
+
+  public static <C extends Audience> ParserDescriptor<C, AbilityDescription> parserGlobal() {
+    return ParserDescriptor.of(new AbilityParser<>(false), AbilityDescription.class);
   }
 }
 

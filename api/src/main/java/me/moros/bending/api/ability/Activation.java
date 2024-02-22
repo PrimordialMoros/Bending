@@ -19,15 +19,14 @@
 
 package me.moros.bending.api.ability;
 
+import me.moros.bending.api.util.KeyUtil;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.translation.Translatable;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents a type of ability activation.
  */
-public enum Activation implements Keyed, Translatable {
+public enum Activation implements Translatable {
   /**
    * Passive abilities are always active.
    */
@@ -68,18 +67,11 @@ public enum Activation implements Keyed, Translatable {
   private final Key key;
 
   Activation(String value) {
-    this.key = Key.key(NAMESPACE, value);
+    this.key = KeyUtil.simple("activation." + value);
   }
 
   @Override
-  public @NonNull Key key() {
-    return key;
+  public String translationKey() {
+    return KeyUtil.concat(key);
   }
-
-  @Override
-  public @NonNull String translationKey() {
-    return NAMESPACE + "." + key().value();
-  }
-
-  public static final String NAMESPACE = "bending.activation";
 }

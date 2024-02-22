@@ -43,7 +43,6 @@ import net.kyori.adventure.util.TriState;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.projectile.Projectile;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class FabricEntity implements Entity {
   private net.minecraft.world.entity.Entity handle;
@@ -253,7 +252,7 @@ public class FabricEntity implements Entity {
   }
 
   @Override
-  public @NonNull UUID uuid() {
+  public UUID uuid() {
     return handle().getUUID();
   }
 
@@ -277,7 +276,7 @@ public class FabricEntity implements Entity {
   }
 
   @Override
-  public @NonNull Audience audience() {
+  public Audience audience() {
     return Audience.empty();
   }
 

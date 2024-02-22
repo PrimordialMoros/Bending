@@ -53,7 +53,6 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.phys.Vec3;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public record FabricWorld(ServerLevel handle) implements World {
@@ -250,12 +249,12 @@ public record FabricWorld(ServerLevel handle) implements World {
   }
 
   @Override
-  public @NonNull Iterable<? extends Audience> audiences() {
+  public Iterable<? extends Audience> audiences() {
     return handle().players();
   }
 
   @Override
-  public @NonNull Key key() {
+  public Key key() {
     return handle().dimension().location();
   }
 }

@@ -30,13 +30,12 @@ import java.util.ResourceBundle;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents a translation of one or more key-value pairs.
  */
 public final class Translation implements Keyed, Iterable<Entry<String, MessageFormat>> {
-  public static final String NAMESPACE = "bending.translation";
+  public static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
 
   private final Key key;
   private final Locale locale;
@@ -75,7 +74,7 @@ public final class Translation implements Keyed, Iterable<Entry<String, MessageF
   }
 
   @Override
-  public @NonNull Key key() {
+  public Key key() {
     return key;
   }
 
@@ -92,7 +91,7 @@ public final class Translation implements Keyed, Iterable<Entry<String, MessageF
    * @throws IllegalArgumentException if bundle is empty
    */
   public static Translation fromBundle(Key key, ResourceBundle bundle) {
-    return fromBundle(key, Message.DEFAULT_LOCALE, bundle);
+    return fromBundle(key, DEFAULT_LOCALE, bundle);
   }
 
   /**
@@ -124,7 +123,7 @@ public final class Translation implements Keyed, Iterable<Entry<String, MessageF
    * @throws IllegalArgumentException if translations is empty
    */
   public static Translation create(Key key, Map<String, String> translations) {
-    return create(key, Message.DEFAULT_LOCALE, translations);
+    return create(key, DEFAULT_LOCALE, translations);
   }
 
   /**

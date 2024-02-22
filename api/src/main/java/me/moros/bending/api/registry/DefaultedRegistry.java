@@ -21,11 +21,13 @@ package me.moros.bending.api.registry;
 
 import java.util.function.Function;
 
+import me.moros.bending.api.util.data.DataKey;
+
 public class DefaultedRegistry<K, V> extends SimpleRegistry<K, V> {
   private final Function<K, V> factory;
 
-  protected DefaultedRegistry(String namespace, Function<V, K> inverseMapper, Function<String, K> keyMapper, Function<K, V> factory) {
-    super(namespace, inverseMapper, keyMapper);
+  protected DefaultedRegistry(DataKey<V> key, Function<V, K> inverseMapper, Function<String, K> keyMapper, Function<K, V> factory) {
+    super(key, inverseMapper, keyMapper);
     this.factory = factory;
   }
 

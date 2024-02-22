@@ -23,6 +23,8 @@ import java.util.Objects;
 import java.util.function.Function;
 
 import me.moros.bending.api.registry.SimpleRegistry.SimpleMutableRegistry;
+import me.moros.bending.api.util.data.DataKey;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Utility class for building registries.
@@ -30,42 +32,54 @@ import me.moros.bending.api.registry.SimpleRegistry.SimpleMutableRegistry;
  * @param <V> the value type
  */
 public final class RegistryBuilder<K, V> {
-  private final String namespace;
+  private final DataKey<V> key;
   private final Function<V, K> inverseMapper;
-  private Function<String, K> keyMapper;
+  private final Function<String, @Nullable K> keyMapper;
 
-  private RegistryBuilder(String namespace, Function<V, K> inverseMapper) {
-    this.namespace = namespace;
+  private RegistryBuilder(DataKey<V> key, Function<V, K> inverseMapper, Function<String, @Nullable K> keyMapper) {
+    this.key = key;
     this.inverseMapper = inverseMapper;
-  }
-
-  public RegistryBuilder<K, V> keyMapper(Function<String, K> keyMapper) {
-    this.keyMapper = Objects.requireNonNull(keyMapper);
-    return this;
+    this.keyMapper = keyMapper;
   }
 
   public Registry<K, V> build() {
-    return new SimpleRegistry<>(namespace, inverseMapper, keyMapper);
+    return new SimpleRegistry<>(key, inverseMapper, keyMapper);
   }
 
   public MutableRegistry<K, V> buildMutable() {
-    return new SimpleMutableRegistry<>(namespace, inverseMapper, keyMapper);
+    return new SimpleMutableRegistry<>(key, inverseMapper, keyMapper);
   }
 
   public DefaultedRegistry<K, V> buildDefaulted(Function<K, V> factory) {
     Objects.requireNonNull(factory);
-    return new DefaultedRegistry<>(namespace, inverseMapper, keyMapper, factory);
+    return new DefaultedRegistry<>(key, inverseMapper, keyMapper, factory);
   }
 
-  public static class IntermediaryRegistryBuilder<V> {
-    private final String namespace;
+  public static final class IntermediaryRegistryBuilder<V> {
+    private final DataKey<V> key;
 
-    IntermediaryRegistryBuilder(String namespace) {
-      this.namespace = namespace;
+    IntermediaryRegistryBuilder(DataKey<V> key) {
+      this.key = key;
     }
 
-    public <K1> RegistryBuilder<K1, V> inverseMapper(Function<V, K1> inverseMapper) {
-      return new RegistryBuilder<>(namespace, Objects.requireNonNull(inverseMapper));
+    public <K> IntermediaryRegistryBuilder2<K, V> inverseMapper(Function<V, K> inverseMapper) {
+      Objects.requireNonNull(inverseMapper);
+      return new IntermediaryRegistryBuilder2<>(key, inverseMapper);
+    }
+  }
+
+  public static final class IntermediaryRegistryBuilder2<K, V> {
+    private final DataKey<V> key;
+    private final Function<V, K> inverseMapper;
+
+    IntermediaryRegistryBuilder2(DataKey<V> key, Function<V, K> inverseMapper) {
+      this.key = key;
+      this.inverseMapper = inverseMapper;
+    }
+
+    public RegistryBuilder<K, V> keyMapper(Function<String, @Nullable K> keyMapper) {
+      Objects.requireNonNull(keyMapper);
+      return new RegistryBuilder<>(key, inverseMapper, keyMapper);
     }
   }
 }

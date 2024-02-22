@@ -21,17 +21,11 @@ package me.moros.bending.common.event;
 
 import java.util.function.Consumer;
 
-import net.kyori.event.EventSubscriber;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import com.seiama.event.EventSubscriber;
 
-record EventSubscriberImpl<E>(Consumer<E> consumer, int postOrder) implements EventSubscriber<E> {
+record EventSubscriberImpl<E>(Consumer<E> consumer) implements EventSubscriber<E> {
   @Override
-  public void on(@NonNull E event) {
+  public void on(E event) {
     consumer.accept(event);
-  }
-
-  @Override
-  public boolean acceptsCancelled() {
-    return false;
   }
 }

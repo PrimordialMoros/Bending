@@ -21,8 +21,8 @@ package me.moros.bending.api.protection;
 
 import java.util.Locale;
 
+import me.moros.bending.api.util.KeyUtil;
 import net.kyori.adventure.key.Key;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Base class for {@link Protection}.
@@ -30,12 +30,20 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public abstract class AbstractProtection implements Protection {
   private final Key key;
 
+  private AbstractProtection(Key key) {
+    this.key = key;
+  }
+
   protected AbstractProtection(String protectionName) {
-    key = Key.key(NAMESPACE, protectionName.toLowerCase(Locale.ROOT));
+    this(KeyUtil.simple(protectionName.toLowerCase(Locale.ROOT)));
+  }
+
+  protected AbstractProtection(String namespace, String protectionName) {
+    this(Key.key(namespace, protectionName));
   }
 
   @Override
-  public @NonNull Key key() {
+  public Key key() {
     return key;
   }
 }

@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
-import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
@@ -40,6 +39,7 @@ import me.moros.bending.common.command.commands.ReloadCommand;
 import me.moros.bending.common.command.commands.ToggleCommand;
 import me.moros.bending.common.command.commands.VersionCommand;
 import me.moros.bending.common.command.parser.ComponentException;
+import me.moros.bending.common.locale.Message;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;

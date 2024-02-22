@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.registry.SimpleRegistry.SimpleMutableRegistry;
 import me.moros.bending.api.user.User;
+import me.moros.bending.api.util.KeyUtil;
 import me.moros.bending.api.util.TextUtil;
 
 /**
@@ -32,7 +33,7 @@ import me.moros.bending.api.util.TextUtil;
  */
 public final class UserRegistry extends SimpleMutableRegistry<UUID, User> {
   UserRegistry() {
-    super(User.NAMESPACE, User::uuid, TextUtil::parseUUID);
+    super(KeyUtil.data("user", User.class), User::uuid, TextUtil::parseUUID);
   }
 
   @Override

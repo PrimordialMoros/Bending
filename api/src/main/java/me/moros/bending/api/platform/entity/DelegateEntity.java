@@ -32,7 +32,6 @@ import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.util.TriState;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents a platform entity.
@@ -271,7 +270,7 @@ public interface DelegateEntity extends Entity {
   }
 
   @Override
-  default @NonNull Audience audience() {
+  default Audience audience() {
     return entity();
   }
 }

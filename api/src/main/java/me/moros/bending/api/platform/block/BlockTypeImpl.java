@@ -27,13 +27,12 @@ import me.moros.bending.api.registry.DefaultedRegistry;
 import me.moros.bending.api.registry.Registry;
 import me.moros.bending.api.util.KeyUtil;
 import net.kyori.adventure.key.Key;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 record BlockTypeImpl(Key key) implements BlockType {
-  static final DefaultedRegistry<Key, BlockType> REGISTRY = Registry.vanillaDefaulted("blocks", BlockTypeImpl::new);
-  static final Registry<Key, BlockProperties> PROPERTY_REGISTRY = Registry.vanilla("block.properties");
-  static final Registry<Key, BlockState> STATE_REGISTRY = Registry.vanilla("block.state");
-  static final Registry<Key, Item> ITEM_REGISTRY = Registry.vanilla("block.item");
+  static final DefaultedRegistry<Key, BlockType> REGISTRY = Registry.vanillaDefaulted("blocks", BlockType.class, BlockTypeImpl::new);
+  static final Registry<Key, BlockProperties> PROPERTY_REGISTRY = Registry.vanilla("block.properties", BlockProperties.class);
+  static final Registry<Key, BlockState> STATE_REGISTRY = Registry.vanilla("block.state", BlockState.class);
+  static final Registry<Key, Item> ITEM_REGISTRY = Registry.vanilla("block.item", Item.class);
 
   static BlockType get(String key) {
     return REGISTRY.get(KeyUtil.vanilla(key));
@@ -79,7 +78,7 @@ record BlockTypeImpl(Key key) implements BlockType {
   }
 
   @Override
-  public @NonNull String translationKey() {
+  public String translationKey() {
     return fromVanilla().translationKey();
   }
 

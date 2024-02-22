@@ -28,7 +28,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.translation.GlobalTranslator;
 import org.bukkit.entity.Player;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class PlaceholderAPIHook extends PlaceholderExpansion {
@@ -43,17 +42,17 @@ public class PlaceholderAPIHook extends PlaceholderExpansion {
   }
 
   @Override
-  public @NonNull String getAuthor() {
+  public String getAuthor() {
     return plugin.author();
   }
 
   @Override
-  public @NonNull String getIdentifier() {
+  public String getIdentifier() {
     return "bending";
   }
 
   @Override
-  public @NonNull String getVersion() {
+  public String getVersion() {
     return plugin.version();
   }
 

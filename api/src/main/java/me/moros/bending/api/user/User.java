@@ -19,6 +19,7 @@
 
 package me.moros.bending.api.user;
 
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -37,6 +38,7 @@ import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.temporal.TempBlock;
 import me.moros.bending.api.user.profile.BenderProfile;
 import me.moros.bending.api.util.GridIterator;
+import me.moros.bending.api.util.KeyUtil;
 import me.moros.bending.api.util.data.DataContainer;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
@@ -47,8 +49,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Represents a user that can bend.
  */
 public sealed interface User extends DelegateLivingEntity, ElementUser, AttributeUser, PresetUser permits BendingUser {
-  String NAMESPACE = "bending.user";
-
   /**
    * Get the game object that this user belongs to.
    * @return the game
@@ -134,9 +134,21 @@ public sealed interface User extends DelegateLivingEntity, ElementUser, Attribut
    * Retrieves the ability name for the currently selected slot.
    * @return the ability's name or an empty string if no ability is bound to the currently selected slot
    */
+  @Deprecated(forRemoval = true)
   default String selectedAbilityName() {
     AbilityDescription selected = selectedAbility();
     return selected == null ? "" : selected.name();
+  }
+
+  /**
+   * Utility method to easily check if the currently selected ability matches the given key.
+   * If key doesn't have a namespace, the default one will be used ({@value KeyUtil#BENDING_NAMESPACE}).
+   * If there's no ability bound in the selected slot then false will be returned.
+   * @return true if the currently selected ability matches the specified key
+   */
+  default boolean hasAbilitySelected(String key) {
+    AbilityDescription selected = selectedAbility();
+    return selected != null && selected.key().equals(KeyUtil.BENDING_KEY_MAPPER.apply(key.toLowerCase(Locale.ROOT)));
   }
 
   /**

@@ -21,7 +21,6 @@ package me.moros.bending.paper.platform;
 
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataType;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 final class BooleanPDT implements PersistentDataType<Byte, Boolean> {
   static final PersistentDataType<Byte, Boolean> INSTANCE = new BooleanPDT();
@@ -33,22 +32,22 @@ final class BooleanPDT implements PersistentDataType<Byte, Boolean> {
   }
 
   @Override
-  public @NonNull Class<Byte> getPrimitiveType() {
+  public Class<Byte> getPrimitiveType() {
     return Byte.class;
   }
 
   @Override
-  public @NonNull Class<Boolean> getComplexType() {
+  public Class<Boolean> getComplexType() {
     return Boolean.class;
   }
 
   @Override
-  public @NonNull Byte toPrimitive(@NonNull Boolean complex, @NonNull PersistentDataAdapterContext context) {
+  public Byte toPrimitive(Boolean complex, PersistentDataAdapterContext context) {
     return complex ? TRUE : FALSE;
   }
 
   @Override
-  public @NonNull Boolean fromPrimitive(@NonNull Byte primitive, @NonNull PersistentDataAdapterContext context) {
+  public Boolean fromPrimitive(Byte primitive, PersistentDataAdapterContext context) {
     return primitive == TRUE;
   }
 }

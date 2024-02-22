@@ -154,8 +154,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
     Ability collidedAbility = collision.collidedAbility();
     boolean fullyCharged = factor == userConfig.chargeFactor;
     if (fullyCharged && collision.removeSelf()) {
-      String name = collidedAbility.description().name();
-      if (AbilityInitializer.layer2.contains(name)) {
+      if (AbilityInitializer.layer2.containsValue(collidedAbility.description().key())) {
         collision.removeOther(true);
       } else {
         collision.removeSelf(false);

@@ -20,7 +20,6 @@
 package me.moros.bending.common;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -41,7 +40,6 @@ import me.moros.bending.common.logging.Logger;
 import me.moros.bending.common.util.GameProviderUtil;
 import me.moros.bending.common.util.ReflectionUtil;
 import me.moros.tasker.executor.SyncExecutor;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.reference.WatchServiceListener;
 
 public abstract class AbstractBending<T> implements Bending {
@@ -148,10 +146,5 @@ public abstract class AbstractBending<T> implements Bending {
   @Override
   public TranslationManager translationManager() {
     return translationManager;
-  }
-
-  @Override
-  public @Nullable InputStream resource(String fileName) {
-    return getClass().getClassLoader().getResourceAsStream(fileName);
   }
 }

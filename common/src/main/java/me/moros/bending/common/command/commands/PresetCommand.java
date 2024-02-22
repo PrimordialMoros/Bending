@@ -22,14 +22,16 @@ package me.moros.bending.common.command.commands;
 import java.util.Collection;
 
 import me.moros.bending.api.ability.preset.Preset;
-import me.moros.bending.api.locale.Message;
+import me.moros.bending.api.ability.preset.PresetRegisterResult;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.ColorPalette;
 import me.moros.bending.api.util.TextUtil;
 import me.moros.bending.common.command.CommandPermissions;
+import me.moros.bending.common.command.CommandUtil;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.command.ContextKeys;
 import me.moros.bending.common.command.parser.PresetParser;
+import me.moros.bending.common.locale.Message;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -79,7 +81,8 @@ public record PresetCommand<C extends Audience>(Commander<C> commander) implemen
     } else {
       Message.PRESET_LIST_HEADER.send(user, user.presetSize());
       JoinConfiguration sep = JoinConfiguration.commas(true);
-      user.sendMessage(Component.join(sep, presets.stream().map(Preset::meta).toList()).colorIfAbsent(ColorPalette.TEXT_COLOR));
+      Component presetList = Component.join(sep, presets.stream().map(CommandUtil::presetDescription).toList());
+      user.sendMessage(presetList.colorIfAbsent(ColorPalette.TEXT_COLOR));
     }
   }
 
@@ -94,7 +97,18 @@ public record PresetCommand<C extends Audience>(Commander<C> commander) implemen
       Message.EMPTY_PRESET.send(user);
       return;
     }
-    user.addPreset(preset.withName(input)).send(user, input);
+    var result = user.addPreset(preset.withName(input));
+    user.sendMessage(mapPresetResult(result, input));
+  }
+
+  private Component mapPresetResult(PresetRegisterResult result, String name) {
+    var msg = switch (result) {
+      case SUCCESS -> Message.PRESET_SUCCESS;
+      case EXISTS -> Message.PRESET_EXISTS;
+      case CANCELLED -> Message.PRESET_CANCELLED;
+      case FAIL -> Message.PRESET_FAIL;
+    };
+    return msg.build(name);
   }
 
   private void onPresetRemove(User user, Preset preset) {

@@ -102,7 +102,7 @@ final class SqlStorage extends AbstractStorage {
       for (AbilityDescription desc : Registries.ABILITIES) {
         if (desc.canBind() && !map.containsKey(desc)) {
           UUID uuid = map.computeIfAbsent(desc, k -> UUID.randomUUID());
-          batch.bind(0, uuid).bind(1, desc.name()).add();
+          batch.bind(0, uuid).bind(1, desc.key().asString()).add();
         }
       }
       if (map.size() != size) {

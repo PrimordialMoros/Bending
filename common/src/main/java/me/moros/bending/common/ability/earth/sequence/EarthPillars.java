@@ -128,7 +128,7 @@ public class EarthPillars extends AbilityInstance {
   }
 
   public static void onFall(User user) {
-    if (user.selectedAbilityName().equals("Catapult")) {
+    if (user.hasAbilitySelected("catapult")) {
       if (pillarsDesc == null) {
         pillarsDesc = Objects.requireNonNull(Registries.ABILITIES.fromString("EarthPillars"));
       }

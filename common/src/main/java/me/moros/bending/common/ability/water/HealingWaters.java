@@ -123,7 +123,7 @@ public class HealingWaters extends AbilityInstance {
   }
 
   public static void switchMode(User user) {
-    if (user.selectedAbilityName().equals("HealingWaters")) {
+    if (user.hasAbilitySelected("healingwaters")) {
       var key = KeyUtil.data("healingwaters-mode", Mode.class);
       if (user.store().canEdit(key)) {
         Mode mode = user.store().toggle(key, Mode.SELF);

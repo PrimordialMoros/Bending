@@ -32,7 +32,6 @@ import java.util.function.Supplier;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.element.Element;
-import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.util.ColorPalette;
 import me.moros.bending.api.util.TextUtil;
 import me.moros.bending.api.util.functional.Suppliers;
@@ -125,20 +124,21 @@ public final class Preset {
     }
   }
 
+  @Deprecated(forRemoval = true)
   public List<Component> display() {
     List<Component> components = new ArrayList<>();
     forEach((desc, idx) -> components.add(slotToComponent(idx, desc)));
     return components;
   }
 
+  @Deprecated(forRemoval = true)
   private Component slotToComponent(int idx, AbilityDescription desc) {
     return Component.text((idx + 1) + ". ", ColorPalette.TEXT_COLOR).append(desc.meta());
   }
 
+  @Deprecated(forRemoval = true)
   public Component meta() {
-    Component details = Component.text().append(Component.join(JoinConfiguration.newlines(), display()))
-      .append(Component.newline()).append(Component.newline())
-      .append(Message.HOVER_PRESET.build()).build();
+    Component details = Component.join(JoinConfiguration.newlines(), display());
     return displayName()
       .hoverEvent(HoverEvent.showText(details))
       .clickEvent(ClickEvent.runCommand("/bending preset bind " + name()));

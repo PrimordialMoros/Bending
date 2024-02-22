@@ -25,7 +25,6 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public sealed class CommandSender implements ForwardingAudience.Single permits PlayerCommandSender {
   private final CommandSourceStack stack;
@@ -39,7 +38,7 @@ public sealed class CommandSender implements ForwardingAudience.Single permits P
   }
 
   @Override
-  public @NonNull Audience audience() {
+  public Audience audience() {
     return stack;
   }
 

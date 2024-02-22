@@ -155,7 +155,7 @@ public class AirBlast extends AbilityInstance {
   }
 
   public static void switchMode(User user) {
-    if (user.selectedAbilityName().equals("AirBlast")) {
+    if (user.hasAbilitySelected("airblast")) {
       var key = KeyUtil.data("airblast-mode", Mode.class);
       if (user.store().canEdit(key)) {
         Mode mode = user.store().toggle(key, Mode.PUSH);

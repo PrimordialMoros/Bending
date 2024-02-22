@@ -36,14 +36,6 @@ public interface AbilityManager extends Updatable, Iterable<Ability> {
 
   void addUpdatable(Updatable instance);
 
-  /**
-   * @deprecated use {@link #addAbility(Ability)}
-   */
-  @Deprecated(forRemoval = true)
-  default void addAbility(User user, Ability instance) {
-    addAbility(instance);
-  }
-
   void addAbility(Ability instance);
 
   void createPassives(User user);
@@ -70,14 +62,6 @@ public interface AbilityManager extends Updatable, Iterable<Ability> {
     return instances().filter(type::isInstance).map(type::cast);
   }
 
-  /**
-   * @deprecated renamed to {@link #destroyUserInstances(User, Class)}
-   */
-  @Deprecated(forRemoval = true)
-  default boolean destroyUserInstance(User user, Class<? extends Ability> type) {
-    return destroyUserInstances(user, type);
-  }
-
   default boolean destroyUserInstances(User user, Class<? extends Ability> type) {
     return destroyUserInstances(user, isInstance(type));
   }
@@ -87,18 +71,6 @@ public interface AbilityManager extends Updatable, Iterable<Ability> {
   }
 
   boolean destroyUserInstances(User user, Predicate<Ability> predicate);
-
-  /**
-   * @deprecated use {@link #destroyUserInstances(User, Predicate)} with a combined predicate
-   */
-  @Deprecated(forRemoval = true)
-  default boolean destroyUserInstances(User user, Iterable<Predicate<Ability>> predicates) {
-    Predicate<Ability> predicate = a -> false;
-    for (var p : predicates) {
-      predicate = predicate.or(p);
-    }
-    return destroyUserInstances(user, predicate);
-  }
 
   void destroyUserInstances(User user);
 

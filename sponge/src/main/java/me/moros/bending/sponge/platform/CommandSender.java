@@ -21,7 +21,6 @@ package me.moros.bending.sponge.platform;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
@@ -37,7 +36,7 @@ public class CommandSender implements ForwardingAudience.Single {
   }
 
   @Override
-  public @NonNull Audience audience() {
+  public Audience audience() {
     return cause.audience();
   }
 

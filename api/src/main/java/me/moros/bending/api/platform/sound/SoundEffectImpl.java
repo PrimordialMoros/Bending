@@ -22,7 +22,6 @@ package me.moros.bending.api.platform.sound;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.sound.Sound.Source;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 record SoundEffectImpl(Sound sound) implements SoundEffect {
   SoundEffectImpl(Key key, Source source, float volume, float pitch) {
@@ -30,7 +29,7 @@ record SoundEffectImpl(Sound sound) implements SoundEffect {
   }
 
   @Override
-  public @NonNull Key key() {
+  public Key key() {
     return sound().name();
   }
 }

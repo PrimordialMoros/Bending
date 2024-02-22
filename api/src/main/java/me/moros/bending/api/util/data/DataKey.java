@@ -20,7 +20,7 @@
 package me.moros.bending.api.util.data;
 
 import net.kyori.adventure.key.Key;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import net.kyori.adventure.key.KeyPattern;
 
 /**
  * Key implementation that also holds the type of data that can be associated with it.
@@ -36,17 +36,17 @@ public final class DataKey<T> implements Key {
   }
 
   @Override
-  public @NonNull String namespace() {
+  public @KeyPattern.Namespace String namespace() {
     return key.namespace();
   }
 
   @Override
-  public @NonNull String value() {
+  public @KeyPattern.Value String value() {
     return key.value();
   }
 
   @Override
-  public @NonNull String asString() {
+  public String asString() {
     return key.asString();
   }
 

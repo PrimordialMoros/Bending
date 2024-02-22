@@ -31,8 +31,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @SuppressWarnings("PatternValidation")
 public final class KeyUtil {
   public static final String BENDING_NAMESPACE = "bending";
+  public static final Function<String, @Nullable Key> BENDING_KEY_MAPPER = stringToKey(BENDING_NAMESPACE);
   public static final Function<String, @Nullable Key> VANILLA_KEY_MAPPER = stringToKey(Key.MINECRAFT_NAMESPACE);
-  private static final char DEFAULT_SEPARATOR = ':';
 
   private KeyUtil() {
   }
@@ -43,6 +43,9 @@ public final class KeyUtil {
    * @return the mapper function
    */
   public static Function<String, @Nullable Key> stringToKey(String namespace) {
+    if (!Key.parseableNamespace(namespace)) {
+      throw new IllegalArgumentException("Invalid namespace %s!".formatted(namespace));
+    }
     return input -> fromString(input, namespace);
   }
 
@@ -75,11 +78,20 @@ public final class KeyUtil {
     return DataKey.wrap(Key.key(BENDING_NAMESPACE, value), type);
   }
 
+  /**
+   * Concatenates a key's namespace and value, separated by a period.
+   * @param key the key to use
+   * @return the resulting string
+   */
+  public static String concat(Key key) {
+    return key.namespace() + '.' + key.value();
+  }
+
   private static @Nullable Key fromString(String string, String defNamespace) {
-    int index = string.indexOf(DEFAULT_SEPARATOR);
+    int index = string.indexOf(Key.DEFAULT_SEPARATOR);
     String namespace = index >= 1 ? string.substring(0, index) : defNamespace;
     String value = index >= 0 ? string.substring(index + 1) : string;
-    if (Key.parseableNamespace(namespace) && Key.parseableValue(value)) {
+    if ((namespace.equals(defNamespace) || Key.parseableNamespace(namespace)) && Key.parseableValue(value)) {
       return Key.key(namespace, value);
     }
     return null;

@@ -19,9 +19,7 @@
 
 package me.moros.bending.api.registry;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -30,6 +28,8 @@ import me.moros.bending.api.ability.AbilityDescription.Sequence;
 import me.moros.bending.api.collision.CollisionPair;
 import me.moros.bending.api.locale.Translation;
 import me.moros.bending.api.protection.Protection;
+import me.moros.bending.api.util.KeyUtil;
+import me.moros.bending.api.util.data.DataKey;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -38,26 +38,26 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Holds all the built-in registries.
  */
 public final class Registries {
-  private static final Map<Key, Registry<Key, ? extends Keyed>> REGISTRIES_BY_KEY = new HashMap<>();
+  private static final Map<DataKey<?>, Registry<Key, ? extends Keyed>> REGISTRIES_BY_KEY = new HashMap<>();
   private static final Map<Class<? extends Keyed>, Registry<Key, ? extends Keyed>> REGISTRIES_BY_CLASS = new HashMap<>();
-  private static final Collection<Key> REGISTRY_KEYS = new HashSet<>();
 
-  public static final Registry<Key, AbilityDescription> ABILITIES = create(AbilityDescription.NAMESPACE, AbilityDescription.class);
-  public static final Registry<Key, Sequence> SEQUENCES = create(Sequence.NAMESPACE, Sequence.class);
-  public static final Registry<Key, CollisionPair> COLLISIONS = create(CollisionPair.NAMESPACE, CollisionPair.class);
-  public static final Registry<Key, Protection> PROTECTIONS = create(Protection.NAMESPACE, Protection.class);
-  public static final Registry<Key, Translation> TRANSLATIONS = create(Translation.NAMESPACE, Translation.class);
+  public static final Registry<Key, AbilityDescription> ABILITIES = create("ability", AbilityDescription.class);
+  public static final Registry<Key, Sequence> SEQUENCES = create("sequence", Sequence.class);
+  public static final Registry<Key, CollisionPair> COLLISIONS = create("collision", CollisionPair.class);
+  public static final Registry<Key, Protection> PROTECTIONS = create("protection", Protection.class);
+  public static final Registry<Key, Translation> TRANSLATIONS = create("translation", Translation.class);
   public static final UserRegistry BENDERS = new UserRegistry();
 
   private Registries() {
   }
 
-  public static Stream<Key> keys() {
-    return REGISTRY_KEYS.stream();
+  public static Stream<DataKey<?>> keys() {
+    return REGISTRIES_BY_KEY.keySet().stream();
   }
 
-  public static Registry<Key, ?> get(Key type) {
-    return REGISTRIES_BY_KEY.get(type);
+  @SuppressWarnings("unchecked")
+  public static <T> @Nullable Registry<Key, T> get(DataKey<T> type) {
+    return (Registry<Key, T>) REGISTRIES_BY_KEY.get(type);
   }
 
   @SuppressWarnings("unchecked")
@@ -65,9 +65,8 @@ public final class Registries {
     return (Registry<Key, T>) REGISTRIES_BY_CLASS.get(type);
   }
 
-  private static <T extends Keyed> Registry<Key, T> create(String namespace, Class<T> clazz) {
-    Registry<Key, T> registry = Registry.<T>simpleBuilder(namespace).build();
-    REGISTRY_KEYS.add(registry.key());
+  private static <T extends Keyed> Registry<Key, T> create(String name, Class<T> clazz) {
+    Registry<Key, T> registry = Registry.simpleBuilder(KeyUtil.data("registry." + name, clazz)).build();
     REGISTRIES_BY_KEY.put(registry.key(), registry);
     REGISTRIES_BY_CLASS.put(clazz, registry);
     return registry;

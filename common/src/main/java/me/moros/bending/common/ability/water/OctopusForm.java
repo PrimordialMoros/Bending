@@ -135,7 +135,7 @@ public class OctopusForm extends AbilityInstance {
   }
 
   private void form() {
-    if (!user.selectedAbilityName().equals("OctopusForm")) {
+    if (!user.hasAbilitySelected("octopusform")) {
       return;
     }
     ring.complete().forEach(this::clean);

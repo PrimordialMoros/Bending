@@ -45,7 +45,7 @@ public final class SequenceManagerImpl implements SequenceManager {
     this.controller = controller;
     cache = Caffeine.newBuilder()
       .expireAfterAccess(Duration.ofSeconds(10))
-      .build(u -> new ArrayDeque<>(16));
+      .build(u -> new ArrayDeque<>(Sequence.MAX_STEPS));
     tryInitRegistry();
   }
 
@@ -71,10 +71,10 @@ public final class SequenceManagerImpl implements SequenceManager {
       return;
     }
     Deque<SequenceStep> buffer = cache.get(user.uuid());
-    if (buffer.size() >= 16) {
+    if (buffer.size() >= Sequence.MAX_STEPS) {
       buffer.removeFirst();
     }
-    buffer.addLast(new SequenceStep(desc, action));
+    buffer.addLast(SequenceStep.of(desc, action));
     List<SequenceStep> bufferSteps = new ArrayList<>(buffer);
     for (Sequence sequence : Registries.SEQUENCES) {
       if (sequence.matches(bufferSteps)) {

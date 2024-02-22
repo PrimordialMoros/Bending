@@ -25,12 +25,12 @@ import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.AttributeModifier;
 import me.moros.bending.api.config.attribute.ModifierOperation;
 import me.moros.bending.api.config.attribute.ModifyPolicy;
-import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.command.CommandPermissions;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.command.parser.AbilityParser;
 import me.moros.bending.common.command.parser.UserParser;
+import me.moros.bending.common.locale.Message;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
 import org.incendo.cloud.component.DefaultValue;
@@ -64,7 +64,7 @@ public record ModifierCommand<C extends Audience>(Commander<C> commander) implem
   }
 
   private ParserDescriptor<C, AttributeModifier> modifierParser() {
-    var policyParser = ArgumentParser.firstOf(EnumParser.enumParser(Element.class), AbilityParser.<C>parser(true))
+    var policyParser = ArgumentParser.firstOf(EnumParser.enumParser(Element.class), AbilityParser.<C>parserGlobal())
       .flatMapSuccess(ModifyPolicy.class, (ctx, r) -> successFuture(r.mapEither(ModifyPolicy::of, ModifyPolicy::of)));
     return AggregateParser.<C>builder()
       .withComponent("policy", policyParser)

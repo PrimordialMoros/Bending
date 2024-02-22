@@ -149,7 +149,7 @@ public class EarthLine extends AbilityInstance {
   }
 
   public static void switchMode(User user) {
-    if (user.selectedAbilityName().equals("EarthLine")) {
+    if (user.hasAbilitySelected("earthline")) {
       var key = KeyUtil.data("earthline-mode", Mode.class);
       if (user.store().canEdit(key)) {
         Mode mode = user.store().toggle(key, Mode.NORMAL);

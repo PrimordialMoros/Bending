@@ -19,10 +19,10 @@
 
 package me.moros.bending.common.event.base;
 
+import com.seiama.event.AbstractCancellable;
 import me.moros.bending.api.event.Cancellable;
 import me.moros.bending.api.event.UserEvent;
 import me.moros.bending.api.user.User;
-import net.kyori.event.AbstractCancellable;
 
 public abstract class AbstractCancellableUserEvent extends AbstractCancellable implements UserEvent, Cancellable {
   private final User user;

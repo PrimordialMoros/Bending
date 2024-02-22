@@ -45,16 +45,6 @@ public enum ProtectionCache {
   }
 
   /**
-   * Remove the block protection cache for the specified user.
-   * @param user the user for which the cache will be invalidated
-   * @deprecated use {@link #invalidate(UUID)}
-   */
-  @Deprecated(forRemoval = true)
-  public void invalidate(User user) {
-    invalidate(user.uuid());
-  }
-
-  /**
    * Remove the block protection cache for the specified user id if it exists.
    * @param uuid the user's id
    */

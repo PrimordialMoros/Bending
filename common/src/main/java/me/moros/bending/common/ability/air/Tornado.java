@@ -174,7 +174,7 @@ public class Tornado extends AbilityInstance {
   }
 
   public static void switchMode(User user) {
-    if (user.selectedAbilityName().equals("Tornado")) {
+    if (user.hasAbilitySelected("tornado")) {
       var key = KeyUtil.data("tornado-mode", Mode.class);
       if (user.store().canEdit(key)) {
         Mode mode = user.store().toggle(key, Mode.PUSH);

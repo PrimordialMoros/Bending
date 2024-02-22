@@ -213,7 +213,7 @@ public class HeatControl extends AbilityInstance {
   }
 
   public static void toggleLight(User user) {
-    if (user.selectedAbilityName().equals("HeatControl")) {
+    if (user.hasAbilitySelected("heatcontrol")) {
       var key = KeyUtil.data("heatcontrol-light", Light.class);
       if (user.store().canEdit(key)) {
         Light light = user.store().toggle(key, Light.ON);
@@ -235,7 +235,7 @@ public class HeatControl extends AbilityInstance {
     if (selected == null) {
       return true;
     }
-    return !selected.name().equals("HeatControl") || !user.canBend(selected);
+    return !user.hasAbilitySelected("HeatControl") || !user.canBend(selected);
   }
 
   @Override

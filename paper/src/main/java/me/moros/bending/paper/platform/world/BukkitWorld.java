@@ -51,7 +51,6 @@ import org.bukkit.entity.FallingBlock;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public record BukkitWorld(org.bukkit.World handle) implements World {
@@ -240,12 +239,12 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
   }
 
   @Override
-  public @NonNull Iterable<? extends Audience> audiences() {
+  public Iterable<? extends Audience> audiences() {
     return handle().audiences();
   }
 
   @Override
-  public @NonNull Key key() {
+  public Key key() {
     return handle().key();
   }
 }

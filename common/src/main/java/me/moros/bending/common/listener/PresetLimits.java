@@ -24,8 +24,8 @@ import java.util.function.ToIntFunction;
 import me.moros.bending.api.config.BendingProperties;
 import me.moros.bending.api.event.EventBus;
 import me.moros.bending.api.event.PresetRegisterEvent;
-import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.user.User;
+import me.moros.bending.common.locale.Message;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public record PresetLimits(ToIntFunction<User> maxPresetsFn) {

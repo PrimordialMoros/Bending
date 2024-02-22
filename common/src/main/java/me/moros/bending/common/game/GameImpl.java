@@ -22,6 +22,7 @@ package me.moros.bending.common.game;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import me.moros.bending.api.config.ConfigProcessor;
 import me.moros.bending.api.event.EventBus;
@@ -31,7 +32,6 @@ import me.moros.bending.api.game.FlightManager;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.game.WorldManager;
 import me.moros.bending.api.registry.Registries;
-import me.moros.bending.api.registry.Registry;
 import me.moros.bending.api.storage.BendingStorage;
 import me.moros.bending.api.temporal.ActionLimiter;
 import me.moros.bending.api.temporal.Cooldown;
@@ -62,7 +62,7 @@ public final class GameImpl implements Game {
   public GameImpl(Bending plugin) {
     this.plugin = plugin;
     this.configProcessor = plugin.configManager().processor();
-    this.eventBus = new EventBusImpl();
+    this.eventBus = new EventBusImpl(plugin.logger());
     this.flightManager = new FlightManagerImpl();
     this.worldManager = new WorldManagerImpl(plugin.logger());
     this.activationController = new ActivationControllerImpl();
@@ -82,7 +82,9 @@ public final class GameImpl implements Game {
   private void lockRegistries() {
     var keys = Registries.keys().toList();
     eventBus.postRegistryLockEvent(keys);
-    keys.stream().map(Registries::get).forEach(Registry::lock);
+    for (var key : keys) {
+      Objects.requireNonNull(Registries.get(key)).lock();
+    }
   }
 
   private void printInfo() {

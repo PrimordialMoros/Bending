@@ -23,12 +23,12 @@ import java.util.List;
 import java.util.Locale;
 
 import me.moros.bending.api.util.ColorPalette;
+import me.moros.bending.api.util.KeyUtil;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.translation.Translatable;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -47,7 +47,7 @@ public enum Element implements Keyed, Translatable {
   Element(String elementName, TextColor color) {
     this.elementName = elementName;
     this.color = color;
-    this.key = Key.key(NAMESPACE, elementName.toLowerCase(Locale.ROOT));
+    this.key = KeyUtil.simple("element." + elementName.toLowerCase(Locale.ROOT));
   }
 
   @Override
@@ -56,13 +56,13 @@ public enum Element implements Keyed, Translatable {
   }
 
   @Override
-  public @NonNull Key key() {
+  public Key key() {
     return key;
   }
 
   @Override
-  public @NonNull String translationKey() {
-    return NAMESPACE + "." + key().value();
+  public String translationKey() {
+    return KeyUtil.concat(key);
   }
 
   /**
@@ -106,7 +106,6 @@ public enum Element implements Keyed, Translatable {
     return null;
   }
 
-  public static final String NAMESPACE = "bending.element";
   public static final List<Element> VALUES = List.of(values());
   public static final List<String> NAMES = List.of("Air", "Water", "Earth", "Fire");
 }

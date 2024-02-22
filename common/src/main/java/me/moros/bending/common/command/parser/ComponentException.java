@@ -21,7 +21,6 @@ package me.moros.bending.common.command.parser;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.util.ComponentMessageThrowable;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class ComponentException extends RuntimeException implements ComponentMessageThrowable {
   private final Component component;
@@ -31,7 +30,7 @@ public class ComponentException extends RuntimeException implements ComponentMes
   }
 
   @Override
-  public @NonNull Component componentMessage() {
+  public Component componentMessage() {
     return component;
   }
 }

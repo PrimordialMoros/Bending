@@ -103,7 +103,7 @@ public class WaterRing extends AbilityInstance {
     }
     Optional<WaterRing> ring = user.game().abilityManager(user.worldKey()).firstInstance(user, WaterRing.class);
     if (ring.isPresent()) {
-      if (method == Activation.ATTACK && user.selectedAbilityName().equals("WaterRing")) {
+      if (method == Activation.ATTACK && user.hasAbilitySelected("waterring")) {
         if (user.sneaking()) {
           user.game().abilityManager(user.worldKey()).destroyInstance(ring.get());
         } else {
@@ -206,7 +206,7 @@ public class WaterRing extends AbilityInstance {
       lastPosition = newPosition;
     }
 
-    if (user.sneaking() && !user.selectedAbilityName().equals("OctopusForm")) {
+    if (user.sneaking() && !user.hasAbilitySelected("octopusform")) {
       long time = System.currentTimeMillis();
       if (sneakStartTime == 0) {
         sneakStartTime = time;

@@ -35,7 +35,7 @@ tasks {
     shadowJar {
         archiveBaseName = "${project.name}-mc${libs.versions.minecraft.get()}"
         dependencies {
-            reloc("cloud.commandframework", "cloudframework")
+            reloc("org.incendo.cloud", "cloud")
         }
         manifest.attributes["MixinConfigs"] = "bending-sponge.mixins.json"
     }

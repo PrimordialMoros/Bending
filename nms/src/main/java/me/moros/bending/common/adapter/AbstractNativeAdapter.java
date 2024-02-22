@@ -26,6 +26,7 @@ import me.moros.bending.api.event.BendingDamageEvent;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.world.World;
+import net.kyori.adventure.text.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.players.PlayerList;
@@ -33,6 +34,8 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LightningRodBlock;
 import net.minecraft.world.level.block.state.BlockState;
+
+import static net.kyori.adventure.text.Component.translatable;
 
 public abstract class AbstractNativeAdapter extends AbstractPacketUtil implements NativeAdapter {
   protected AbstractNativeAdapter(PlayerList playerList) {
@@ -77,7 +80,10 @@ public abstract class AbstractNativeAdapter extends AbstractPacketUtil implement
     var target = adapt(event.target());
     int capturedInvulnerableTime = target.invulnerableTime;
     target.invulnerableTime = 0;
-    var damageSource = new AbilityDamageSource(adapt(event.user().entity()), event.user(), event.ability(), this::adapt);
+    Component deathMsg = translatable(event.ability().translationKey() + ".death",
+      "bending.ability.generic.death")
+      .arguments(event.ability().displayName(), event.target().name(), event.user().name());
+    var damageSource = new AbilityDamageSource(adapt(event.user().entity()), adapt(deathMsg));
     boolean result = target.hurt(damageSource, (float) event.damage());
     target.invulnerableTime = capturedInvulnerableTime;
     return result;

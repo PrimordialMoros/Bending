@@ -27,13 +27,11 @@ import io.papermc.paper.event.block.BlockLockCheckEvent;
 import io.papermc.paper.event.entity.EntityInsideBlockEvent;
 import io.papermc.paper.event.entity.EntityMoveEvent;
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
-import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.ActionType;
 import me.moros.bending.api.ability.Activation;
 import me.moros.bending.api.ability.DamageSource;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.game.Game;
-import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.temporal.ActionLimiter;
@@ -48,12 +46,12 @@ import me.moros.bending.api.util.metadata.EntityInteraction;
 import me.moros.bending.api.util.metadata.Metadata;
 import me.moros.bending.common.ability.earth.EarthGlove;
 import me.moros.bending.common.ability.earth.MetalCable;
+import me.moros.bending.common.locale.Message;
 import me.moros.bending.paper.platform.DamageUtil;
 import me.moros.bending.paper.platform.PlatformAdapter;
 import me.moros.bending.paper.platform.block.LockableImpl;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
-import net.kyori.adventure.text.Component;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -330,10 +328,7 @@ public record UserListener(Game game) implements Listener, BukkitListener {
     Player player = event.getEntity();
     DamageSource cause = DamageUtil.cachedDamageSource(player.getUniqueId());
     if (cause != null) {
-      AbilityDescription ability = cause.ability();
-      Component message = Component.translatable(ability.deathKey(), Message.ABILITY_GENERIC_DEATH_KEY)
-        .arguments(player.name(), cause.name(), ability.displayName());
-      event.deathMessage(message);
+      event.deathMessage(Message.ABILITY_DEATH_MESSAGE.build(cause.ability(), player.name(), cause.name()));
     }
   }
 

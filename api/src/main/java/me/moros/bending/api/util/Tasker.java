@@ -25,7 +25,6 @@ import me.moros.tasker.executor.AsyncExecutor;
 import me.moros.tasker.executor.SimpleAsyncExecutor;
 import me.moros.tasker.executor.SyncExecutor;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Utility class to easily schedule sync, async tasks.
@@ -54,7 +53,7 @@ public final class Tasker {
    * Get the async task executor.
    * @return the async task executor
    */
-  public static @NonNull AsyncExecutor async() {
+  public static AsyncExecutor async() {
     return ASYNC;
   }
 }

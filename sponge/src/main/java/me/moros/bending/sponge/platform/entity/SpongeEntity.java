@@ -33,7 +33,6 @@ import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.registry.RegistryTypes;
@@ -239,12 +238,12 @@ public class SpongeEntity implements Entity {
   }
 
   @Override
-  public @NonNull UUID uuid() {
+  public UUID uuid() {
     return handle().uniqueId();
   }
 
   @Override
-  public @NonNull Audience audience() {
+  public Audience audience() {
     return Audience.empty();
   }
 

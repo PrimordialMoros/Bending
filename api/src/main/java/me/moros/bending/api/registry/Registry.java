@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 
 import me.moros.bending.api.registry.RegistryBuilder.IntermediaryRegistryBuilder;
 import me.moros.bending.api.util.KeyUtil;
+import me.moros.bending.api.util.data.DataKey;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -37,6 +38,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @param <V> the type of values for this registry
  */
 public interface Registry<K, V> extends Container<V>, TagHolder<V> {
+  DataKey<V> key();
+
   /**
    * Check if the registry contains a value for the specified key.
    * @param key the key to check
@@ -125,23 +128,24 @@ public interface Registry<K, V> extends Container<V>, TagHolder<V> {
    */
   Set<K> keys();
 
-  static <V> IntermediaryRegistryBuilder<V> builder(String namespace) {
-    return new IntermediaryRegistryBuilder<>(namespace);
+  static <V> IntermediaryRegistryBuilder<V> builder(DataKey<V> key) {
+    Objects.requireNonNull(key);
+    return new IntermediaryRegistryBuilder<>(key);
   }
 
-  static <V extends Keyed> RegistryBuilder<Key, V> simpleBuilder(String namespace) {
-    return Registry.<V>builder(namespace).inverseMapper(Keyed::key).keyMapper(KeyUtil.stringToKey(namespace));
+  static <V extends Keyed> RegistryBuilder<Key, V> simpleBuilder(DataKey<V> key) {
+    return builder(key).inverseMapper(Keyed::key).keyMapper(KeyUtil.stringToKey(key.namespace()));
   }
 
-  static <V extends Keyed> RegistryBuilder<Key, V> vanillaBuilder(String namespace) {
-    return Registry.<V>builder(namespace).inverseMapper(Keyed::key).keyMapper(KeyUtil.VANILLA_KEY_MAPPER);
+  static <V extends Keyed> RegistryBuilder<Key, V> vanillaBuilder(DataKey<V> key) {
+    return builder(key).inverseMapper(Keyed::key).keyMapper(KeyUtil.VANILLA_KEY_MAPPER);
   }
 
-  static <V extends Keyed> Registry<Key, V> vanilla(String namespace) {
-    return Registry.<V>vanillaBuilder(namespace).build();
+  static <V extends Keyed> Registry<Key, V> vanilla(String name, Class<V> type) {
+    return vanillaBuilder(DataKey.wrap(KeyUtil.vanilla(name), type)).build();
   }
 
-  static <V extends Keyed> DefaultedRegistry<Key, V> vanillaDefaulted(String namespace, Function<Key, V> factory) {
-    return Registry.<V>vanillaBuilder(namespace).buildDefaulted(factory);
+  static <V extends Keyed> DefaultedRegistry<Key, V> vanillaDefaulted(String name, Class<V> type, Function<Key, V> factory) {
+    return vanillaBuilder(DataKey.wrap(KeyUtil.vanilla(name), type)).buildDefaulted(factory);
   }
 }

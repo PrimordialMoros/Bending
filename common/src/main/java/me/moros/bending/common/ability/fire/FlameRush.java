@@ -154,8 +154,7 @@ public class FlameRush extends AbilityInstance {
   public void onCollision(Collision collision) {
     Ability collidedAbility = collision.collidedAbility();
     if (fullyCharged && collision.removeSelf()) {
-      String name = collidedAbility.description().name();
-      if (AbilityInitializer.layer3.contains(name)) {
+      if (AbilityInitializer.layer3.containsValue(collidedAbility.description().key())) {
         collision.removeOther(true);
       } else {
         collision.removeSelf(false);

@@ -137,7 +137,7 @@ public class WaterGimbal extends AbilityInstance {
   }
 
   public static void launch(User user) {
-    if (user.selectedAbilityName().equals("Torrent")) {
+    if (user.hasAbilitySelected("torrent")) {
       user.game().abilityManager(user.worldKey()).firstInstance(user, WaterGimbal.class).ifPresent(WaterGimbal::launch);
     }
   }

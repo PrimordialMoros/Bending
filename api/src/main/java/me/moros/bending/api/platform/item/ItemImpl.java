@@ -25,7 +25,7 @@ import me.moros.bending.api.util.KeyUtil;
 import net.kyori.adventure.key.Key;
 
 record ItemImpl(Key key) implements Item {
-  static final DefaultedRegistry<Key, Item> REGISTRY = Registry.vanillaDefaulted("item", ItemImpl::new);
+  static final DefaultedRegistry<Key, Item> REGISTRY = Registry.vanillaDefaulted("item", Item.class, ItemImpl::new);
 
   static Item get(String key) {
     return REGISTRY.get(KeyUtil.vanilla(key));

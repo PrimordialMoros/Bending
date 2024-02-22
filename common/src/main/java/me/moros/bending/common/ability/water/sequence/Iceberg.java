@@ -122,7 +122,7 @@ public class Iceberg extends AbilityInstance {
       }
       return UpdateResult.CONTINUE;
     } else {
-      if (!user.selectedAbilityName().equals("IceSpike")) {
+      if (!user.hasAbilitySelected("icespike")) {
         return UpdateResult.REMOVE;
       }
       return states.update();
@@ -147,7 +147,7 @@ public class Iceberg extends AbilityInstance {
   }
 
   public static void launch(User user) {
-    if (user.selectedAbilityName().equals("IceSpike")) {
+    if (user.hasAbilitySelected("icespike")) {
       user.game().abilityManager(user.worldKey()).firstInstance(user, Iceberg.class).ifPresent(Iceberg::launch);
     }
   }

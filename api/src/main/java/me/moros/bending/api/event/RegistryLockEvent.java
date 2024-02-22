@@ -21,7 +21,7 @@ package me.moros.bending.api.event;
 
 import java.util.Collection;
 
-import net.kyori.adventure.key.Key;
+import me.moros.bending.api.util.data.DataKey;
 
 /**
  * Called during Bending's initialization, before registries are locked.
@@ -31,5 +31,5 @@ public interface RegistryLockEvent extends BendingEvent {
    * Provides the keys of the registries that are going to be locked.
    * @return the collection of RegistryKeys
    */
-  Collection<Key> registryKeys();
+  Collection<DataKey<?>> registryKeys();
 }

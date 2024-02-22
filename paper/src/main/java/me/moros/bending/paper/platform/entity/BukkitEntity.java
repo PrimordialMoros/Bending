@@ -44,7 +44,6 @@ import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Projectile;
 import org.bukkit.util.Vector;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class BukkitEntity implements Entity {
   private final org.bukkit.entity.Entity handle;
@@ -233,7 +232,7 @@ public class BukkitEntity implements Entity {
   }
 
   @Override
-  public @NonNull UUID uuid() {
+  public UUID uuid() {
     return handle().getUniqueId();
   }
 
@@ -257,7 +256,7 @@ public class BukkitEntity implements Entity {
   }
 
   @Override
-  public @NonNull Audience audience() {
+  public Audience audience() {
     return handle();
   }
 

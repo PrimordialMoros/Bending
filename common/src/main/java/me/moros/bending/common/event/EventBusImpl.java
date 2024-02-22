@@ -22,6 +22,11 @@ package me.moros.bending.common.event;
 import java.util.Collection;
 import java.util.function.Consumer;
 
+import com.seiama.event.EventConfig;
+import com.seiama.event.bus.EventBus.EventExceptionHandler;
+import com.seiama.event.bus.SimpleEventBus;
+import com.seiama.event.registry.EventRegistry;
+import com.seiama.event.registry.SimpleEventRegistry;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.Activation;
 import me.moros.bending.api.ability.element.Element;
@@ -40,28 +45,40 @@ import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.BendingEffect;
+import me.moros.bending.api.util.data.DataKey;
+import me.moros.bending.common.logging.Logger;
 import me.moros.math.Vector3d;
-import net.kyori.adventure.key.Key;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class EventBusImpl implements EventBus {
-  private final net.kyori.event.EventBus<BendingEvent> eventBus;
+  private final EventRegistry<BendingEvent> eventRegistry;
+  private final com.seiama.event.bus.EventBus<BendingEvent> eventBus;
   private boolean closed = false;
 
-  public EventBusImpl() {
-    this.eventBus = net.kyori.event.EventBus.create(BendingEvent.class);
+  public EventBusImpl(Logger logger) {
+    this(new EventExceptionHandlerImpl(logger));
+  }
+
+  protected EventBusImpl() {
+    this(EventExceptionHandlerImpl.DUMMY);
+  }
+
+  private EventBusImpl(EventExceptionHandler eventExceptionHandler) {
+    this.eventRegistry = new SimpleEventRegistry<>(BendingEvent.class);
+    this.eventBus = new SimpleEventBus<>(eventRegistry, eventExceptionHandler);
   }
 
   @Override
   public void shutdown() {
-    this.eventBus.unsubscribeIf(x -> true);
+    eventRegistry.unsubscribeIf(x -> true);
     this.closed = true;
   }
 
   @Override
   public <T extends BendingEvent> void subscribe(Class<T> event, Consumer<? super T> subscriber, int priority) {
     if (!closed) {
-      eventBus.subscribe(event, new EventSubscriberImpl<>(subscriber, priority));
+      var eventConfig = EventConfig.of(priority, false, false);
+      eventRegistry.subscribe(event, eventConfig, new EventSubscriberImpl<>(subscriber));
     }
   }
 
@@ -70,11 +87,12 @@ public class EventBusImpl implements EventBus {
     if (closed) {
       throw new IllegalStateException("Eventbus has been terminated, cannot post new events!");
     }
-    return eventBus.post(event).wasSuccessful() && (!(event instanceof Cancellable c) || !c.cancelled());
+    eventBus.post(event);
+    return !(event instanceof Cancellable c) || !c.cancelled();
   }
 
   @Override
-  public void postRegistryLockEvent(Collection<Key> keys) {
+  public void postRegistryLockEvent(Collection<DataKey<?>> keys) {
     post(new RegistryLockEventImpl(keys));
   }
 

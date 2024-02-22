@@ -36,7 +36,6 @@ import net.luckperms.api.context.ContextManager;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.user.UserManager;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public abstract class AbstractLuckPermsHook<T> {
@@ -73,7 +72,7 @@ public abstract class AbstractLuckPermsHook<T> {
     private ContextCalculator<T> build(Function<User, Iterable<String>> mapper) {
       return new ContextCalculator<>() {
         @Override
-        public void calculate(@NonNull T target, ContextConsumer consumer) {
+        public void calculate(T target, ContextConsumer consumer) {
           User user = adapt(target);
           if (user != null) {
             consumer.accept(createContextSet(mapper.apply(user)));
@@ -90,7 +89,7 @@ public abstract class AbstractLuckPermsHook<T> {
     private ContextCalculator<T> buildWithPredicate(Predicate<User> predicate) {
       return new ContextCalculator<>() {
         @Override
-        public void calculate(@NonNull T target, ContextConsumer consumer) {
+        public void calculate(T target, ContextConsumer consumer) {
           User user = adapt(target);
           if (user != null) {
             consumer.accept(createContextSet(predicate.test(user)));

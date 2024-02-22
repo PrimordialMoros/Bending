@@ -25,7 +25,7 @@ import me.moros.bending.api.util.KeyUtil;
 import net.kyori.adventure.key.Key;
 
 record EntityTypeImpl(Key key) implements EntityType {
-  static final DefaultedRegistry<Key, EntityType> REGISTRY = Registry.vanillaDefaulted("entities", EntityTypeImpl::new);
+  static final DefaultedRegistry<Key, EntityType> REGISTRY = Registry.vanillaDefaulted("entities", EntityType.class, EntityTypeImpl::new);
 
   static EntityType get(String key) {
     return REGISTRY.get(KeyUtil.vanilla(key));

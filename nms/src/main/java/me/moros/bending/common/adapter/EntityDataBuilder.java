@@ -29,37 +29,37 @@ import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.network.syncher.SynchedEntityData.DataValue;
 
-public class EntityDataBuilder {
+final class EntityDataBuilder {
   private final int id;
   private final Collection<DataValue<?>> dataValues;
   private byte statusFlags;
 
-  public EntityDataBuilder(int id) {
+  EntityDataBuilder(int id) {
     this.id = id;
     this.dataValues = new TreeSet<>(Comparator.comparingInt(DataValue::id));
     this.statusFlags = 0;
   }
 
-  public <T> EntityDataBuilder setRaw(int index, EntityDataSerializer<T> serializer, T data) {
+  <T> EntityDataBuilder setRaw(int index, EntityDataSerializer<T> serializer, T data) {
     dataValues.add(new DataValue<>(index, serializer, data));
     return this;
   }
 
-  public <T> EntityDataBuilder setRaw(EntityMeta<T> key, T data) {
+  <T> EntityDataBuilder setRaw(EntityMeta<T> key, T data) {
     return setRaw(key.index(), key.serializer(), data);
   }
 
-  public EntityDataBuilder noGravity() {
+  EntityDataBuilder noGravity() {
     return setRaw(EntityMeta.GRAVITY, true);
   }
 
-  public EntityDataBuilder withStatus(EntityStatus status) {
+  EntityDataBuilder withStatus(EntityStatus status) {
     statusFlags = (byte) (statusFlags | 1 << status.index());
     setRaw(EntityMeta.ENTITY_STATUS, statusFlags);
     return this;
   }
 
-  public ClientboundSetEntityDataPacket build() {
+  ClientboundSetEntityDataPacket build() {
     return new ClientboundSetEntityDataPacket(id, List.copyOf(dataValues));
   }
 }

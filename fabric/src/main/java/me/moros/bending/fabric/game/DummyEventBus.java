@@ -29,6 +29,7 @@ final class DummyEventBus extends EventBusImpl {
   static final EventBus INSTANCE = new DummyEventBus();
 
   private DummyEventBus() {
+    super();
   }
 
   @Override

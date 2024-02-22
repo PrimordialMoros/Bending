@@ -19,9 +19,9 @@
 
 package me.moros.bending.paper.gui;
 
-import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.common.gui.AbstractBoard;
+import me.moros.bending.common.locale.Message;
 import me.moros.bending.paper.platform.PlatformAdapter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;

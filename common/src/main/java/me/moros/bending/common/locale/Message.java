@@ -17,10 +17,9 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.locale;
+package me.moros.bending.common.locale;
 
-import java.util.Locale;
-
+import me.moros.bending.api.ability.AbilityDescription;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
@@ -37,8 +36,6 @@ import static net.kyori.adventure.text.Component.*;
  * Provides formatted messages.
  */
 public interface Message {
-  Locale DEFAULT_LOCALE = Locale.ENGLISH;
-
   Component PREFIX = text("[", ACCENT)
     .append(text("Bending", TEXT_COLOR))
     .append(text("] ", ACCENT));
@@ -171,16 +168,16 @@ public interface Message {
   Args1<Integer> CLEAR_SLOT = slot -> translatable("bending.command.clear.specific", SUCCESS)
     .arguments(text(slot));
 
-  Args1<Component> ABILITY_INFO_EMPTY = ability -> translatable("bending.command.info.empty", WARN)
-    .arguments(ability);
-
   Args2<Component, Component> ABILITY_INFO_DESCRIPTION = (ability, description) -> translatable("bending.command.info.description", TEXT_COLOR)
     .arguments(ability, description);
 
   Args2<Component, Component> ABILITY_INFO_INSTRUCTIONS = (ability, instructions) -> translatable("bending.command.info.instructions", TEXT_COLOR)
     .arguments(ability, instructions);
 
-  String ABILITY_GENERIC_DEATH_KEY = "bending.ability.generic.death";
+  Args1<AbilityDescription> ABILITY_DESCRIPTION = desc -> translatable(desc.translationKey() + ".description");
+  Args1<AbilityDescription> ABILITY_INSTRUCTIONS = desc -> translatable(desc.translationKey() + ".instructions");
+  Args3<AbilityDescription, Component, Component> ABILITY_DEATH_MESSAGE = (desc, target, killer) -> translatable(desc.translationKey() + ".death",
+    "bending.ability.generic.death").arguments(target, killer, desc.displayName());
 
   Args0 VERSION_DESC = () -> translatable("bending.command.version.description");
   Args2<String, String> VERSION_COMMAND_HOVER = (author, link) -> translatable("bending.command.version.hover", NEUTRAL)
@@ -243,6 +240,15 @@ public interface Message {
 
     default void send(Audience audience, A0 arg0, A1 arg1) {
       audience.sendMessage(build(arg0, arg1));
+    }
+  }
+
+  @FunctionalInterface
+  interface Args3<A0, A1, A2> {
+    Component build(A0 arg0, A1 arg1, A2 arg2);
+
+    default void send(Audience audience, A0 arg0, A1 arg1, A2 arg2) {
+      audience.sendMessage(build(arg0, arg1, arg2));
     }
   }
 }

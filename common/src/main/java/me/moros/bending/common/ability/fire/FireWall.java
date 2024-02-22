@@ -129,7 +129,7 @@ public class FireWall extends AbilityInstance {
     }
 
     long time = System.currentTimeMillis();
-    if (user.sneaking() && user.selectedAbilityName().equals("FireWall")) {
+    if (user.sneaking() && user.hasAbilitySelected("firewall")) {
       if (lastSneakTime == 0) {
         lastSneakTime = time;
       }

@@ -19,6 +19,7 @@
 
 package me.moros.bending.common.command;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -28,36 +29,46 @@ import java.util.stream.Stream;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.Activation;
 import me.moros.bending.api.ability.element.Element;
-import me.moros.bending.api.locale.Message;
+import me.moros.bending.api.ability.preset.Preset;
 import me.moros.bending.api.registry.Registries;
-import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.ColorPalette;
-import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.identity.Identity;
+import me.moros.bending.api.util.KeyUtil;
+import me.moros.bending.common.locale.Message;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.flattener.ComponentFlattener;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 public final class CommandUtil {
   private CommandUtil() {
   }
 
-  public static <C extends Audience> List<String> combinedSuggestions(C sender) {
-    return Stream.of(Element.NAMES, abilityCompletions(sender, false, true)).flatMap(Collection::stream).toList();
+  private static final PlainTextComponentSerializer SERIALIZER = PlainTextComponentSerializer.builder()
+    .flattener(ComponentFlattener.textOnly()).build();
+
+  public static String mapToSuggestion(AbilityDescription desc) {
+    Key key = desc.key();
+    return key.namespace().equals(KeyUtil.BENDING_NAMESPACE) ? SERIALIZER.serialize(desc.displayName()) : key.asString();
   }
 
-  public static <C extends Audience> List<String> abilityCompletions(C sender, boolean validOnly, boolean sequenceSuggestions) {
-    Predicate<AbilityDescription> predicate = d -> !d.hidden();
-    if (!sequenceSuggestions) {
-      predicate = predicate.and(AbilityDescription::canBind);
-    }
-    if (validOnly) {
-      User user = sender.get(Identity.UUID).map(Registries.BENDERS::get).orElse(null);
-      if (user != null) {
-        predicate = predicate.and(user::hasPermission).and(d -> user.hasElement(d.element()));
-      }
-    }
-    return Registries.ABILITIES.stream().filter(predicate).map(AbilityDescription::name).toList();
+  public static List<Component> presetSlots(Preset preset) {
+    List<Component> lines = new ArrayList<>();
+    preset.forEach((desc, idx) ->
+      lines.add(Component.text((idx + 1) + ". ", ColorPalette.TEXT_COLOR).append(mapToClickComponent(desc)))
+    );
+    return lines;
+  }
+
+  public static Component presetDescription(Preset preset) {
+    Component details = Component.text().append(Component.join(JoinConfiguration.newlines(), presetSlots(preset)))
+      .append(Component.newline()).append(Component.newline())
+      .append(Message.HOVER_PRESET.build()).build();
+    return preset.displayName()
+      .hoverEvent(HoverEvent.showText(details))
+      .clickEvent(ClickEvent.runCommand("/bending preset bind " + preset.name()));
   }
 
   public static AbilityDisplay collectAll(Predicate<AbilityDescription> permissionChecker, Element element) {
@@ -73,7 +84,7 @@ public final class CommandUtil {
     var components = Registries.ABILITIES.stream()
       .filter(desc -> element == desc.element() && !desc.hidden() && desc.canBind())
       .filter(permissionChecker)
-      .map(AbilityDescription::meta)
+      .map(CommandUtil::mapToClickComponent)
       .toList();
     return new AbilityDisplay(Message.ABILITIES.build(), components);
   }
@@ -82,7 +93,7 @@ public final class CommandUtil {
     var components = Registries.SEQUENCES.stream()
       .filter(desc -> element == desc.element() && !desc.hidden())
       .filter(permissionChecker)
-      .map(AbilityDescription::meta)
+      .map(CommandUtil::mapToClickComponent)
       .toList();
     return new AbilityDisplay(Message.SEQUENCES.build(), components);
   }
@@ -91,9 +102,13 @@ public final class CommandUtil {
     var components = Registries.ABILITIES.stream()
       .filter(desc -> element == desc.element() && !desc.hidden() && !desc.canBind() && desc.isActivatedBy(Activation.PASSIVE))
       .filter(permissionChecker)
-      .map(AbilityDescription::meta)
+      .map(CommandUtil::mapToClickComponent)
       .toList();
     return new AbilityDisplay(Message.PASSIVES.build(), components);
+  }
+
+  private static Component mapToClickComponent(AbilityDescription desc) {
+    return desc.displayName().clickEvent(ClickEvent.runCommand("/bending help " + desc.key().asString()));
   }
 
   public static final class AbilityDisplay implements Iterable<Component> {

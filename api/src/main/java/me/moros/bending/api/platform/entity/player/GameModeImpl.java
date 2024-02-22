@@ -25,7 +25,7 @@ import me.moros.bending.api.util.KeyUtil;
 import net.kyori.adventure.key.Key;
 
 record GameModeImpl(Key key) implements GameMode {
-  static final DefaultedRegistry<Key, GameMode> REGISTRY = Registry.vanillaDefaulted("gamemode", GameModeImpl::new);
+  static final DefaultedRegistry<Key, GameMode> REGISTRY = Registry.vanillaDefaulted("gamemode", GameMode.class, GameModeImpl::new);
 
   static GameMode get(String key) {
     return REGISTRY.get(KeyUtil.vanilla(key));

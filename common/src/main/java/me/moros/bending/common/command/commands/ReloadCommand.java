@@ -19,9 +19,9 @@
 
 package me.moros.bending.common.command.commands;
 
-import me.moros.bending.api.locale.Message;
 import me.moros.bending.common.command.CommandPermissions;
 import me.moros.bending.common.command.Commander;
+import me.moros.bending.common.locale.Message;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
 import org.incendo.cloud.minecraft.extras.RichDescription;

@@ -25,7 +25,7 @@ import me.moros.bending.api.util.KeyUtil;
 import net.kyori.adventure.key.Key;
 
 record PotionEffectImpl(Key key) implements PotionEffect {
-  static final DefaultedRegistry<Key, PotionEffect> REGISTRY = Registry.vanillaDefaulted("potion", PotionEffectImpl::new);
+  static final DefaultedRegistry<Key, PotionEffect> REGISTRY = Registry.vanillaDefaulted("potion", PotionEffect.class, PotionEffectImpl::new);
 
   static PotionEffect get(String key) {
     return REGISTRY.get(KeyUtil.vanilla(key));

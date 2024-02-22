@@ -25,19 +25,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.StreamSupport;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.registry.Registries;
+import me.moros.bending.api.util.KeyUtil;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Represents a possible collision between 2 abilities.
  */
 public final class CollisionPair implements Keyed {
-  public static final String NAMESPACE = "bending.collision";
-
   private final AbilityDescription first;
   private final AbilityDescription second;
   private final boolean removeFirst;
@@ -94,14 +93,15 @@ public final class CollisionPair implements Keyed {
 
   @Override
   public String toString() {
-    return first.name() + " (Remove: " + removeFirst + ") - " + second.name() + "(Remove: " + removeSecond + ")";
+    return first.key().asString() + " (Remove: " + removeFirst + ") - " +
+      second.key().asString() + "(Remove: " + removeSecond + ")";
   }
 
   public static Key createKey(AbilityDescription first, AbilityDescription second) {
-    String f = first.key().value();
-    String s = second.key().value();
+    String f = KeyUtil.concat(first.key());
+    String s = KeyUtil.concat(second.key());
     String value = f.compareTo(s) > 0 ? (f + '-' + s) : (s + '-' + f);
-    return Key.key(NAMESPACE, value);
+    return KeyUtil.simple(value);
   }
 
   public static Builder builder() {
@@ -109,7 +109,7 @@ public final class CollisionPair implements Keyed {
   }
 
   @Override
-  public @NonNull Key key() {
+  public Key key() {
     return key;
   }
 
@@ -127,20 +127,46 @@ public final class CollisionPair implements Keyed {
       simpleCollisions = new ArrayList<>();
     }
 
+    @Deprecated(forRemoval = true)
     public Builder layer(Collection<String> abilities) {
+      layers.add(new CollisionLayer(mapAbilitiesOld(abilities), true));
+      return this;
+    }
+
+    public Builder layer(Iterable<Key> abilities) {
       layers.add(new CollisionLayer(mapAbilities(abilities), true));
       return this;
     }
 
+    @Deprecated(forRemoval = true)
     public Builder add(String first, String second, boolean removeFirst, boolean removeSecond) {
       return add(List.of(first), List.of(second), removeFirst, removeSecond);
     }
 
+    public Builder add(Key first, Key second, boolean removeFirst, boolean removeSecond) {
+      return add(List.of(first), List.of(second), removeFirst, removeSecond);
+    }
+
+    @Deprecated(forRemoval = true)
     public Builder add(String first, Collection<String> second, boolean removeFirst, boolean removeSecond) {
       return add(List.of(first), second, removeFirst, removeSecond);
     }
 
+    public Builder add(Key first, Iterable<Key> second, boolean removeFirst, boolean removeSecond) {
+      return add(List.of(first), second, removeFirst, removeSecond);
+    }
+
+    @Deprecated(forRemoval = true)
     public Builder add(Collection<String> first, Collection<String> second, boolean removeFirst, boolean removeSecond) {
+      for (AbilityDescription desc1 : mapAbilitiesOld(first)) {
+        for (AbilityDescription desc2 : mapAbilitiesOld(second)) {
+          simpleCollisions.add(new CollisionPair(desc1, desc2, removeFirst, removeSecond));
+        }
+      }
+      return this;
+    }
+
+    public Builder add(Iterable<Key> first, Iterable<Key> second, boolean removeFirst, boolean removeSecond) {
       for (AbilityDescription desc1 : mapAbilities(first)) {
         for (AbilityDescription desc2 : mapAbilities(second)) {
           simpleCollisions.add(new CollisionPair(desc1, desc2, removeFirst, removeSecond));
@@ -169,8 +195,18 @@ public final class CollisionPair implements Keyed {
       return collisionSet;
     }
 
-    private List<AbilityDescription> mapAbilities(Collection<String> abilities) {
-      return abilities.stream().map(Registries.ABILITIES::fromString).filter(Objects::nonNull).toList();
+    @Deprecated
+    private List<AbilityDescription> mapAbilitiesOld(Iterable<String> abilities) {
+      List<AbilityDescription> result = new ArrayList<>();
+      for (String ability : abilities) {
+        AbilityDescription desc = Objects.requireNonNull(Registries.ABILITIES.fromString(ability));
+        result.add(desc);
+      }
+      return result;
+    }
+
+    private List<AbilityDescription> mapAbilities(Iterable<Key> abilities) {
+      return StreamSupport.stream(abilities.spliterator(), false).map(Registries.ABILITIES::getOrThrow).toList();
     }
 
     private static Collection<CollisionPair> registerSelfCancellingCollisions(List<AbilityDescription> layer) {

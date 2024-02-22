@@ -23,10 +23,9 @@ import me.moros.bending.api.registry.Registry;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.sound.Sound.Source;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public sealed interface Sound extends Keyed, Sounds permits SoundImpl {
-  @NonNull Key key();
+  Key key();
 
   static Registry<Key, Sound> registry() {
     return SoundImpl.REGISTRY;
