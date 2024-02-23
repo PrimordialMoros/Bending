@@ -19,6 +19,7 @@
 
 package me.moros.bending.common.adapter;
 
+import me.moros.bending.api.ability.DamageSource;
 import me.moros.bending.api.adapter.NativeAdapter;
 import me.moros.bending.api.collision.raytrace.BlockRayTrace;
 import me.moros.bending.api.collision.raytrace.Context;
@@ -83,7 +84,8 @@ public abstract class AbstractNativeAdapter extends AbstractPacketUtil implement
     Component deathMsg = translatable(event.ability().translationKey() + ".death",
       "bending.ability.generic.death")
       .arguments(event.ability().displayName(), event.target().name(), event.user().name());
-    var damageSource = new AbilityDamageSource(adapt(event.user().entity()), adapt(deathMsg));
+    var bendingSource = DamageSource.of(event.user().name(), event.ability());
+    var damageSource = new AbilityDamageSource(adapt(event.user().entity()), adapt(deathMsg), bendingSource);
     boolean result = target.hurt(damageSource, (float) event.damage());
     target.invulnerableTime = capturedInvulnerableTime;
     return result;

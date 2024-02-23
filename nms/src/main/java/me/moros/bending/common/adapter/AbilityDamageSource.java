@@ -19,20 +19,34 @@
 
 package me.moros.bending.common.adapter;
 
+import me.moros.bending.api.ability.AbilityDescription;
+import me.moros.bending.api.ability.DamageSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
-final class AbilityDamageSource extends net.minecraft.world.damagesource.DamageSource {
+final class AbilityDamageSource extends net.minecraft.world.damagesource.DamageSource implements DamageSource {
   private final Component deathMessage;
+  private final DamageSource bendingSource;
 
-  AbilityDamageSource(Entity userEntity, Component deathMessage) {
+  AbilityDamageSource(Entity userEntity, Component deathMessage, DamageSource bendingSource) {
     super(userEntity.damageSources().generic().typeHolder(), userEntity);
     this.deathMessage = deathMessage;
+    this.bendingSource = bendingSource;
   }
 
   @Override
   public Component getLocalizedDeathMessage(LivingEntity livingEntity) {
     return deathMessage;
+  }
+
+  @Override
+  public net.kyori.adventure.text.Component name() {
+    return bendingSource.name();
+  }
+
+  @Override
+  public AbilityDescription ability() {
+    return bendingSource.ability();
   }
 }
