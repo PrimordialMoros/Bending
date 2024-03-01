@@ -39,19 +39,14 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.flattener.ComponentFlattener;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 public final class CommandUtil {
   private CommandUtil() {
   }
 
-  private static final PlainTextComponentSerializer SERIALIZER = PlainTextComponentSerializer.builder()
-    .flattener(ComponentFlattener.textOnly()).build();
-
   public static String mapToSuggestion(AbilityDescription desc) {
     Key key = desc.key();
-    return key.namespace().equals(KeyUtil.BENDING_NAMESPACE) ? SERIALIZER.serialize(desc.displayName()) : key.asString();
+    return key.namespace().equals(KeyUtil.BENDING_NAMESPACE) ? key.value() : key.asString();
   }
 
   public static List<Component> presetSlots(Preset preset) {
