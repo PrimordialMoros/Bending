@@ -33,7 +33,6 @@ import me.moros.bending.api.util.Tasker;
 import me.moros.bending.api.util.functional.Suppliers;
 import me.moros.bending.common.AbstractBending;
 import me.moros.bending.common.command.Commander;
-import me.moros.bending.common.command.parser.AbilityParser;
 import me.moros.bending.common.hook.MiniPlaceholdersHook;
 import me.moros.bending.common.logging.Slf4jLogger;
 import me.moros.bending.common.util.Initializer;
@@ -45,6 +44,7 @@ import me.moros.bending.fabric.listener.BlockListener;
 import me.moros.bending.fabric.listener.ConnectionListener;
 import me.moros.bending.fabric.listener.UserListener;
 import me.moros.bending.fabric.listener.WorldListener;
+import me.moros.bending.fabric.platform.BrigadierSetup;
 import me.moros.bending.fabric.platform.CommandSender;
 import me.moros.bending.fabric.platform.CommandSender.PlayerCommandSender;
 import me.moros.bending.fabric.platform.FabricMetadata;
@@ -57,7 +57,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.Person;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.server.MinecraftServer;
 import org.incendo.cloud.SenderMapper;
 import org.incendo.cloud.execution.ExecutionCoordinator;
@@ -88,10 +87,7 @@ final class FabricBending extends AbstractBending<ModContainer> {
       ExecutionCoordinator.simpleCoordinator(),
       SenderMapper.create(CommandSender::from, CommandSender::stack)
     );
-    manager.brigadierManager().registerMapping(
-      new io.leangen.geantyref.TypeToken<AbilityParser<CommandSender>>() {},
-      builder -> builder.toConstant(ResourceLocationArgument.id()).cloudSuggestions()
-    );
+    BrigadierSetup.setup(manager);
     Commander.create(manager, PlayerCommandSender.class, this).init();
   }
 
