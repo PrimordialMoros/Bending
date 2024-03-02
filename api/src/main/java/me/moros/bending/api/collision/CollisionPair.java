@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.StreamSupport;
 
@@ -127,43 +126,17 @@ public final class CollisionPair implements Keyed {
       simpleCollisions = new ArrayList<>();
     }
 
-    @Deprecated(forRemoval = true)
-    public Builder layer(Collection<String> abilities) {
-      layers.add(new CollisionLayer(mapAbilitiesOld(abilities), true));
-      return this;
-    }
-
     public Builder layer(Iterable<Key> abilities) {
       layers.add(new CollisionLayer(mapAbilities(abilities), true));
       return this;
-    }
-
-    @Deprecated(forRemoval = true)
-    public Builder add(String first, String second, boolean removeFirst, boolean removeSecond) {
-      return add(List.of(first), List.of(second), removeFirst, removeSecond);
     }
 
     public Builder add(Key first, Key second, boolean removeFirst, boolean removeSecond) {
       return add(List.of(first), List.of(second), removeFirst, removeSecond);
     }
 
-    @Deprecated(forRemoval = true)
-    public Builder add(String first, Collection<String> second, boolean removeFirst, boolean removeSecond) {
-      return add(List.of(first), second, removeFirst, removeSecond);
-    }
-
     public Builder add(Key first, Iterable<Key> second, boolean removeFirst, boolean removeSecond) {
       return add(List.of(first), second, removeFirst, removeSecond);
-    }
-
-    @Deprecated(forRemoval = true)
-    public Builder add(Collection<String> first, Collection<String> second, boolean removeFirst, boolean removeSecond) {
-      for (AbilityDescription desc1 : mapAbilitiesOld(first)) {
-        for (AbilityDescription desc2 : mapAbilitiesOld(second)) {
-          simpleCollisions.add(new CollisionPair(desc1, desc2, removeFirst, removeSecond));
-        }
-      }
-      return this;
     }
 
     public Builder add(Iterable<Key> first, Iterable<Key> second, boolean removeFirst, boolean removeSecond) {
@@ -193,16 +166,6 @@ public final class CollisionPair implements Keyed {
         }
       }
       return collisionSet;
-    }
-
-    @Deprecated
-    private List<AbilityDescription> mapAbilitiesOld(Iterable<String> abilities) {
-      List<AbilityDescription> result = new ArrayList<>();
-      for (String ability : abilities) {
-        AbilityDescription desc = Objects.requireNonNull(Registries.ABILITIES.fromString(ability));
-        result.add(desc);
-      }
-      return result;
     }
 
     private List<AbilityDescription> mapAbilities(Iterable<Key> abilities) {

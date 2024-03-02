@@ -19,20 +19,19 @@
 
 package me.moros.bending.api.ability;
 
+import java.util.Objects;
+
 /**
  * Pair representation of {@link AbilityDescription} and {@link Activation}.
  */
-public record SequenceStep(AbilityDescription ability, Activation activation) {
-  /**
-   * @deprecated use {@link #of(AbilityDescription, Activation)} instead
-   */
-  @Deprecated(forRemoval = true)
-  public SequenceStep(AbilityDescription ability, Activation activation) {
-    this.ability = ability;
-    this.activation = activation;
-  }
+public interface SequenceStep {
+  AbilityDescription ability();
 
-  public static SequenceStep of(AbilityDescription ability, Activation activation) {
-    return new SequenceStep(ability, activation);
+  Activation activation();
+
+  static SequenceStep of(AbilityDescription ability, Activation activation) {
+    Objects.requireNonNull(ability);
+    Objects.requireNonNull(activation);
+    return new SequenceStepImpl(ability, activation);
   }
 }

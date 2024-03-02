@@ -39,7 +39,6 @@ public final class ServerBlockEvents {
     return true;
   });
 
-
   public static final Event<BlockDropLoot> BLOCK_DROP_LOOT = EventFactory.createArrayBacked(BlockDropLoot.class, callbacks -> (level, pos) -> {
     for (var callback : callbacks) {
       if (!callback.onDropLoot(level, pos)) {
@@ -80,7 +79,6 @@ public final class ServerBlockEvents {
   public interface PistonMove {
     boolean onPistonMove(ServerLevel level, BlockPos pos, List<BlockPos> toPush, List<BlockPos> toDestroy);
   }
-
 
   @FunctionalInterface
   public interface BlockDropLoot {

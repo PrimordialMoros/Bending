@@ -183,7 +183,6 @@ public class SpongeLivingEntity extends SpongeEntity implements LivingEntity {
     return PlatformAdapter.fromSpongeEntity(arrow);
   }
 
-
   @Override
   public TriState checkProperty(BooleanProperty property) {
     var spongeProperty = PropertyMapper.PROPERTIES.get(property);

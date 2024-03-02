@@ -19,7 +19,6 @@
 
 package me.moros.bending.api.ability.preset;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -36,9 +35,6 @@ import me.moros.bending.api.util.ColorPalette;
 import me.moros.bending.api.util.TextUtil;
 import me.moros.bending.api.util.functional.Suppliers;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.JoinConfiguration;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -122,26 +118,6 @@ public final class Preset {
         consumer.accept(desc, idx);
       }
     }
-  }
-
-  @Deprecated(forRemoval = true)
-  public List<Component> display() {
-    List<Component> components = new ArrayList<>();
-    forEach((desc, idx) -> components.add(slotToComponent(idx, desc)));
-    return components;
-  }
-
-  @Deprecated(forRemoval = true)
-  private Component slotToComponent(int idx, AbilityDescription desc) {
-    return Component.text((idx + 1) + ". ", ColorPalette.TEXT_COLOR).append(desc.meta());
-  }
-
-  @Deprecated(forRemoval = true)
-  public Component meta() {
-    Component details = Component.join(JoinConfiguration.newlines(), display());
-    return displayName()
-      .hoverEvent(HoverEvent.showText(details))
-      .clickEvent(ClickEvent.runCommand("/bending preset bind " + name()));
   }
 
   private TextColor dominantColor() {

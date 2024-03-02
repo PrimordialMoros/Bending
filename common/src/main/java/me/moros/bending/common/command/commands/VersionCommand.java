@@ -41,7 +41,6 @@ public record VersionCommand<C extends Audience>(Commander<C> commander) impleme
     );
   }
 
-
   private void onVersion(C sender) {
     String link = "https://github.com/PrimordialMoros/Bending";
     Component version = Component.text("Bending " + commander().plugin().version(), ColorPalette.HEADER)

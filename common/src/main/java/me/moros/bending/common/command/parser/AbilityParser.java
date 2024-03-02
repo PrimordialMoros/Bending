@@ -38,7 +38,7 @@ import org.incendo.cloud.suggestion.BlockingSuggestionProvider;
 public final class AbilityParser<C extends Audience> implements ArgumentParser<C, AbilityDescription>, BlockingSuggestionProvider.Strings<C> {
   private final boolean validBindsOnly;
 
-  public AbilityParser(boolean validBindsOnly) {
+  private AbilityParser(boolean validBindsOnly) {
     this.validBindsOnly = validBindsOnly;
   }
 
@@ -78,5 +78,3 @@ public final class AbilityParser<C extends Audience> implements ArgumentParser<C
     return ParserDescriptor.of(new AbilityParser<>(false), AbilityDescription.class);
   }
 }
-
-

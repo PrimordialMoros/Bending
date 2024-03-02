@@ -131,16 +131,6 @@ public sealed interface User extends DelegateLivingEntity, ElementUser, Attribut
   @Nullable AbilityDescription selectedAbility();
 
   /**
-   * Retrieves the ability name for the currently selected slot.
-   * @return the ability's name or an empty string if no ability is bound to the currently selected slot
-   */
-  @Deprecated(forRemoval = true)
-  default String selectedAbilityName() {
-    AbilityDescription selected = selectedAbility();
-    return selected == null ? "" : selected.name();
-  }
-
-  /**
    * Utility method to easily check if the currently selected ability matches the given key.
    * If key doesn't have a namespace, the default one will be used ({@value KeyUtil#BENDING_NAMESPACE}).
    * If there's no ability bound in the selected slot then false will be returned.

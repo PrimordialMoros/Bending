@@ -34,7 +34,6 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.translation.Translatable;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -106,11 +105,6 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
     return requiredPermissions;
   }
 
-  @Deprecated(forRemoval = true)
-  public Component meta() {
-    return displayName().clickEvent(ClickEvent.runCommand("/bending help " + key().asString()));
-  }
-
   @Override
   public Key key() {
     return key;
@@ -119,21 +113,6 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
   @Override
   public String translationKey() {
     return key().namespace() + ".ability." + key().value();
-  }
-
-  @Deprecated(forRemoval = true)
-  public String descriptionKey() {
-    return translationKey() + ".description";
-  }
-
-  @Deprecated(forRemoval = true)
-  public String instructionsKey() {
-    return translationKey() + ".instructions";
-  }
-
-  @Deprecated(forRemoval = true)
-  public String deathKey() {
-    return translationKey() + ".death";
   }
 
   @Override
@@ -327,24 +306,6 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
         throw new IllegalStateException("Ability must be activated by sequence");
       }
       List<SequenceStep> sequenceSteps = function.apply(new SequenceBuilder()).validateAndBuild();
-      return new Sequence(this, sequenceSteps);
-    }
-
-    /**
-     * @deprecated use {@link #buildSequence(UnaryOperator)} instead
-     */
-    @Deprecated(forRemoval = true)
-    public Sequence buildSequence(SequenceStep step1, SequenceStep step2, SequenceStep @Nullable ... steps) {
-      validate();
-      if (!activations.contains(Activation.SEQUENCE)) {
-        throw new IllegalStateException("Ability must be activated by sequence");
-      }
-      List<SequenceStep> sequenceSteps = new ArrayList<>();
-      sequenceSteps.add(Objects.requireNonNull(step1, "Sequence steps cannot be null"));
-      sequenceSteps.add(Objects.requireNonNull(step2, "Sequence steps cannot be null"));
-      if (steps != null) {
-        sequenceSteps.addAll(List.of(steps));
-      }
       return new Sequence(this, sequenceSteps);
     }
 

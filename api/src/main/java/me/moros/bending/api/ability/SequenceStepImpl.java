@@ -17,18 +17,7 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.sponge.mixin.accessor;
+package me.moros.bending.api.ability;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
-import net.minecraft.world.entity.Entity;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-
-@Mixin(Entity.class)
-public interface EntityAccess {
-  @Accessor("ENTITY_COUNTER")
-  static AtomicInteger idCounter() {
-    throw new AssertionError();
-  }
+record SequenceStepImpl(AbilityDescription ability, Activation activation) implements SequenceStep {
 }

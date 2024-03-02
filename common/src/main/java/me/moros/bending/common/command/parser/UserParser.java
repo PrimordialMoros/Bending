@@ -37,6 +37,9 @@ import org.incendo.cloud.parser.ParserDescriptor;
 import org.incendo.cloud.suggestion.BlockingSuggestionProvider;
 
 public final class UserParser<C extends Audience> implements ArgumentParser<C, User>, BlockingSuggestionProvider.Strings<C> {
+  private UserParser() {
+  }
+
   @Override
   public ArgumentParseResult<User> parse(CommandContext<C> commandContext, CommandInput commandInput) {
     String input = commandInput.peekString();
@@ -76,5 +79,3 @@ public final class UserParser<C extends Audience> implements ArgumentParser<C, U
     return ParserDescriptor.of(new UserParser<>(), User.class);
   }
 }
-
-

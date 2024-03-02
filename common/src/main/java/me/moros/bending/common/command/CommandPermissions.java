@@ -19,7 +19,6 @@
 
 package me.moros.bending.common.command;
 
-
 import org.incendo.cloud.permission.Permission;
 
 public final class CommandPermissions {

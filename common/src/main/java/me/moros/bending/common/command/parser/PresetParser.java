@@ -34,6 +34,9 @@ import org.incendo.cloud.parser.ParserDescriptor;
 import org.incendo.cloud.suggestion.BlockingSuggestionProvider;
 
 public final class PresetParser<C extends Audience> implements ArgumentParser<C, Preset>, BlockingSuggestionProvider.Strings<C> {
+  private PresetParser() {
+  }
+
   @Override
   public ArgumentParseResult<Preset> parse(CommandContext<C> commandContext, CommandInput commandInput) {
     String input = commandInput.peekString();
@@ -57,5 +60,3 @@ public final class PresetParser<C extends Audience> implements ArgumentParser<C,
     return ParserDescriptor.of(new PresetParser<>(), Preset.class);
   }
 }
-
-

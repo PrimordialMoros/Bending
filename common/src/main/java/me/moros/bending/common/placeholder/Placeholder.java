@@ -41,5 +41,3 @@ public sealed interface Placeholder extends Placeholders permits StaticPlacehold
     return new DynamicPlaceholderImpl(Objects.requireNonNull(function));
   }
 }
-
-

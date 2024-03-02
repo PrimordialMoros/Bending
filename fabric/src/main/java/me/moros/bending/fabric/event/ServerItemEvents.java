@@ -56,7 +56,6 @@ public final class ServerItemEvents {
     return InteractionResultHolder.pass(items);
   });
 
-
   public static final Event<AccessLock> ACCESS_LOCK = EventFactory.createArrayBacked(AccessLock.class, callbacks -> (player, lock, item) -> {
     for (var callback : callbacks) {
       var result = callback.onAccess(player, lock, item);
