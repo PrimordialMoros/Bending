@@ -66,6 +66,7 @@ public final class PlaceholderProvider implements Iterable<KeyedValue<? extends 
       .add(Placeholder.ELEMENT)
       .add(Placeholder.DISPLAY_NAME)
       .add(Placeholder.SELECTED_ABILITY)
+      .add(Placeholder.SLOT)
       .add(Placeholder.ABILITY_INFO);
   }
 

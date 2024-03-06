@@ -44,6 +44,8 @@ interface Placeholders {
 
   KeyedValue<StaticPlaceholder> SELECTED_ABILITY = create("selected_ability", Placeholder.of(Placeholders::selectedAbility));
 
+  KeyedValue<DynamicPlaceholder> SLOT = create("slot", Placeholder.of(Placeholders::slot));
+
   KeyedValue<DynamicPlaceholder> ABILITY_INFO = create("ability_info", Placeholder.of(Placeholders::abilityInfo));
 
   private static <T extends Placeholder> KeyedValue<T> create(String id, T placeholder) {
@@ -80,6 +82,11 @@ interface Placeholders {
 
   private static Component selectedAbility(User user) {
     AbilityDescription desc = user.selectedAbility();
+    return desc == null ? Component.empty() : desc.displayName();
+  }
+
+  private static Component slot(User user, String slot) {
+    AbilityDescription desc = user.boundAbility(Integer.parseInt(slot));
     return desc == null ? Component.empty() : desc.displayName();
   }
 
