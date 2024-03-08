@@ -4,18 +4,18 @@ tasker = "1.0.1"
 adventure = "4.16.0"
 adventure-fabric = "5.12.0"
 configurate = "4.1.2"
-cloud = "2.0.0-beta.3"
+cloud = "2.0.0-SNAPSHOT"
 cloud-snapshot = "1.8.0-SNAPSHOT"
 bstats = "3.0.2"
 paper = "1.20.4-R0.1-SNAPSHOT"
 sponge-api = "11.0.0-SNAPSHOT"
 sponge-common = "1.20.1-11.0.0-SNAPSHOT"
 minecraft = "1.20.4"
-fabric-loom = "1.5.7"
-fabric-api = "0.96.3+1.20.4"
+fabric-loom = "1.5.8"
+fabric-api = "0.96.4+1.20.4"
 fabric-loader = "0.15.7"
 shadow = "8.1.1"
-flyway = "10.8.1"
+flyway = "10.9.1"
 junit = "5.10.2"
 
 [libraries]
@@ -84,7 +84,7 @@ fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.
 paper = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
 inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.13" }
 grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.2" }
-towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.100.1.15" }
+towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.100.1.18" }
 lwc = { module = "com.griefcraft:lwc", version = "2.3.2" }
 worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.9" }
 papi = { module = "me.clip:placeholderapi", version = "2.11.5" }
