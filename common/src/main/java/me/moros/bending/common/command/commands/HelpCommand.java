@@ -57,7 +57,7 @@ public record HelpCommand<C extends Audience>(Commander<C> commander, MinecraftH
       .handler(c -> onHelp(c, ""))
     );
     commander().register(builder
-      .literal("help", "h")
+      .literal("help")
       .optional("query", StringParser.greedyStringParser(), helpSuggestions())
       .commandDescription(RichDescription.of(Message.HELP_DESC.build()))
       .permission(CommandPermissions.HELP)

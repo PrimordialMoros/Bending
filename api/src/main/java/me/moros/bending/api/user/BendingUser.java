@@ -206,11 +206,6 @@ sealed class BendingUser implements User permits BendingPlayer {
   }
 
   @Override
-  public @Nullable AbilityDescription selectedAbility() {
-    return boundAbility(currentSlot());
-  }
-
-  @Override
   public boolean onCooldown(AbilityDescription desc) {
     return Cooldown.MANAGER.isTemp(Cooldown.of(this, desc));
   }

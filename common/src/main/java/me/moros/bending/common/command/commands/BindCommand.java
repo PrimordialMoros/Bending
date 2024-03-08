@@ -47,7 +47,7 @@ public record BindCommand<C extends Audience>(Commander<C> commander) implements
   public void init() {
     var builder = commander().rootBuilder();
     commander().register(builder
-      .literal("bind", "b")
+      .literal("bind")
       .required("ability", AbilityParser.parser())
       .optional("slot", IntegerParser.integerParser(1, 9), DefaultValue.constant(0))
       .commandDescription(RichDescription.of(Message.BIND_DESC.build()))
@@ -56,7 +56,7 @@ public record BindCommand<C extends Audience>(Commander<C> commander) implements
       .handler(c -> onBind(c.get(ContextKeys.BENDING_PLAYER), c.get("ability"), c.get("slot")))
     );
     commander().register(builder
-      .literal("clear", "c")
+      .literal("clear")
       .optional("slot", IntegerParser.integerParser(1, 9), DefaultValue.constant(0))
       .commandDescription(RichDescription.of(Message.CLEAR_DESC.build()))
       .permission(CommandPermissions.BIND)
@@ -64,7 +64,7 @@ public record BindCommand<C extends Audience>(Commander<C> commander) implements
       .handler(c -> onBindClear(c.get(ContextKeys.BENDING_PLAYER), c.get("slot")))
     );
     commander().register(builder
-      .literal("who", "w")
+      .literal("who")
       .optional("target", UserParser.parser(), DefaultValue.parsed("me"))
       .commandDescription(RichDescription.of(Message.DISPLAY_DESC.build()))
       .permission(CommandPermissions.HELP)

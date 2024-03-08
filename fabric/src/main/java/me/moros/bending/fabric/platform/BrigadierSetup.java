@@ -19,6 +19,7 @@
 
 package me.moros.bending.fabric.platform;
 
+import io.leangen.geantyref.TypeToken;
 import me.moros.bending.common.command.parser.AbilityParser;
 import net.kyori.adventure.audience.Audience;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
@@ -30,7 +31,7 @@ public final class BrigadierSetup {
 
   public static <C extends Audience> void setup(BrigadierManagerHolder<C, ?> holder) {
     holder.brigadierManager().registerMapping(
-      new io.leangen.geantyref.TypeToken<AbilityParser<C>>() {},
+      new TypeToken<AbilityParser<C>>() {},
       builder -> builder.toConstant(ResourceLocationArgument.id()).cloudSuggestions()
     );
   }

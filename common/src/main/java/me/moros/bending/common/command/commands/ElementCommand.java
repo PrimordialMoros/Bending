@@ -44,7 +44,7 @@ public record ElementCommand<C extends Audience>(Commander<C> commander) impleme
   public void init() {
     var builder = commander().rootBuilder();
     commander().register(builder
-      .literal("choose", "ch")
+      .literal("choose")
       .commandDescription(RichDescription.of(Message.ELEMENT_CHOOSE_DESC.build()))
       .permission(CommandPermissions.CHOOSE)
       .senderType(commander().playerType())
@@ -52,7 +52,7 @@ public record ElementCommand<C extends Audience>(Commander<C> commander) impleme
     );
 
     commander().manager().command(builder
-      .literal("choose", "ch")
+      .literal("choose")
       .required("element", EnumParser.enumParser(Element.class))
       .commandDescription(RichDescription.of(Message.ELEMENT_CHOOSE_DESC.build()))
       .permission(CommandPermissions.CHOOSE)
@@ -60,7 +60,7 @@ public record ElementCommand<C extends Audience>(Commander<C> commander) impleme
       .handler(c -> onElementChoose(c.get(ContextKeys.BENDING_PLAYER), c.get("element")))
     );
     commander().manager().command(builder
-      .literal("choose", "ch")
+      .literal("choose")
       .required("element", EnumParser.enumParser(Element.class))
       .required("target", UserParser.parser())
       .commandDescription(RichDescription.of(Message.ELEMENT_CHOOSE_DESC.build()))
@@ -69,11 +69,11 @@ public record ElementCommand<C extends Audience>(Commander<C> commander) impleme
     );
 
     dualRegister(builder
-      .literal("add", "a")
+      .literal("add")
       .commandDescription(RichDescription.of(Message.ELEMENT_ADD_DESC.build()))
       .permission(CommandPermissions.ADD), this::onElementAdd);
     dualRegister(builder
-      .literal("remove", "rm")
+      .literal("remove")
       .commandDescription(RichDescription.of(Message.ELEMENT_REMOVE_DESC.build()))
       .permission(CommandPermissions.REMOVE), this::onElementRemove);
   }

@@ -45,7 +45,7 @@ public record AttributeCommand<C extends Audience>(Commander<C> commander) imple
   @Override
   public void init() {
     commander().register(commander().rootBuilder()
-      .literal("attribute", "attributes")
+      .literal("attribute")
       .required("ability", AbilityParser.parserGlobal())
       .commandDescription(RichDescription.of(Message.ATTRIBUTE_DESC.build()))
       .permission(CommandPermissions.ATTRIBUTE)

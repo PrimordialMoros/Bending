@@ -83,7 +83,7 @@ final class FabricBending extends AbstractBending<ModContainer> {
     );
     registerLifecycleListeners();
 
-    FabricServerCommandManager<CommandSender> manager = new FabricServerCommandManager<>(
+    var manager = new FabricServerCommandManager<>(
       ExecutionCoordinator.simpleCoordinator(),
       SenderMapper.create(CommandSender::from, CommandSender::stack)
     );

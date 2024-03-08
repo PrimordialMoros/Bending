@@ -230,7 +230,7 @@ public class WaterRing extends AbilityInstance {
       }
     }
 
-    if (ring.stream().noneMatch(b -> user.canBuild(b))) {
+    if (ring.stream().noneMatch(user::canBuild)) {
       return UpdateResult.REMOVE;
     }
     Collections.rotate(ring, 1);

@@ -66,7 +66,7 @@ record CommanderImpl<C extends Audience>(CommandManager<C> manager, Class<? exte
 
   @Override
   public Command.Builder<C> rootBuilder() {
-    return manager().commandBuilder("bending", RichDescription.of(Message.BASE_DESC.build()), "bend", "b");
+    return manager().commandBuilder("bending", RichDescription.of(Message.BASE_DESC.build()), "b");
   }
 
   @Override

@@ -42,31 +42,31 @@ import org.incendo.cloud.parser.standard.StringParser;
 public record PresetCommand<C extends Audience>(Commander<C> commander) implements Initializer {
   @Override
   public void init() {
-    var builder = commander().rootBuilder().literal("preset", "presets", "p")
+    var builder = commander().rootBuilder().literal("preset")
       .commandDescription(RichDescription.of(Message.PRESET_DESC.build()))
       .permission(CommandPermissions.PRESET);
     commander().register(builder
-      .literal("list", "ls")
+      .literal("list")
       .commandDescription(RichDescription.of(Message.PRESET_LIST_DESC.build()))
       .senderType(commander().playerType())
       .handler(c -> onPresetList(c.get(ContextKeys.BENDING_PLAYER)))
     );
     commander().register(builder
-      .literal("create", "c")
+      .literal("create")
       .required("name", StringParser.stringParser())
       .commandDescription(RichDescription.of(Message.PRESET_CREATE_DESC.build()))
       .senderType(commander().playerType())
       .handler(c -> onPresetCreate(c.get(ContextKeys.BENDING_PLAYER), c.get("name")))
     );
     commander().register(builder
-      .literal("remove", "rm")
+      .literal("remove")
       .required("preset", PresetParser.parser())
       .commandDescription(RichDescription.of(Message.PRESET_REMOVE_DESC.build()))
       .senderType(commander().playerType())
       .handler(c -> onPresetRemove(c.get(ContextKeys.BENDING_PLAYER), c.get("preset")))
     );
     commander().register(builder
-      .literal("bind", "b")
+      .literal("bind")
       .required("preset", PresetParser.parser())
       .commandDescription(RichDescription.of(Message.PRESET_BIND_DESC.build()))
       .senderType(commander().playerType())

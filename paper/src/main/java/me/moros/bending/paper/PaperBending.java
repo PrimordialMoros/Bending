@@ -51,7 +51,6 @@ import org.bstats.charts.AdvancedPie;
 import org.bstats.charts.SimplePie;
 import org.bstats.charts.SingleLineChart;
 import org.bukkit.Server;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.ServicePriority;
 import org.incendo.cloud.execution.ExecutionCoordinator;
@@ -75,7 +74,8 @@ final class PaperBending extends AbstractBending<BendingBootstrap> {
     pluginManager.registerEvents(new ConnectionListener(logger(), game), parent);
     pluginManager.registerEvents(new WorldListener(game), parent);
 
-    PaperCommandManager<CommandSender> manager = PaperCommandManager.createNative(parent, ExecutionCoordinator.simpleCoordinator());
+    var manager = PaperCommandManager.createNative(parent, ExecutionCoordinator.simpleCoordinator());
+    // TODO change to brigadier
     manager.registerAsynchronousCompletions();
     Commander.create(manager, Player.class, this).init();
 

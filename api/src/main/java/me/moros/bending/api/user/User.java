@@ -128,7 +128,9 @@ public sealed interface User extends DelegateLivingEntity, ElementUser, Attribut
    * Get the currently selected ability for the user.
    * @return the ability in the currently selected slot for the user if found, null otherwise
    */
-  @Nullable AbilityDescription selectedAbility();
+  default @Nullable AbilityDescription selectedAbility() {
+    return boundAbility(currentSlot());
+  }
 
   /**
    * Utility method to easily check if the currently selected ability matches the given key.

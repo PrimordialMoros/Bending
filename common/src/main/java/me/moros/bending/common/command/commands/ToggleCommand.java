@@ -32,7 +32,7 @@ public record ToggleCommand<C extends Audience>(Commander<C> commander) implemen
   @Override
   public void init() {
     commander().register(commander().rootBuilder()
-      .literal("toggle", "t")
+      .literal("toggle")
       .commandDescription(RichDescription.of(Message.TOGGLE_DESC.build()))
       .permission(CommandPermissions.TOGGLE)
       .senderType(commander().playerType())

@@ -34,7 +34,7 @@ public record VersionCommand<C extends Audience>(Commander<C> commander) impleme
   @Override
   public void init() {
     commander().register(commander().rootBuilder()
-      .literal("version", "v")
+      .literal("version")
       .commandDescription(RichDescription.of(Message.VERSION_DESC.build()))
       .permission(CommandPermissions.VERSION)
       .handler(c -> onVersion(c.sender()))

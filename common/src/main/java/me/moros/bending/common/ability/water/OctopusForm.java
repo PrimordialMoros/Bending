@@ -114,7 +114,7 @@ public class OctopusForm extends AbilityInstance {
         lastBlock = current;
         forceUpdate = true;
       }
-      if (base.stream().noneMatch(b -> user.canBuild(b))) {
+      if (base.stream().noneMatch(user::canBuild)) {
         return UpdateResult.REMOVE;
       }
       renderBase();

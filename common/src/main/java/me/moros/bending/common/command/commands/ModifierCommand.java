@@ -46,17 +46,18 @@ import static org.incendo.cloud.parser.ArgumentParseResult.successFuture;
 public record ModifierCommand<C extends Audience>(Commander<C> commander) implements Initializer {
   @Override
   public void init() {
-    var builder = commander().rootBuilder().literal("modifier", "modifiers")
+    var builder = commander().rootBuilder().literal("modifier")
       .commandDescription(RichDescription.of(Message.MODIFIER_DESC.build()))
       .permission(CommandPermissions.MODIFY);
     commander().register(builder
-      .literal("add", "a")
+      .literal("add")
       .required("modifier", modifierParser())
       .optional("target", UserParser.parser(), DefaultValue.parsed("me"))
       .commandDescription(RichDescription.of(Message.MODIFIER_ADD_DESC.build()))
       .handler(c -> onModifierAdd(c.sender(), c.get("modifier"), c.get("target")))
     );
-    commander().register(builder.literal("clear", "c")
+    commander().register(builder
+      .literal("clear")
       .optional("target", UserParser.parser(), DefaultValue.parsed("me"))
       .commandDescription(RichDescription.of(Message.MODIFIER_CLEAR_DESC.build()))
       .handler(c -> onModifierClear(c.sender(), c.get("target")))
