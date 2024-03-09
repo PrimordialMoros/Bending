@@ -13,6 +13,7 @@ Bending
 <a href="LICENSE"><img src="https://img.shields.io/github/license/PrimordialMoros/Bending?color=009185&style=flat-square" alt="License"/></a>
 <a href="https://github.com/PrimordialMoros/Bending/releases"><img src="https://img.shields.io/github/v/release/PrimordialMoros/Bending?color=009185&style=flat-square" alt="Github release"/></a>
 <a href="https://discord.gg/sjwncgE"><img src="https://img.shields.io/badge/chat-discord-5865F2?style=flat-square" alt="Discord"/></a>
+<a href="https://matrix.to/#/#bending:matrix.org"><img src="https://img.shields.io/badge/chat-matrix-ffffff?style=flat-square" alt="Matrix"/></a>
 </p>
 
 <p align="center">
@@ -21,16 +22,19 @@ Bending
 <a href="https://search.maven.org/artifact/me.moros/bending-api"><img src="https://img.shields.io/maven-central/v/me.moros/bending-api?label=bending-api&style=flat-square" alt="Maven Central"/></a>
 </p>
 
-#### Main Features:
+Bending is a free and open source mod/plugin for Minecraft. Master the 4 elements (Air, Water, Earth and Fire),
+shaping the world around you for an unparalleled PvE and PvP experience.
 
-- Bend the 4 elements (Air, Water, Earth, Fire)
-- Built-in bending board
+#### Features:
+- High performance
+- User friendly
 - Dynamic ability interactions
 - Accurate collision system
-- Support for custom translations and [Localization](https://github.com/PrimordialMoros/Bending/wiki/Localization)
+- Fully [translatable](https://github.com/PrimordialMoros/Bending/wiki/Localization)
 - Support for bending mobs
 - Robust, flexible API
-- Multiple server implementations: Paper, Sponge, Fabric (also works as a singleplayer mod)
+
+For more information, check the [wiki](https://github.com/PrimordialMoros/Bending/wiki).
 
 ## Download
 
@@ -52,7 +56,3 @@ Any contributions, large or small, major features, bug fixes, unit/integration t
 
 For information on how to use Bending in your own projects check
 the [Developer API](https://github.com/PrimordialMoros/Bending/wiki/Developer-API) wiki.
-
-### Special thanks to
-
-[JProfiler](https://www.ej-technologies.com/products/jprofiler/overview.html) for their great Java profiler.

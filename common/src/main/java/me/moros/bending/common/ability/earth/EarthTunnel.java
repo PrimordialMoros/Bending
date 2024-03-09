@@ -110,7 +110,11 @@ public class EarthTunnel extends AbilityInstance {
         if (userConfig.extractOres) {
           extract(current);
         }
-        TempBlock.air().duration(BendingProperties.instance().earthRevertTime()).build(current);
+        if (userConfig.persistent) {
+          current.setType(BlockType.AIR);
+        } else {
+          TempBlock.air().duration(BendingProperties.instance().earthRevertTime()).build(current);
+        }
       }
       if (angle >= 360) {
         angle = 0;
@@ -196,6 +200,8 @@ public class EarthTunnel extends AbilityInstance {
     @Modifiable(Attribute.SPEED)
     private int speed = 2;
     private boolean extractOres = true;
+    @Comment("Persistent earth tunnel will NOT revert blocks, use at your own risk")
+    private boolean persistent = false;
 
     @Override
     public List<String> path() {

@@ -70,8 +70,7 @@ record ConfigProcessorImpl(Logger logger,
   }
 
   private <T extends Configurable> T process(AttributeUser user, AbilityDescription desc, T copy) {
-    Collection<AttributeModifier> activeModifiers = user.attributes()
-      .filter(modifier -> modifier.policy().shouldModify(desc)).toList();
+    Collection<AttributeModifier> activeModifiers = collectActiveModifiers(user, desc);
     if (!activeModifiers.isEmpty()) {
       forEachAttribute(activeModifiers, copy, (f, a, b, m) -> f.set(copy, m));
     }
@@ -80,11 +79,14 @@ record ConfigProcessorImpl(Logger logger,
 
   @Override
   public Collection<AttributeValue> listAttributes(AttributeUser user, AbilityDescription desc, Configurable config) {
-    Collection<AttributeModifier> activeModifiers = user.attributes()
-      .filter(modifier -> modifier.policy().shouldModify(desc)).toList();
+    Collection<AttributeModifier> activeModifiers = collectActiveModifiers(user, desc);
     Collection<AttributeValue> attributes = new ArrayList<>();
     forEachAttribute(activeModifiers, config, (f, a, b, m) -> attributes.add(AttributeValue.of(a, f.getName(), b, m)));
     return attributes;
+  }
+
+  private Collection<AttributeModifier> collectActiveModifiers(AttributeUser user, AbilityDescription desc) {
+    return user.attributes().filter(modifier -> modifier.policy().shouldModify(user, desc)).toList();
   }
 
   private void forEachAttribute(Collection<AttributeModifier> activeModifiers, Configurable instance, MultiConsumer consumer) {
