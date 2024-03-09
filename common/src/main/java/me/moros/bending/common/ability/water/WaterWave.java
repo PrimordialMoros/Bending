@@ -66,6 +66,9 @@ public class WaterWave extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
+    if (method == Activation.PASSIVE) {
+      return false;
+    }
     if (user.game().abilityManager(user.worldKey()).hasAbility(user, WaterWave.class)) {
       return false;
     }

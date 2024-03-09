@@ -230,7 +230,7 @@ public final class AbilityInitializer implements Initializer {
     abilities.add(waterRing);
 
     AbilityDescription waterWave = AbilityDescription.builder("WaterWave", WaterWave::new)
-      .element(WATER).activation(SNEAK).canBind(false).build();
+      .element(WATER).activation(PASSIVE, SNEAK).canBind(false).build();
     abilities.add(waterWave);
 
     AbilityDescription torrent = AbilityDescription.builder("Torrent", Torrent::new)

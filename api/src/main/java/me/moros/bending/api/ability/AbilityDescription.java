@@ -22,6 +22,7 @@ package me.moros.bending.api.ability;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -58,7 +59,7 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
     key = builder.key;
     name = builder.name;
     element = builder.element;
-    displayName = Component.text(name, element.color());
+    displayName = builder.displayName;
     constructor = builder.constructor;
     activations = builder.activations;
     requiredPermissions = List.copyOf(builder.requiredPermissions);
@@ -237,6 +238,7 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
   public static final class Builder {
     private final Key key;
     private final String name;
+    private Component displayName;
     private Element element;
     private final Function<AbilityDescription, ? extends Ability> constructor;
     private EnumSet<Activation> activations;
@@ -250,6 +252,11 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
       this.name = name;
       this.constructor = constructor;
       this.requiredPermissions = List.of(defaultPermission());
+    }
+
+    public Builder displayName(Component displayName) {
+      this.displayName = displayName;
+      return this;
     }
 
     public Builder element(Element element) {
@@ -268,7 +275,7 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
     }
 
     public Builder require(String @Nullable ... permissions) {
-      Collection<String> c = new ArrayList<>();
+      Collection<String> c = new LinkedHashSet<>();
       c.add(defaultPermission());
       if (permissions != null) {
         c.addAll(List.of(permissions));
@@ -315,10 +322,13 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
       if (activations.isEmpty()) {
         throw new IllegalStateException("Activation methods cannot be empty");
       }
+      if (displayName == null) {
+         displayName = Component.text(name, element.color());
+      }
     }
 
     private String defaultPermission() {
-      return "bending.ability." + key.value();
+      return key.namespace() + ".ability." + key.value();
     }
   }
 }
