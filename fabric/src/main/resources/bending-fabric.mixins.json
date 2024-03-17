@@ -4,6 +4,7 @@
   "package": "me.moros.bending.fabric.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "accessor.BlockBehaviourAccess",
     "accessor.ChunkMapAccess",
     "accessor.CommandSourceStackAccess",
     "accessor.CreeperAccess",

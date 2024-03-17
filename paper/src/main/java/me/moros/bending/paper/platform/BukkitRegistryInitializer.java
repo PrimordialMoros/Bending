@@ -87,7 +87,7 @@ public final class BukkitRegistryInitializer implements RegistryInitializer {
 
   @Override
   public void initParticleRegistry(Registry<Key, Particle> registry) {
-    // No registry in bukkit
+    init(registry, org.bukkit.Registry.PARTICLE_TYPE);
   }
 
   @Override

@@ -44,6 +44,7 @@ import me.moros.bending.api.temporal.TempLight;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.BendingEffect;
 import me.moros.bending.api.util.ExpiringSet;
+import me.moros.bending.api.util.KeyUtil;
 import me.moros.bending.api.util.functional.ExpireRemovalPolicy;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
@@ -51,6 +52,7 @@ import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Rotation;
 import me.moros.math.Vector3d;
+import net.kyori.adventure.key.Key;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class FireShield extends AbilityInstance {
@@ -158,10 +160,8 @@ public class FireShield extends AbilityInstance {
   @Override
   public void onCollision(Collision collision) {
     if (!sphere) {
-      // TODO use keys
-      List<String> ignore = List.of("bending:earthblast", "bending:watermanipulation");
-      String collidedName = collision.collidedAbility().description().key().asString();
-      if (collision.removeOther() && ignore.contains(collidedName)) {
+      List<Key> ignore = List.of(KeyUtil.simple("earthblast"), KeyUtil.simple("watermanipulation"));
+      if (collision.removeOther() && ignore.contains(collision.collidedAbility().description().key())) {
         collision.removeOther(false);
       }
     }

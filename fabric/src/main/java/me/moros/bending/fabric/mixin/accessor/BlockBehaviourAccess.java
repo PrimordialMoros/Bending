@@ -19,23 +19,12 @@
 
 package me.moros.bending.fabric.mixin.accessor;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
-import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(Entity.class)
-public interface EntityAccess {
-  @Accessor("ENTITY_COUNTER")
-  static AtomicInteger idCounter() {
-    throw new AssertionError();
-  }
-
-  @Invoker("setSharedFlag")
-  void setSharedFlag(int flag, boolean value);
-
-  @Invoker("getFireImmuneTicks")
-  int maxFireTicks();
+@Mixin(BlockBehaviour.class)
+public interface BlockBehaviourAccess {
+  @Accessor("hasCollision")
+  boolean hasCollision();
 }

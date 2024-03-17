@@ -39,6 +39,7 @@ import me.moros.bending.api.registry.Registry;
 import me.moros.bending.api.registry.Tag;
 import me.moros.bending.api.registry.TagBuilder;
 import me.moros.bending.common.util.RegistryInitializer;
+import me.moros.bending.fabric.mixin.accessor.BlockBehaviourAccess;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
@@ -139,8 +140,8 @@ final class FabricRegistryInitializer implements RegistryInitializer {
       .isLiquid(data.liquid())
       .isFlammable(FlammableBlockRegistry.getDefaultInstance().get(block).getBurnChance() > 0)
       .hasGravity(data.getBlock() instanceof FallingBlock)
-      .isCollidable(data.blocksMotion())
-      .hardness(data.getBlock().defaultDestroyTime())
+      .isCollidable(((BlockBehaviourAccess) block).hasCollision())
+      .hardness(block.defaultDestroyTime())
       .soundGroup(mapSoundGroup(data.getSoundType())).build();
   }
 

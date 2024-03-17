@@ -45,6 +45,7 @@ import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
 import org.bukkit.Location;
+import org.bukkit.Registry;
 import org.bukkit.World.Environment;
 import org.bukkit.block.TileState;
 import org.bukkit.entity.FallingBlock;
@@ -137,7 +138,7 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
 
   @Override
   public <T> void spawnParticle(ParticleContext<T> context) {
-    var p = ParticleMapper.mapParticle(context.particle());
+    var p = Registry.PARTICLE_TYPE.get(PlatformAdapter.nsk(context.particle().key()));
     if (p != null) {
       var data = ParticleMapper.mapParticleData(context);
       handle().spawnParticle(p, context.position().x(), context.position().y(), context.position().z(), context.count(),
