@@ -46,6 +46,8 @@ import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.bending.common.ability.air.sequence.AirWheel;
 import me.moros.bending.common.config.ConfigManager;
+import me.moros.math.FastMath;
+import me.moros.math.Rotation;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
@@ -64,6 +66,7 @@ public class AirBlade extends AbilityInstance {
   private boolean charging;
   private double factor = 1;
   private long startTime;
+  private double chargingPoint;
 
   public AirBlade(AbilityDescription desc) {
     super(desc);
@@ -124,18 +127,31 @@ public class AirBlade extends AbilityInstance {
       long time = System.currentTimeMillis();
       if (user.sneaking() && time > startTime + 100) {
         double timeFactor = Math.min(0.9, (time - startTime) / (double) userConfig.maxChargeTime);
-        Vector3d rotateAxis = Vector3d.PLUS_J.cross(direction);
         double r = userConfig.radius * userConfig.chargeFactor * timeFactor * 0.5;
-        VectorUtil.circle(direction.multiply(r), rotateAxis, 20).forEach(v ->
+        int amount = FastMath.ceil(r * 10);
+        Rotation rotation = createNextRotation(Vector3d.PLUS_J.cross(direction), amount);
+        VectorUtil.rotate(direction.multiply(r), rotation, amount).forEach(v ->
           ParticleBuilder.air(origin.add(v)).spawn(user.world())
         );
+        double[] offset = direction.toArray();
+        for (double d = 0.1; d < r; d += 0.1 * r) {
+          rotation.applyTo(offset, offset);
+          ParticleBuilder.air(origin.add(Vector3d.from(offset).multiply(d))).spawn(user.world());
+        }
+        if (ThreadLocalRandom.current().nextInt(6) == 0) {
+          SoundEffect.AIR.play(user.world(), origin);
+        }
       } else if (!user.sneaking()) {
         launch();
       }
       return UpdateResult.CONTINUE;
     }
-
     return blade.update();
+  }
+
+  private Rotation createNextRotation(Vector3d rotateAxis, int amount) {
+    chargingPoint += Math.PI / 36;
+    return Rotation.from(rotateAxis, chargingPoint).applyTo(Rotation.from(rotateAxis, 2 * Math.PI / amount));
   }
 
   private void launch() {
@@ -181,8 +197,9 @@ public class AirBlade extends AbilityInstance {
 
     @Override
     public void render() {
-      Vector3d rotateAxis = Vector3d.PLUS_J.cross(this.ray.direction());
-      VectorUtil.circle(this.ray.direction().multiply(this.radius), rotateAxis, 40).forEach(v ->
+      int amount = FastMath.ceil(22 * radius);
+      Rotation rotation = createNextRotation(Vector3d.PLUS_J.cross(this.ray.direction()), amount);
+      VectorUtil.rotate(this.ray.direction().multiply(this.radius), rotation, amount).forEach(v ->
         ParticleBuilder.air(location.add(v)).spawn(user.world())
       );
     }
