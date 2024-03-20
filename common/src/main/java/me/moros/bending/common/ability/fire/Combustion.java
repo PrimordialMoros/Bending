@@ -155,6 +155,8 @@ public class Combustion extends AbilityInstance implements Explosive {
 
   private class CombustBeam extends ParticleStream {
     private static final SoundEffect LOUD_COMBUSTION = SoundEffect.COMBUSTION.with(2, 0);
+
+    private Vector3d streamDirection;
     private double randomBeamDistance = 7;
 
     public CombustBeam() {
@@ -162,6 +164,7 @@ public class Combustion extends AbilityInstance implements Explosive {
       canCollide = BlockType::isLiquid;
       singleCollision = true;
       steps = 6;
+      streamDirection = dir;
     }
 
     @Override
@@ -173,7 +176,10 @@ public class Combustion extends AbilityInstance implements Explosive {
 
     @Override
     protected Vector3d controlDirection() {
-      return user.direction().multiply(speed);
+      if (description().equals(user.selectedAbility())) {
+        streamDirection = user.direction().multiply(speed);
+      }
+      return streamDirection;
     }
 
     private void renderRing() {
