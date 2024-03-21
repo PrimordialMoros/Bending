@@ -157,7 +157,7 @@ public class FabricEntity implements Entity {
 
   @Override
   public int maxFireTicks() {
-    return ((EntityAccess) handle()).maxFireTicks();
+    return ((EntityAccess) handle()).bending$maxFireTicks();
   }
 
   @Override

@@ -29,10 +29,10 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(FallingBlockEntity.class)
 public interface FallingBlockEntityAccess {
   @Accessor("cancelDrop")
-  void cancelDrop(boolean cancelDrop);
+  void bending$cancelDrop(boolean cancelDrop);
 
   @Invoker("<init>")
-  static FallingBlockEntity create(Level level, double d, double e, double f, BlockState blockState) {
+  static FallingBlockEntity bending$create(Level level, double d, double e, double f, BlockState blockState) {
     throw new AssertionError();
   }
 }

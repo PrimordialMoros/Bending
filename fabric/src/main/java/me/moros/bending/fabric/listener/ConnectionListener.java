@@ -50,7 +50,7 @@ public final class ConnectionListener extends AbstractConnectionListener impleme
   }
 
   private void onPlayerPreLogin(ServerLoginPacketListenerImpl handler, MinecraftServer server, PacketSender sender, LoginSynchronizer synchronizer) {
-    GameProfile prof = ((ServerLoginPacketListenerImplAccess) handler).profile();
+    GameProfile prof = ((ServerLoginPacketListenerImplAccess) handler).bending$profile();
     if (prof != null) {
       synchronizer.waitFor(asyncJoin(prof.getId()));
     }

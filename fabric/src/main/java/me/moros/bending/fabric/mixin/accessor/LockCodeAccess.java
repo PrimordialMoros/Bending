@@ -26,5 +26,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(LockCode.class)
 public interface LockCodeAccess {
   @Accessor("key")
-  String password();
+  String bending$password();
 }

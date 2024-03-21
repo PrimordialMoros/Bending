@@ -26,5 +26,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(BlockBehaviour.class)
 public interface BlockBehaviourAccess {
   @Accessor("hasCollision")
-  boolean hasCollision();
+  boolean bending$hasCollision();
 }

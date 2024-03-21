@@ -27,7 +27,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(Creeper.class)
 public interface CreeperAccess {
   @Accessor("DATA_IS_POWERED")
-  static EntityDataAccessor<Boolean> getDataIsPowered() {
+  static EntityDataAccessor<Boolean> bending$getDataIsPowered() {
     throw new AssertionError();
   }
 }

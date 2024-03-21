@@ -134,7 +134,7 @@ public class AirBlade extends AbilityInstance {
           ParticleBuilder.air(origin.add(v)).spawn(user.world())
         );
         double[] offset = direction.toArray();
-        for (double d = 0.1; d < r; d += 0.1 * r) {
+        for (double d = 0.1; d < r; d += 0.25) {
           rotation.applyTo(offset, offset);
           ParticleBuilder.air(origin.add(Vector3d.from(offset).multiply(d))).spawn(user.world());
         }

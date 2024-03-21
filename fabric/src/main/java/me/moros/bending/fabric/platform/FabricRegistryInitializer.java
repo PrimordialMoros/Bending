@@ -140,7 +140,7 @@ final class FabricRegistryInitializer implements RegistryInitializer {
       .isLiquid(data.liquid())
       .isFlammable(FlammableBlockRegistry.getDefaultInstance().get(block).getBurnChance() > 0)
       .hasGravity(data.getBlock() instanceof FallingBlock)
-      .isCollidable(((BlockBehaviourAccess) block).hasCollision())
+      .isCollidable(((BlockBehaviourAccess) block).bending$hasCollision())
       .hardness(block.defaultDestroyTime())
       .soundGroup(mapSoundGroup(data.getSoundType())).build();
   }

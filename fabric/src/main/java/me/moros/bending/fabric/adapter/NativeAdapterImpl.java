@@ -67,6 +67,6 @@ public final class NativeAdapterImpl extends AbstractNativeAdapter {
 
   @Override
   protected int nextEntityId() {
-    return EntityAccess.idCounter().incrementAndGet();
+    return EntityAccess.bending$idCounter().incrementAndGet();
   }
 }

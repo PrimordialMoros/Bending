@@ -29,13 +29,13 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(Entity.class)
 public interface EntityAccess {
   @Accessor("ENTITY_COUNTER")
-  static AtomicInteger idCounter() {
+  static AtomicInteger bending$idCounter() {
     throw new AssertionError();
   }
 
   @Invoker("setSharedFlag")
-  void setSharedFlag(int flag, boolean value);
+  void bending$setSharedFlag(int flag, boolean value);
 
   @Invoker("getFireImmuneTicks")
-  int maxFireTicks();
+  int bending$maxFireTicks();
 }

@@ -57,7 +57,7 @@ public abstract class BaseContainerBlockEntityMixin implements Lockable {
 
   @Unique
   private static String extractLockCode(LockCode code) {
-    return ((LockCodeAccess) code).password();
+    return ((LockCodeAccess) code).bending$password();
   }
 
   @Inject(method = "canUnlock", at = @At(value = "HEAD"), cancellable = true)

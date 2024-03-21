@@ -49,7 +49,7 @@ public sealed class CommandSender implements ForwardingAudience.Single permits P
   }
 
   public static CommandSender from(CommandSourceStack stack) {
-    if (((CommandSourceStackAccess) stack).source() instanceof ServerPlayer) {
+    if (((CommandSourceStackAccess) stack).bending$source() instanceof ServerPlayer) {
       return new PlayerCommandSender(stack);
     }
     return new CommandSender(stack);

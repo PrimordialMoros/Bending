@@ -45,8 +45,8 @@ final class PropertyMapper {
       entry(EntityProperty.SPRINTING, boolProp(Entity.class, Entity::isSprinting, Entity::setSprinting)),
       entry(EntityProperty.ALLOW_FLIGHT, boolProp(ServerPlayer.class, p -> p.getAbilities().mayfly, PlayerUtil::setAllowFlight)),
       entry(EntityProperty.FLYING, boolProp(ServerPlayer.class, e -> e.getAbilities().flying, PlayerUtil::setFlying)),
-      entry(EntityProperty.GLIDING, boolProp(LivingEntity.class, LivingEntity::isFallFlying, (e, v) -> ((EntityAccess) e).setSharedFlag(7, v))),
-      entry(EntityProperty.CHARGED, boolProp(Creeper.class, Creeper::isPowered, (e, v) -> e.getEntityData().set(CreeperAccess.getDataIsPowered(), v))),
+      entry(EntityProperty.GLIDING, boolProp(LivingEntity.class, LivingEntity::isFallFlying, (e, v) -> ((EntityAccess) e).bending$setSharedFlag(7, v))),
+      entry(EntityProperty.CHARGED, boolProp(Creeper.class, Creeper::isPowered, (e, v) -> e.getEntityData().set(CreeperAccess.bending$getDataIsPowered(), v))),
       entry(EntityProperty.ALLOW_PICKUP, boolProp(ItemEntity.class, ItemEntity::hasPickUpDelay, (e, v) -> {
         if (v) {
           e.setDefaultPickUpDelay();

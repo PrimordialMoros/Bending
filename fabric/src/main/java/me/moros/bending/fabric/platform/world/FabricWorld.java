@@ -210,11 +210,11 @@ public record FabricWorld(ServerLevel handle) implements World {
   @Override
   public Entity createFallingBlock(Position center, BlockState state, boolean gravity) {
     var data = PlatformAdapter.toFabricData(state);
-    var fabricEntity = FallingBlockEntityAccess.create(handle(), center.x(), center.y(), center.z(), data);
+    var fabricEntity = FallingBlockEntityAccess.bending$create(handle(), center.x(), center.y(), center.z(), data);
     fabricEntity.time = 1; // Is this needed?
     fabricEntity.setNoGravity(!gravity);
     fabricEntity.dropItem = false;
-    ((FallingBlockEntityAccess) fabricEntity).cancelDrop(true);
+    ((FallingBlockEntityAccess) fabricEntity).bending$cancelDrop(true);
     handle().addFreshEntity(fabricEntity);
     return PlatformAdapter.fromFabricEntity(fabricEntity);
   }
@@ -245,7 +245,7 @@ public record FabricWorld(ServerLevel handle) implements World {
 
   @Override
   public int viewDistance() {
-    return ((ChunkMapAccess) handle().getChunkSource().chunkMap).viewDistance() - 1;
+    return ((ChunkMapAccess) handle().getChunkSource().chunkMap).bending$viewDistance() - 1;
   }
 
   @Override

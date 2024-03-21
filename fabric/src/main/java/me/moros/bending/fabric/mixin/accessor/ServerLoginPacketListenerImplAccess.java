@@ -28,5 +28,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(ServerLoginPacketListenerImpl.class)
 public interface ServerLoginPacketListenerImplAccess {
   @Accessor("authenticatedProfile")
-  @Nullable GameProfile profile();
+  @Nullable GameProfile bending$profile();
 }
