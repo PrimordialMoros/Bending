@@ -1,0 +1,77 @@
+name: Bug Report
+description: Report a problem
+labels: [ "bug" ]
+body:
+  - type: markdown
+    attributes:
+      value: "Before continuing, please check if your problem is fixed by updating to a newer version."
+
+  - type: input
+    id: bending-version
+    attributes:
+      label: Bending Version
+      description: The version of Bending, can be found by using `/bending version`.
+      placeholder: "3.4.5"
+    validations:
+      required: true
+
+  - type: input
+    id: platform-version
+    attributes:
+      label: Platform Details
+      description: The type and version of the platform you are on.
+      placeholder: "git-Paper-404 (MC: 1.20.4)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: mod-plugin-list
+    attributes:
+      label: Mod/Plugin List
+      description: A list of all mods/plugins you are running.
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: Describe the issue you experienced in as much detail as possible.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: Reproduction Steps
+      description: Steps to reproduce the bug.
+      value: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: Describe what you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs and Configs
+      description: Feel free to include any relevant logs or config files by uploading to https://gist.github.com/ and sharing the links below.
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra-info
+    attributes:
+      label: Extra Info
+      description: Please include any other relevant details in the space below.
+      placeholder: "I was able to reproduce this only when Sozin's comet comes into orbit."
+    validations:
+      required: false
