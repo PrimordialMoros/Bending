@@ -31,7 +31,7 @@ public final class ItemDisplayBuilder extends AbstractDisplayBuilder<Item, ItemD
     super(ItemDisplayImpl::new);
   }
 
-  public ItemDisplayBuilder(ItemDisplay display) {
+  ItemDisplayBuilder(ItemDisplay display) {
     super(ItemDisplayImpl::new, display);
     displayType(display.displayType());
   }

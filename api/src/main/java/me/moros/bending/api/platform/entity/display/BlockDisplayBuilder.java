@@ -26,7 +26,7 @@ public final class BlockDisplayBuilder extends AbstractDisplayBuilder<BlockState
     super(BlockDisplayImpl::new);
   }
 
-  public BlockDisplayBuilder(BlockDisplay display) {
+  BlockDisplayBuilder(BlockDisplay display) {
     super(BlockDisplayImpl::new, display);
   }
 }

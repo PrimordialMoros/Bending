@@ -38,7 +38,7 @@ public final class TextDisplayBuilder extends AbstractDisplayBuilder<Component, 
     super(TextDisplayImpl::new);
   }
 
-  public TextDisplayBuilder(TextDisplay display) {
+  TextDisplayBuilder(TextDisplay display) {
     super(TextDisplayImpl::new, display);
     lineWidth(display.lineWidth());
     backgroundColor(display.backgroundColor());

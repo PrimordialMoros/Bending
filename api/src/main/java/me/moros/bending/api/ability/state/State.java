@@ -36,4 +36,16 @@ public interface State extends Updatable {
    * Complete this state.
    */
   void complete();
+
+  /**
+   * Wraps an {@link Updatable} into a {@link State}.
+   * @param action the updatable action
+   * @return the resulting state
+   */
+  static State from(Updatable action) {
+    if (action instanceof StateWrapper state) {
+      return state;
+    }
+    return new StateWrapper(action);
+  }
 }

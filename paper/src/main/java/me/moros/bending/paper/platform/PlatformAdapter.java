@@ -66,7 +66,7 @@ public final class PlatformAdapter {
   static {
     PERSISTENT_DATA_TYPE_MAP = Map.ofEntries(
       entry(PersistentDataType.SHORT), entry(PersistentDataType.FLOAT), entry(PersistentDataType.DOUBLE),
-      entry(BooleanPDT.INSTANCE), entry(PersistentDataType.STRING),
+      entry(PersistentDataType.BOOLEAN), entry(PersistentDataType.STRING),
       entry(PersistentDataType.BYTE), entry(PersistentDataType.BYTE_ARRAY),
       entry(PersistentDataType.INTEGER), entry(PersistentDataType.INTEGER_ARRAY),
       entry(PersistentDataType.LONG), entry(PersistentDataType.LONG_ARRAY),
