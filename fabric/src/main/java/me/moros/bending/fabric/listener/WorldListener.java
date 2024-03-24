@@ -29,6 +29,7 @@ import me.moros.bending.common.util.Initializer;
 import me.moros.bending.fabric.platform.FabricMetadata;
 import me.moros.bending.fabric.platform.entity.FabricEntity;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
+import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -42,7 +43,9 @@ public record WorldListener(Supplier<Game> gameSupplier) implements FabricListen
     var early = new ResourceLocation("bending", "early");
     ServerWorldEvents.UNLOAD.register(this::onWorldUnload);
     ServerEntityWorldChangeEvents.AFTER_ENTITY_CHANGE_WORLD.register(early, this::onChangeWorld);
+    ServerEntityWorldChangeEvents.AFTER_ENTITY_CHANGE_WORLD.addPhaseOrdering(early, Event.DEFAULT_PHASE);
     ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register(early, this::onChangeWorld);
+    ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.addPhaseOrdering(early, Event.DEFAULT_PHASE);
   }
 
   private void onWorldUnload(MinecraftServer server, ServerLevel world) {

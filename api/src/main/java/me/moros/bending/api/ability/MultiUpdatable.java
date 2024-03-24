@@ -27,7 +27,6 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import me.moros.bending.api.ability.state.State;
-import me.moros.bending.api.ability.state.StateWrapper;
 
 /**
  * Wraps a collection of {@link Updatable}.
@@ -70,7 +69,7 @@ public class MultiUpdatable<T extends Updatable> implements Updatable, Iterable<
   }
 
   public State asState() {
-    return new StateWrapper(this);
+    return State.from(this);
   }
 
   @Override

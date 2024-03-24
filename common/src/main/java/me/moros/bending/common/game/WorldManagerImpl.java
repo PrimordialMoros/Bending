@@ -127,8 +127,8 @@ public final class WorldManagerImpl implements WorldManager {
 
   @ConfigSerializable
   private static final class Config implements Configurable {
-    @Comment("You can specify worlds by their name")
-    private List<String> disabledWorlds = List.of("DisabledBendingWorld");
+    @Comment("Worlds are specified by their key, e.g. minecraft:overworld")
+    private List<String> disabledWorlds = List.of("disabledbendingworld");
 
     @Override
     public List<String> path() {

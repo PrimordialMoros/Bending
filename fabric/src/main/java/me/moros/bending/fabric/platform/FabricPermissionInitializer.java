@@ -36,9 +36,9 @@ public class FabricPermissionInitializer extends PermissionInitializer {
   private final Map<String, TriState> defaultPermissions = new ConcurrentHashMap<>();
 
   public FabricPermissionInitializer() {
-    var early = new ResourceLocation("bending", "early");
-    PermissionCheckEvent.EVENT.register(early, this::onPermissionCheck);
-    PermissionCheckEvent.EVENT.addPhaseOrdering(early, Event.DEFAULT_PHASE);
+    var fallback = new ResourceLocation("bending", "fallback");
+    PermissionCheckEvent.EVENT.register(fallback, this::onPermissionCheck);
+    PermissionCheckEvent.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, fallback);
   }
 
   private TriState onPermissionCheck(SharedSuggestionProvider source, String permission) {
