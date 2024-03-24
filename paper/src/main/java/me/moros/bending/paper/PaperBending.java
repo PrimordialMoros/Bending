@@ -22,7 +22,6 @@ package me.moros.bending.paper;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Locale;
-import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
 import me.moros.bending.api.ability.element.Element;
@@ -32,11 +31,11 @@ import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.AbstractBending;
 import me.moros.bending.common.command.Commander;
+import me.moros.bending.common.hook.LuckPermsHook;
 import me.moros.bending.common.hook.MiniPlaceholdersHook;
-import me.moros.bending.common.listener.PresetLimits;
+import me.moros.bending.common.hook.PresetLimits;
 import me.moros.bending.common.logging.Logger;
 import me.moros.bending.common.util.ReflectionUtil;
-import me.moros.bending.paper.hook.LuckPermsHook;
 import me.moros.bending.paper.hook.PlaceholderAPIHook;
 import me.moros.bending.paper.listener.BlockListener;
 import me.moros.bending.paper.listener.ConnectionListener;
@@ -65,6 +64,7 @@ final class PaperBending extends AbstractBending<BendingBootstrap> {
     injectTasker(new PaperExecutor(parent));
     ReflectionUtil.injectStatic(Platform.Holder.class, new BukkitPlatform(logger()));
     new ProtectionInitializer(this).init();
+    registerHooks(parent.getServer());
     load();
     new BukkitPermissionInitializer().init();
 
@@ -80,7 +80,6 @@ final class PaperBending extends AbstractBending<BendingBootstrap> {
     Commander.create(manager, Player.class, this).init();
 
     parent.getServer().getServicesManager().register(Game.class, game, parent, ServicePriority.Normal);
-    registerHooks(parent.getServer());
   }
 
   void onPluginDisable() {
@@ -94,11 +93,10 @@ final class PaperBending extends AbstractBending<BendingBootstrap> {
     if (server.getPluginManager().isPluginEnabled("MiniPlaceholders")) {
       new MiniPlaceholdersHook().init();
     }
-    ToIntFunction<User> limiter = null;
     if (server.getPluginManager().isPluginEnabled("LuckPerms")) {
-      limiter = LuckPermsHook.register(server.getServicesManager());
+      var hook = LuckPermsHook.register(Player::getUniqueId);
+      registerNamedAddon(PresetLimits.NAME, hook::presetLimits);
     }
-    PresetLimits.register(game.eventBus(), limiter);
     setupCustomCharts(new Metrics(parent, 8717));
   }
 

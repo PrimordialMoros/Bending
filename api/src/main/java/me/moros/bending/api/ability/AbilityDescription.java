@@ -323,7 +323,7 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
         throw new IllegalStateException("Activation methods cannot be empty");
       }
       if (displayName == null) {
-         displayName = Component.text(name, element.color());
+        displayName = Component.text(name, element.color());
       }
     }
 

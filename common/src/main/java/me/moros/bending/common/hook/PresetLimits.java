@@ -17,18 +17,21 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.common.listener;
+package me.moros.bending.common.hook;
 
 import java.util.function.ToIntFunction;
 
+import me.moros.bending.api.addon.Addon;
 import me.moros.bending.api.config.BendingProperties;
-import me.moros.bending.api.event.EventBus;
 import me.moros.bending.api.event.PresetRegisterEvent;
+import me.moros.bending.api.game.Game;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.locale.Message;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
-public record PresetLimits(ToIntFunction<User> maxPresetsFn) {
+public record PresetLimits(ToIntFunction<User> maxPresetsFn) implements Addon {
+  public static final String NAME = "preset-limits";
+  private static final Addon DEFAULT_LIMITS = new PresetLimits(u -> BendingProperties.instance().maxPresets());
+
   private void onPresetRegister(PresetRegisterEvent event) {
     int maxPresets = maxPresetsFn.applyAsInt(event.user());
     if (maxPresets > 0 && event.user().presetSize() >= maxPresets) {
@@ -37,8 +40,16 @@ public record PresetLimits(ToIntFunction<User> maxPresetsFn) {
     }
   }
 
-  public static void register(EventBus eventBus, @Nullable ToIntFunction<User> limiter) {
-    var listener = new PresetLimits(limiter == null ? u -> BendingProperties.instance().maxPresets() : limiter);
-    eventBus.subscribe(PresetRegisterEvent.class, listener::onPresetRegister);
+  @Override
+  public void load() {
+  }
+
+  @Override
+  public void enable(Game game) {
+    game.eventBus().subscribe(PresetRegisterEvent.class, this::onPresetRegister);
+  }
+
+  public static Addon defaultLimits() {
+    return DEFAULT_LIMITS;
   }
 }

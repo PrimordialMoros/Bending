@@ -23,13 +23,17 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.ToIntFunction;
 
 import me.moros.bending.api.ability.element.Element;
+import me.moros.bending.api.addon.Addon;
 import me.moros.bending.api.config.BendingProperties;
+import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.context.ContextCalculator;
 import net.luckperms.api.context.ContextConsumer;
 import net.luckperms.api.context.ContextManager;
@@ -38,9 +42,14 @@ import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.user.UserManager;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public abstract class AbstractLuckPermsHook<T> {
-  protected AbstractLuckPermsHook(ContextManager manager) {
-    setupContexts(manager);
+public final class LuckPermsHook<T> {
+  private final Function<T, UUID> uuidExtractor;
+  private final UserManager userManager;
+
+  private LuckPermsHook(Function<T, UUID> uuidExtractor, LuckPerms luckPerms) {
+    this.uuidExtractor = uuidExtractor;
+    this.userManager = luckPerms.getUserManager();
+    setupContexts(luckPerms.getContextManager());
   }
 
   private void setupContexts(ContextManager manager) {
@@ -54,7 +63,20 @@ public abstract class AbstractLuckPermsHook<T> {
     );
   }
 
-  protected abstract @Nullable User adapt(T user);
+  private @Nullable User adapt(T user) {
+    return Registries.BENDERS.get(uuidExtractor.apply(user));
+  }
+
+  private int limits(User user) {
+    var lpUser = userManager.getUser(user.uuid());
+    return lpUser != null ? lpUser.getCachedData().getMetaData(lpUser.getQueryOptions())
+      .getMetaValue("bending-max-presets", Integer::parseInt)
+      .orElseGet(BendingProperties.instance()::maxPresets) : 0;
+  }
+
+  public Addon presetLimits() {
+    return new PresetLimits(this::limits);
+  }
 
   private final class Builder {
     private final String key;
@@ -114,13 +136,7 @@ public abstract class AbstractLuckPermsHook<T> {
     }
   }
 
-  public record LPPresetMeta(UserManager userManager) implements ToIntFunction<User> {
-    @Override
-    public int applyAsInt(User user) {
-      var lpUser = userManager.getUser(user.uuid());
-      return lpUser != null ? lpUser.getCachedData().getMetaData(lpUser.getQueryOptions())
-        .getMetaValue("bending-max-presets", Integer::parseInt)
-        .orElseGet(BendingProperties.instance()::maxPresets) : 0;
-    }
+  public static <T> LuckPermsHook<T> register(Function<T, UUID> uuidExtractor) throws IllegalStateException {
+    return new LuckPermsHook<>(uuidExtractor, LuckPermsProvider.get());
   }
 }

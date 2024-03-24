@@ -22,8 +22,8 @@ package me.moros.bending.common;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.Set;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 import me.moros.bending.api.addon.Addon;
@@ -34,6 +34,7 @@ import me.moros.bending.common.ability.AbilityInitializer;
 import me.moros.bending.common.config.BendingPropertiesImpl;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.bending.common.game.GameImpl;
+import me.moros.bending.common.hook.PresetLimits;
 import me.moros.bending.common.loader.AddonLoader;
 import me.moros.bending.common.locale.TranslationManager;
 import me.moros.bending.common.logging.Logger;
@@ -51,6 +52,7 @@ public abstract class AbstractBending<T> implements Bending {
   private final WatchServiceListener listener;
   private final ConfigManager configManager;
   private final TranslationManager translationManager;
+  private final Map<String, Supplier<Addon>> addonProviders;
   private final AddonLoader addonLoader;
 
   protected Game game;
@@ -66,6 +68,7 @@ public abstract class AbstractBending<T> implements Bending {
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
+    this.addonProviders = new ConcurrentHashMap<>();
     this.addonLoader = AddonLoader.create(logger(), path, getClass().getClassLoader());
     this.configManager.subscribe(new BendingPropertiesImpl(), this::injectProperties);
     new AbilityInitializer().init();
@@ -79,12 +82,13 @@ public abstract class AbstractBending<T> implements Bending {
     ReflectionUtil.injectStatic(BendingProperties.Holder.class, properties);
   }
 
-  protected Collection<Supplier<Addon>> addonProviders() {
-    return Set.of();
+  protected void registerNamedAddon(String name, Supplier<Addon> provider) {
+    addonProviders.putIfAbsent(name, provider);
   }
 
   protected void load() {
-    addonLoader.loadAll(addonProviders());
+    registerNamedAddon(PresetLimits.NAME, PresetLimits::defaultLimits);
+    addonLoader.loadAll(addonProviders.values());
     translationManager.refresh(); // Refresh to load addon translations
     game = new GameImpl(this);
     GameProviderUtil.registerProvider(game);

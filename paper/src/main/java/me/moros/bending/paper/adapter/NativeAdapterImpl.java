@@ -19,6 +19,8 @@
 
 package me.moros.bending.paper.adapter;
 
+import java.util.function.Predicate;
+
 import me.moros.bending.api.adapter.NativeAdapter;
 import me.moros.bending.api.collision.raytrace.BlockRayTrace;
 import me.moros.bending.api.collision.raytrace.Context;
@@ -43,7 +45,8 @@ public final class NativeAdapterImpl implements NativeAdapter {
     var loc = new Location(handle, context.origin().x(), context.origin().y(), context.origin().z());
     var dir = new Vector(context.dir().x(), context.dir().y(), context.dir().z());
     var mode = context.ignoreLiquids() ? FluidCollisionMode.NEVER : FluidCollisionMode.ALWAYS;
-    var result = handle.rayTraceBlocks(loc, dir, context.range(), mode, context.ignorePassable());
+    Predicate<org.bukkit.block.Block> canCollide = b -> !context.ignore(b.getX(), b.getY(), b.getZ());
+    var result = handle.rayTraceBlocks(loc, dir, context.range(), mode, context.ignorePassable(), canCollide);
     if (result == null || result.getHitBlock() == null) {
       return RayTrace.miss(context.endPoint());
     }

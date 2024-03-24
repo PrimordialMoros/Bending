@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
 
 import me.moros.bending.api.addon.Addon;
 import me.moros.bending.api.game.Game;
@@ -33,12 +32,13 @@ import me.moros.bending.api.util.Tasker;
 import me.moros.bending.api.util.functional.Suppliers;
 import me.moros.bending.common.AbstractBending;
 import me.moros.bending.common.command.Commander;
+import me.moros.bending.common.hook.LuckPermsHook;
 import me.moros.bending.common.hook.MiniPlaceholdersHook;
+import me.moros.bending.common.hook.PresetLimits;
 import me.moros.bending.common.logging.Slf4jLogger;
 import me.moros.bending.common.util.Initializer;
 import me.moros.bending.common.util.ReflectionUtil;
 import me.moros.bending.fabric.game.DummyGame;
-import me.moros.bending.fabric.hook.LuckPermsHook;
 import me.moros.bending.fabric.hook.PlaceholderHook;
 import me.moros.bending.fabric.listener.BlockListener;
 import me.moros.bending.fabric.listener.ConnectionListener;
@@ -58,6 +58,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.Person;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import org.incendo.cloud.SenderMapper;
 import org.incendo.cloud.execution.ExecutionCoordinator;
 import org.incendo.cloud.fabric.FabricServerCommandManager;
@@ -103,6 +104,7 @@ final class FabricBending extends AbstractBending<ModContainer> {
   private void onEnable(MinecraftServer server) {
     if (phase == LoadPhase.FIRST) {
       listeners.forEach(Initializer::init);
+      registerAddonProviders();
       registerHooks();
       phase = LoadPhase.LOADING;
     }
@@ -133,7 +135,8 @@ final class FabricBending extends AbstractBending<ModContainer> {
       new MiniPlaceholdersHook().init();
     }
     if (FabricLoader.getInstance().isModLoaded("luckperms")) {
-      LuckPermsHook.register();
+      var hook = LuckPermsHook.register(ServerPlayer::getUUID);
+      registerNamedAddon(PresetLimits.NAME, hook::presetLimits);
     }
   }
 
@@ -151,10 +154,9 @@ final class FabricBending extends AbstractBending<ModContainer> {
     return parent.getMetadata().getVersion().getFriendlyString();
   }
 
-  @Override
-  protected Collection<Supplier<Addon>> addonProviders() {
-    return FabricLoader.getInstance().getEntrypointContainers("bending", Addon.class).stream()
-      .map(c -> Suppliers.lazy(c::getEntrypoint)).toList();
+  private void registerAddonProviders() {
+    FabricLoader.getInstance().getEntrypointContainers("bending", Addon.class)
+      .forEach(c -> registerNamedAddon(c.getProvider().getMetadata().getId(), Suppliers.lazy(c::getEntrypoint)));
   }
 
   private enum LoadPhase {FIRST, LOADING, LOADED}
