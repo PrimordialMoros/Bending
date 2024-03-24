@@ -79,6 +79,7 @@ public record BindCommand<C extends Audience>(Commander<C> commander) implements
     }
     if (!user.hasPermission(ability)) {
       Message.ABILITY_BIND_NO_PERMISSION.send(user, ability.displayName());
+      return;
     }
     if (!user.hasElement(ability.element())) {
       Message.ABILITY_BIND_REQUIRES_ELEMENT.send(user, ability.displayName(), ability.element().displayName());
