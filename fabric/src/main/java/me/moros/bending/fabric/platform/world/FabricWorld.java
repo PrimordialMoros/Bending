@@ -25,6 +25,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
 import me.moros.bending.api.collision.geometry.AABB;
+import me.moros.bending.api.collision.raytrace.BlockRayTrace;
 import me.moros.bending.api.collision.raytrace.CompositeRayTrace;
 import me.moros.bending.api.collision.raytrace.Context;
 import me.moros.bending.api.collision.raytrace.RayTrace;
@@ -153,6 +154,11 @@ public record FabricWorld(ServerLevel handle) implements World {
         context.count(), context.offset().x(), context.offset().y(), context.offset().z(), context.extra()
       );
     }
+  }
+
+  @Override
+  public BlockRayTrace rayTraceBlocks(Context context) {
+    return RayTraceUtil.rayTraceBlocks(context, handle(), this);
   }
 
   @Override

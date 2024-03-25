@@ -21,12 +21,9 @@ package me.moros.bending.common.adapter;
 
 import me.moros.bending.api.ability.DamageSource;
 import me.moros.bending.api.adapter.NativeAdapter;
-import me.moros.bending.api.collision.raytrace.BlockRayTrace;
-import me.moros.bending.api.collision.raytrace.Context;
 import me.moros.bending.api.event.BendingDamageEvent;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.Entity;
-import me.moros.bending.api.platform.world.World;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -47,11 +44,6 @@ public abstract class AbstractNativeAdapter extends AbstractPacketUtil implement
   public boolean setBlockFast(Block block, me.moros.bending.api.platform.block.BlockState state) {
     BlockPos position = new BlockPos(block.blockX(), block.blockY(), block.blockZ());
     return adapt(block.world()).setBlock(position, adapt(state), 2);
-  }
-
-  @Override
-  public BlockRayTrace rayTraceBlocks(World world, Context context) {
-    return RayTraceUtil.rayTraceBlocks(context, adapt(world), world);
   }
 
   @Override

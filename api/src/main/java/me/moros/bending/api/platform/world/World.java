@@ -61,9 +61,7 @@ public interface World extends Keyed, ForwardingAudience, BlockGetter, BlockSett
    * @param context the raytrace context
    * @return the result of the performed raytrace
    */
-  default BlockRayTrace rayTraceBlocks(Context context) {
-    return Platform.instance().nativeAdapter().rayTraceBlocks(this, context);
-  }
+  BlockRayTrace rayTraceBlocks(Context context);
 
   /**
    * Perform a raytrace for entities and return the result/

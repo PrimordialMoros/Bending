@@ -19,41 +19,24 @@
 
 package me.moros.bending.paper.adapter;
 
-import java.util.function.Function;
-
 import me.moros.bending.api.adapter.NativeAdapter;
-import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.common.logging.Logger;
-import me.moros.bending.common.util.ReflectionUtil;
-import me.moros.bending.paper.platform.PlatformAdapter;
 import org.bukkit.Bukkit;
-import org.bukkit.block.data.BlockData;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class AdapterLoader {
-  private AdapterLoader() {
-  }
+  private static final String NATIVE_VERSION = "1.20.4";
 
-  private static @Nullable NativeAdapter findAdapter(String className) {
-    try {
-      Class<?> cls = ReflectionUtil.getClassOrThrow(className);
-      if (!cls.isSynthetic() && NativeAdapter.class.isAssignableFrom(cls)) {
-        Function<BlockState, BlockData> dataMapper = PlatformAdapter::toBukkitData;
-        return (NativeAdapter) cls.getDeclaredConstructor(Function.class).newInstance(dataMapper);
-      }
-    } catch (Exception ignore) {
-    }
-    return null;
+  public static final NativeAdapter DUMMY = new NativeAdapter() {
+  };
+
+  private AdapterLoader() {
   }
 
   public static NativeAdapter loadAdapter(Logger logger) {
     String mcVersion = Bukkit.getServer().getMinecraftVersion();
-    String pathVersion = "v" + mcVersion.replaceAll("\\.", "_");
-    String className = "me.moros.bending.paper.adapter." + pathVersion + ".NativeAdapterImpl";
-    NativeAdapter adapter = findAdapter(className);
-    if (adapter != null) {
+    if (mcVersion.equals(NATIVE_VERSION)) {
       logger.info("Successfully loaded native adapter for version " + mcVersion);
-      return adapter;
+      return new NativeAdapterImpl();
     } else {
       String s = """
                 
@@ -67,6 +50,6 @@ public final class AdapterLoader {
         """.formatted(mcVersion);
       logger.warn(s);
     }
-    return NativeAdapterImpl.DUMMY;
+    return DUMMY;
   }
 }

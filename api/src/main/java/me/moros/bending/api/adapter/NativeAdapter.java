@@ -19,14 +19,11 @@
 
 package me.moros.bending.api.adapter;
 
-import me.moros.bending.api.collision.raytrace.BlockRayTrace;
-import me.moros.bending.api.collision.raytrace.Context;
 import me.moros.bending.api.event.BendingDamageEvent;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.entity.Entity;
-import me.moros.bending.api.platform.world.World;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
@@ -35,8 +32,8 @@ import org.jetbrains.annotations.ApiStatus.Internal;
 /**
  * Interface for all NMS and Packet shenanigans that Bending takes advantage of.
  */
+@Internal
 public interface NativeAdapter extends PacketUtil {
-  @Internal
   default boolean damage(BendingDamageEvent event) {
     return event.target().damage(event.damage(), event.user());
   }
@@ -51,13 +48,6 @@ public interface NativeAdapter extends PacketUtil {
     block.world().setBlockState(block, state);
     return true;
   }
-
-  /**
-   * Perform a raytrace for blocks and return the result.
-   * @param context the raytrace context
-   * @return the result of the performed raytrace
-   */
-  BlockRayTrace rayTraceBlocks(World world, Context context);
 
   private Block eyeBlock(Entity entity) {
     Vector3d loc = entity.location();

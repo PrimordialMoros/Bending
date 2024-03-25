@@ -19,40 +19,52 @@
 
 package me.moros.bending.paper.adapter;
 
-import java.util.function.Predicate;
+import java.util.Objects;
 
-import me.moros.bending.api.adapter.NativeAdapter;
-import me.moros.bending.api.collision.raytrace.BlockRayTrace;
-import me.moros.bending.api.collision.raytrace.Context;
-import me.moros.bending.api.collision.raytrace.RayTrace;
-import me.moros.bending.api.platform.block.Block;
+import io.papermc.paper.adventure.PaperAdventure;
+import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.world.World;
-import me.moros.bending.paper.platform.world.BukkitWorld;
-import me.moros.math.Vector3d;
-import org.bukkit.FluidCollisionMode;
-import org.bukkit.Location;
-import org.bukkit.util.Vector;
+import me.moros.bending.common.adapter.AbstractNativeAdapter;
+import me.moros.bending.paper.platform.PlatformAdapter;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_20_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_20_R3.block.data.CraftBlockData;
 
-public final class NativeAdapterImpl implements NativeAdapter {
-  public static final NativeAdapter DUMMY = new NativeAdapterImpl();
-
-  private NativeAdapterImpl() {
+final class NativeAdapterImpl extends AbstractNativeAdapter {
+  NativeAdapterImpl() {
+    super(MinecraftServer.getServer().getPlayerList());
   }
 
   @Override
-  public BlockRayTrace rayTraceBlocks(World world, Context context) {
-    var handle = ((BukkitWorld) world).handle();
-    var loc = new Location(handle, context.origin().x(), context.origin().y(), context.origin().z());
-    var dir = new Vector(context.dir().x(), context.dir().y(), context.dir().z());
-    var mode = context.ignoreLiquids() ? FluidCollisionMode.NEVER : FluidCollisionMode.ALWAYS;
-    Predicate<org.bukkit.block.Block> canCollide = b -> !context.ignore(b.getX(), b.getY(), b.getZ());
-    var result = handle.rayTraceBlocks(loc, dir, context.range(), mode, context.ignorePassable(), canCollide);
-    if (result == null || result.getHitBlock() == null) {
-      return RayTrace.miss(context.endPoint());
-    }
-    var pos = result.getHitPosition();
-    Vector3d point = Vector3d.of(pos.getX(), pos.getY(), pos.getZ());
-    Block block = world.blockAt(result.getHitBlock().getX(), result.getHitBlock().getY(), result.getHitBlock().getZ());
-    return RayTrace.hit(point, block);
+  protected ServerLevel adapt(World world) {
+    var bukkitWorld = Objects.requireNonNull(Bukkit.getWorld(world.name()));
+    return ((CraftWorld) bukkitWorld).getHandle();
+  }
+
+  @Override
+  protected BlockState adapt(me.moros.bending.api.platform.block.BlockState state) {
+    return ((CraftBlockData) PlatformAdapter.toBukkitData(state)).getState();
+  }
+
+  @Override
+  protected ItemStack adapt(Item item) {
+    return BuiltInRegistries.ITEM.get(new ResourceLocation(item.key().namespace(), item.key().value())).getDefaultInstance();
+  }
+
+  @Override
+  protected Component adapt(net.kyori.adventure.text.Component component) {
+    return PaperAdventure.asVanilla(component);
+  }
+
+  @Override
+  protected int nextEntityId() {
+    return net.minecraft.world.entity.Entity.nextEntityId();
   }
 }

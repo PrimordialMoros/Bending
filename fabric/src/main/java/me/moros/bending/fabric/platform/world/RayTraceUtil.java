@@ -17,7 +17,7 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.common.adapter;
+package me.moros.bending.fabric.platform.world;
 
 import java.util.function.Function;
 

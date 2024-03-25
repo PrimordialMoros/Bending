@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "bending",
-  "version": "${pluginVersion}",
+  "version": "${version}",
   "name": "Bending",
   "description": "Bending mod for Fabric.",
   "contact": {
@@ -26,7 +26,7 @@
   "depends": {
     "fabric": "*",
     "fabricloader": ">=0.15.0",
-    "minecraft": ">=1.20.4",
+    "minecraft": "~${mcVersion}",
     "cloud": "*",
     "adventure-platform-fabric": "*"
   }

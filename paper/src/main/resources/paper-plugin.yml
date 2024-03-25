@@ -1,5 +1,5 @@
 name: Bending
-version: '${pluginVersion}'
+version: '${version}'
 loader: me.moros.bending.paper.BendingLoader
 main: me.moros.bending.paper.BendingBootstrap
 author: Moros

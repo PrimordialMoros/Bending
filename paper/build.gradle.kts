@@ -1,5 +1,6 @@
 plugins {
     id("platform-conventions")
+    alias(libs.plugins.userdev)
     alias(libs.plugins.hangar)
     alias(libs.plugins.run.paper)
 }
@@ -15,7 +16,7 @@ repositories {
 
 dependencies {
     bendingImplementation(projects.bendingCommon)
-    bendingImplementation(projects.adapterV1204) { targetConfiguration = "reobf" }
+    bendingImplementation(projects.bendingNms)
     bendingImplementation(libs.tasker.bukkit)
     bendingImplementation(libs.bstats.bukkit)
     bendingImplementation(libs.cloud.minecraft)
@@ -27,12 +28,12 @@ dependencies {
     runtimeDownload(libs.jdbi)
     runtimeDownload(libs.bundles.flyway)
     runtimeDownload(libs.bundles.drivers.nonstandard)
-    compileOnly(libs.paper)
     compileOnly(libs.grief.prevention)
     compileOnly(libs.towny)
     compileOnly(libs.lwc)
     compileOnly(libs.worldguard)
     compileOnly(libs.papi)
+    paperweight.paperDevBundle("${libs.versions.minecraft.get()}-R0.1-SNAPSHOT")
 }
 
 tasks {
@@ -50,7 +51,7 @@ tasks {
     }
     named<Copy>("processResources") {
         filesMatching("*plugin.yml") {
-            expand("pluginVersion" to project.version)
+            expand("version" to project.version)
         }
     }
 }
@@ -70,7 +71,7 @@ sourceSets.main {
 }
 
 bendingPlatform {
-    productionJar = tasks.shadowJar.flatMap { it.archiveFile }
+    productionJar = tasks.reobfJar.flatMap { it.outputJar }
 }
 
 hangarPublish.publications.register("plugin") {

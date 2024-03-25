@@ -25,9 +25,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
 import me.moros.bending.api.collision.geometry.AABB;
+import me.moros.bending.api.collision.raytrace.BlockRayTrace;
 import me.moros.bending.api.collision.raytrace.CompositeRayTrace;
 import me.moros.bending.api.collision.raytrace.Context;
 import me.moros.bending.api.collision.raytrace.RayTrace;
+import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.block.Lockable;
@@ -44,6 +46,7 @@ import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.Registry;
 import org.bukkit.World.Environment;
@@ -144,6 +147,22 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
       handle().spawnParticle(p, context.position().x(), context.position().y(), context.position().z(), context.count(),
         context.offset().x(), context.offset().y(), context.offset().z(), context.extra(), data, true);
     }
+  }
+
+  @Override
+  public BlockRayTrace rayTraceBlocks(Context context) {
+    var loc = new Location(handle(), context.origin().x(), context.origin().y(), context.origin().z());
+    var dir = new Vector(context.dir().x(), context.dir().y(), context.dir().z());
+    var mode = context.ignoreLiquids() ? FluidCollisionMode.NEVER : FluidCollisionMode.ALWAYS;
+    Predicate<org.bukkit.block.Block> canCollide = b -> !context.ignore(b.getX(), b.getY(), b.getZ());
+    var result = handle().rayTraceBlocks(loc, dir, context.range(), mode, context.ignorePassable(), canCollide);
+    if (result == null || result.getHitBlock() == null) {
+      return RayTrace.miss(context.endPoint());
+    }
+    var pos = result.getHitPosition();
+    Vector3d point = Vector3d.of(pos.getX(), pos.getY(), pos.getZ());
+    Block block = blockAt(result.getHitBlock().getX(), result.getHitBlock().getY(), result.getHitBlock().getZ());
+    return RayTrace.hit(point, block);
   }
 
   @Override

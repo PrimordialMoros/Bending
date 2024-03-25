@@ -35,7 +35,6 @@ import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.logging.Logger;
 import me.moros.bending.paper.adapter.AdapterLoader;
-import me.moros.bending.paper.adapter.NativeAdapterImpl;
 import me.moros.bending.paper.gui.BoardImpl;
 import me.moros.bending.paper.gui.ElementMenu;
 import me.moros.bending.paper.platform.item.BukkitItemBuilder;
@@ -47,7 +46,7 @@ public class BukkitPlatform implements Platform, PlatformFactory {
   public BukkitPlatform(Logger logger) {
     new BukkitRegistryInitializer().init();
     this.adapter = AdapterLoader.loadAdapter(logger);
-    this.hasNativeSupport = adapter == NativeAdapterImpl.DUMMY;
+    this.hasNativeSupport = adapter != AdapterLoader.DUMMY;
   }
 
   @Override

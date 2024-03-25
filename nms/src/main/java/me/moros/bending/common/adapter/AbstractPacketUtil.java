@@ -41,7 +41,6 @@ import me.moros.bending.api.platform.world.World;
 import me.moros.bending.common.adapter.EntityMeta.EntityStatus;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
-import me.moros.math.adapter.Adapters;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
@@ -70,16 +69,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 
 public abstract class AbstractPacketUtil implements PacketUtil {
-  static {
-    Adapters.vector3d().register(Vector3f.class,
-      v -> Vector3d.of(v.x(), v.y(), v.z()),
-      v -> new Vector3f((float) v.x(), (float) v.y(), (float) v.z())
-    );
-  }
-
   private final PlayerList playerList;
 
   protected AbstractPacketUtil(PlayerList playerList) {

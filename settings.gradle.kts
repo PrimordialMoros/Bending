@@ -16,9 +16,6 @@ setupSubproject("bending-nms", "nms")
 setupSubproject("bending-fabric", "fabric")
 setupSubproject("bending-paper", "paper")
 //setupSubproject("bending-sponge", "sponge")
-file("paper/adapters").listFiles { _, name -> name.startsWith("adapter-") }?.forEach {
-    setupSubproject(it.name, it.path)
-}
 include("jmh")
 //include("code-generator")
 

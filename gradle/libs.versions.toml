@@ -7,7 +7,6 @@ configurate = "4.1.2"
 cloud = "2.0.0-beta.4"
 cloud-snapshot = "1.8.0-SNAPSHOT"
 bstats = "3.0.2"
-paper = "1.20.4-R0.1-SNAPSHOT"
 sponge-api = "11.0.0-SNAPSHOT"
 sponge-common = "1.20.1-11.0.0-SNAPSHOT"
 minecraft = "1.20.4"
@@ -81,7 +80,6 @@ sgui = { module = "eu.pb4:sgui", version = "1.4.2+1.20.4" }
 fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.2-SNAPSHOT" }
 
 # Bukkit
-paper = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
 inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.13" }
 grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.2" }
 towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.100.1.18" }
