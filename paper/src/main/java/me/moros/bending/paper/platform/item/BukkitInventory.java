@@ -19,13 +19,12 @@
 
 package me.moros.bending.paper.platform.item;
 
-import me.moros.bending.api.platform.item.ArmorContents;
 import me.moros.bending.api.platform.item.Inventory;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.paper.platform.PlatformAdapter;
 import org.bukkit.inventory.EntityEquipment;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.EquipmentSlot;
 
 public class BukkitInventory implements Inventory {
   private final EntityEquipment handle;
@@ -34,7 +33,7 @@ public class BukkitInventory implements Inventory {
     this.handle = handle;
   }
 
-  public EntityEquipment handle() {
+  private EntityEquipment handle() {
     return handle;
   }
 
@@ -44,23 +43,18 @@ public class BukkitInventory implements Inventory {
   }
 
   @Override
-  public void setItemInMainHand(ItemSnapshot item) {
-    handle().setItemInMainHand(PlatformAdapter.toBukkitItem(item), true);
-  }
-
-  @Override
   public boolean canPlaceBlock() {
     return handle().getItemInMainHand().getType().isBlock() || handle().getItemInOffHand().getType().isBlock();
   }
 
   @Override
-  public ItemSnapshot itemInMainHand() {
-    return new BukkitItem(handle().getItemInMainHand());
+  public ItemSnapshot item(me.moros.bending.api.platform.item.EquipmentSlot slot) {
+    return new BukkitItem(handle().getItem(toBukkit(slot)));
   }
 
   @Override
-  public ItemSnapshot itemInOffHand() {
-    return new BukkitItem(handle().getItemInOffHand());
+  public void item(me.moros.bending.api.platform.item.EquipmentSlot slot, ItemSnapshot item) {
+    handle().setItem(toBukkit(slot), PlatformAdapter.toBukkitItem(item));
   }
 
   @Override
@@ -78,18 +72,14 @@ public class BukkitInventory implements Inventory {
     return false;
   }
 
-  @Override
-  public ArmorContents<ItemSnapshot> armor() {
-    ItemSnapshot h = PlatformAdapter.fromBukkitItem(handle().getHelmet());
-    ItemSnapshot c = PlatformAdapter.fromBukkitItem(handle().getChestplate());
-    ItemSnapshot l = PlatformAdapter.fromBukkitItem(handle().getLeggings());
-    ItemSnapshot b = PlatformAdapter.fromBukkitItem(handle().getBoots());
-    return ArmorContents.of(h, c, l, b);
-  }
-
-  @Override
-  public void equipArmor(ArmorContents<ItemSnapshot> armor) {
-    var a = armor.map(PlatformAdapter::toBukkitItem);
-    handle.setArmorContents(new ItemStack[]{a.boots(), a.leggings(), a.chestplate(), a.helmet()});
+  private static EquipmentSlot toBukkit(me.moros.bending.api.platform.item.EquipmentSlot slot) {
+    return switch (slot) {
+      case MAINHAND -> EquipmentSlot.HAND;
+      case OFFHAND -> EquipmentSlot.OFF_HAND;
+      case FEET -> EquipmentSlot.FEET;
+      case LEGS -> EquipmentSlot.LEGS;
+      case CHEST -> EquipmentSlot.CHEST;
+      case HEAD -> EquipmentSlot.HEAD;
+    };
   }
 }

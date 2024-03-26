@@ -21,6 +21,7 @@ package me.moros.bending.common.ability.earth;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
@@ -76,7 +77,7 @@ public class LavaDisk extends AbilityInstance {
   private Vector3d direction;
   private Collider collider;
 
-  private final ExpiringSet<Entity> affectedEntities = new ExpiringSet<>(1000);
+  private final ExpiringSet<UUID> affectedEntities = new ExpiringSet<>(500);
 
   private boolean launched = false;
   private double distance;
@@ -185,12 +186,11 @@ public class LavaDisk extends AbilityInstance {
   }
 
   private boolean damageEntity(Entity entity, double damage) {
-    if (!affectedEntities.contains(entity)) {
-      affectedEntities.add(entity);
+    if (affectedEntities.add(entity.uuid())) {
+      Particle.LAVA.builder(entity.center()).count(4).offset(0.5).extra(0.1).spawn(user.world());
       BendingEffect.FIRE_TICK.apply(user, entity);
       entity.damage(damage, user, description());
       currentPower -= userConfig.powerDiminishPerEntity;
-      Particle.LAVA.builder(entity.center()).count(4).offset(0.5).extra(0.1).spawn(user.world());
       return true;
     }
     return false;

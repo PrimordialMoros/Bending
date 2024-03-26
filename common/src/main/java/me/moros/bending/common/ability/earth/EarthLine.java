@@ -206,7 +206,6 @@ public class EarthLine extends AbilityInstance {
 
     @Override
     public boolean onEntityHit(Entity entity) {
-      double damage = userConfig.damage;
       switch (mode) {
         case NORMAL -> raiseSpikes();
         case PRISON -> {
@@ -214,7 +213,7 @@ public class EarthLine extends AbilityInstance {
           return true;
         }
       }
-      entity.damage(damage, user, description());
+      entity.damage(userConfig.damage, user, description());
       Vector3d velocity = direction.withY(userConfig.knockup).normalize().multiply(userConfig.knockback);
       entity.applyVelocity(EarthLine.this, velocity);
       return true;

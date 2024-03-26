@@ -19,10 +19,11 @@
 
 package me.moros.bending.common.ability.earth.sequence;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import java.util.function.Predicate;
 
 import me.moros.bending.api.ability.AbilityDescription;
@@ -58,7 +59,7 @@ public class EarthPillars extends AbilityInstance {
   private RemovalPolicy removalPolicy;
 
   private final MultiUpdatable<Pillar> pillars = MultiUpdatable.empty();
-  private final Collection<Entity> affectedEntities = new HashSet<>();
+  private final Set<UUID> affectedEntities = new HashSet<>();
   private Predicate<Block> predicate;
 
   private double factor;
@@ -143,11 +144,7 @@ public class EarthPillars extends AbilityInstance {
 
     @Override
     public boolean onEntityHit(Entity entity) {
-      if (entity.uuid().equals(user.uuid())) {
-        return false;
-      }
-      if (!affectedEntities.contains(entity)) {
-        affectedEntities.add(entity);
+      if (!entity.uuid().equals(user.uuid()) && affectedEntities.add(entity.uuid())) {
         entity.damage(userConfig.damage * factor, user, description());
       }
       entity.applyVelocity(EarthPillars.this, Vector3d.PLUS_J.multiply(userConfig.knockup * factor));

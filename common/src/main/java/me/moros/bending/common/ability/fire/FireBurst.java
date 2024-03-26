@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.api.ability.AbilityDescription;
@@ -64,7 +65,7 @@ public class FireBurst extends AbilityInstance {
   private RemovalPolicy removalPolicy;
 
   private final MultiUpdatable<FireStream> streams = MultiUpdatable.empty();
-  private final Set<Entity> affectedEntities = new HashSet<>();
+  private final Set<UUID> affectedEntities = new HashSet<>();
 
   private boolean released;
   private long startTime;
@@ -179,10 +180,9 @@ public class FireBurst extends AbilityInstance {
 
     @Override
     public boolean onEntityHit(Entity entity) {
-      if (!affectedEntities.contains(entity)) {
-        affectedEntities.add(entity);
-        entity.damage(userConfig.damage, user, description());
+      if (affectedEntities.add(entity.uuid())) {
         BendingEffect.FIRE_TICK.apply(user, entity, userConfig.fireTicks);
+        entity.damage(userConfig.damage, user, description());
         entity.applyVelocity(FireBurst.this, ray.direction().normalize().multiply(0.5));
       }
       return true;

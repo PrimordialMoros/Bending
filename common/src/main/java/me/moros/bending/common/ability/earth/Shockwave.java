@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.api.ability.AbilityDescription;
@@ -68,7 +69,7 @@ public class Shockwave extends AbilityInstance {
   private RemovalPolicy removalPolicy;
 
   private final MultiUpdatable<Ripple> streams = MultiUpdatable.empty();
-  private final Set<Entity> affectedEntities = new HashSet<>();
+  private final Set<UUID> affectedEntities = new HashSet<>();
   private final Set<Block> affectedBlocks = new HashSet<>();
   private final ExpiringSet<Block> recentAffectedBlocks = new ExpiringSet<>(500);
   private Collection<Collider> colliders = List.of();
@@ -147,16 +148,16 @@ public class Shockwave extends AbilityInstance {
   }
 
   private boolean onEntityHit(Entity entity) {
-    if (!affectedEntities.contains(entity)) {
+    if (!affectedEntities.contains(entity.uuid())) {
       Vector3d loc = entity.location();
       AABB entityCollider = entity.bounds();
       for (Collider aabb : colliders) {
         if (aabb.intersects(entityCollider)) {
+          affectedEntities.add(entity.uuid());
           entity.damage(userConfig.damage, user, description());
           double deltaY = Math.min(0.8, 0.4 + loc.distance(origin) / (1.5 * range));
           Vector3d push = loc.subtract(origin).normalize().withY(deltaY).multiply(userConfig.knockback);
           entity.applyVelocity(this, push);
-          affectedEntities.add(entity);
           return true;
         }
       }
@@ -221,7 +222,7 @@ public class Shockwave extends AbilityInstance {
       if (!affectedBlocks.add(block)) {
         return;
       }
-      recentAffectedBlocks.add(block);
+      recentAffectedBlocks.forceAdd(block);
       WorldUtil.tryBreakPlant(block);
       if (MaterialUtil.isFire(block)) {
         block.setType(BlockType.AIR);

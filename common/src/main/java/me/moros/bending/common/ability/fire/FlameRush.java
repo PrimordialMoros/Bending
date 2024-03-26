@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.api.ability.Ability;
@@ -65,7 +66,7 @@ public class FlameRush extends AbilityInstance {
   private RemovalPolicy removalPolicy;
 
   private FireStream stream;
-  private final Set<Entity> affectedEntities = new HashSet<>();
+  private final Set<UUID> affectedEntities = new HashSet<>();
 
   private boolean charging;
   private boolean fullyCharged = false;
@@ -218,10 +219,9 @@ public class FlameRush extends AbilityInstance {
 
     @Override
     public boolean onEntityHit(Entity entity) {
-      if (!affectedEntities.contains(entity)) {
-        affectedEntities.add(entity);
-        entity.damage(userConfig.damage * factor, user, description());
+      if (affectedEntities.add(entity.uuid())) {
         BendingEffect.FIRE_TICK.apply(user, entity);
+        entity.damage(userConfig.damage * factor, user, description());
         entity.applyVelocity(FlameRush.this, streamDirection.normalize().multiply(0.7 * factor));
       }
       return false;

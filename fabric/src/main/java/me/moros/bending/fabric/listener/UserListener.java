@@ -19,21 +19,17 @@
 
 package me.moros.bending.fabric.listener;
 
-import java.util.List;
-import java.util.ListIterator;
 import java.util.UUID;
 import java.util.function.Supplier;
 
 import me.moros.bending.api.ability.ActionType;
 import me.moros.bending.api.ability.Activation;
-import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.temporal.ActionLimiter;
 import me.moros.bending.api.temporal.TempArmor;
 import me.moros.bending.api.user.User;
-import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.api.util.metadata.BlockInteraction;
 import me.moros.bending.api.util.metadata.EntityInteraction;
 import me.moros.bending.api.util.metadata.Metadata;
@@ -101,7 +97,6 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
     ServerPlayerEvents.MODIFY_INVENTORY_SLOT.register(this::onInventoryClick);
     ServerInventoryEvents.HOPPER.register(this::onHopperItemPickup);
     ServerItemEvents.DROP_ITEM.register(this::onDropItem);
-    ServerItemEvents.ENTITY_DROP_LOOT.register(this::onDropLoot);
     ServerItemEvents.ACCESS_LOCK.register(this::onAccessLock);
     ServerEntityEvents.DAMAGE.register(this::onEntityDamage);
     ServerLivingEntityEvents.ALLOW_DAMAGE.register(this::onEntityAllowDamage);
@@ -317,21 +312,6 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
       return !ItemUtil.hasKey(stack, Metadata.ARMOR_KEY);
     }
     return true;
-  }
-
-  private InteractionResultHolder<List<ItemStack>> onDropLoot(LivingEntity entity, DamageSource source, List<ItemStack> items) {
-    if (!disabledWorld(entity) && source instanceof me.moros.bending.api.ability.DamageSource s && s.ability().element() == Element.FIRE) {
-      ListIterator<ItemStack> it = items.listIterator();
-      while (it.hasNext()) {
-        ItemStack item = it.next();
-        var mapped = MaterialUtil.COOKABLE.get(PlatformAdapter.fromFabricItem(item.getItem()));
-        var flamed = mapped == null ? null : PlatformAdapter.toFabricItemType(mapped);
-        if (flamed != null) {
-          it.set(new ItemStack(flamed, item.getCount()));
-        }
-      }
-    }
-    return InteractionResultHolder.pass(items);
   }
 
   private TriState onAccessLock(Player player, String lock, ItemStack item) {

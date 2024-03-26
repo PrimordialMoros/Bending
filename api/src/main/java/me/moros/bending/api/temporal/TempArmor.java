@@ -19,7 +19,9 @@
 
 package me.moros.bending.api.temporal;
 
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,6 +29,7 @@ import java.util.UUID;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.item.ArmorContents;
+import me.moros.bending.api.platform.item.EquipmentSlot;
 import me.moros.bending.api.platform.item.Inventory;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
@@ -39,22 +42,20 @@ public final class TempArmor extends Temporary {
   public static final TemporalManager<UUID, TempArmor> MANAGER = new TemporalManager<>(600);
 
   private final LivingEntity entity;
-  private final ArmorContents<ItemSnapshot> snapshot;
   private boolean reverted = false;
 
-  private TempArmor(LivingEntity entity, ArmorContents<ItemSnapshot> armor, int ticks) {
-    Inventory equipment = Objects.requireNonNull(entity.inventory());
+  private TempArmor(LivingEntity entity, int ticks) {
     this.entity = entity;
-    this.snapshot = equipment.armor().map(TempArmor::filter);
-    equipment.equipArmor(armor);
     MANAGER.addEntry(entity.uuid(), this, ticks);
   }
 
   /**
    * @return an unmodifiable view of the snapshot
    */
+  @Deprecated(forRemoval = true)
   public ArmorContents<ItemSnapshot> snapshot() {
-    return snapshot;
+    var air = ItemSnapshot.AIR.get();
+    return ArmorContents.of(air, air, air, air);
   }
 
   @Override
@@ -63,7 +64,12 @@ public final class TempArmor extends Temporary {
       return false;
     }
     reverted = true;
-    Objects.requireNonNull(entity.inventory()).equipArmor(snapshot);
+    Inventory equipment = Objects.requireNonNull(entity.inventory());
+    for (var slot : EquipmentSlot.ARMOR) {
+      if (equipment.item(slot).has(Metadata.ARMOR_KEY)) {
+        equipment.item(slot, ItemSnapshot.AIR.get());
+      }
+    }
     MANAGER.removeEntry(entity.uuid());
     return true;
   }
@@ -77,7 +83,7 @@ public final class TempArmor extends Temporary {
       .head(Item.LEATHER_HELMET)
       .chest(Item.LEATHER_CHESTPLATE)
       .legs(Item.LEATHER_LEGGINGS)
-      .boots(Item.LEATHER_BOOTS);
+      .feet(Item.LEATHER_BOOTS);
   }
 
   public static Builder iron() {
@@ -85,7 +91,7 @@ public final class TempArmor extends Temporary {
       .head(Item.IRON_HELMET)
       .chest(Item.IRON_CHESTPLATE)
       .legs(Item.IRON_LEGGINGS)
-      .boots(Item.IRON_BOOTS);
+      .feet(Item.IRON_BOOTS);
   }
 
   public static Builder gold() {
@@ -93,35 +99,45 @@ public final class TempArmor extends Temporary {
       .head(Item.GOLDEN_HELMET)
       .chest(Item.GOLDEN_CHESTPLATE)
       .legs(Item.GOLDEN_LEGGINGS)
-      .boots(Item.GOLDEN_BOOTS);
+      .feet(Item.GOLDEN_BOOTS);
   }
 
   public static final class Builder {
-    private final Item[] armor;
+    private final EnumMap<EquipmentSlot, Item> armor;
     private long duration = 30000;
 
     private Builder() {
-      this.armor = new Item[4];
+      this.armor = new EnumMap<>(EquipmentSlot.class);
+    }
+
+    private Builder safePutItem(EquipmentSlot slot, @Nullable Item material) {
+      if (material == null) {
+        armor.remove(slot);
+      } else {
+        armor.put(slot, material);
+      }
+      return this;
     }
 
     public Builder head(@Nullable Item material) {
-      armor[0] = material;
-      return this;
+      return safePutItem(EquipmentSlot.HEAD, material);
     }
 
     public Builder chest(@Nullable Item material) {
-      armor[1] = material;
-      return this;
+      return safePutItem(EquipmentSlot.CHEST, material);
     }
 
     public Builder legs(@Nullable Item material) {
-      armor[2] = material;
-      return this;
+      return safePutItem(EquipmentSlot.LEGS, material);
     }
 
+    public Builder feet(@Nullable Item material) {
+      return safePutItem(EquipmentSlot.FEET, material);
+    }
+
+    @Deprecated(forRemoval = true)
     public Builder boots(@Nullable Item material) {
-      armor[3] = material;
-      return this;
+      return feet(material);
     }
 
     public Builder duration(long duration) {
@@ -131,23 +147,27 @@ public final class TempArmor extends Temporary {
 
     public Optional<TempArmor> build(User user) {
       Objects.requireNonNull(user);
-      if (MANAGER.isTemp(user.uuid()) || user.inventory() == null) {
+      Inventory inv = user.inventory();
+      if (MANAGER.isTemp(user.uuid()) || inv == null) {
         return Optional.empty();
       }
-      ItemSnapshot[] armorItems = new ItemSnapshot[4];
-      for (int i = 0; i < 4; i++) {
-        Item mat = armor[i];
-        if (mat != null) {
-          ItemSnapshot builtItem = Platform.instance().factory().itemBuilder(mat)
-            .name(Component.text("Bending Armor")).lore(List.of(Component.text("Temporary")))
-            .unbreakable(true).meta(Metadata.ARMOR_KEY, true).build();
-          armorItems[i] = builtItem;
-        } else {
-          ItemSnapshot.AIR.get();
-        }
+      var armorItems = armor.entrySet().stream()
+        .filter(e -> inv.item(e.getKey()).type() == Item.AIR)
+        .map(e -> Map.entry(e.getKey(), createArmorItem(e.getValue())))
+        .toList();
+      if (armorItems.isEmpty()) {
+        return Optional.empty();
       }
-      var newArmor = ArmorContents.of(armorItems[0], armorItems[1], armorItems[2], armorItems[3]);
-      return Optional.of(new TempArmor(user.entity(), newArmor, MANAGER.fromMillis(duration)));
+      for (var entry : armorItems) {
+        inv.item(entry.getKey(), entry.getValue());
+      }
+      return Optional.of(new TempArmor(user.entity(), MANAGER.fromMillis(duration)));
+    }
+
+    private ItemSnapshot createArmorItem(Item type) {
+      return Platform.instance().factory().itemBuilder(type)
+        .name(Component.text("Bending Armor")).lore(List.of(Component.text("Temporary")))
+        .unbreakable(true).meta(Metadata.ARMOR_KEY, true).build();
     }
   }
 

@@ -138,11 +138,11 @@ public final class BendingExplosion {
       Vector3d entityCenter = entity.center();
       double distance = center.distance(entityCenter);
       double distanceFactor = (distance <= halfSize) ? 1 : (1 - (distance - halfSize) / size);
-      if (ignoreInside == null || !ignoreInside.contains(entityCenter)) {
-        entity.damage(damage * distanceFactor, user, desc);
-        BendingEffect.FIRE_TICK.apply(user, entity, fireTicks);
-      } else {
+      if (ignoreInside != null && ignoreInside.contains(entityCenter)) {
         distanceFactor *= 0.75; // Reduce impact for those inside the collider
+      } else {
+        BendingEffect.FIRE_TICK.apply(user, entity, fireTicks);
+        entity.damage(damage * distanceFactor, user, desc);
       }
       double knockback = BendingProperties.instance().explosionKnockback(sizeFactor * distanceFactor);
       if (entity.uuid().equals(user.uuid())) {

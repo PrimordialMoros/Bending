@@ -31,11 +31,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_20_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_20_R3.block.data.CraftBlockData;
+import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity;
 
 final class NativeAdapterImpl extends AbstractNativeAdapter {
   NativeAdapterImpl() {
@@ -51,6 +53,11 @@ final class NativeAdapterImpl extends AbstractNativeAdapter {
   @Override
   protected BlockState adapt(me.moros.bending.api.platform.block.BlockState state) {
     return ((CraftBlockData) PlatformAdapter.toBukkitData(state)).getState();
+  }
+
+  @Override
+  protected Entity adapt(me.moros.bending.api.platform.entity.Entity entity) {
+    return ((CraftEntity) PlatformAdapter.toBukkitEntity(entity)).getHandle();
   }
 
   @Override

@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.api.ability.AbilityDescription;
@@ -67,8 +68,8 @@ public class FireWall extends AbilityInstance {
   private Collection<Vector3d> bases;
   private final Map<Block, TempLight> lights = new HashMap<>();
   private Collection<TempLight> oldLights;
-  private final ExpiringSet<Entity> cachedEntities = new ExpiringSet<>(500);
-  private final ExpiringSet<Entity> damagedEntities = new ExpiringSet<>(500);
+  private final ExpiringSet<UUID> cachedEntities = new ExpiringSet<>(500);
+  private final ExpiringSet<UUID> damagedEntities = new ExpiringSet<>(500);
   private OBB collider;
   private Vector3d center;
   private Vector3d direction;
@@ -243,11 +244,10 @@ public class FireWall extends AbilityInstance {
       return true;
     }
 
-    if (!cachedEntities.contains(entity)) {
+    if (!cachedEntities.contains(entity.uuid())) {
       if (Registries.BENDERS.getIfExists(entity.uuid()).map(HeatControl::canBurn).orElse(true)) {
         BendingEffect.FIRE_TICK.apply(user, entity);
-        if (!damagedEntities.contains(entity)) {
-          damagedEntities.add(entity);
+        if (damagedEntities.add(entity.uuid())) {
           entity.damage(userConfig.damage, user, description());
         }
         Vector3d pos = entity.center();
@@ -257,7 +257,7 @@ public class FireWall extends AbilityInstance {
         entity.applyVelocity(this, velocity);
         return true;
       } else {
-        cachedEntities.add(entity);
+        cachedEntities.add(entity.uuid());
       }
     }
     return false;

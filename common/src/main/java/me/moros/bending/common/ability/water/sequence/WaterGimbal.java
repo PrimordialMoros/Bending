@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.api.ability.AbilityDescription;
@@ -267,7 +268,7 @@ public class WaterGimbal extends AbilityInstance {
   }
 
   private class GimbalStream extends BlockStream {
-    private final Set<Entity> affectedEntities = new HashSet<>();
+    private final Set<UUID> affectedEntities = new HashSet<>();
 
     public GimbalStream() {
       super(user, BlockType.WATER, userConfig.range, 16);
@@ -275,11 +276,10 @@ public class WaterGimbal extends AbilityInstance {
 
     @Override
     public boolean onEntityHit(Entity entity) {
-      if (entity instanceof LivingEntity && !affectedEntities.contains(entity)) {
+      if (entity instanceof LivingEntity && affectedEntities.add(entity.uuid())) {
         entity.damage(userConfig.damage, user, description());
         Vector3d velocity = direction.withY(Math.min(direction.y(), userConfig.knockup)).multiply(userConfig.knockback);
         entity.applyVelocity(WaterGimbal.this, velocity);
-        affectedEntities.add(entity);
       }
       return false;
     }

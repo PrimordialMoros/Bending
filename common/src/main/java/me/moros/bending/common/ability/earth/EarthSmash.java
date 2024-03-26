@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
@@ -429,7 +430,7 @@ public class EarthSmash extends AbilityInstance {
   }
 
   private final class ShotState implements EarthSmashState {
-    private final Set<Entity> affectedEntities;
+    private final Set<UUID> affectedEntities;
     private final Vector3d origin;
     private final Vector3d direction;
     private Vector3d location;
@@ -473,13 +474,12 @@ public class EarthSmash extends AbilityInstance {
     }
 
     private boolean onEntityHit(Entity entity) {
-      if (affectedEntities.contains(entity)) {
-        return false;
+      if (affectedEntities.add(entity.uuid())) {
+        entity.damage(userConfig.damage, user, description());
+        Vector3d velocity = entity.center().subtract(boulder.center()).withY(userConfig.knockup).normalize();
+        entity.applyVelocity(EarthSmash.this, velocity.multiply(userConfig.knockback));
+        return true;
       }
-      affectedEntities.add(entity);
-      entity.damage(userConfig.damage, user, description());
-      Vector3d velocity = entity.center().subtract(boulder.center()).withY(userConfig.knockup).normalize();
-      entity.applyVelocity(EarthSmash.this, velocity.multiply(userConfig.knockback));
       return false;
     }
 
@@ -521,7 +521,7 @@ public class EarthSmash extends AbilityInstance {
 
   private final class ShatteredState implements EarthSmashState {
     private final Map<TempFallingBlock, ShardType> pieces;
-    private final Set<Entity> affectedEntities;
+    private final Set<UUID> affectedEntities;
 
     private ShatteredState(Map<TempFallingBlock, ShardType> pieces) {
       this.pieces = pieces;
@@ -540,20 +540,17 @@ public class EarthSmash extends AbilityInstance {
     }
 
     private boolean onEntityHit(Entity entity, ShardType type) {
-      if (!affectedEntities.contains(entity)) {
-        affectedEntities.add(entity);
-        entity.damage(userConfig.shatterDamage, user, description());
-        if (entity.valid()) {
-          switch (type) {
-            case MAGMA -> BendingEffect.FIRE_TICK.apply(user, entity, userConfig.fireTicks);
-            case SAND ->
-              EntityUtil.tryAddPotion(entity, PotionEffect.BLINDNESS, FastMath.round(userConfig.sandDuration / 50.0), userConfig.sandPower - 1);
-            case ICE -> BendingEffect.FROST_TICK.apply(user, entity, userConfig.freezeTicks);
-            case MUD ->
-              EntityUtil.tryAddPotion(entity, PotionEffect.SLOWNESS, FastMath.round(userConfig.mudDuration / 50.0), userConfig.mudPower - 1);
-          }
-          return true;
+      if (affectedEntities.add(entity.uuid())) {
+        switch (type) {
+          case MAGMA -> BendingEffect.FIRE_TICK.apply(user, entity, userConfig.fireTicks);
+          case SAND ->
+            EntityUtil.tryAddPotion(entity, PotionEffect.BLINDNESS, FastMath.round(userConfig.sandDuration / 50.0), userConfig.sandPower - 1);
+          case ICE -> BendingEffect.FROST_TICK.apply(user, entity, userConfig.freezeTicks);
+          case MUD ->
+            EntityUtil.tryAddPotion(entity, PotionEffect.SLOWNESS, FastMath.round(userConfig.mudDuration / 50.0), userConfig.mudPower - 1);
         }
+        entity.damage(userConfig.shatterDamage, user, description());
+        return true;
       }
       return false;
     }

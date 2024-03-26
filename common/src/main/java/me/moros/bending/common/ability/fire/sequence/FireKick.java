@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.api.ability.AbilityDescription;
@@ -58,7 +59,7 @@ public class FireKick extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private final Set<Entity> affectedEntities = new HashSet<>();
+  private final Set<UUID> affectedEntities = new HashSet<>();
   private final MultiUpdatable<FireStream> streams = MultiUpdatable.empty();
 
   public FireKick(AbilityDescription desc) {
@@ -124,10 +125,9 @@ public class FireKick extends AbilityInstance {
 
     @Override
     public boolean onEntityHit(Entity entity) {
-      if (!affectedEntities.contains(entity)) {
-        affectedEntities.add(entity);
-        entity.damage(userConfig.damage, user, description());
+      if (affectedEntities.add(entity.uuid())) {
         BendingEffect.FIRE_TICK.apply(user, entity, userConfig.fireTicks);
+        entity.damage(userConfig.damage, user, description());
       }
       return true;
     }

@@ -126,8 +126,8 @@ public class FireWheel extends AbilityInstance {
 
     @Override
     public boolean onEntityHit(Entity entity) {
-      entity.damage(userConfig.damage, user, description());
       BendingEffect.FIRE_TICK.apply(user, entity, userConfig.fireTicks);
+      entity.damage(userConfig.damage, user, description());
       return true;
     }
 

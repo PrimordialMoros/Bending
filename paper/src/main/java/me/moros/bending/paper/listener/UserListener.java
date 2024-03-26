@@ -19,7 +19,6 @@
 
 package me.moros.bending.paper.listener;
 
-import java.util.ListIterator;
 import java.util.UUID;
 
 import com.destroystokyo.paper.event.player.PlayerJumpEvent;
@@ -30,7 +29,6 @@ import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import me.moros.bending.api.ability.ActionType;
 import me.moros.bending.api.ability.Activation;
 import me.moros.bending.api.ability.DamageSource;
-import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.registry.Registries;
@@ -40,7 +38,6 @@ import me.moros.bending.api.temporal.TempBlock;
 import me.moros.bending.api.temporal.TempEntity;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.BendingEffect;
-import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.api.util.metadata.BlockInteraction;
 import me.moros.bending.api.util.metadata.EntityInteraction;
 import me.moros.bending.api.util.metadata.Metadata;
@@ -290,37 +287,19 @@ public record UserListener(Game game) implements Listener, BukkitListener {
 
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
   public void onEntityDeathHigh(EntityDeathEvent event) {
+    TempArmor.MANAGER.get(event.getEntity().getUniqueId()).ifPresent(TempArmor::revert);
     var nsk = PlatformAdapter.nsk(Metadata.ARMOR_KEY);
     event.getDrops().removeIf(item -> item.getItemMeta().getPersistentDataContainer().has(nsk));
-    if (disabledWorld(event) || event instanceof PlayerDeathEvent) {
-      return;
-    }
-    DamageSource cause = DamageUtil.cachedDamageSource(event.getEntity().getUniqueId());
-    if (cause != null && cause.ability().element() == Element.FIRE) {
-      ListIterator<ItemStack> it = event.getDrops().listIterator();
-      while (it.hasNext()) {
-        ItemStack item = it.next();
-        var mapped = MaterialUtil.COOKABLE.get(PlatformAdapter.fromBukkitItem(item.getType()));
-        Material flamed = mapped == null ? null : PlatformAdapter.toBukkitItemMaterial(mapped);
-        if (flamed != null) {
-          it.set(new ItemStack(flamed, item.getAmount()));
-        }
-      }
-    }
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onUserDeath(EntityDeathEvent event) {
     UUID uuid = event.getEntity().getUniqueId();
     ActionLimiter.MANAGER.get(uuid).ifPresent(ActionLimiter::revert);
-    TempArmor.MANAGER.get(uuid).ifPresent(TempArmor::revert);
     if (disabledWorld(event) || event instanceof PlayerDeathEvent) {
       return;
     }
-    User user = Registries.BENDERS.get(uuid);
-    if (user != null) {
-      game.activationController().onUserDeconstruct(user);
-    }
+    Registries.BENDERS.getIfExists(uuid).ifPresent(game.activationController()::onUserDeconstruct);
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)

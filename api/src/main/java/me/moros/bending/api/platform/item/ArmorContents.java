@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
+@Deprecated(forRemoval = true)
 public interface ArmorContents<T> extends Iterable<T> {
   T helmet();
 

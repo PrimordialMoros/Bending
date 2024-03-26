@@ -102,6 +102,7 @@ public class Projectile extends AbilityInstance {
     } else {
       modifiedDamage = damage;
     }
+    entity.applyVelocity(this, projectile.velocity().normalize().multiply(0.4));
     entity.damage(modifiedDamage, user, description());
     return true;
   }

@@ -240,8 +240,8 @@ public class FireBlast extends AbilityInstance implements Explosive {
         explode();
         return true;
       }
-      entity.damage(userConfig.damage * factor, user, description());
       BendingEffect.FIRE_TICK.apply(user, entity, userConfig.fireTicks);
+      entity.damage(userConfig.damage * factor, user, description());
       entity.applyVelocity(FireBlast.this, ray.direction().normalize().multiply(0.5));
       return true;
     }

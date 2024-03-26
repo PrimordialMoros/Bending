@@ -48,8 +48,8 @@ public final class InventoryUtil {
   public static boolean hasMetalArmor(LivingEntity entity) {
     Inventory inv = entity.inventory();
     if (inv != null) {
-      for (ItemSnapshot item : inv.armor()) {
-        if (item != null && MaterialUtil.METAL_ARMOR.isTagged(item)) {
+      for (var slot : EquipmentSlot.ARMOR) {
+        if (MaterialUtil.METAL_ARMOR.isTagged(inv.item(slot))) {
           return true;
         }
       }

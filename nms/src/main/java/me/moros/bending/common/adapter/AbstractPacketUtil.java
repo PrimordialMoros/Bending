@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -85,9 +84,7 @@ public abstract class AbstractPacketUtil implements PacketUtil {
 
   protected abstract BlockState adapt(me.moros.bending.api.platform.block.BlockState state);
 
-  protected net.minecraft.world.entity.Entity adapt(Entity entity) {
-    return Objects.requireNonNull(adapt(entity.world()).getEntity(entity.id()));
-  }
+  protected abstract net.minecraft.world.entity.Entity adapt(Entity entity);
 
   protected abstract ItemStack adapt(Item item);
 

@@ -27,10 +27,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.util.KeyUtil;
+import me.moros.bending.api.util.functional.Suppliers;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.text.Component;
@@ -158,11 +160,12 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
     public static final int MAX_STEPS = 16;
 
     private final List<SequenceStep> steps;
-    private Component instructions;
+    private final Supplier<Component> instructions;
 
     private Sequence(Builder builder, List<SequenceStep> steps) {
       super(builder);
       this.steps = List.copyOf(steps);
+      this.instructions = Suppliers.lazy(this::generateInstructions);
     }
 
     /**
@@ -178,10 +181,7 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
      * @return the instructions
      */
     public Component instructions() {
-      if (instructions == null) {
-        instructions = generateInstructions();
-      }
-      return instructions;
+      return instructions.get();
     }
 
     private Component generateInstructions() {

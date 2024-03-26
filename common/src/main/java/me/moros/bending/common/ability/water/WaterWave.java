@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import me.moros.bending.api.ability.AbilityDescription;
@@ -55,7 +56,7 @@ public class WaterWave extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private final Set<Entity> affectedEntities = new HashSet<>();
+  private final Set<UUID> affectedEntities = new HashSet<>();
 
   private boolean ice = false;
   private long startTime;
@@ -133,8 +134,7 @@ public class WaterWave extends AbilityInstance {
   }
 
   private boolean onEntityHit(Entity entity) {
-    if (!affectedEntities.contains(entity)) {
-      affectedEntities.add(entity);
+    if (affectedEntities.add(entity.uuid())) {
       BendingEffect.FROST_TICK.apply(user, entity, userConfig.freezeTicks);
       entity.damage(userConfig.iceDamage, user, description());
       return true;

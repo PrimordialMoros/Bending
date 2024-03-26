@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.api.ability.AbilityDescription;
@@ -58,7 +59,7 @@ public class FireSpin extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private final Set<Entity> affectedEntities = new HashSet<>();
+  private final Set<UUID> affectedEntities = new HashSet<>();
   private final MultiUpdatable<FireStream> streams = MultiUpdatable.empty();
 
   public FireSpin(AbilityDescription desc) {
@@ -121,10 +122,9 @@ public class FireSpin extends AbilityInstance {
 
     @Override
     public boolean onEntityHit(Entity entity) {
-      if (!affectedEntities.contains(entity)) {
-        affectedEntities.add(entity);
-        entity.damage(userConfig.damage, user, description());
+      if (affectedEntities.add(entity.uuid())) {
         BendingEffect.FIRE_TICK.apply(user, entity);
+        entity.damage(userConfig.damage, user, description());
         entity.applyVelocity(FireSpin.this, ray.direction().normalize().multiply(userConfig.knockback));
       }
       return true;

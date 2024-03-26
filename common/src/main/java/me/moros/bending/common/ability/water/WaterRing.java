@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
@@ -80,7 +81,7 @@ public class WaterRing extends AbilityInstance {
   private StateChain states;
   private final List<Block> ring = new ArrayList<>(24);
   private final Collection<IceShard> shards = new ArrayList<>(16);
-  private final ExpiringSet<Entity> affectedEntities = new ExpiringSet<>(500);
+  private final ExpiringSet<UUID> affectedEntities = new ExpiringSet<>(500);
 
   private boolean ready = false;
   private boolean completed = false;
@@ -254,17 +255,17 @@ public class WaterRing extends AbilityInstance {
   }
 
   private boolean checkCollisions(Entity entity) {
-    for (Block block : ring) {
-      if (affectedEntities.contains(entity)) {
-        return false;
-      }
-      AABB blockBounds = AABB.BLOCK_BOUNDS.at(block);
-      AABB entityBounds = entity.bounds();
-      if (MaterialUtil.isWater(block) && !blockBounds.intersects(entityBounds)) {
-        entity.damage(userConfig.damage, user, description());
-        Vector3d velocity = entity.location().subtract(user.eyeLocation()).withY(0).normalize();
-        entity.applyVelocity(WaterRing.this, velocity.multiply(userConfig.knockback));
-        affectedEntities.add(entity);
+    if (!affectedEntities.contains(entity.uuid())) {
+      for (Block block : ring) {
+        AABB blockBounds = AABB.BLOCK_BOUNDS.at(block);
+        AABB entityBounds = entity.bounds();
+        if (MaterialUtil.isWater(block) && !blockBounds.intersects(entityBounds)) {
+          affectedEntities.add(entity.uuid());
+          entity.damage(userConfig.damage, user, description());
+          Vector3d velocity = entity.location().subtract(user.eyeLocation()).withY(0).normalize();
+          entity.applyVelocity(WaterRing.this, velocity.multiply(userConfig.knockback));
+          return true;
+        }
       }
     }
     return false;

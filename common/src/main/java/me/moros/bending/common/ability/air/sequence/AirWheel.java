@@ -22,6 +22,7 @@ package me.moros.bending.common.ability.air.sequence;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.AbilityInstance;
@@ -55,7 +56,7 @@ public class AirWheel extends AbilityInstance {
 
   private Config userConfig;
 
-  private final ExpiringSet<Entity> affectedEntities = new ExpiringSet<>(500);
+  private final ExpiringSet<UUID> affectedEntities = new ExpiringSet<>(500);
 
   private AirScooter scooter;
   private Collider collider;
@@ -113,12 +114,11 @@ public class AirWheel extends AbilityInstance {
   }
 
   private boolean onEntityHit(Entity entity) {
-    if (affectedEntities.contains(entity)) {
-      return false;
+    if (affectedEntities.add(entity.uuid())) {
+      entity.damage(userConfig.damage, user, description());
+      return true;
     }
-    affectedEntities.add(entity);
-    entity.damage(userConfig.damage, user, description());
-    return true;
+    return false;
   }
 
   @Override

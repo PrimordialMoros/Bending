@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
@@ -81,7 +82,7 @@ public class Lightning extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private final Set<Entity> affectedEntities = new HashSet<>();
+  private final Set<UUID> affectedEntities = new HashSet<>();
 
   private Collection<Collider> colliders = new ArrayList<>();
   private ListIterator<LineSegment> arcIterator;
@@ -266,8 +267,7 @@ public class Lightning extends AbilityInstance {
   }
 
   private void onEntityHit(Entity entity) {
-    if (!affectedEntities.contains(entity)) {
-      affectedEntities.add(entity);
+    if (affectedEntities.add(entity.uuid())) {
       if (entity.type() == EntityType.CREEPER && entity instanceof LivingEntity creeper) {
         creeper.setProperty(EntityProperty.CHARGED, true);
       }

@@ -125,7 +125,10 @@ public class EarthArmor extends AbilityInstance {
       case IRON -> TempArmor.iron();
       case GOLD -> TempArmor.gold();
     };
-    armorBuilder.duration(userConfig.duration).build(user);
+    if (armorBuilder.duration(userConfig.duration).build(user).isEmpty()) {
+      removalPolicy = (u, d) -> true;
+      return;
+    }
     int duration = FastMath.round(userConfig.duration / 50.0);
     EntityUtil.tryAddPotion(user, PotionEffect.RESISTANCE, duration, resistance - 1);
     removalPolicy = Policies.builder().add(ExpireRemovalPolicy.of(userConfig.duration)).build();

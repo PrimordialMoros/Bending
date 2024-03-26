@@ -24,11 +24,25 @@ public interface Inventory {
 
   boolean canPlaceBlock();
 
-  ItemSnapshot itemInMainHand();
+  ItemSnapshot item(EquipmentSlot slot);
 
-  void setItemInMainHand(ItemSnapshot item);
+  void item(EquipmentSlot slot, ItemSnapshot item);
 
-  ItemSnapshot itemInOffHand();
+  default ItemSnapshot itemInMainHand() {
+    return item(EquipmentSlot.MAINHAND);
+  }
+
+  default void setItemInMainHand(ItemSnapshot item) {
+    item(EquipmentSlot.MAINHAND, item);
+  }
+
+  default ItemSnapshot itemInOffHand() {
+    return item(EquipmentSlot.OFFHAND);
+  }
+
+  default void setItemInOffHand(ItemSnapshot item) {
+    item(EquipmentSlot.OFFHAND, item);
+  }
 
   default boolean has(Item type) {
     return has(type, 1);
@@ -44,7 +58,20 @@ public interface Inventory {
 
   boolean remove(Item type, int amount);
 
-  ArmorContents<ItemSnapshot> armor();
+  @Deprecated(forRemoval = true)
+  default ArmorContents<ItemSnapshot> armor() {
+    ItemSnapshot h = item(EquipmentSlot.HEAD);
+    ItemSnapshot c = item(EquipmentSlot.CHEST);
+    ItemSnapshot l = item(EquipmentSlot.LEGS);
+    ItemSnapshot b = item(EquipmentSlot.FEET);
+    return ArmorContents.of(h, c, l, b);
+  }
 
-  void equipArmor(ArmorContents<ItemSnapshot> armor);
+  @Deprecated(forRemoval = true)
+  default void equipArmor(ArmorContents<ItemSnapshot> armor) {
+    item(EquipmentSlot.HEAD, armor.helmet());
+    item(EquipmentSlot.CHEST, armor.chestplate());
+    item(EquipmentSlot.LEGS, armor.leggings());
+    item(EquipmentSlot.FEET, armor.boots());
+  }
 }

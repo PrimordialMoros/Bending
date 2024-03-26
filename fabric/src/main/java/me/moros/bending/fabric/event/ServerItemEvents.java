@@ -19,16 +19,10 @@
 
 package me.moros.bending.fabric.event;
 
-import java.util.List;
-
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
@@ -45,17 +39,6 @@ public final class ServerItemEvents {
     return true;
   });
 
-  public static final Event<EntityDropLoot> ENTITY_DROP_LOOT = EventFactory.createArrayBacked(EntityDropLoot.class, callbacks -> (entity, source, items) -> {
-    for (var callback : callbacks) {
-      var result = callback.onDropLoot(entity, source, items);
-      items = result.getObject();
-      if (result.getResult() != InteractionResult.PASS) {
-        return result;
-      }
-    }
-    return InteractionResultHolder.pass(items);
-  });
-
   public static final Event<AccessLock> ACCESS_LOCK = EventFactory.createArrayBacked(AccessLock.class, callbacks -> (player, lock, item) -> {
     for (var callback : callbacks) {
       var result = callback.onAccess(player, lock, item);
@@ -69,11 +52,6 @@ public final class ServerItemEvents {
   @FunctionalInterface
   public interface DropItem {
     boolean onDrop(ServerPlayer player, ItemStack item);
-  }
-
-  @FunctionalInterface
-  public interface EntityDropLoot {
-    InteractionResultHolder<List<ItemStack>> onDropLoot(LivingEntity entity, DamageSource source, List<ItemStack> items);
   }
 
   @FunctionalInterface

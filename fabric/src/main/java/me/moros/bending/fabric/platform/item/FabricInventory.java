@@ -19,7 +19,6 @@
 
 package me.moros.bending.fabric.platform.item;
 
-import me.moros.bending.api.platform.item.ArmorContents;
 import me.moros.bending.api.platform.item.Inventory;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
@@ -42,19 +41,19 @@ public class FabricInventory implements Inventory {
   }
 
   @Override
-  public void setItemInMainHand(ItemSnapshot snapshot) {
-    handle.setItemInHand(InteractionHand.MAIN_HAND, PlatformAdapter.toFabricItem(snapshot));
-  }
-
-  @Override
   public boolean canPlaceBlock() {
     return handle.getItemInHand(InteractionHand.MAIN_HAND).getItem() instanceof BlockItem ||
       handle.getItemInHand(InteractionHand.OFF_HAND).getItem() instanceof BlockItem;
   }
 
   @Override
-  public ItemSnapshot itemInMainHand() {
-    return new FabricItem(handle.getItemInHand(InteractionHand.MAIN_HAND));
+  public ItemSnapshot item(me.moros.bending.api.platform.item.EquipmentSlot slot) {
+    return new FabricItem(handle.getItemBySlot(toVanilla(slot)));
+  }
+
+  @Override
+  public void item(me.moros.bending.api.platform.item.EquipmentSlot slot, ItemSnapshot snapshot) {
+    handle.setItemSlot(toVanilla(slot), PlatformAdapter.toFabricItem(snapshot));
   }
 
   @Override
@@ -77,20 +76,14 @@ public class FabricInventory implements Inventory {
     return false;
   }
 
-  @Override
-  public ArmorContents<ItemSnapshot> armor() {
-    ItemSnapshot h = PlatformAdapter.fromFabricItem(handle.getItemBySlot(EquipmentSlot.HEAD));
-    ItemSnapshot c = PlatformAdapter.fromFabricItem(handle.getItemBySlot(EquipmentSlot.CHEST));
-    ItemSnapshot l = PlatformAdapter.fromFabricItem(handle.getItemBySlot(EquipmentSlot.LEGS));
-    ItemSnapshot b = PlatformAdapter.fromFabricItem(handle.getItemBySlot(EquipmentSlot.FEET));
-    return ArmorContents.of(h, c, l, b);
-  }
-
-  @Override
-  public void equipArmor(ArmorContents<ItemSnapshot> armor) {
-    handle.setItemSlot(EquipmentSlot.HEAD, PlatformAdapter.toFabricItem(armor.helmet()));
-    handle.setItemSlot(EquipmentSlot.CHEST, PlatformAdapter.toFabricItem(armor.chestplate()));
-    handle.setItemSlot(EquipmentSlot.LEGS, PlatformAdapter.toFabricItem(armor.leggings()));
-    handle.setItemSlot(EquipmentSlot.FEET, PlatformAdapter.toFabricItem(armor.boots()));
+  private static EquipmentSlot toVanilla(me.moros.bending.api.platform.item.EquipmentSlot slot) {
+    return switch (slot) {
+      case MAINHAND -> EquipmentSlot.MAINHAND;
+      case OFFHAND -> EquipmentSlot.OFFHAND;
+      case FEET -> EquipmentSlot.FEET;
+      case LEGS -> EquipmentSlot.LEGS;
+      case CHEST -> EquipmentSlot.CHEST;
+      case HEAD -> EquipmentSlot.HEAD;
+    };
   }
 }

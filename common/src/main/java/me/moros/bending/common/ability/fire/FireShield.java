@@ -21,6 +21,7 @@ package me.moros.bending.common.ability.fire;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.api.ability.AbilityDescription;
@@ -61,7 +62,7 @@ public class FireShield extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private final ExpiringSet<Entity> affectedEntities = new ExpiringSet<>(500);
+  private final ExpiringSet<UUID> affectedEntities = new ExpiringSet<>(500);
   private Shield shield;
   private ThreadLocalRandom rand;
 
@@ -130,9 +131,8 @@ public class FireShield extends AbilityInstance {
       return true;
     }
     BendingEffect.FIRE_TICK.apply(user, entity);
-    if (!affectedEntities.contains(entity)) {
+    if (affectedEntities.add(entity.uuid())) {
       entity.damage(userConfig.damage, user, description());
-      affectedEntities.add(entity);
     }
     return false;
   }

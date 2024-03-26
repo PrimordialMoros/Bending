@@ -100,6 +100,6 @@ final class DisplayUtil {
   }
 
   private static Vector3f adapt(Position vector) {
-    return vector.to(Vector3f.class);
+    return new Vector3f((float) vector.x(), (float) vector.y(), (float) vector.z());
   }
 }

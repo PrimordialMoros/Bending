@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.api.ability.AbilityDescription;
@@ -152,7 +153,7 @@ public class Torrent extends AbilityInstance {
   }
 
   private class TorrentStream extends BlockStream {
-    private final Set<Entity> affectedEntities = new HashSet<>();
+    private final Set<UUID> affectedEntities = new HashSet<>();
     private boolean shouldFreeze = false;
     private boolean clicked = false;
 
@@ -166,10 +167,9 @@ public class Torrent extends AbilityInstance {
         if (clicked && !shouldFreeze) {
           shouldFreeze = true;
         }
-        if (!affectedEntities.contains(entity)) {
+        if (affectedEntities.add(entity.uuid())) {
           double damage = shouldFreeze ? userConfig.damage : userConfig.damage + userConfig.freezeBonusDamage;  // apply bonus damage on freeze
           entity.damage(damage, user, description());
-          affectedEntities.add(entity);
         }
       }
       Vector3d velocity = direction.withY(Math.min(direction.y(), userConfig.knockup)).multiply(userConfig.knockback);

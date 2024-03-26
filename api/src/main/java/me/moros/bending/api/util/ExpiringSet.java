@@ -57,8 +57,21 @@ public class ExpiringSet<E> {
    * Temporarily add the given element to the expiring set.
    * @param item the element to add
    */
-  public void add(E item) {
+  public void forceAdd(E item) {
     cache.put(item, false);
+  }
+
+  /**
+   * Temporarily add the given element to the expiring set.
+   * @param item the element to add
+   * @return true if the element was added as a result of this call, false otherwise
+   */
+  public boolean add(E item) {
+    if (contains(item)) {
+      return false;
+    }
+    forceAdd(item);
+    return true;
   }
 
   /**

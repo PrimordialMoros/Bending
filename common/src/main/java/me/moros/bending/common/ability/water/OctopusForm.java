@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.api.ability.AbilityDescription;
@@ -64,7 +65,7 @@ public class OctopusForm extends AbilityInstance {
   private final List<Tentacle> tentacles = new ArrayList<>();
 
   private final Set<TempBlock> affectedBlocks = new HashSet<>();
-  private final ExpiringSet<Entity> affectedEntities = new ExpiringSet<>(500);
+  private final ExpiringSet<UUID> affectedEntities = new ExpiringSet<>(500);
 
   private WaterRing ring;
   private Block lastBlock;
@@ -192,11 +193,10 @@ public class OctopusForm extends AbilityInstance {
   }
 
   private boolean onEntityHit(Entity entity) {
-    if (!affectedEntities.contains(entity)) {
+    if (affectedEntities.add(entity.uuid())) {
       entity.damage(userConfig.damage, user, description());
       Vector3d dir = entity.center().subtract(user.location()).normalize().multiply(userConfig.knockback);
       entity.applyVelocity(this, dir);
-      affectedEntities.add(entity);
     }
     return false;
   }

@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.api.ability.Ability;
@@ -60,7 +61,7 @@ public class AirSwipe extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private final Set<Entity> affectedEntities = new HashSet<>();
+  private final Set<UUID> affectedEntities = new HashSet<>();
   private final MultiUpdatable<AirStream> streams = MultiUpdatable.empty();
 
   private boolean charging;
@@ -185,11 +186,10 @@ public class AirSwipe extends AbilityInstance {
 
     @Override
     public boolean onEntityHit(Entity entity) {
-      if (!affectedEntities.contains(entity)) {
+      if (affectedEntities.add(entity.uuid())) {
         entity.damage(userConfig.damage * factor, user, description());
         Vector3d velocity = entity.center().subtract(ray.position()).normalize().multiply(factor);
         entity.applyVelocity(AirSwipe.this, velocity);
-        affectedEntities.add(entity);
         return true;
       }
       return false;

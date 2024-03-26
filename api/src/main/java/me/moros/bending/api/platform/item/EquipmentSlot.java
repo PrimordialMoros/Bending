@@ -17,28 +17,19 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.util.data;
+package me.moros.bending.api.platform.item;
 
-import java.util.Map;
+import java.util.List;
 
-import me.moros.bending.api.util.ExpiringSet;
+public enum EquipmentSlot {
+  MAINHAND,
+  OFFHAND,
+  FEET,
+  LEGS,
+  CHEST,
+  HEAD;
 
-class BlockingDataContainer extends SimpleDataContainer {
-  private final ExpiringSet<DataKey<?>> cooldowns;
-
-  BlockingDataContainer(Map<DataKey<?>, Object> data, ExpiringSet<DataKey<?>> cooldowns) {
-    super(data);
-    this.cooldowns = cooldowns;
-  }
-
-  @Override
-  public <T> boolean canEdit(DataKey<T> key) {
-    return !cooldowns.contains(key);
-  }
-
-  @Override
-  public <T> void add(DataKey<T> key, T value) {
-    cooldowns.forceAdd(key);
-    super.add(key, value);
-  }
+  public static final List<EquipmentSlot> HAND = List.of(MAINHAND, OFFHAND);
+  public static final List<EquipmentSlot> ARMOR = List.of(FEET, LEGS, CHEST, HEAD);
+  public static final List<EquipmentSlot> VALUES = List.of(values());
 }

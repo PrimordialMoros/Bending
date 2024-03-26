@@ -20,10 +20,11 @@
 package me.moros.bending.common.ability.water;
 
 import java.util.ArrayDeque;
-import java.util.Collection;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.AbilityInstance;
@@ -61,7 +62,7 @@ public class IceSpike extends AbilityInstance {
   private RemovalPolicy removalPolicy;
 
   private final MultiUpdatable<IcePillar> pillars = MultiUpdatable.empty();
-  private final Collection<Entity> affectedEntities = new HashSet<>();
+  private final Set<UUID> affectedEntities = new HashSet<>();
 
   public IceSpike(AbilityDescription desc) {
     super(desc);
@@ -238,14 +239,12 @@ public class IceSpike extends AbilityInstance {
     }
 
     private boolean onEntityHit(Entity entity) {
-      if (!affectedEntities.contains(entity) && !entity.uuid().equals(user.uuid())) {
-        affectedEntities.add(entity);
+      if (!entity.uuid().equals(user.uuid()) && affectedEntities.add(entity.uuid())) {
         BendingEffect.FROST_TICK.apply(user, entity, userConfig.freezeTicks);
         entity.damage(userConfig.damage, user, description());
-        entity.applyVelocity(IceSpike.this, Vector3d.PLUS_J.multiply(userConfig.knockup));
-        return true;
       }
-      return false;
+      entity.applyVelocity(IceSpike.this, Vector3d.PLUS_J.multiply(userConfig.knockup));
+      return true;
     }
   }
 
