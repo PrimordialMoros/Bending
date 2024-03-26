@@ -42,7 +42,9 @@ public final class MaterialUtil {
   private MaterialUtil() {
   }
 
+  @Deprecated(forRemoval = true)
   public static final Map<Item, Item> COOKABLE;
+  @Deprecated(forRemoval = true)
   public static final Map<BlockType, Item> ORES;
   public static final BlockTag WATER_PLANTS = BlockTag.reference(KeyUtil.simple("water-plants"));
   public static final BlockTag BREAKABLE_PLANTS = BlockTag.reference(KeyUtil.simple("breakable-plants"));
@@ -84,16 +86,16 @@ public final class MaterialUtil {
     );
 
     STAINED_TERRACOTTA = BlockTag.builder("stained_terracotta")
-      .endsWith("TERRACOTTA")
+      .endsWith("terracotta")
       .not(BlockType.TERRACOTTA)
-      .notEndsWith("GLAZED_TERRACOTTA")
+      .notEndsWith("glazed_terracotta")
       .build();
 
     SANDSTONES = BlockTag.builder("sandstone")
       .add(BlockType.SANDSTONE, BlockType.CHISELED_SANDSTONE, BlockType.CUT_SANDSTONE, BlockType.SMOOTH_SANDSTONE)
       .build();
 
-    RED_SANDSTONES = BlockTag.builder("red_sandstone").endsWith("RED_SANDSTONE").build();
+    RED_SANDSTONES = BlockTag.builder("red_sandstone").endsWith("red_sandstone").build();
   }
 
   public static void init() {
@@ -122,7 +124,7 @@ public final class MaterialUtil {
       .add(BlockTag.WOOL_CARPETS)
       .add(BlockTag.BUTTONS)
       .add(BlockType.LIGHT, BlockType.AIR, BlockType.CAVE_AIR, BlockType.VOID_AIR, BlockType.COBWEB, BlockType.SNOW)
-      .endsWith("TORCH").buildAndRegister();
+      .endsWith("torch").buildAndRegister();
     BlockTag.builder(LOCKABLE_CONTAINERS.key())
       .add(BlockType.CHEST, BlockType.TRAPPED_CHEST, BlockType.BARREL, BlockType.SHULKER_BOX,
         BlockType.FURNACE, BlockType.BLAST_FURNACE, BlockType.SMOKER, BlockType.BEACON,
@@ -251,7 +253,7 @@ public final class MaterialUtil {
       return BlockType.RED_SAND;
     } else if (STAINED_TERRACOTTA.isTagged(type)) {
       return BlockType.CLAY;
-    } else if (type.name().endsWith("_CONCRETE")) {
+    } else if (type.name().endsWith("_concrete")) {
       BlockType result = BlockType.registry().fromString(type.name() + "_powder");
       return result == null ? BlockType.GRAVEL : result;
     } else if (ORES.containsKey(type)) {

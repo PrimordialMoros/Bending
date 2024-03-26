@@ -66,7 +66,7 @@ public final class EarthMaterials {
       ).buildAndRegister();
     BlockTag.builder(LAVA_BENDABLE.key()).add(BlockType.LAVA, BlockType.MAGMA_BLOCK).buildAndRegister();
     BlockTag.builder(MUD_BENDABLE.key())
-      .add(BlockType.SOUL_SAND, BlockType.SOUL_SOIL, BlockType.BROWN_TERRACOTTA).endsWith("MUD").buildAndRegister();
+      .add(BlockType.SOUL_SAND, BlockType.SOUL_SOIL, BlockType.BROWN_TERRACOTTA).endsWith("mud").buildAndRegister();
     BlockTag.builder(ALL.key())
       .add(EARTH_BENDABLE).add(SAND_BENDABLE).add(METAL_BENDABLE).add(LAVA_BENDABLE).add(MUD_BENDABLE)
       .buildAndRegister();
