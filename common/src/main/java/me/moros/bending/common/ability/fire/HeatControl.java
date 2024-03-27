@@ -35,9 +35,8 @@ import me.moros.bending.api.config.attribute.Modifiable;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockTag;
-import me.moros.bending.api.platform.item.Inventory;
-import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
+import me.moros.bending.api.platform.item.PlayerInventory;
 import me.moros.bending.api.platform.particle.ParticleBuilder;
 import me.moros.bending.api.platform.world.WorldUtil;
 import me.moros.bending.api.temporal.TempBlock;
@@ -105,10 +104,11 @@ public class HeatControl extends AbilityInstance {
     }
     melt.processQueue(1);
     long time = System.currentTimeMillis();
-    if (description().equals(user.selectedAbility())) {
-      Vector3d origin = user.mainHandSide();
-      boolean cooking = user.sneaking() && isHoldingFood() && !MaterialUtil.isWater(user.world().blockAt(origin));
-      if (cooking) {
+    Vector3d handLoc = user.mainHandSide();
+    boolean dryHand = !MaterialUtil.isWater(user.world().blockAt(handLoc));
+    if (dryHand && description().equals(user.selectedAbility())) {
+      boolean sneaking = user.sneaking();
+      if (sneaking) {
         if (startTime <= 0) {
           startTime = time;
         } else if (time > startTime + userConfig.cookInterval && cook()) {
@@ -124,8 +124,8 @@ public class HeatControl extends AbilityInstance {
         startTime = 0;
       }
       Block head = user.eyeBlock();
-      if (cooking || (canLight && head.world().lightLevel(head) < 7)) {
-        ParticleBuilder.fire(user, origin).spawn(user.world());
+      if (sneaking || (canLight && head.world().lightLevel(head) < 7)) {
+        ParticleBuilder.fire(user, handLoc).spawn(user.world());
         createLight(head);
       } else {
         resetLight();
@@ -152,24 +152,12 @@ public class HeatControl extends AbilityInstance {
     }
   }
 
-  private boolean isHoldingFood() {
-    Inventory inv = user.inventory();
-    if (inv != null) {
-      return MaterialUtil.COOKABLE.containsKey(inv.itemInMainHand().type());
-    }
-    return false;
-  }
-
   private boolean cook() {
-    Inventory inv = user.inventory();
-    if (inv != null) {
-      Item uncooked = inv.itemInMainHand().type();
-      Item cooked = MaterialUtil.COOKABLE.get(uncooked);
-      if (cooked != null && inv.remove(uncooked)) {
-        ItemSnapshot item = Platform.instance().factory().itemBuilder(cooked).build();
-        if (inv.add(item) > 0) {
-          user.world().dropItem(user.location(), item);
-        }
+    if (user.inventory() instanceof PlayerInventory inv) {
+      ItemSnapshot uncooked = inv.itemInMainHand();
+      ItemSnapshot cooked = Platform.instance().factory().campfireRecipeCooked(uncooked.type()).orElse(null);
+      if (cooked != null && inv.remove(uncooked.type())) {
+        inv.offer(cooked);
         return true;
       }
     }

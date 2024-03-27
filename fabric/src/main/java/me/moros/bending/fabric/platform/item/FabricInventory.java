@@ -20,7 +20,6 @@
 package me.moros.bending.fabric.platform.item;
 
 import me.moros.bending.api.platform.item.Inventory;
-import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.fabric.platform.PlatformAdapter;
 import net.minecraft.world.InteractionHand;
@@ -33,11 +32,6 @@ public class FabricInventory implements Inventory {
 
   public FabricInventory(LivingEntity handle) {
     this.handle = handle;
-  }
-
-  @Override
-  public int selectedSlot() {
-    return -1;
   }
 
   @Override
@@ -54,26 +48,6 @@ public class FabricInventory implements Inventory {
   @Override
   public void item(me.moros.bending.api.platform.item.EquipmentSlot slot, ItemSnapshot snapshot) {
     handle.setItemSlot(toVanilla(slot), PlatformAdapter.toFabricItem(snapshot));
-  }
-
-  @Override
-  public ItemSnapshot itemInOffHand() {
-    return new FabricItem(handle.getItemInHand(InteractionHand.OFF_HAND));
-  }
-
-  @Override
-  public boolean has(Item type, int amount) {
-    return false;
-  }
-
-  @Override
-  public int add(ItemSnapshot item) {
-    return item.amount();
-  }
-
-  @Override
-  public boolean remove(Item type, int amount) {
-    return false;
   }
 
   private static EquipmentSlot toVanilla(me.moros.bending.api.platform.item.EquipmentSlot slot) {

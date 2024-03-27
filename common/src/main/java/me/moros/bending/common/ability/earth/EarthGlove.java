@@ -37,9 +37,9 @@ import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.EntityType;
 import me.moros.bending.api.platform.entity.LivingEntity;
-import me.moros.bending.api.platform.item.Inventory;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
+import me.moros.bending.api.platform.item.PlayerInventory;
 import me.moros.bending.api.platform.property.EntityProperty;
 import me.moros.bending.api.platform.sound.Sound;
 import me.moros.bending.api.platform.sound.SoundEffect;
@@ -242,16 +242,14 @@ public class EarthGlove extends AbilityInstance {
   }
 
   private Entity buildGlove(Vector3d spawnLocation) {
-    Inventory inv = user.inventory();
-    isMetal = user.hasPermission("bending.metal") && inv != null && inv.has(Item.IRON_INGOT);
+    if (user.inventory() instanceof PlayerInventory inv) {
+      isMetal = user.hasPermission("bending.metal") && inv.remove(Item.IRON_INGOT);
+    }
     ItemSnapshot item = Platform.instance().factory().itemBuilder(isMetal ? Item.IRON_INGOT : Item.STONE).build();
     Entity entity = user.world().dropItem(spawnLocation, item, false);
     entity.invulnerable(true);
     entity.gravity(isMetal);
     entity.add(GLOVE_KEY, this);
-    if (isMetal && inv != null) {
-      inv.remove(Item.IRON_INGOT);
-    }
     return entity;
   }
 

@@ -19,16 +19,18 @@
 
 package me.moros.bending.fabric.platform.item;
 
-import java.util.Collection;
-
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
+import me.moros.bending.api.platform.item.PlayerInventory;
 import me.moros.bending.fabric.platform.PlatformAdapter;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.item.PlayerInventoryStorage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
-public class FabricPlayerInventory extends FabricInventory {
+public class FabricPlayerInventory extends FabricInventory implements PlayerInventory {
   private final Inventory handle;
 
   public FabricPlayerInventory(ServerPlayer player) {
@@ -47,38 +49,21 @@ public class FabricPlayerInventory extends FabricInventory {
   }
 
   @Override
-  public int add(ItemSnapshot item) {
-    var fabricItem = PlatformAdapter.toFabricItem(item);
-    return handle.add(fabricItem) ? 0 : item.amount(); // TODO handle distribution and remaining amount
+  public void offer(ItemSnapshot item) {
+    handle.placeItemBackInInventory(PlatformAdapter.toFabricItem(item));
   }
 
   @Override
   public boolean remove(Item type, int amount) {
-    var mat = PlatformAdapter.toFabricItemType(type);
-    int remaining = amount;
-    if (remaining > 0) {
-      remaining = removeFrom(handle.items, mat, remaining);
-    }
-    if (remaining > 0) {
-      remaining = removeFrom(handle.armor, mat, remaining);
-    }
-    if (remaining > 0) {
-      remaining = removeFrom(handle.offhand, mat, remaining);
-    }
-    return remaining <= 0;
-  }
-
-  private int removeFrom(Collection<ItemStack> collection, net.minecraft.world.item.Item type, int amount) {
-    for (ItemStack item : collection) {
-      if (!item.isEmpty() && item.is(type)) {
-        if (item.getCount() >= amount) {
-          item.setCount(item.getCount() - amount);
-          return 0;
-        } else {
-          amount -= item.getCount();
-        }
+    try (Transaction transaction = Transaction.openOuter()) {
+      var item = PlatformAdapter.toFabricItemType(type);
+      if (PlayerInventoryStorage.of(handle).extract(ItemVariant.of(item), amount, transaction) == amount) {
+        transaction.commit();
+        return true;
+      } else {
+        transaction.abort();
       }
     }
-    return amount;
+    return false;
   }
 }

@@ -36,8 +36,7 @@ public final class InventoryUtil {
    * @return true if the user has an inventory with a water bottle, false otherwise
    */
   public static boolean hasFullBottle(User user) {
-    Inventory inventory = user.inventory();
-    return inventory != null && inventory.has(Item.POTION);
+    return user.inventory() instanceof PlayerInventory inv && inv.has(Item.POTION);
   }
 
   /**

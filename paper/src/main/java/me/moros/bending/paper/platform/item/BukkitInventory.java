@@ -20,7 +20,6 @@
 package me.moros.bending.paper.platform.item;
 
 import me.moros.bending.api.platform.item.Inventory;
-import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.paper.platform.PlatformAdapter;
 import org.bukkit.inventory.EntityEquipment;
@@ -38,11 +37,6 @@ public class BukkitInventory implements Inventory {
   }
 
   @Override
-  public int selectedSlot() {
-    return -1;
-  }
-
-  @Override
   public boolean canPlaceBlock() {
     return handle().getItemInMainHand().getType().isBlock() || handle().getItemInOffHand().getType().isBlock();
   }
@@ -55,21 +49,6 @@ public class BukkitInventory implements Inventory {
   @Override
   public void item(me.moros.bending.api.platform.item.EquipmentSlot slot, ItemSnapshot item) {
     handle().setItem(toBukkit(slot), PlatformAdapter.toBukkitItem(item));
-  }
-
-  @Override
-  public boolean has(Item type, int amount) {
-    return false;
-  }
-
-  @Override
-  public int add(ItemSnapshot item) {
-    return item.amount();
-  }
-
-  @Override
-  public boolean remove(Item type, int amount) {
-    return false;
   }
 
   private static EquipmentSlot toBukkit(me.moros.bending.api.platform.item.EquipmentSlot slot) {

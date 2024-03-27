@@ -20,8 +20,6 @@
 package me.moros.bending.api.platform.item;
 
 public interface Inventory {
-  int selectedSlot();
-
   boolean canPlaceBlock();
 
   ItemSnapshot item(EquipmentSlot slot);
@@ -42,36 +40,5 @@ public interface Inventory {
 
   default void setItemInOffHand(ItemSnapshot item) {
     item(EquipmentSlot.OFFHAND, item);
-  }
-
-  default boolean has(Item type) {
-    return has(type, 1);
-  }
-
-  boolean has(Item type, int amount);
-
-  int add(ItemSnapshot item);
-
-  default boolean remove(Item type) {
-    return remove(type, 1);
-  }
-
-  boolean remove(Item type, int amount);
-
-  @Deprecated(forRemoval = true)
-  default ArmorContents<ItemSnapshot> armor() {
-    ItemSnapshot h = item(EquipmentSlot.HEAD);
-    ItemSnapshot c = item(EquipmentSlot.CHEST);
-    ItemSnapshot l = item(EquipmentSlot.LEGS);
-    ItemSnapshot b = item(EquipmentSlot.FEET);
-    return ArmorContents.of(h, c, l, b);
-  }
-
-  @Deprecated(forRemoval = true)
-  default void equipArmor(ArmorContents<ItemSnapshot> armor) {
-    item(EquipmentSlot.HEAD, armor.helmet());
-    item(EquipmentSlot.CHEST, armor.chestplate());
-    item(EquipmentSlot.LEGS, armor.leggings());
-    item(EquipmentSlot.FEET, armor.boots());
   }
 }

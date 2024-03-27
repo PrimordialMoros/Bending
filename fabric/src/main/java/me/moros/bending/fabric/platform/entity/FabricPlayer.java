@@ -26,7 +26,7 @@ import me.moros.bending.api.locale.Translation;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.platform.entity.player.Player;
-import me.moros.bending.api.platform.item.Inventory;
+import me.moros.bending.api.platform.item.PlayerInventory;
 import me.moros.bending.fabric.platform.item.FabricPlayerInventory;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
@@ -60,7 +60,7 @@ public class FabricPlayer extends FabricLivingEntity implements Player {
   }
 
   @Override
-  public Inventory inventory() {
+  public PlayerInventory inventory() {
     return new FabricPlayerInventory(handle());
   }
 

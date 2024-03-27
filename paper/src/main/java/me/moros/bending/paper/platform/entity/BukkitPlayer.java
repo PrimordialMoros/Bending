@@ -24,7 +24,7 @@ import java.util.Locale;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.platform.entity.player.Player;
-import me.moros.bending.api.platform.item.Inventory;
+import me.moros.bending.api.platform.item.PlayerInventory;
 import me.moros.bending.paper.platform.PlatformAdapter;
 import me.moros.bending.paper.platform.item.BukkitPlayerInventory;
 import net.kyori.adventure.util.TriState;
@@ -56,7 +56,7 @@ public class BukkitPlayer extends BukkitLivingEntity implements Player {
   }
 
   @Override
-  public Inventory inventory() {
+  public PlayerInventory inventory() {
     return new BukkitPlayerInventory(handle());
   }
 

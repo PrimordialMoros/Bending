@@ -19,8 +19,13 @@
 
 package me.moros.bending.fabric.platform;
 
+import java.time.Duration;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import me.moros.bending.api.ability.element.ElementHandler;
 import me.moros.bending.api.adapter.NativeAdapter;
 import me.moros.bending.api.gui.Board;
@@ -28,6 +33,7 @@ import me.moros.bending.api.gui.ElementGui;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.PlatformFactory;
 import me.moros.bending.api.platform.PlatformType;
+import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.DelegatePlayer;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
@@ -38,16 +44,28 @@ import me.moros.bending.fabric.adapter.NativeAdapterImpl;
 import me.moros.bending.fabric.gui.BoardImpl;
 import me.moros.bending.fabric.gui.ElementMenu;
 import me.moros.bending.fabric.platform.item.FabricItemBuilder;
+import net.fabricmc.fabric.api.tag.convention.v1.ConventionalBlockTags;
+import net.fabricmc.fabric.api.tag.convention.v1.TagUtil;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.CampfireCookingRecipe;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.enchantment.Enchantments;
 
 public class FabricPlatform implements Platform, PlatformFactory {
   private final MinecraftServer server;
   private final NativeAdapter adapter;
+  private final LoadingCache<Item, ItemSnapshot> campfireRecipesCache;
 
   public FabricPlatform(MinecraftServer server) {
-    new FabricRegistryInitializer().init();
     this.server = server;
+    new FabricRegistryInitializer().init();
     this.adapter = new NativeAdapterImpl(server);
+    this.campfireRecipesCache = Caffeine.newBuilder()
+      .expireAfterAccess(Duration.ofMinutes(10))
+      .build(this::findCampfireRecipe);
   }
 
   @Override
@@ -94,5 +112,45 @@ public class FabricPlatform implements Platform, PlatformFactory {
   @Override
   public ItemBuilder itemBuilder(ItemSnapshot snapshot) {
     return new FabricItemBuilder(PlatformAdapter.toFabricItem(snapshot), server);
+  }
+
+  @Override
+  public Optional<ItemSnapshot> campfireRecipeCooked(Item input) {
+    var result = campfireRecipesCache.get(input);
+    return result.type() == Item.AIR ? Optional.empty() : Optional.of(result);
+  }
+
+  @Override
+  public Collection<ItemSnapshot> calculateOptimalOreDrops(Block block) {
+    var level = PlatformAdapter.toFabricWorld(block.world());
+    var pos = new BlockPos(block.blockX(), block.blockY(), block.blockZ());
+    var state = level.getBlockState(pos);
+    if (TagUtil.isIn(server.registryAccess(), ConventionalBlockTags.ORES, state.getBlock())) {
+      var item = new ItemStack(Items.DIAMOND_PICKAXE);
+      item.enchant(Enchantments.BLOCK_FORTUNE, 2);
+      return net.minecraft.world.level.block.Block.getDrops(state, level, pos, level.getBlockEntity(pos))
+        .stream().map(PlatformAdapter::fromFabricItem).toList();
+    }
+    return List.of();
+  }
+
+  private ItemSnapshot findCampfireRecipe(Item item) {
+    var fabricItem = PlatformAdapter.toFabricItem(item);
+    for (var recipeHolder : server.getRecipeManager().getAllRecipesFor(RecipeType.CAMPFIRE_COOKING)) {
+      var recipe = recipeHolder.value();
+      if (matchesRecipe(recipe, fabricItem)) {
+        return PlatformAdapter.fromFabricItem(recipe.getResultItem(server.registryAccess()));
+      }
+    }
+    return ItemSnapshot.AIR.get();
+  }
+
+  private boolean matchesRecipe(CampfireCookingRecipe recipe, ItemStack itemStack) {
+    for (var ingredient : recipe.getIngredients()) {
+      if (ingredient.test(itemStack)) {
+        return true;
+      }
+    }
+    return false;
   }
 }

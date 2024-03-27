@@ -19,11 +19,13 @@
 
 package me.moros.bending.api.platform;
 
+import java.util.Collection;
 import java.util.Optional;
 
 import me.moros.bending.api.ability.element.ElementHandler;
 import me.moros.bending.api.gui.Board;
 import me.moros.bending.api.gui.ElementGui;
+import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemBuilder;
 import me.moros.bending.api.platform.item.ItemSnapshot;
@@ -37,4 +39,8 @@ public interface PlatformFactory {
   ItemBuilder itemBuilder(Item item);
 
   ItemBuilder itemBuilder(ItemSnapshot snapshot);
+
+  Optional<ItemSnapshot> campfireRecipeCooked(Item input);
+
+  Collection<ItemSnapshot> calculateOptimalOreDrops(Block block);
 }

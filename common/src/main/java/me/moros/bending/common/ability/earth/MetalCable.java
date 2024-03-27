@@ -40,9 +40,9 @@ import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.EntityType;
-import me.moros.bending.api.platform.item.Inventory;
 import me.moros.bending.api.platform.item.InventoryUtil;
 import me.moros.bending.api.platform.item.Item;
+import me.moros.bending.api.platform.item.PlayerInventory;
 import me.moros.bending.api.platform.particle.Particle;
 import me.moros.bending.api.platform.particle.ParticleBuilder;
 import me.moros.bending.api.platform.sound.SoundEffect;
@@ -261,8 +261,7 @@ public class MetalCable extends AbilityInstance {
     if (InventoryUtil.hasMetalArmor(user)) {
       return true;
     }
-    Inventory inv = user.inventory();
-    return inv != null && inv.has(Item.IRON_INGOT);
+    return user.inventory() instanceof PlayerInventory inv && inv.has(Item.IRON_INGOT);
   }
 
   private void remove() {

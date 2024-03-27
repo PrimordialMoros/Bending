@@ -27,8 +27,8 @@ import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.LivingEntity;
-import me.moros.bending.api.platform.item.Inventory;
 import me.moros.bending.api.platform.item.Item;
+import me.moros.bending.api.platform.item.PlayerInventory;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.text.Component;
 
@@ -38,7 +38,7 @@ public interface Player extends LivingEntity {
   Locale locale();
 
   @Override
-  Inventory inventory();
+  PlayerInventory inventory();
 
   /**
    * Accurately checks if this player is standing on ground using {@link AABB}.

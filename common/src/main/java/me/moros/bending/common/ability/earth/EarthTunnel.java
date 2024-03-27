@@ -19,8 +19,8 @@
 
 package me.moros.bending.common.ability.earth;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
 import me.moros.bending.api.ability.AbilityDescription;
@@ -33,14 +33,12 @@ import me.moros.bending.api.config.attribute.Modifiable;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockType;
-import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.temporal.TempBlock;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.material.EarthMaterials;
-import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
@@ -107,14 +105,7 @@ public class EarthTunnel extends AbilityInstance {
         return UpdateResult.REMOVE;
       }
       if (predicate.test(current)) {
-        if (userConfig.extractOres) {
-          extract(current);
-        }
-        if (userConfig.persistent) {
-          current.setType(BlockType.AIR);
-        } else {
-          TempBlock.air().duration(BendingProperties.instance().earthRevertTime()).build(current);
-        }
+        tryMineBlock(current);
       }
       if (angle >= 360) {
         angle = 0;
@@ -139,48 +130,32 @@ public class EarthTunnel extends AbilityInstance {
     return UpdateResult.CONTINUE;
   }
 
-  private void extract(Block block) {
-    if (TempBlock.MANAGER.isTemp(block)) {
-      return;
-    }
-    BlockType type = block.type();
-    Item drop = MaterialUtil.ORES.get(type);
-    if (drop == null) {
-      return;
-    }
-    int amount = getAmount(drop);
-    if (amount <= 0) {
-      return;
-    }
-
-    BlockType newType;
-    if (type.name().contains("NETHER")) {
-      newType = BlockType.NETHERRACK;
-    } else if (type.name().contains("DEEPSLATE")) {
-      newType = BlockType.DEEPSLATE;
+  private void tryMineBlock(Block block) {
+    Collection<ItemSnapshot> capturedDrops;
+    if (userConfig.extractOres && !TempBlock.MANAGER.isTemp(block)) {
+      capturedDrops = Platform.instance().factory().calculateOptimalOreDrops(block);
+      if (!userConfig.persistent) {
+        BlockType type = block.type();
+        BlockType newType;
+        if (type.name().contains("nether")) {
+          newType = BlockType.NETHERRACK;
+        } else if (type.name().contains("deepslate")) {
+          newType = BlockType.DEEPSLATE;
+        } else {
+          newType = BlockType.STONE;
+        }
+        block.setType(newType);
+      }
     } else {
-      newType = BlockType.STONE;
+      capturedDrops = List.of();
     }
-    block.setType(newType);
-
-    int rand = ThreadLocalRandom.current().nextInt(100);
-    int factor = rand >= 75 ? 3 : rand >= 50 ? 2 : 1;
-    ItemSnapshot item = Platform.instance().factory().itemBuilder(drop).build(factor * amount);
-    block.world().dropItem(block.center(), item);
-  }
-
-  private int getAmount(Item type) {
-    if (type == Item.COAL || type == Item.DIAMOND || type == Item.EMERALD || type == Item.QUARTZ || type == Item.RAW_IRON || type == Item.RAW_GOLD) {
-      return 1;
-    } else if (type == Item.REDSTONE || type == Item.RAW_COPPER) {
-      return 5;
-    } else if (type == Item.GOLD_NUGGET) {
-      return 6;
-    } else if (type == Item.LAPIS_LAZULI) {
-      return 9;
+    if (userConfig.persistent) {
+      block.setType(BlockType.AIR);
     } else {
-      return 0;
+      TempBlock.air().duration(BendingProperties.instance().earthRevertTime()).build(block);
     }
+    Vector3d pos = block.center();
+    capturedDrops.forEach(drop -> block.world().dropItem(pos, drop));
   }
 
   @Override

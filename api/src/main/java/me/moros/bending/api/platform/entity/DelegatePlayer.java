@@ -23,7 +23,7 @@ import java.util.Locale;
 
 import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.platform.entity.player.Player;
-import me.moros.bending.api.platform.item.Inventory;
+import me.moros.bending.api.platform.item.PlayerInventory;
 
 /**
  * Represents a platform player.
@@ -33,7 +33,7 @@ public interface DelegatePlayer extends DelegateLivingEntity, Player {
   Player entity();
 
   @Override
-  default Inventory inventory() {
+  default PlayerInventory inventory() {
     return entity().inventory();
   }
 

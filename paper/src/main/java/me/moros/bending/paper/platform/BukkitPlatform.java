@@ -19,8 +19,15 @@
 
 package me.moros.bending.paper.platform;
 
+import java.time.Duration;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 
+import com.destroystokyo.paper.MaterialTags;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import me.moros.bending.api.ability.element.ElementHandler;
 import me.moros.bending.api.adapter.NativeAdapter;
 import me.moros.bending.api.gui.Board;
@@ -28,6 +35,7 @@ import me.moros.bending.api.gui.ElementGui;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.PlatformFactory;
 import me.moros.bending.api.platform.PlatformType;
+import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemBuilder;
@@ -38,15 +46,25 @@ import me.moros.bending.paper.adapter.AdapterLoader;
 import me.moros.bending.paper.gui.BoardImpl;
 import me.moros.bending.paper.gui.ElementMenu;
 import me.moros.bending.paper.platform.item.BukkitItemBuilder;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.CampfireRecipe;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
 
 public class BukkitPlatform implements Platform, PlatformFactory {
   private final NativeAdapter adapter;
   private final boolean hasNativeSupport;
+  private final LoadingCache<Item, ItemSnapshot> campfireRecipesCache;
 
   public BukkitPlatform(Logger logger) {
     new BukkitRegistryInitializer().init();
     this.adapter = AdapterLoader.loadAdapter(logger);
     this.hasNativeSupport = adapter != AdapterLoader.DUMMY;
+    this.campfireRecipesCache = Caffeine.newBuilder()
+      .expireAfterAccess(Duration.ofMinutes(10))
+      .build(this::findCampfireRecipe);
   }
 
   @Override
@@ -93,5 +111,37 @@ public class BukkitPlatform implements Platform, PlatformFactory {
   @Override
   public ItemBuilder itemBuilder(ItemSnapshot snapshot) {
     return new BukkitItemBuilder(PlatformAdapter.toBukkitItem(snapshot));
+  }
+
+  @Override
+  public Optional<ItemSnapshot> campfireRecipeCooked(Item input) {
+    var result = campfireRecipesCache.get(input);
+    return result.type() == Item.AIR ? Optional.empty() : Optional.of(result);
+  }
+
+  @Override
+  public Collection<ItemSnapshot> calculateOptimalOreDrops(Block block) {
+    var world = PlatformAdapter.toBukkitWorld(block.world());
+    var blockState = world.getBlockState(block.blockX(), block.blockY(), block.blockZ());
+    if (MaterialTags.ORES.isTagged(blockState)) {
+      var item = new ItemStack(Material.DIAMOND_PICKAXE);
+      item.addEnchantment(Enchantment.LOOT_BONUS_BLOCKS, 2);
+      return blockState.getDrops(item).stream()
+        .map(PlatformAdapter::fromBukkitItem).toList();
+    }
+    return List.of();
+  }
+
+  private ItemSnapshot findCampfireRecipe(Item item) {
+    var bukkitItem = PlatformAdapter.toBukkitItem(item);
+    Iterator<Recipe> iterator = Bukkit.recipeIterator();
+    while (iterator.hasNext()) {
+      if (iterator.next() instanceof CampfireRecipe recipe) {
+        if (recipe.getInputChoice().test(bukkitItem)) {
+          return PlatformAdapter.fromBukkitItem(recipe.getResult());
+        }
+      }
+    }
+    return ItemSnapshot.AIR.get();
   }
 }

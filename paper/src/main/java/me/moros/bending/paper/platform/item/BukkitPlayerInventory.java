@@ -19,19 +19,17 @@
 
 package me.moros.bending.paper.platform.item;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Objects;
 
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
+import me.moros.bending.api.platform.item.PlayerInventory;
 import me.moros.bending.paper.platform.PlatformAdapter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class BukkitPlayerInventory extends BukkitInventory {
-  private final PlayerInventory handle;
+public class BukkitPlayerInventory extends BukkitInventory implements PlayerInventory {
+  private final org.bukkit.inventory.PlayerInventory handle;
 
   public BukkitPlayerInventory(Player player) {
     super(player.getEquipment());
@@ -45,64 +43,29 @@ public class BukkitPlayerInventory extends BukkitInventory {
 
   @Override
   public boolean has(Item type, int amount) {
-    var mat = PlatformAdapter.toBukkitItemMaterial(type);
-    return handle.contains(mat, amount);
+    return handle.contains(PlatformAdapter.toBukkitItemMaterial(type), amount);
   }
 
   @Override
-  public int add(ItemSnapshot item) {
+  public void offer(ItemSnapshot item) {
     var bukkitItem = PlatformAdapter.toBukkitItem(item);
-    var result = handle.addItem(bukkitItem);
-    return result.size();
+    int leftover = handle.addItem(bukkitItem).size();
+    if (leftover > 0) {
+      bukkitItem.setAmount(leftover);
+      var player = Objects.requireNonNull(handle.getHolder());
+      player.getWorld().dropItemNaturally(player.getEyeLocation().subtract(0, 0.3, 0), bukkitItem);
+    }
   }
 
   @Override
   public boolean remove(Item type, int amount) {
-    return removeItemAmount(PlatformAdapter.toBukkitItem(type), amount);
-  }
-
-  private boolean removeItemAmount(ItemStack toRemove, int amount) { // TODO redo logic, should only affect if enough items can be removed
-    List<Integer> clearSlots = new ArrayList<>();
-    ItemStack[] items = handle.getContents();
-
-    for (int i = 0; i < items.length; i++) {
-      ItemStack item = items[i];
-      if (isEmpty(item)) {
-        continue;
-      }
-      if (item.isSimilar(toRemove)) {
-        if (item.getAmount() >= amount) {
-          item.setAmount(item.getAmount() - amount);
-          handle.setItem(i, item);
-          for (int slot : clearSlots) {
-            clearSlot(slot);
-          }
-          return true;
-        } else {
-          amount -= item.getAmount();
-          clearSlots.add(i);
-        }
-
-        if (amount == 0) {
-          for (int slot : clearSlots) {
-            clearSlot(slot);
-          }
-          return true;
-        }
-      }
+    ItemStack bukkitItem = PlatformAdapter.toBukkitItem(type);
+    bukkitItem.setAmount(amount);
+    var result = handle.removeItemAnySlot().values().stream().findAny();
+    if (result.isPresent()) {
+      handle.addItem(result.get()); // Add item back
+      return false;
     }
-    return false;
-  }
-
-  private boolean isEmpty(@Nullable ItemStack item) {
-    return item == null || item.getType().isAir();
-  }
-
-  private void clearSlot(int slot) {
-    ItemStack item = handle.getItem(slot);
-    if (!isEmpty(item)) {
-      item.setAmount(0);
-      handle.setItem(slot, item);
-    }
+    return true;
   }
 }

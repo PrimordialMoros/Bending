@@ -28,7 +28,6 @@ import java.util.UUID;
 
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.entity.LivingEntity;
-import me.moros.bending.api.platform.item.ArmorContents;
 import me.moros.bending.api.platform.item.EquipmentSlot;
 import me.moros.bending.api.platform.item.Inventory;
 import me.moros.bending.api.platform.item.Item;
@@ -47,15 +46,6 @@ public final class TempArmor extends Temporary {
   private TempArmor(LivingEntity entity, int ticks) {
     this.entity = entity;
     MANAGER.addEntry(entity.uuid(), this, ticks);
-  }
-
-  /**
-   * @return an unmodifiable view of the snapshot
-   */
-  @Deprecated(forRemoval = true)
-  public ArmorContents<ItemSnapshot> snapshot() {
-    var air = ItemSnapshot.AIR.get();
-    return ArmorContents.of(air, air, air, air);
   }
 
   @Override
@@ -169,9 +159,5 @@ public final class TempArmor extends Temporary {
         .name(Component.text("Bending Armor")).lore(List.of(Component.text("Temporary")))
         .unbreakable(true).meta(Metadata.ARMOR_KEY, true).build();
     }
-  }
-
-  private static ItemSnapshot filter(ItemSnapshot item) {
-    return item.get(Metadata.ARMOR_KEY).isEmpty() ? item : ItemSnapshot.AIR.get();
   }
 }
