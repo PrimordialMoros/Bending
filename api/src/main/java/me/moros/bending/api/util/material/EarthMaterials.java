@@ -31,47 +31,61 @@ import me.moros.bending.api.util.KeyUtil;
  * Group and categorize all earth bendable materials.
  */
 public final class EarthMaterials {
-  public static final ItemTag METAL_KEYS = ItemTag.reference(KeyUtil.simple("metal-keys"));
+  public static final ItemTag METAL_KEYS = ItemTag.reference(KeyUtil.simple("metal_keys"));
 
-  public static final BlockTag EARTH_BENDABLE = BlockTag.reference(KeyUtil.simple("earth-sources"));
-  public static final BlockTag SAND_BENDABLE = BlockTag.reference(KeyUtil.simple("sand-sources"));
-  public static final BlockTag METAL_BENDABLE = BlockTag.reference(KeyUtil.simple("metal-sources"));
-  public static final BlockTag LAVA_BENDABLE = BlockTag.reference(KeyUtil.simple("lava-sources"));
-  public static final BlockTag MUD_BENDABLE = BlockTag.reference(KeyUtil.simple("mud-sources"));
-  private static final BlockTag ALL = BlockTag.reference(KeyUtil.simple("all-earth-sources"));
+  public static final BlockTag EARTH_BENDABLE = BlockTag.reference(KeyUtil.simple("earth_sources"));
+  public static final BlockTag SAND_BENDABLE = BlockTag.reference(KeyUtil.simple("sand_sources"));
+  public static final BlockTag METAL_BENDABLE = BlockTag.reference(KeyUtil.simple("metal_sources"));
+  public static final BlockTag LAVA_BENDABLE = BlockTag.reference(KeyUtil.simple("lava_sources"));
+  public static final BlockTag MUD_BENDABLE = BlockTag.reference(KeyUtil.simple("mud_sources"));
+  private static final BlockTag ALL = BlockTag.reference(KeyUtil.simple("all_earth_sources"));
 
   public static void init() {
     BlockTag.builder(EARTH_BENDABLE.key())
+      .add(BlockTag.reference(KeyUtil.simple("extra_earth_sources")))
       .add(BlockTag.DIRT)
+      .add(BlockTag.BASE_STONE_OVERWORLD)
+      .add(BlockTag.BASE_STONE_NETHER)
       .add(BlockTag.STONE_BRICKS)
       .add(BlockTag.TERRACOTTA)
-      .contains("concrete")
-      .add(BlockType.DIRT_PATH,
-        BlockType.GRANITE, BlockType.POLISHED_GRANITE, BlockType.DIORITE, BlockType.POLISHED_DIORITE,
-        BlockType.ANDESITE, BlockType.POLISHED_ANDESITE, BlockType.GRAVEL, BlockType.CLAY,
-        BlockType.COAL_ORE, BlockType.DEEPSLATE_COAL_ORE, BlockType.IRON_ORE, BlockType.DEEPSLATE_IRON_ORE,
-        BlockType.GOLD_ORE, BlockType.DEEPSLATE_GOLD_ORE, BlockType.REDSTONE_ORE, BlockType.DEEPSLATE_REDSTONE_ORE,
-        BlockType.LAPIS_ORE, BlockType.DEEPSLATE_LAPIS_ORE, BlockType.DIAMOND_ORE, BlockType.DEEPSLATE_DIAMOND_ORE,
-        BlockType.COPPER_ORE, BlockType.DEEPSLATE_COPPER_ORE, BlockType.EMERALD_ORE, BlockType.DEEPSLATE_EMERALD_ORE,
-        BlockType.NETHER_QUARTZ_ORE, BlockType.NETHER_GOLD_ORE, BlockType.NETHERRACK, BlockType.STONE_BRICK_STAIRS,
-        BlockType.STONE, BlockType.COBBLESTONE, BlockType.COBBLESTONE_STAIRS, BlockType.AMETHYST_BLOCK,
-        BlockType.DEEPSLATE, BlockType.CALCITE, BlockType.TUFF, BlockType.SMOOTH_BASALT
-      ).buildAndRegister();
-    BlockTag.builder(SAND_BENDABLE.key()).add(BlockTag.SAND).endsWith("sandstone").buildAndRegister();
+      .add(BlockTag.COAL_ORES).add(BlockTag.IRON_ORES).add(BlockType.GOLD_ORE).add(BlockTag.COPPER_ORES)
+      .add(BlockTag.REDSTONE_ORES).add(BlockTag.LAPIS_ORES).add(BlockTag.DIAMOND_ORES).add(BlockType.EMERALD_ORE)
+      .add(BlockType.NETHER_QUARTZ_ORE, BlockType.NETHER_GOLD_ORE)
+      .add(BlockTag.CONCRETE_POWDER).contains("concrete")
+      .add(BlockType.DIRT_PATH, BlockType.GRAVEL, BlockType.CLAY,
+        BlockType.COBBLESTONE, BlockType.COBBLESTONE_STAIRS, BlockType.STONE_BRICK_STAIRS,
+        BlockType.CALCITE, BlockType.SMOOTH_BASALT, BlockType.AMETHYST_BLOCK, BlockType.QUARTZ_BLOCK,
+        BlockType.POLISHED_GRANITE, BlockType.POLISHED_DIORITE, BlockType.POLISHED_ANDESITE)
+      .buildAndRegister();
+
+    BlockTag.builder(SAND_BENDABLE.key())
+      .add(BlockTag.reference(KeyUtil.simple("extra_sand_sources")))
+      .add(BlockTag.SAND).endsWith("sandstone")
+      .buildAndRegister();
+
     BlockTag.builder(METAL_BENDABLE.key())
+      .add(BlockTag.reference(KeyUtil.simple("extra_metal_sources")))
       .add(BlockType.IRON_BLOCK, BlockType.RAW_IRON_BLOCK,
         BlockType.GOLD_BLOCK, BlockType.RAW_GOLD_BLOCK,
-        BlockType.COPPER_BLOCK, BlockType.RAW_COPPER_BLOCK,
-        BlockType.QUARTZ_BLOCK
+        BlockType.COPPER_BLOCK, BlockType.RAW_COPPER_BLOCK
       ).buildAndRegister();
-    BlockTag.builder(LAVA_BENDABLE.key()).add(BlockType.LAVA, BlockType.MAGMA_BLOCK).buildAndRegister();
+
+    BlockTag.builder(LAVA_BENDABLE.key())
+      .add(BlockTag.reference(KeyUtil.simple("extra_lava_sources")))
+      .add(BlockType.LAVA, BlockType.MAGMA_BLOCK)
+      .buildAndRegister();
+
     BlockTag.builder(MUD_BENDABLE.key())
-      .add(BlockType.SOUL_SAND, BlockType.SOUL_SOIL, BlockType.BROWN_TERRACOTTA).endsWith("mud").buildAndRegister();
+      .add(BlockTag.reference(KeyUtil.simple("extra_mud_sources")))
+      .add(BlockType.SOUL_SAND, BlockType.SOUL_SOIL, BlockType.BROWN_TERRACOTTA).endsWith("mud")
+      .buildAndRegister();
+
     BlockTag.builder(ALL.key())
       .add(EARTH_BENDABLE).add(SAND_BENDABLE).add(METAL_BENDABLE).add(LAVA_BENDABLE).add(MUD_BENDABLE)
       .buildAndRegister();
 
-    ItemTag.builder(METAL_KEYS.key()).add(Item.IRON_INGOT, Item.GOLD_INGOT, Item.COPPER_INGOT, Item.NETHERITE_INGOT)
+    ItemTag.builder(METAL_KEYS.key())
+      .add(Item.IRON_INGOT, Item.GOLD_INGOT, Item.COPPER_INGOT, Item.NETHERITE_INGOT)
       .buildAndRegister();
   }
 

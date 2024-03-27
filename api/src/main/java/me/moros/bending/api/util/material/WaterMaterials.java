@@ -28,30 +28,48 @@ import me.moros.bending.api.util.KeyUtil;
  * Group and categorize all water bendable materials.
  */
 public final class WaterMaterials {
-  public static final BlockTag PLANT_BENDABLE = BlockTag.reference(KeyUtil.simple("plant-sources"));
-  public static final BlockTag ICE_BENDABLE = BlockTag.reference(KeyUtil.simple("ice-sources"));
-  public static final BlockTag SNOW_BENDABLE = BlockTag.reference(KeyUtil.simple("snow-sources"));
-  public static final BlockTag FULL_SOURCES = BlockTag.reference(KeyUtil.simple("full-water-sources"));
-  private static final BlockTag ALL = BlockTag.reference(KeyUtil.simple("all-water-sources"));
+  public static final BlockTag PLANT_BENDABLE = BlockTag.reference(KeyUtil.simple("plant_sources"));
+  public static final BlockTag ICE_BENDABLE = BlockTag.reference(KeyUtil.simple("ice_sources"));
+  public static final BlockTag SNOW_BENDABLE = BlockTag.reference(KeyUtil.simple("snow_sources"));
+  public static final BlockTag FULL_SOURCES = BlockTag.reference(KeyUtil.simple("full_water_sources"));
+  private static final BlockTag ALL = BlockTag.reference(KeyUtil.simple("all_water_sources"));
 
   public static void init() {
     BlockTag.builder(PLANT_BENDABLE.key())
-      .add(BlockType.CACTUS, BlockType.MELON, BlockType.VINE)
+      .add(BlockTag.reference(KeyUtil.simple("plant_sources/extra")))
       .add(BlockTag.FLOWERS)
       .add(BlockTag.SAPLINGS)
       .add(BlockTag.CROPS)
       .add(BlockTag.LEAVES)
-      .add(BlockType.BROWN_MUSHROOM, BlockType.RED_MUSHROOM)
-      .add(BlockType.BROWN_MUSHROOM_BLOCK, BlockType.RED_MUSHROOM_BLOCK, BlockType.MUSHROOM_STEM)
-      .add(BlockType.CARVED_PUMPKIN, BlockType.JACK_O_LANTERN, BlockType.PUMPKIN)
+      .add(BlockType.CACTUS, BlockType.MELON, BlockType.VINE,
+        BlockType.CARVED_PUMPKIN, BlockType.JACK_O_LANTERN, BlockType.PUMPKIN,
+        BlockType.BROWN_MUSHROOM, BlockType.RED_MUSHROOM,
+        BlockType.BROWN_MUSHROOM_BLOCK, BlockType.RED_MUSHROOM_BLOCK, BlockType.MUSHROOM_STEM)
       .buildAndRegister();
-    BlockTag.builder(ICE_BENDABLE.key()).add(BlockTag.ICE).buildAndRegister();
-    BlockTag.builder(SNOW_BENDABLE.key()).add(BlockType.SNOW, BlockType.SNOW_BLOCK).buildAndRegister();
-    BlockTag.builder(FULL_SOURCES.key()).add(BlockType.WATER, BlockType.CACTUS, BlockType.MELON, BlockType.SNOW_BLOCK)
-      .add(ICE_BENDABLE).add(BlockTag.LEAVES)
-      .add(BlockType.BROWN_MUSHROOM_BLOCK, BlockType.RED_MUSHROOM_BLOCK, BlockType.MUSHROOM_STEM)
-      .add(BlockType.CARVED_PUMPKIN, BlockType.JACK_O_LANTERN, BlockType.PUMPKIN).buildAndRegister();
-    BlockTag.builder(ALL.key()).add(PLANT_BENDABLE).add(ICE_BENDABLE).add(SNOW_BENDABLE).add(BlockType.WATER).buildAndRegister();
+
+    BlockTag.builder(ICE_BENDABLE.key())
+      .add(BlockTag.reference(KeyUtil.simple("ice_sources/extra")))
+      .add(BlockTag.ICE)
+      .buildAndRegister();
+
+    BlockTag.builder(SNOW_BENDABLE.key())
+      .add(BlockTag.reference(KeyUtil.simple("snow_sources/extra")))
+      .add(BlockType.SNOW, BlockType.SNOW_BLOCK)
+      .buildAndRegister();
+
+    BlockTag.builder(FULL_SOURCES.key())
+      .add(BlockTag.reference(KeyUtil.simple("full_water_sources/extra")))
+      .add(ICE_BENDABLE)
+      .add(BlockTag.LEAVES)
+      .add(BlockType.WATER, BlockType.CACTUS, BlockType.MELON, BlockType.SNOW_BLOCK,
+        BlockType.CARVED_PUMPKIN, BlockType.JACK_O_LANTERN, BlockType.PUMPKIN,
+        BlockType.BROWN_MUSHROOM_BLOCK, BlockType.RED_MUSHROOM_BLOCK, BlockType.MUSHROOM_STEM)
+      .buildAndRegister();
+
+    BlockTag.builder(ALL.key())
+      .add(BlockTag.reference(KeyUtil.simple("water_sources/extra")))
+      .add(PLANT_BENDABLE).add(ICE_BENDABLE).add(SNOW_BENDABLE).add(BlockType.WATER)
+      .buildAndRegister();
   }
 
   private WaterMaterials() {

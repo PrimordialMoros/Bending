@@ -128,7 +128,7 @@ public class FabricPlatform implements Platform, PlatformFactory {
     if (TagUtil.isIn(server.registryAccess(), ConventionalBlockTags.ORES, state.getBlock())) {
       var item = new ItemStack(Items.DIAMOND_PICKAXE);
       item.enchant(Enchantments.BLOCK_FORTUNE, 2);
-      return net.minecraft.world.level.block.Block.getDrops(state, level, pos, level.getBlockEntity(pos))
+      return net.minecraft.world.level.block.Block.getDrops(state, level, pos, level.getBlockEntity(pos), null, item)
         .stream().map(PlatformAdapter::fromFabricItem).toList();
     }
     return List.of();

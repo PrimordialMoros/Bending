@@ -19,8 +19,6 @@
 
 package me.moros.bending.api.util.material;
 
-import java.util.Map;
-
 import me.moros.bending.api.platform.Direction;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
@@ -31,8 +29,7 @@ import me.moros.bending.api.platform.item.ItemTag;
 import me.moros.bending.api.platform.property.StateProperty;
 import me.moros.bending.api.util.KeyUtil;
 import me.moros.math.FastMath;
-
-import static java.util.Map.entry;
+import net.kyori.adventure.key.Key;
 
 /**
  * Group and categorize all various common materials.
@@ -42,49 +39,19 @@ public final class MaterialUtil {
   private MaterialUtil() {
   }
 
-  @Deprecated(forRemoval = true)
-  public static final Map<Item, Item> COOKABLE;
-  @Deprecated(forRemoval = true)
-  public static final Map<BlockType, Item> ORES;
-  public static final BlockTag WATER_PLANTS = BlockTag.reference(KeyUtil.simple("water-plants"));
-  public static final BlockTag BREAKABLE_PLANTS = BlockTag.reference(KeyUtil.simple("breakable-plants"));
+  public static final BlockTag WATER_PLANTS = BlockTag.reference(KeyUtil.simple("water_plants"));
+  public static final BlockTag BREAKABLE_PLANTS = BlockTag.reference(KeyUtil.simple("breakable_plants"));
   public static final BlockTag TRANSPARENT = BlockTag.reference(KeyUtil.simple("transparent"));
-  public static final BlockTag LOCKABLE_CONTAINERS = BlockTag.reference(KeyUtil.simple("lockable-containers"));
+  public static final BlockTag LOCKABLE_CONTAINERS = BlockTag.reference(KeyUtil.simple("lockable_containers"));
   public static final BlockTag CONTAINERS = BlockTag.reference(KeyUtil.simple("containers"));
-  public static final BlockTag UNBREAKABLES = BlockTag.reference(KeyUtil.simple("unbreakables"));
-  public static final ItemTag METAL_ARMOR = ItemTag.reference(KeyUtil.simple("metal-armor"));
+  public static final BlockTag UNBREAKABLES = BlockTag.reference(KeyUtil.simple("unbreakable"));
+  public static final ItemTag METAL_ARMOR = ItemTag.reference(KeyUtil.simple("metal_armor"));
 
   private static final BlockTag STAINED_TERRACOTTA;
   private static final BlockTag SANDSTONES;
   private static final BlockTag RED_SANDSTONES;
 
   static {
-    COOKABLE = Map.ofEntries(
-      entry(Item.PORKCHOP, Item.COOKED_PORKCHOP),
-      entry(Item.BEEF, Item.COOKED_BEEF),
-      entry(Item.CHICKEN, Item.COOKED_CHICKEN),
-      entry(Item.COD, Item.COOKED_COD),
-      entry(Item.SALMON, Item.COOKED_SALMON),
-      entry(Item.POTATO, Item.BAKED_POTATO),
-      entry(Item.MUTTON, Item.COOKED_MUTTON),
-      entry(Item.RABBIT, Item.COOKED_RABBIT),
-      entry(Item.WET_SPONGE, Item.SPONGE),
-      entry(Item.KELP, Item.DRIED_KELP),
-      entry(Item.STICK, Item.TORCH)
-    );
-
-    ORES = Map.ofEntries(
-      entry(BlockType.COAL_ORE, Item.COAL), entry(BlockType.DEEPSLATE_COAL_ORE, Item.COAL),
-      entry(BlockType.LAPIS_ORE, Item.LAPIS_LAZULI), entry(BlockType.DEEPSLATE_LAPIS_ORE, Item.LAPIS_LAZULI),
-      entry(BlockType.REDSTONE_ORE, Item.REDSTONE), entry(BlockType.DEEPSLATE_REDSTONE_ORE, Item.REDSTONE),
-      entry(BlockType.DIAMOND_ORE, Item.DIAMOND), entry(BlockType.DEEPSLATE_DIAMOND_ORE, Item.DIAMOND),
-      entry(BlockType.EMERALD_ORE, Item.EMERALD), entry(BlockType.DEEPSLATE_EMERALD_ORE, Item.EMERALD),
-      entry(BlockType.IRON_ORE, Item.RAW_IRON), entry(BlockType.DEEPSLATE_IRON_ORE, Item.RAW_IRON),
-      entry(BlockType.GOLD_ORE, Item.RAW_GOLD), entry(BlockType.DEEPSLATE_GOLD_ORE, Item.RAW_GOLD),
-      entry(BlockType.COPPER_ORE, Item.RAW_COPPER), entry(BlockType.DEEPSLATE_COPPER_ORE, Item.RAW_COPPER),
-      entry(BlockType.NETHER_QUARTZ_ORE, Item.QUARTZ), entry(BlockType.NETHER_GOLD_ORE, Item.GOLD_NUGGET)
-    );
-
     STAINED_TERRACOTTA = BlockTag.builder("stained_terracotta")
       .endsWith("terracotta")
       .not(BlockType.TERRACOTTA)
@@ -254,9 +221,9 @@ public final class MaterialUtil {
     } else if (STAINED_TERRACOTTA.isTagged(type)) {
       return BlockType.CLAY;
     } else if (type.name().endsWith("_concrete")) {
-      BlockType result = BlockType.registry().fromString(type.name() + "_powder");
+      BlockType result = BlockType.registry().get(Key.key(type.key().namespace(), type.name() + "_powder"));
       return result == null ? BlockType.GRAVEL : result;
-    } else if (ORES.containsKey(type)) {
+    } else if (type.name().endsWith("_ore")) { // TODO replace with ORES tag if added
       return BlockType.GRAVEL;
     }
     if (TO_GRAVEL.isTagged(type)) {

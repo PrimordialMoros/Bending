@@ -134,7 +134,7 @@ public class EarthTunnel extends AbilityInstance {
     Collection<ItemSnapshot> capturedDrops;
     if (userConfig.extractOres && !TempBlock.MANAGER.isTemp(block)) {
       capturedDrops = Platform.instance().factory().calculateOptimalOreDrops(block);
-      if (!userConfig.persistent) {
+      if (!capturedDrops.isEmpty() && !userConfig.persistent) {
         BlockType type = block.type();
         BlockType newType;
         if (type.name().contains("nether")) {

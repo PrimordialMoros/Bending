@@ -50,14 +50,18 @@ public class FabricPlayerInventory extends FabricInventory implements PlayerInve
 
   @Override
   public void offer(ItemSnapshot item) {
-    handle.placeItemBackInInventory(PlatformAdapter.toFabricItem(item));
+    try (Transaction transaction = Transaction.openOuter()) {
+      var transactionItem = ItemVariant.of(PlatformAdapter.toFabricItem(item));
+      PlayerInventoryStorage.of(handle).offerOrDrop(transactionItem, item.amount(), transaction);
+      transaction.commit();
+    }
   }
 
   @Override
   public boolean remove(Item type, int amount) {
     try (Transaction transaction = Transaction.openOuter()) {
-      var item = PlatformAdapter.toFabricItemType(type);
-      if (PlayerInventoryStorage.of(handle).extract(ItemVariant.of(item), amount, transaction) == amount) {
+      var transactionItem = ItemVariant.of(PlatformAdapter.toFabricItemType(type));
+      if (PlayerInventoryStorage.of(handle).extract(transactionItem, amount, transaction) == amount) {
         transaction.commit();
         return true;
       } else {

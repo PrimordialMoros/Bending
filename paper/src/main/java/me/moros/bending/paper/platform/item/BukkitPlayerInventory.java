@@ -61,9 +61,9 @@ public class BukkitPlayerInventory extends BukkitInventory implements PlayerInve
   public boolean remove(Item type, int amount) {
     ItemStack bukkitItem = PlatformAdapter.toBukkitItem(type);
     bukkitItem.setAmount(amount);
-    var result = handle.removeItemAnySlot().values().stream().findAny();
-    if (result.isPresent()) {
-      handle.addItem(result.get()); // Add item back
+    var toReturn = handle.removeItemAnySlot(bukkitItem).values().stream().findAny().orElse(null);
+    if (toReturn != null) {
+      handle.addItem(toReturn); // Add item back
       return false;
     }
     return true;
