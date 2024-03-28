@@ -26,7 +26,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.function.DoubleFunction;
 
-import com.google.common.collect.Iterables;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.config.ConfigProcessor;
 import me.moros.bending.api.config.Configurable;
@@ -94,14 +93,13 @@ record ConfigProcessorImpl(Logger logger,
       Modifiable annotation = field.getAnnotation(Modifiable.class);
       if (annotation != null) {
         Attribute attribute = annotation.value();
-        boolean wasAccessible = field.canAccess(instance);
         try {
           field.setAccessible(true);
           Number baseValue = ((Number) field.get(instance));
           Number finalValue = baseValue;
           if (!activeModifiers.isEmpty()) {
             double base = baseValue.doubleValue();
-            double modified = modifyAttribute(base, Iterables.filter(activeModifiers, a -> a.attribute() == attribute));
+            double modified = modifyAttribute(base, attribute, activeModifiers);
             if (base != modified) {
               finalValue = CONVERTERS.getOrDefault(field.getType(), x -> x).apply(modified);
             }
@@ -109,20 +107,20 @@ record ConfigProcessorImpl(Logger logger,
           consumer.accept(field, attribute, baseValue, finalValue);
         } catch (IllegalAccessException e) {
           logger.warn(e.getMessage(), e);
-        } finally {
-          field.setAccessible(wasAccessible);
         }
       }
     }
   }
 
-  private double modifyAttribute(double baseValue, Iterable<AttributeModifier> filteredModifiers) {
+  private double modifyAttribute(double baseValue, Attribute attribute, Collection<AttributeModifier> activeModifiers) {
     double[] operations = new double[]{0, 1, 1};
-    for (AttributeModifier modifier : filteredModifiers) {
-      switch (modifier.type()) {
-        case ADDITIVE -> operations[0] += modifier.value();
-        case SUMMED_MULTIPLICATIVE -> operations[1] += modifier.value();
-        case MULTIPLICATIVE -> operations[2] *= modifier.value();
+    for (AttributeModifier modifier : activeModifiers) {
+      if (attribute == modifier.attribute()) {
+        switch (modifier.type()) {
+          case ADDITIVE -> operations[0] += modifier.value();
+          case SUMMED_MULTIPLICATIVE -> operations[1] += modifier.value();
+          case MULTIPLICATIVE -> operations[2] *= modifier.value();
+        }
       }
     }
     return (baseValue + operations[0]) * operations[1] * operations[2];

@@ -34,14 +34,11 @@ public final class ReflectionUtil {
     T result = null;
     for (Field field : instance.getClass().getDeclaredFields()) {
       if (Modifier.isStatic(field.getModifiers()) && clazz.isAssignableFrom(field.getType())) {
-        boolean wasAccessible = field.canAccess(null);
         try {
           field.setAccessible(true);
           result = (T) field.get(null);
         } catch (IllegalAccessException e) {
           e.printStackTrace();
-        } finally {
-          field.setAccessible(wasAccessible);
         }
         break;
       }
@@ -61,7 +58,7 @@ public final class ReflectionUtil {
     var valueClass = value.getClass();
     for (var field : clazz.getDeclaredFields()) {
       if (!isFinal(field) && field.getType().isAssignableFrom(valueClass)) {
-        accessField(field, null, f -> {
+        accessField(field, f -> {
           f.set(null, value);
           return f;
         });
@@ -77,7 +74,7 @@ public final class ReflectionUtil {
   private static <T, V> V getFieldAs(Class<?> clazz, String fieldName, @Nullable T instance) {
     try {
       var field = getFieldSafe(clazz, fieldName);
-      return (V) accessField(field, instance, f -> f.get(instance)).orElseThrow();
+      return (V) accessField(field, f -> f.get(instance)).orElseThrow();
     } catch (NoSuchFieldException e) {
       throw new RuntimeException(e);
     }
@@ -87,15 +84,12 @@ public final class ReflectionUtil {
     return clazz.getDeclaredField(fieldName);
   }
 
-  private static <R> Optional<R> accessField(Field field, @Nullable Object instance, FieldFunction<R> function) {
-    boolean accessible = field.canAccess(instance);
+  private static <R> Optional<R> accessField(Field field, FieldFunction<R> function) {
     field.setAccessible(true);
     try {
       return Optional.of(function.apply(field));
     } catch (IllegalAccessException e) {
       return Optional.empty();
-    } finally {
-      field.setAccessible(accessible);
     }
   }
 

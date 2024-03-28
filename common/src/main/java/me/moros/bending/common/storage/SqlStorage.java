@@ -22,6 +22,7 @@ package me.moros.bending.common.storage;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
@@ -33,8 +34,6 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.preset.Preset;
@@ -48,6 +47,7 @@ import me.moros.bending.common.storage.sql.migration.V1__Rename_legacy_tables;
 import me.moros.bending.common.storage.sql.migration.V3__Migrate_from_legacy;
 import me.moros.bending.common.util.UUIDUtil;
 import me.moros.storage.StorageDataSource;
+import net.kyori.adventure.util.Index;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.flywaydb.core.Flyway;
 import org.jdbi.v3.core.Jdbi;
@@ -59,7 +59,7 @@ import org.jdbi.v3.core.statement.PreparedBatch;
 import org.jdbi.v3.core.statement.StatementContext;
 
 final class SqlStorage extends AbstractStorage {
-  private final BiMap<AbilityDescription, UUID> abilityIndex;
+  private final Index<UUID, AbilityDescription> abilityIndex;
 
   private final StorageDataSource dataSource;
   private final SqlDialect dialect;
@@ -93,7 +93,7 @@ final class SqlStorage extends AbstractStorage {
     flyway.migrate();
   }
 
-  private BiMap<AbilityDescription, UUID> createAbilities() {
+  private Index<UUID, AbilityDescription> createAbilities() {
     var entries = DB.inTransaction(handle -> {
       Map<AbilityDescription, UUID> map = handle.createQuery(dialect.SELECT_ABILITIES)
         .map(this::abilityRowMapper).filter(Objects::nonNull).collectToMap(Entry::getKey, Entry::getValue);
@@ -108,9 +108,9 @@ final class SqlStorage extends AbstractStorage {
       if (map.size() != size) {
         batch.execute();
       }
-      return map.entrySet();
+      return map;
     });
-    return ImmutableBiMap.copyOf(entries);
+    return Index.create(entries::get, new ArrayList<>(entries.keySet()));
   }
 
   @Override
@@ -224,7 +224,7 @@ final class SqlStorage extends AbstractStorage {
         preset.forEach((desc, idx) -> presetSlotBatch
           .bind(0, presetId)
           .bind(1, idx + 1)
-          .bind(2, abilityIndex.get(desc))
+          .bind(2, abilityIndex.key(desc))
           .add()
         );
       }
@@ -247,7 +247,7 @@ final class SqlStorage extends AbstractStorage {
   }
 
   private @Nullable AbilityDescription getAbilityFromId(UUID uuid) {
-    return abilityIndex.inverse().get(uuid);
+    return abilityIndex.value(uuid);
   }
 
   private @Nullable Entry<AbilityDescription, UUID> abilityRowMapper(ResultSet rs, StatementContext ctx) throws SQLException {

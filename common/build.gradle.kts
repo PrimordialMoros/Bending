@@ -13,7 +13,6 @@ dependencies {
     compileOnly(libs.hikari)
     compileOnly(libs.jdbi)
     compileOnly(libs.flyway.core)
-    compileOnly(libs.guava)
     compileOnly(libs.bundles.configurate)
     compileOnly(libs.bundles.cloud)
 }
