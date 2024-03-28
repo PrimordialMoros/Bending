@@ -29,7 +29,6 @@ import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.EntityType;
 import me.moros.bending.api.platform.property.BooleanProperty;
 import me.moros.bending.api.platform.world.World;
-import me.moros.bending.api.util.data.DataHolder;
 import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.api.util.functional.Suppliers;
 import me.moros.bending.paper.platform.BukkitDataHolder;
@@ -47,12 +46,10 @@ import org.bukkit.util.Vector;
 
 public class BukkitEntity implements Entity {
   private final org.bukkit.entity.Entity handle;
-  private final Supplier<DataHolder> holder;
   private final Supplier<Map<BooleanProperty, Boolean>> properties;
 
   public BukkitEntity(org.bukkit.entity.Entity handle) {
     this.handle = handle;
-    this.holder = Suppliers.lazy(() -> BukkitDataHolder.combined(handle()));
     this.properties = Suppliers.lazy(IdentityHashMap::new);
   }
 
@@ -278,16 +275,16 @@ public class BukkitEntity implements Entity {
 
   @Override
   public <T> Optional<T> get(DataKey<T> key) {
-    return holder.get().get(key);
+    return new BukkitDataHolder(handle()).get(key);
   }
 
   @Override
   public <T> void add(DataKey<T> key, T value) {
-    holder.get().add(key, value);
+    new BukkitDataHolder(handle()).add(key, value);
   }
 
   @Override
   public <T> void remove(DataKey<T> key) {
-    holder.get().remove(key);
+    new BukkitDataHolder(handle()).remove(key);
   }
 }

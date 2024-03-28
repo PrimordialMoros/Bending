@@ -43,7 +43,7 @@ public class BukkitInventory implements Inventory {
 
   @Override
   public ItemSnapshot item(me.moros.bending.api.platform.item.EquipmentSlot slot) {
-    return new BukkitItem(handle().getItem(toBukkit(slot)));
+    return PlatformAdapter.fromBukkitItem(handle().getItem(toBukkit(slot)));
   }
 
   @Override

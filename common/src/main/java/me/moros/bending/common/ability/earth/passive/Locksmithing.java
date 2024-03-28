@@ -72,7 +72,7 @@ public class Locksmithing extends AbilityInstance {
     return UpdateResult.CONTINUE;
   }
 
-  private void act(Inventory inv, ItemSnapshot key, Block block) {
+  private void act(Inventory inventory, ItemSnapshot key, Block block) {
     if (!user.canBend(description())) {
       return;
     }
@@ -86,27 +86,36 @@ public class Locksmithing extends AbilityInstance {
     }
     Lockable container = block.world().containerLock(block);
     if (container != null) {
-      boolean sneaking = user.sneaking();
-      if (!sneaking && container.lock().isEmpty()) {
-        container.lock(getOrCreateKey(inv, key));
-        Sound.BLOCK_CHEST_LOCKED.asEffect().play(block);
-        user.sendActionBar(Component.text("Locked", description().element().color()));
-      } else if (sneaking && (user.hasPermission(FeaturePermissions.OVERRIDE_LOCK) || validKey(key, container.lock().orElse("")))) {
-        container.lock("");
-        Sound.BLOCK_CHEST_LOCKED.asEffect(1, 2).play(block);
-        user.sendActionBar(Component.text("Unlocked", description().element().color()));
+      String containerLock = container.lock().orElse("");
+      boolean locked = !containerLock.isBlank();
+      if (user.sneaking()) {
+        if (locked && (user.hasPermission(FeaturePermissions.OVERRIDE_LOCK) || validKey(key, containerLock))) {
+          unlockContainer(container, block);
+        }
+      } else {
+        if (!locked) {
+          lockContainer(inventory, container, key, block);
+        }
       }
     }
   }
 
-  private String getOrCreateKey(Inventory inv, ItemSnapshot item) {
-    var key = item.get(Metadata.METAL_KEY).orElse("");
-    if (key.isBlank()) {
-      key = UUID.randomUUID().toString();
-      var builder = Platform.instance().factory().itemBuilder(item).meta(Metadata.METAL_KEY, key);
-      inv.setItemInMainHand(builder.build(item.amount()));
+  private void lockContainer(Inventory inventory, Lockable container, ItemSnapshot key, Block block) {
+    String code = key.get(Metadata.METAL_KEY).orElse("");
+    if (code.isBlank()) {
+      code = UUID.randomUUID().toString();
+      var builder = Platform.instance().factory().itemBuilder(key).meta(Metadata.METAL_KEY, code);
+      inventory.setItemInMainHand(builder.build(key.amount()));
     }
-    return key;
+    container.lock(code);
+    Sound.BLOCK_CHEST_LOCKED.asEffect().play(block);
+    user.sendActionBar(Component.text("Locked", description().element().color()));
+  }
+
+  private void unlockContainer(Lockable container, Block block) {
+    container.lock("");
+    Sound.BLOCK_CHEST_LOCKED.asEffect(1, 2).play(block);
+    user.sendActionBar(Component.text("Unlocked", description().element().color()));
   }
 
   public static void act(User user, Block block) {
@@ -121,8 +130,8 @@ public class Locksmithing extends AbilityInstance {
   }
 
   public static boolean canBreak(Player player, Lockable container) {
-    String lock = container.lock().orElse(null);
-    if (lock == null || player.hasPermission(FeaturePermissions.OVERRIDE_LOCK)) {
+    String lock = container.lock().orElse("");
+    if (lock.isBlank() || player.hasPermission(FeaturePermissions.OVERRIDE_LOCK)) {
       return true;
     }
     Inventory inv = player.inventory();

@@ -97,7 +97,7 @@ public final class PlatformAdapter {
   }
 
   public static ItemStack toFabricItem(ItemSnapshot item) {
-    return ((FabricItem) item).handle();
+    return ((FabricItem) item).copy();
   }
 
   public static ItemSnapshot fromFabricItem(ItemStack itemStack) {

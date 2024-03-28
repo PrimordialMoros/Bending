@@ -17,36 +17,38 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.paper.platform;
+package me.moros.bending.fabric.platform;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import me.moros.bending.api.util.data.DataHolder;
 import me.moros.bending.api.util.data.DataKey;
-import me.moros.bending.api.util.functional.Suppliers;
-import org.bukkit.Bukkit;
-import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.metadata.MetadataValue;
-import org.bukkit.metadata.Metadatable;
-import org.bukkit.plugin.Plugin;
+import me.moros.bending.api.util.metadata.Metadata;
+import me.moros.bending.common.util.DummyDataHolder;
+import me.moros.bending.fabric.platform.item.ItemUtil;
+import net.minecraft.world.item.ItemStack;
 
-public record BukkitDataHolder(Metadatable handle) implements DataHolder {
-  private static final Supplier<Plugin> plugin = Suppliers.lazy(() -> Bukkit.getPluginManager().getPlugin("bending"));
+public record FabricPersistentDataHolder(ItemStack handle) implements DataHolder {
+  public static DataHolder create(ItemStack itemStack) {
+    return itemStack.isEmpty() ? DummyDataHolder.INSTANCE : new FabricPersistentDataHolder(itemStack);
+  }
 
   @Override
   public <T> Optional<T> get(DataKey<T> key) {
-    return handle().getMetadata(key.value()).stream().map(MetadataValue::value)
-      .filter(key.type()::isInstance).map(key.type()::cast).findAny();
+    return Metadata.isPersistent(key) ? Optional.ofNullable(ItemUtil.getKey(handle(), key)) : Optional.empty();
   }
 
   @Override
   public <T> void add(DataKey<T> key, T value) {
-    handle().setMetadata(key.value(), new FixedMetadataValue(plugin.get(), value));
+    if (Metadata.isPersistent(key)) {
+      ItemUtil.addKey(handle(), key, value);
+    }
   }
 
   @Override
   public <T> void remove(DataKey<T> key) {
-    handle().removeMetadata(key.value(), plugin.get());
+    if (Metadata.isPersistent(key)) {
+      ItemUtil.removeKey(handle(), key);
+    }
   }
 }

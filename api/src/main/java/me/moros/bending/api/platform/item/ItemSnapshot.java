@@ -34,7 +34,9 @@ public interface ItemSnapshot extends DataHolder {
 
   int amount();
 
+  @Deprecated(forRemoval = true)
   Optional<String> customName();
 
+  @Deprecated(forRemoval = true)
   Optional<Component> customDisplayName();
 }

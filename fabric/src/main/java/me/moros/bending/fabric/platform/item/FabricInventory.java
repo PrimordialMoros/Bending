@@ -42,7 +42,7 @@ public class FabricInventory implements Inventory {
 
   @Override
   public ItemSnapshot item(me.moros.bending.api.platform.item.EquipmentSlot slot) {
-    return new FabricItem(handle.getItemBySlot(toVanilla(slot)));
+    return PlatformAdapter.fromFabricItem(handle.getItemBySlot(toVanilla(slot)));
   }
 
   @Override

@@ -20,29 +20,32 @@
 package me.moros.bending.fabric.platform.item;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
+import me.moros.bending.api.util.data.DataHolder;
 import me.moros.bending.api.util.data.DataKey;
-import me.moros.bending.api.util.metadata.Metadata;
+import me.moros.bending.api.util.functional.Suppliers;
+import me.moros.bending.fabric.platform.FabricPersistentDataHolder;
 import me.moros.bending.fabric.platform.PlatformAdapter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.world.item.ItemStack;
 
-public class FabricItem implements ItemSnapshot {
+public final class FabricItem implements ItemSnapshot {
   private final Item type;
-  private final int amount;
   private final ItemStack handle;
+  private final Supplier<DataHolder> holderSupplier;
 
   public FabricItem(ItemStack handle) {
     this.type = PlatformAdapter.fromFabricItem(handle.getItem());
-    this.amount = handle.getCount();
     this.handle = handle.copy();
+    this.holderSupplier = Suppliers.lazy(() -> FabricPersistentDataHolder.create(this.handle));
   }
 
-  public ItemStack handle() {
-    return handle;
+  public ItemStack copy() {
+    return handle.copy();
   }
 
   @Override
@@ -52,35 +55,33 @@ public class FabricItem implements ItemSnapshot {
 
   @Override
   public int amount() {
-    return amount;
+    return handle.getCount();
   }
 
+  @Deprecated(forRemoval = true)
   @Override
   public Optional<String> customName() {
     return customDisplayName().map(LegacyComponentSerializer.legacySection()::serialize);
   }
 
+  @Deprecated(forRemoval = true)
   @Override
   public Optional<Component> customDisplayName() {
-    return handle().hasCustomHoverName() ? Optional.of(handle().getHoverName().asComponent()) : Optional.empty();
+    return handle.hasCustomHoverName() ? Optional.of(handle.getHoverName().asComponent()) : Optional.empty();
   }
 
   @Override
   public <T> Optional<T> get(DataKey<T> key) {
-    return Metadata.isPersistent(key) ? Optional.ofNullable(ItemUtil.getKey(handle(), key)) : Optional.empty();
+    return holderSupplier.get().get(key);
   }
 
   @Override
   public <T> void add(DataKey<T> key, T value) {
-    if (Metadata.isPersistent(key)) {
-      ItemUtil.addKey(handle(), key, value);
-    }
+    holderSupplier.get().add(key, value);
   }
 
   @Override
   public <T> void remove(DataKey<T> key) {
-    if (Metadata.isPersistent(key)) {
-      ItemUtil.removeKey(handle(), key);
-    }
+    holderSupplier.get().remove(key);
   }
 }

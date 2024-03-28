@@ -27,26 +27,26 @@ import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.util.data.DataHolder;
 import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.api.util.functional.Suppliers;
-import me.moros.bending.paper.platform.BukkitDataHolder;
+import me.moros.bending.paper.platform.BukkitPersistentDataHolder;
 import me.moros.bending.paper.platform.PlatformAdapter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class BukkitItem implements ItemSnapshot {
-  private final ItemStack handle;
+public final class BukkitItem implements ItemSnapshot {
   private final Item type;
-  private final Supplier<DataHolder> holder;
+  private final ItemStack handle;
+  private final Supplier<DataHolder> holderSupplier;
 
   public BukkitItem(ItemStack handle) {
+    this.type = PlatformAdapter.fromBukkitItem(handle.getType());
     this.handle = handle.clone();
-    this.type = PlatformAdapter.fromBukkitItem(this.handle.getType());
-    this.holder = Suppliers.lazy(() -> BukkitDataHolder.persistent(handle().getItemMeta()));
+    this.holderSupplier = Suppliers.lazy(() -> BukkitPersistentDataHolder.create(this.handle));
   }
 
-  public ItemStack handle() {
-    return handle;
+  public ItemStack copy() {
+    return handle.clone();
   }
 
   @Override
@@ -56,31 +56,33 @@ public class BukkitItem implements ItemSnapshot {
 
   @Override
   public int amount() {
-    return handle().getAmount();
+    return handle.getAmount();
   }
 
+  @Deprecated(forRemoval = true)
   @Override
   public Optional<String> customName() {
     return customDisplayName().map(LegacyComponentSerializer.legacySection()::serialize);
   }
 
+  @Deprecated(forRemoval = true)
   @Override
   public Optional<Component> customDisplayName() {
-    return Optional.ofNullable(handle().getItemMeta()).map(ItemMeta::displayName);
+    return Optional.ofNullable(handle.getItemMeta()).map(ItemMeta::displayName);
   }
 
   @Override
   public <T> Optional<T> get(DataKey<T> key) {
-    return holder.get().get(key);
+    return holderSupplier.get().get(key);
   }
 
   @Override
   public <T> void add(DataKey<T> key, T value) {
-    holder.get().add(key, value);
+    holderSupplier.get().add(key, value);
   }
 
   @Override
   public <T> void remove(DataKey<T> key) {
-    holder.get().remove(key);
+    holderSupplier.get().remove(key);
   }
 }

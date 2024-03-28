@@ -17,36 +17,29 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.paper.platform;
+package me.moros.bending.common.util;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import me.moros.bending.api.util.data.DataHolder;
 import me.moros.bending.api.util.data.DataKey;
-import me.moros.bending.api.util.functional.Suppliers;
-import org.bukkit.Bukkit;
-import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.metadata.MetadataValue;
-import org.bukkit.metadata.Metadatable;
-import org.bukkit.plugin.Plugin;
 
-public record BukkitDataHolder(Metadatable handle) implements DataHolder {
-  private static final Supplier<Plugin> plugin = Suppliers.lazy(() -> Bukkit.getPluginManager().getPlugin("bending"));
+public final class DummyDataHolder implements DataHolder {
+  public static final DataHolder INSTANCE = new DummyDataHolder();
+
+  private DummyDataHolder() {
+  }
 
   @Override
   public <T> Optional<T> get(DataKey<T> key) {
-    return handle().getMetadata(key.value()).stream().map(MetadataValue::value)
-      .filter(key.type()::isInstance).map(key.type()::cast).findAny();
+    return Optional.empty();
   }
 
   @Override
   public <T> void add(DataKey<T> key, T value) {
-    handle().setMetadata(key.value(), new FixedMetadataValue(plugin.get(), value));
   }
 
   @Override
   public <T> void remove(DataKey<T> key) {
-    handle().removeMetadata(key.value(), plugin.get());
   }
 }

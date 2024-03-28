@@ -82,7 +82,7 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
 
   @Override
   public DataHolder blockMetadata(int x, int y, int z) {
-    return BukkitDataHolder.nonPersistent(handle().getBlockAt(x, y, z));
+    return new BukkitDataHolder(handle().getBlockAt(x, y, z));
   }
 
   @Override

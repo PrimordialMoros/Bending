@@ -129,7 +129,7 @@ public final class PlatformAdapter {
   }
 
   public static ItemStack toBukkitItem(ItemSnapshot item) {
-    var stack = ((BukkitItem) item).handle().clone();
+    var stack = ((BukkitItem) item).copy();
     stack.setAmount(item.amount());
     return stack;
   }

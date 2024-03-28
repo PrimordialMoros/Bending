@@ -75,19 +75,19 @@ public record BlockListener(Supplier<Game> gameSupplier) implements FabricListen
     }
     if (blockEntity instanceof Lockable lockable) {
       var block = PlatformAdapter.fromFabricWorld((ServerLevel) level).blockAt(pos.getX(), pos.getY(), pos.getZ());
-      return !handleLockedContainer((ServerPlayer) player, block, lockable);
+      return canBreakLockedContainer((ServerPlayer) player, block, lockable);
     }
     return true;
   }
 
-  private boolean handleLockedContainer(ServerPlayer player, Block block, Lockable lockable) {
+  private boolean canBreakLockedContainer(ServerPlayer player, Block block, Lockable lockable) {
     if (!Locksmithing.canBreak(PlatformAdapter.fromFabricEntity(player), lockable)) {
       player.sendActionBar(Component.translatable("container.isLocked")
         .arguments(((Nameable) lockable).getName().asComponent()));
       Sound.BLOCK_CHEST_LOCKED.asEffect().play(block);
-      return true;
+      return false;
     }
-    return false;
+    return true;
   }
 
   private boolean onAfterBlockBreak(ServerLevel level, BlockPos pos) {
