@@ -21,25 +21,19 @@ package me.moros.bending.api.config.attribute;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.element.Element;
-import me.moros.bending.api.user.AttributeUser;
 
 /**
  * Represents a policy that determines which abilities or elements can be modified by an attribute modifier.
  */
 @FunctionalInterface
 public interface ModifyPolicy {
-  boolean shouldModify(AttributeUser user, AbilityDescription desc);
-
-  @Deprecated(forRemoval = true)
-  default boolean shouldModify(AbilityDescription desc) {
-    return false;
-  }
+  boolean shouldModify(AbilityDescription desc);
 
   static ModifyPolicy of(Element element) {
-    return (user, desc) -> desc.element() == element;
+    return desc -> desc.element() == element;
   }
 
-  static ModifyPolicy of(AbilityDescription expected) {
-    return (user, desc) -> expected.equals(desc);
+  static ModifyPolicy of(AbilityDescription desc) {
+    return desc::equals;
   }
 }

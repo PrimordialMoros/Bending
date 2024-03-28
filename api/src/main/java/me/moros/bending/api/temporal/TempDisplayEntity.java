@@ -70,10 +70,6 @@ public class TempDisplayEntity extends Temporary {
     return true;
   }
 
-  protected boolean isReverted() {
-    return reverted;
-  }
-
   public static Builder<BlockDisplayBuilder> builder(BlockType data) {
     return builder(data.defaultState());
   }

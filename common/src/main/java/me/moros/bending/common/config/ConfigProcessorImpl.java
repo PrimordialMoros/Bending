@@ -86,7 +86,7 @@ record ConfigProcessorImpl(Logger logger,
   }
 
   private Collection<AttributeModifier> collectActiveModifiers(AttributeUser user, AbilityDescription desc) {
-    return user.attributes().filter(modifier -> modifier.policy().shouldModify(user, desc)).toList();
+    return user.attributes().filter(modifier -> modifier.policy().shouldModify(desc)).toList();
   }
 
   private void forEachAttribute(Collection<AttributeModifier> activeModifiers, Configurable instance, MultiConsumer consumer) {
