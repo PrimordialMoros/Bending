@@ -25,6 +25,7 @@ import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.entity.DelegatePlayer;
 import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.platform.entity.player.Player;
+import me.moros.bending.api.util.FeaturePermissions;
 import net.kyori.adventure.util.TriState;
 
 /**
@@ -84,6 +85,6 @@ final class BendingPlayer extends BendingUser implements DelegatePlayer {
     if (store().has(Board.HIDDEN) || !game().worldManager().isEnabled(worldKey()) || !canBend()) {
       return false;
     }
-    return hasElements() && hasPermission("bending.board");
+    return hasElements() && hasPermission(FeaturePermissions.BOARD);
   }
 }

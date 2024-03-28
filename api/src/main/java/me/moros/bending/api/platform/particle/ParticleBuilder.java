@@ -24,6 +24,7 @@ import java.util.Objects;
 import me.moros.bending.api.platform.particle.ParticleDustData.Transitive;
 import me.moros.bending.api.platform.world.World;
 import me.moros.bending.api.user.User;
+import me.moros.bending.api.util.FeaturePermissions;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -142,7 +143,7 @@ public final class ParticleBuilder<T> {
    * @return a new builder instance
    */
   public static ParticleBuilder<Void> fire(User user, Position center) {
-    Particle effect = user.hasPermission("bending.bluefire") ? Particle.SOUL_FIRE_FLAME : Particle.FLAME;
+    Particle effect = user.hasPermission(FeaturePermissions.BLUE_FIRE) ? Particle.SOUL_FIRE_FLAME : Particle.FLAME;
     return effect.builder(center);
   }
 

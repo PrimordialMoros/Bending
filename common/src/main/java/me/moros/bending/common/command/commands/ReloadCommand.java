@@ -19,8 +19,8 @@
 
 package me.moros.bending.common.command.commands;
 
-import me.moros.bending.common.command.CommandPermissions;
 import me.moros.bending.common.command.Commander;
+import me.moros.bending.common.command.Permissions;
 import me.moros.bending.common.locale.Message;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
@@ -32,7 +32,7 @@ public record ReloadCommand<C extends Audience>(Commander<C> commander) implemen
     commander().register(commander().rootBuilder()
       .literal("reload")
       .commandDescription(RichDescription.of(Message.RELOAD_DESC.build()))
-      .permission(CommandPermissions.RELOAD)
+      .permission(Permissions.RELOAD)
       .handler(c -> onReload(c.sender()))
     );
   }

@@ -21,9 +21,9 @@ package me.moros.bending.common.command.commands;
 
 import me.moros.bending.api.gui.Board;
 import me.moros.bending.api.user.User;
-import me.moros.bending.common.command.CommandPermissions;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.command.ContextKeys;
+import me.moros.bending.common.command.Permissions;
 import me.moros.bending.common.locale.Message;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
@@ -35,7 +35,7 @@ public record BoardCommand<C extends Audience>(Commander<C> commander) implement
     commander().register(commander().rootBuilder()
       .literal("board")
       .commandDescription(RichDescription.of(Message.BOARD_DESC.build()))
-      .permission(CommandPermissions.BOARD)
+      .permission(Permissions.BOARD)
       .senderType(commander().playerType())
       .handler(c -> onBoard(c.get(ContextKeys.BENDING_PLAYER)))
     );

@@ -38,7 +38,7 @@ import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.TextUtil;
 import me.moros.bending.api.util.functional.Suppliers;
-import me.moros.bending.common.command.CommandPermissions;
+import me.moros.bending.common.command.Permissions;
 import me.moros.bending.common.locale.Message;
 import me.moros.bending.common.locale.Message.Args0;
 import net.kyori.adventure.text.Component;
@@ -47,7 +47,6 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.util.TriState;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.incendo.cloud.permission.Permission;
 
 public abstract class AbstractGui<ItemStack, T> implements ElementGui {
   protected static final Supplier<ItemSnapshot> BACKGROUND = Suppliers.lazy(() ->
@@ -149,19 +148,19 @@ public abstract class AbstractGui<ItemStack, T> implements ElementGui {
   }
 
   protected enum ActionType {
-    CHOOSE(Message.ELEMENTS_GUI_CHOOSE, CommandPermissions.CHOOSE, ElementHandler::onElementChoose, false),
-    DISPLAY(Message.ELEMENTS_GUI_DISPLAY, CommandPermissions.HELP, ElementHandler::onElementDisplay, false),
-    ADD(Message.ELEMENTS_GUI_ADD, CommandPermissions.ADD, ElementHandler::onElementAdd, true),
-    REMOVE(Message.ELEMENTS_GUI_REMOVE, CommandPermissions.REMOVE, ElementHandler::onElementRemove, true);
+    CHOOSE(Message.ELEMENTS_GUI_CHOOSE, Permissions.CHOOSE, ElementHandler::onElementChoose, false),
+    DISPLAY(Message.ELEMENTS_GUI_DISPLAY, Permissions.HELP, ElementHandler::onElementDisplay, false),
+    ADD(Message.ELEMENTS_GUI_ADD, Permissions.ADD, ElementHandler::onElementAdd, true),
+    REMOVE(Message.ELEMENTS_GUI_REMOVE, Permissions.REMOVE, ElementHandler::onElementRemove, true);
 
     private final Args0 message;
     private final String permission;
     private final MenuAction menuAction;
     private final boolean keepOpen;
 
-    ActionType(Args0 message, Permission permission, MenuAction menuAction, boolean keepOpen) {
+    ActionType(Args0 message, String permission, MenuAction menuAction, boolean keepOpen) {
       this.message = message;
-      this.permission = permission.permissionString();
+      this.permission = permission;
       this.menuAction = menuAction;
       this.keepOpen = keepOpen;
     }

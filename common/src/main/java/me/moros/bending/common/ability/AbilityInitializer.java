@@ -31,6 +31,7 @@ import me.moros.bending.api.ability.AbilityDescription.Sequence;
 import me.moros.bending.api.collision.CollisionPair;
 import me.moros.bending.api.registry.Container;
 import me.moros.bending.api.registry.Registries;
+import me.moros.bending.api.util.FeaturePermissions;
 import me.moros.bending.api.util.KeyUtil;
 import me.moros.bending.common.ability.air.AirBlade;
 import me.moros.bending.common.ability.air.AirBlast;
@@ -280,10 +281,10 @@ public final class AbilityInitializer implements Initializer {
       .element(EARTH).activation(PASSIVE).canBind(false).build());
 
     abilities.add(AbilityDescription.builder("FerroControl", FerroControl::new)
-      .element(EARTH).activation(PASSIVE).canBind(false).require("bending.metal").build());
+      .element(EARTH).activation(PASSIVE).canBind(false).require(FeaturePermissions.METAL).build());
 
     abilities.add(AbilityDescription.builder("Locksmithing", Locksmithing::new)
-      .element(EARTH).activation(PASSIVE).canBind(false).require("bending.metal").build());
+      .element(EARTH).activation(PASSIVE).canBind(false).require(FeaturePermissions.METAL).build());
 
     abilities.add(AbilityDescription.builder("EarthBlast", EarthBlast::new)
       .element(EARTH).activation(SNEAK, ATTACK).bypassCooldown(true).build());
@@ -327,13 +328,13 @@ public final class AbilityInitializer implements Initializer {
       .element(EARTH).activation(SNEAK, FALL).build());
 
     abilities.add(AbilityDescription.builder("MetalCable", MetalCable::new)
-      .element(EARTH).activation(ATTACK, SNEAK).bypassCooldown(true).require("bending.metal").build());
+      .element(EARTH).activation(ATTACK, SNEAK).bypassCooldown(true).require(FeaturePermissions.METAL).build());
 
     abilities.add(AbilityDescription.builder("LavaDisk", LavaDisk::new)
-      .element(EARTH).activation(SNEAK).require("bending.lava").build());
+      .element(EARTH).activation(SNEAK).require(FeaturePermissions.LAVA).build());
 
     abilities.add(AbilityDescription.builder("LavaFlux", LavaFlux::new)
-      .element(EARTH).activation(SNEAK).require("bending.lava").build());
+      .element(EARTH).activation(SNEAK).require(FeaturePermissions.LAVA).build());
 
     Sequence bulwark = AbilityDescription.builder("Bulwark", Bulwark::new)
       .element(EARTH).activation(SEQUENCE).hidden(true).buildSequence(steps -> steps

@@ -28,10 +28,10 @@ import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.ColorPalette;
-import me.moros.bending.common.command.CommandPermissions;
 import me.moros.bending.common.command.CommandUtil;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.command.ContextKeys;
+import me.moros.bending.common.command.Permissions;
 import me.moros.bending.common.locale.Message;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
@@ -60,7 +60,7 @@ public record HelpCommand<C extends Audience>(Commander<C> commander, MinecraftH
       .literal("help")
       .optional("query", StringParser.greedyStringParser(), helpSuggestions())
       .commandDescription(RichDescription.of(Message.HELP_DESC.build()))
-      .permission(CommandPermissions.HELP)
+      .permission(Permissions.HELP)
       .handler(c -> onHelp(c, c.getOrDefault("query", "")))
     );
   }

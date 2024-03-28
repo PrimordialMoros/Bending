@@ -36,6 +36,7 @@ import me.moros.bending.api.platform.item.Inventory;
 import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.platform.sound.Sound;
 import me.moros.bending.api.user.User;
+import me.moros.bending.api.util.FeaturePermissions;
 import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.api.util.metadata.Metadata;
@@ -44,8 +45,6 @@ import net.kyori.adventure.text.Component;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Locksmithing extends AbilityInstance {
-  private static final String OVERRIDE = "bending.admin.overridelock";
-
   private static final Config config = ConfigManager.load(Config::new);
 
   private Config userConfig;
@@ -87,11 +86,12 @@ public class Locksmithing extends AbilityInstance {
     }
     Lockable container = block.world().containerLock(block);
     if (container != null) {
-      if (!user.sneaking() && container.lock().isEmpty()) {
+      boolean sneaking = user.sneaking();
+      if (!sneaking && container.lock().isEmpty()) {
         container.lock(getOrCreateKey(inv, key));
         Sound.BLOCK_CHEST_LOCKED.asEffect().play(block);
         user.sendActionBar(Component.text("Locked", description().element().color()));
-      } else if (user.sneaking() && (user.hasPermission(OVERRIDE) || validKey(key, container.lock().orElse("")))) {
+      } else if (sneaking && (user.hasPermission(FeaturePermissions.OVERRIDE_LOCK) || validKey(key, container.lock().orElse("")))) {
         container.lock("");
         Sound.BLOCK_CHEST_LOCKED.asEffect(1, 2).play(block);
         user.sendActionBar(Component.text("Unlocked", description().element().color()));
@@ -122,7 +122,7 @@ public class Locksmithing extends AbilityInstance {
 
   public static boolean canBreak(Player player, Lockable container) {
     String lock = container.lock().orElse(null);
-    if (lock == null || player.hasPermission(OVERRIDE)) {
+    if (lock == null || player.hasPermission(FeaturePermissions.OVERRIDE_LOCK)) {
       return true;
     }
     Inventory inv = player.inventory();

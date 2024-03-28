@@ -26,10 +26,10 @@ import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.preset.Preset;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.ColorPalette;
-import me.moros.bending.common.command.CommandPermissions;
 import me.moros.bending.common.command.CommandUtil;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.command.ContextKeys;
+import me.moros.bending.common.command.Permissions;
 import me.moros.bending.common.command.parser.AbilityParser;
 import me.moros.bending.common.command.parser.UserParser;
 import me.moros.bending.common.locale.Message;
@@ -51,7 +51,7 @@ public record BindCommand<C extends Audience>(Commander<C> commander) implements
       .required("ability", AbilityParser.parser())
       .optional("slot", IntegerParser.integerParser(1, 9), DefaultValue.constant(0))
       .commandDescription(RichDescription.of(Message.BIND_DESC.build()))
-      .permission(CommandPermissions.BIND)
+      .permission(Permissions.BIND)
       .senderType(commander().playerType())
       .handler(c -> onBind(c.get(ContextKeys.BENDING_PLAYER), c.get("ability"), c.get("slot")))
     );
@@ -59,7 +59,7 @@ public record BindCommand<C extends Audience>(Commander<C> commander) implements
       .literal("clear")
       .optional("slot", IntegerParser.integerParser(1, 9), DefaultValue.constant(0))
       .commandDescription(RichDescription.of(Message.CLEAR_DESC.build()))
-      .permission(CommandPermissions.BIND)
+      .permission(Permissions.BIND)
       .senderType(commander().playerType())
       .handler(c -> onBindClear(c.get(ContextKeys.BENDING_PLAYER), c.get("slot")))
     );
@@ -67,7 +67,7 @@ public record BindCommand<C extends Audience>(Commander<C> commander) implements
       .literal("who")
       .optional("target", UserParser.parser(), DefaultValue.parsed("me"))
       .commandDescription(RichDescription.of(Message.DISPLAY_DESC.build()))
-      .permission(CommandPermissions.HELP)
+      .permission(Permissions.HELP)
       .handler(c -> onBindList(c.sender(), c.get("target")))
     );
   }

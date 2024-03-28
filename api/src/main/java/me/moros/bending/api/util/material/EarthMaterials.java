@@ -25,6 +25,7 @@ import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemTag;
 import me.moros.bending.api.user.User;
+import me.moros.bending.api.util.FeaturePermissions;
 import me.moros.bending.api.util.KeyUtil;
 
 /**
@@ -85,6 +86,7 @@ public final class EarthMaterials {
       .buildAndRegister();
 
     ItemTag.builder(METAL_KEYS.key())
+      .add(ItemTag.reference(KeyUtil.simple("extra_metal_keys")))
       .add(Item.IRON_INGOT, Item.GOLD_INGOT, Item.COPPER_INGOT, Item.NETHERITE_INGOT)
       .buildAndRegister();
   }
@@ -93,10 +95,10 @@ public final class EarthMaterials {
   }
 
   public static boolean isEarthbendable(User user, Block block) {
-    if (isMetalBendable(block) && !user.hasPermission("bending.metal")) {
+    if (isMetalBendable(block) && !user.hasPermission(FeaturePermissions.METAL)) {
       return false;
     }
-    if (isLavaBendable(block) && !user.hasPermission("bending.lava")) {
+    if (isLavaBendable(block) && !user.hasPermission(FeaturePermissions.LAVA)) {
       return false;
     }
     return ALL.isTagged(block);
@@ -106,7 +108,7 @@ public final class EarthMaterials {
     if (isLavaBendable(block)) {
       return false;
     }
-    if (isMetalBendable(block) && !user.hasPermission("bending.metal")) {
+    if (isMetalBendable(block) && !user.hasPermission(FeaturePermissions.METAL)) {
       return false;
     }
     return ALL.isTagged(block);

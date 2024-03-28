@@ -51,6 +51,7 @@ import me.moros.bending.api.temporal.TempEntity;
 import me.moros.bending.api.temporal.TempEntity.TempFallingBlock;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.BendingExplosion;
+import me.moros.bending.api.util.FeaturePermissions;
 import me.moros.bending.api.util.functional.OutOfRangeRemovalPolicy;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
@@ -107,7 +108,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
       return false;
     }
 
-    canConvert = userConfig.allowConvertMagma && user.hasPermission("bending.lava");
+    canConvert = userConfig.allowConvertMagma && user.hasPermission(FeaturePermissions.LAVA);
 
     return prepare();
   }

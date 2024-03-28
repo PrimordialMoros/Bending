@@ -26,8 +26,8 @@ import me.moros.bending.api.config.attribute.AttributeModifier;
 import me.moros.bending.api.config.attribute.ModifierOperation;
 import me.moros.bending.api.config.attribute.ModifyPolicy;
 import me.moros.bending.api.user.User;
-import me.moros.bending.common.command.CommandPermissions;
 import me.moros.bending.common.command.Commander;
+import me.moros.bending.common.command.Permissions;
 import me.moros.bending.common.command.parser.AbilityParser;
 import me.moros.bending.common.command.parser.UserParser;
 import me.moros.bending.common.locale.Message;
@@ -48,7 +48,7 @@ public record ModifierCommand<C extends Audience>(Commander<C> commander) implem
   public void init() {
     var builder = commander().rootBuilder().literal("modifier")
       .commandDescription(RichDescription.of(Message.MODIFIER_DESC.build()))
-      .permission(CommandPermissions.MODIFY);
+      .permission(Permissions.MODIFY);
     commander().register(builder
       .literal("add")
       .required("modifier", modifierParser())

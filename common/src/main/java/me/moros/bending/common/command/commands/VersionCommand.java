@@ -20,8 +20,8 @@
 package me.moros.bending.common.command.commands;
 
 import me.moros.bending.api.util.ColorPalette;
-import me.moros.bending.common.command.CommandPermissions;
 import me.moros.bending.common.command.Commander;
+import me.moros.bending.common.command.Permissions;
 import me.moros.bending.common.locale.Message;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
@@ -36,7 +36,7 @@ public record VersionCommand<C extends Audience>(Commander<C> commander) impleme
     commander().register(commander().rootBuilder()
       .literal("version")
       .commandDescription(RichDescription.of(Message.VERSION_DESC.build()))
-      .permission(CommandPermissions.VERSION)
+      .permission(Permissions.VERSION)
       .handler(c -> onVersion(c.sender()))
     );
   }

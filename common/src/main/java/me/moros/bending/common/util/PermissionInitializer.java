@@ -27,9 +27,9 @@ import java.util.stream.Stream;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.registry.Registries;
-import me.moros.bending.common.command.CommandPermissions;
+import me.moros.bending.api.util.FeaturePermissions;
+import me.moros.bending.common.command.Permissions;
 import net.kyori.adventure.util.TriState;
-import org.incendo.cloud.permission.Permission;
 
 public abstract class PermissionInitializer implements Initializer {
   protected PermissionInitializer() {
@@ -44,28 +44,28 @@ public abstract class PermissionInitializer implements Initializer {
 
   private void initPlayerNodes() {
     var elementNodes = initAbilityNodes();
-    var children = Stream.of(CommandPermissions.BIND, CommandPermissions.BOARD, CommandPermissions.CHOOSE,
-        CommandPermissions.HELP, CommandPermissions.PRESET, CommandPermissions.TOGGLE, CommandPermissions.VERSION)
-      .map(Permission::permissionString).collect(Collectors.toSet());
+    var children = Stream.of(Permissions.BIND, Permissions.BOARD, Permissions.CHOOSE,
+        Permissions.HELP, Permissions.PRESET, Permissions.TOGGLE, Permissions.VERSION)
+      .collect(Collectors.toSet());
     children.addAll(elementNodes);
-    children.add("bending.board");
+    children.add(FeaturePermissions.BOARD);
     registerDefault("bending.player", children);
   }
 
   private void initAdminNodes() {
-    var children = Stream.of(CommandPermissions.ADD, CommandPermissions.REMOVE, CommandPermissions.MODIFY,
-        CommandPermissions.RELOAD, CommandPermissions.IMPORT, CommandPermissions.EXPORT, CommandPermissions.ATTRIBUTE)
-      .map(Permission::permissionString).collect(Collectors.toSet());
+    var children = Stream.of(Permissions.ADD, Permissions.REMOVE, Permissions.MODIFY,
+        Permissions.RELOAD, Permissions.IMPORT, Permissions.EXPORT, Permissions.ATTRIBUTE)
+      .collect(Collectors.toSet());
     children.add("bending.player");
-    children.add("bending.bluefire");
-    children.add(CommandPermissions.CHOOSE.permissionString() + ".other");
-    children.add(CommandPermissions.ADD.permissionString() + ".other");
-    children.add(CommandPermissions.REMOVE.permissionString() + ".other");
+    children.add(FeaturePermissions.BLUE_FIRE);
+    children.add(Permissions.CHOOSE + ".other");
+    children.add(Permissions.ADD + ".other");
+    children.add(Permissions.REMOVE + ".other");
     registerDefault("bending.admin", children, TriState.NOT_SET);
   }
 
   private void initMisc() {
-    registerDefault("bending.admin.overridelock", List.of(), TriState.FALSE);
+    registerDefault(FeaturePermissions.OVERRIDE_LOCK, List.of(), TriState.FALSE);
   }
 
   private Collection<String> initAbilityNodes() {
@@ -76,7 +76,7 @@ public abstract class PermissionInitializer implements Initializer {
   private String registerAbilityNodes(Element element) {
     var node = elementParentNode(element);
     var abilityNodes = collect(element);
-    abilityNodes.add(CommandPermissions.CHOOSE.permissionString() + "." + element.key().value());
+    abilityNodes.add(Permissions.CHOOSE + "." + element.key().value());
     registerDefault(node, abilityNodes);
     return node;
   }

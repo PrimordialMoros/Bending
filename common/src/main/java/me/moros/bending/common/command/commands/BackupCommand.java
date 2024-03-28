@@ -24,8 +24,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import me.moros.bending.api.GameProvider;
 import me.moros.bending.api.storage.BendingStorage;
 import me.moros.bending.common.backup.Operation;
-import me.moros.bending.common.command.CommandPermissions;
 import me.moros.bending.common.command.Commander;
+import me.moros.bending.common.command.Permissions;
 import me.moros.bending.common.locale.Message;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
@@ -45,14 +45,14 @@ public record BackupCommand<C extends Audience>(Commander<C> commander, AtomicBo
       .literal("export")
       .optional("file", StringParser.quotedStringParser(), DefaultValue.constant(""))
       .commandDescription(RichDescription.of(Message.EXPORT_DESC.build()))
-      .permission(CommandPermissions.EXPORT)
+      .permission(Permissions.EXPORT)
       .handler(c -> onExport(c.sender(), c.get("file")))
     );
     commander().register(builder
       .literal("import")
       .required("file", StringParser.quotedStringParser())
       .commandDescription(RichDescription.of(Message.IMPORT_DESC.build()))
-      .permission(CommandPermissions.IMPORT)
+      .permission(Permissions.IMPORT)
       .handler(c -> onImport(c.sender(), c.get("file")))
     );
   }

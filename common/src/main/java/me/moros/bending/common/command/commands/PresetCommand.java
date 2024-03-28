@@ -26,10 +26,10 @@ import me.moros.bending.api.ability.preset.PresetRegisterResult;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.ColorPalette;
 import me.moros.bending.api.util.TextUtil;
-import me.moros.bending.common.command.CommandPermissions;
 import me.moros.bending.common.command.CommandUtil;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.command.ContextKeys;
+import me.moros.bending.common.command.Permissions;
 import me.moros.bending.common.command.parser.PresetParser;
 import me.moros.bending.common.locale.Message;
 import me.moros.bending.common.util.Initializer;
@@ -44,7 +44,7 @@ public record PresetCommand<C extends Audience>(Commander<C> commander) implemen
   public void init() {
     var builder = commander().rootBuilder().literal("preset")
       .commandDescription(RichDescription.of(Message.PRESET_DESC.build()))
-      .permission(CommandPermissions.PRESET);
+      .permission(Permissions.PRESET);
     commander().register(builder
       .literal("list")
       .commandDescription(RichDescription.of(Message.PRESET_LIST_DESC.build()))

@@ -36,7 +36,7 @@ public final class WaterMaterials {
 
   public static void init() {
     BlockTag.builder(PLANT_BENDABLE.key())
-      .add(BlockTag.reference(KeyUtil.simple("plant_sources/extra")))
+      .add(BlockTag.reference(KeyUtil.simple("extra_plant_sources")))
       .add(BlockTag.FLOWERS)
       .add(BlockTag.SAPLINGS)
       .add(BlockTag.CROPS)
@@ -48,17 +48,17 @@ public final class WaterMaterials {
       .buildAndRegister();
 
     BlockTag.builder(ICE_BENDABLE.key())
-      .add(BlockTag.reference(KeyUtil.simple("ice_sources/extra")))
+      .add(BlockTag.reference(KeyUtil.simple("extra_ice_sources")))
       .add(BlockTag.ICE)
       .buildAndRegister();
 
     BlockTag.builder(SNOW_BENDABLE.key())
-      .add(BlockTag.reference(KeyUtil.simple("snow_sources/extra")))
+      .add(BlockTag.reference(KeyUtil.simple("extra_snow_sources")))
       .add(BlockType.SNOW, BlockType.SNOW_BLOCK)
       .buildAndRegister();
 
     BlockTag.builder(FULL_SOURCES.key())
-      .add(BlockTag.reference(KeyUtil.simple("full_water_sources/extra")))
+      .add(BlockTag.reference(KeyUtil.simple("extra_full_water_sources")))
       .add(ICE_BENDABLE)
       .add(BlockTag.LEAVES)
       .add(BlockType.WATER, BlockType.CACTUS, BlockType.MELON, BlockType.SNOW_BLOCK,
@@ -67,7 +67,7 @@ public final class WaterMaterials {
       .buildAndRegister();
 
     BlockTag.builder(ALL.key())
-      .add(BlockTag.reference(KeyUtil.simple("water_sources/extra")))
+      .add(BlockTag.reference(KeyUtil.simple("extra_water_sources")))
       .add(PLANT_BENDABLE).add(ICE_BENDABLE).add(SNOW_BENDABLE).add(BlockType.WATER)
       .buildAndRegister();
   }

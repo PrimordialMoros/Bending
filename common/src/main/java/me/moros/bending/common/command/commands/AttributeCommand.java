@@ -28,9 +28,9 @@ import me.moros.bending.api.config.attribute.AttributeValue;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.ColorPalette;
 import me.moros.bending.api.util.Tasker;
-import me.moros.bending.common.command.CommandPermissions;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.command.ContextKeys;
+import me.moros.bending.common.command.Permissions;
 import me.moros.bending.common.command.parser.AbilityParser;
 import me.moros.bending.common.locale.Message;
 import me.moros.bending.common.util.Initializer;
@@ -48,7 +48,7 @@ public record AttributeCommand<C extends Audience>(Commander<C> commander) imple
       .literal("attribute")
       .required("ability", AbilityParser.parserGlobal())
       .commandDescription(RichDescription.of(Message.ATTRIBUTE_DESC.build()))
-      .permission(CommandPermissions.ATTRIBUTE)
+      .permission(Permissions.ATTRIBUTE)
       .senderType(commander().playerType())
       .handler(c -> onViewConfig(c.get(ContextKeys.BENDING_PLAYER), c.get("ability")))
     );

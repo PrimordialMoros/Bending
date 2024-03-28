@@ -27,10 +27,10 @@ import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.user.User;
-import me.moros.bending.common.command.CommandPermissions;
 import me.moros.bending.common.command.CommandUtil;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.command.ContextKeys;
+import me.moros.bending.common.command.Permissions;
 import me.moros.bending.common.command.parser.UserParser;
 import me.moros.bending.common.locale.Message;
 import me.moros.bending.common.util.Initializer;
@@ -46,7 +46,7 @@ public record ElementCommand<C extends Audience>(Commander<C> commander) impleme
     commander().register(builder
       .literal("choose")
       .commandDescription(RichDescription.of(Message.ELEMENT_CHOOSE_DESC.build()))
-      .permission(CommandPermissions.CHOOSE)
+      .permission(Permissions.CHOOSE)
       .senderType(commander().playerType())
       .handler(c -> onElementChooseGUI(c.get(ContextKeys.BENDING_PLAYER)))
     );
@@ -55,7 +55,7 @@ public record ElementCommand<C extends Audience>(Commander<C> commander) impleme
       .literal("choose")
       .required("element", EnumParser.enumParser(Element.class))
       .commandDescription(RichDescription.of(Message.ELEMENT_CHOOSE_DESC.build()))
-      .permission(CommandPermissions.CHOOSE)
+      .permission(Permissions.CHOOSE)
       .senderType(commander().playerType())
       .handler(c -> onElementChoose(c.get(ContextKeys.BENDING_PLAYER), c.get("element")))
     );
@@ -64,18 +64,18 @@ public record ElementCommand<C extends Audience>(Commander<C> commander) impleme
       .required("element", EnumParser.enumParser(Element.class))
       .required("target", UserParser.parser())
       .commandDescription(RichDescription.of(Message.ELEMENT_CHOOSE_DESC.build()))
-      .permission(CommandPermissions.CHOOSE.permissionString() + ".other")
+      .permission(Permissions.CHOOSE + ".other")
       .handler(c -> onElementSet(c.get("target"), c.get("element")))
     );
 
     dualRegister(builder
       .literal("add")
       .commandDescription(RichDescription.of(Message.ELEMENT_ADD_DESC.build()))
-      .permission(CommandPermissions.ADD), this::onElementAdd);
+      .permission(Permissions.ADD), this::onElementAdd);
     dualRegister(builder
       .literal("remove")
       .commandDescription(RichDescription.of(Message.ELEMENT_REMOVE_DESC.build()))
-      .permission(CommandPermissions.REMOVE), this::onElementRemove);
+      .permission(Permissions.REMOVE), this::onElementRemove);
   }
 
   private void dualRegister(Command.Builder<C> builder, BiConsumer<User, Element> handler) {
@@ -98,7 +98,7 @@ public record ElementCommand<C extends Audience>(Commander<C> commander) impleme
 
   @Override
   public void onElementChoose(User user, Element element) {
-    if (!user.hasPermission(CommandPermissions.CHOOSE.permissionString() + "." + element.key().value())) {
+    if (!user.hasPermission(Permissions.CHOOSE + "." + element.key().value())) {
       Message.ELEMENT_CHOOSE_NO_PERMISSION.send(user, element.displayName());
       return;
     }

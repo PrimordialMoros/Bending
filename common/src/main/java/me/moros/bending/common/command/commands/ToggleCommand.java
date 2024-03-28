@@ -20,9 +20,9 @@
 package me.moros.bending.common.command.commands;
 
 import me.moros.bending.api.user.User;
-import me.moros.bending.common.command.CommandPermissions;
 import me.moros.bending.common.command.Commander;
 import me.moros.bending.common.command.ContextKeys;
+import me.moros.bending.common.command.Permissions;
 import me.moros.bending.common.locale.Message;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
@@ -34,7 +34,7 @@ public record ToggleCommand<C extends Audience>(Commander<C> commander) implemen
     commander().register(commander().rootBuilder()
       .literal("toggle")
       .commandDescription(RichDescription.of(Message.TOGGLE_DESC.build()))
-      .permission(CommandPermissions.TOGGLE)
+      .permission(Permissions.TOGGLE)
       .senderType(commander().playerType())
       .handler(c -> onToggle(c.get(ContextKeys.BENDING_PLAYER)))
     );
