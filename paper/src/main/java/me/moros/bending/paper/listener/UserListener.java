@@ -307,7 +307,7 @@ public record UserListener(Game game) implements Listener, BukkitListener {
     Player player = event.getEntity();
     DamageSource cause = DamageUtil.cachedDamageSource(player.getUniqueId());
     if (cause != null) {
-      event.deathMessage(Message.ABILITY_DEATH_MESSAGE.build(cause.ability(), player.name(), cause.name()));
+      event.deathMessage(Message.ABILITY_DEATH_MESSAGE.build(player.name(), cause.name(), cause.ability()));
     }
   }
 

@@ -75,7 +75,7 @@ public abstract class AbstractNativeAdapter extends AbstractPacketUtil implement
     target.invulnerableTime = 0;
     Component deathMsg = translatable(event.ability().translationKey() + ".death",
       "bending.ability.generic.death")
-      .arguments(event.ability().displayName(), event.target().name(), event.user().name());
+      .arguments(event.target().name(), event.user().name(), event.ability().displayName());
     var bendingSource = DamageSource.of(event.user().name(), event.ability());
     var damageSource = new AbilityDamageSource(adapt(event.user().entity()), adapt(deathMsg), bendingSource);
     boolean result = target.hurt(damageSource, (float) event.damage());

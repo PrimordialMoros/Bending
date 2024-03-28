@@ -176,7 +176,7 @@ public interface Message {
 
   Args1<AbilityDescription> ABILITY_DESCRIPTION = desc -> translatable(desc.translationKey() + ".description");
   Args1<AbilityDescription> ABILITY_INSTRUCTIONS = desc -> translatable(desc.translationKey() + ".instructions");
-  Args3<AbilityDescription, Component, Component> ABILITY_DEATH_MESSAGE = (desc, target, killer) -> translatable(desc.translationKey() + ".death",
+  Args3<Component, Component, AbilityDescription> ABILITY_DEATH_MESSAGE = (target, killer, desc) -> translatable(desc.translationKey() + ".death",
     "bending.ability.generic.death").arguments(target, killer, desc.displayName());
 
   Args0 VERSION_DESC = () -> translatable("bending.command.version.description");
