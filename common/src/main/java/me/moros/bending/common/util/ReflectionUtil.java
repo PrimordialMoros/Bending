@@ -19,6 +19,7 @@
 
 package me.moros.bending.common.util;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Optional;
@@ -30,20 +31,20 @@ public final class ReflectionUtil {
   private ReflectionUtil() {
   }
 
-  public static <T> @Nullable T findStaticField(Object instance, Class<T> clazz) {
-    T result = null;
-    for (Field field : instance.getClass().getDeclaredFields()) {
-      if (Modifier.isStatic(field.getModifiers()) && clazz.isAssignableFrom(field.getType())) {
+  public static <T> @Nullable T findAndCreateInnerClass(Object parent, Class<T> clazz) {
+    for (var innerClass : parent.getClass().getDeclaredClasses()) {
+      if (clazz.isAssignableFrom(innerClass)) {
         try {
-          field.setAccessible(true);
-          result = (T) field.get(null);
-        } catch (IllegalAccessException e) {
+          Constructor<?> constructor = innerClass.getDeclaredConstructor();
+          constructor.setAccessible(true);
+          return (T) constructor.newInstance();
+        } catch (Exception e) {
           e.printStackTrace();
+          break;
         }
-        break;
       }
     }
-    return result;
+    return null;
   }
 
   public static Class<?> getClassOrThrow(String fullName) {

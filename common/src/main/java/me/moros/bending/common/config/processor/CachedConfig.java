@@ -21,7 +21,6 @@ package me.moros.bending.common.config.processor;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
-import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,12 +33,13 @@ import java.util.Map.Entry;
 import me.moros.bending.api.config.Configurable;
 import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.Modifiable;
+import org.spongepowered.configurate.util.NamingSchemes;
 
-public final class CachedConfig implements Iterable<Entry<Attribute, NamedVarHandle>> {
-  private final Collection<Entry<Attribute, NamedVarHandle>> entries;
-  private final Map<Attribute, Collection<NamedVarHandle>> map;
+public final class CachedConfig implements Iterable<Entry<Attribute, ConfigEntry>> {
+  private final Collection<Entry<Attribute, ConfigEntry>> entries;
+  private final Map<Attribute, Collection<ConfigEntry>> map;
 
-  private CachedConfig(Collection<Entry<Attribute, NamedVarHandle>> entries) {
+  private CachedConfig(Collection<Entry<Attribute, ConfigEntry>> entries) {
     this.entries = List.copyOf(entries);
     this.map = new EnumMap<>(Attribute.class);
     for (var entry : this.entries) {
@@ -47,27 +47,39 @@ public final class CachedConfig implements Iterable<Entry<Attribute, NamedVarHan
     }
   }
 
-  public Iterable<NamedVarHandle> getVarHandlesFor(Attribute attribute) {
+  public Iterable<ConfigEntry> getKeysFor(Attribute attribute) {
     return map.getOrDefault(attribute, List.of());
   }
 
   @Override
-  public Iterator<Entry<Attribute, NamedVarHandle>> iterator() {
+  public Iterator<Entry<Attribute, ConfigEntry>> iterator() {
     return entries.iterator();
   }
 
   public static CachedConfig createFrom(Configurable instance) throws IllegalAccessException {
-    Lookup lookup = MethodHandles.privateLookupIn(instance.getClass(), MethodHandles.lookup());
-    List<Entry<Attribute, NamedVarHandle>> handles = new ArrayList<>();
+    ConfigEntryFactory factory = instance.external() ? varHandleFactory(instance.getClass()) : nodeFactory();
+    List<Entry<Attribute, ConfigEntry>> handles = new ArrayList<>();
     for (Field field : instance.getClass().getDeclaredFields()) {
       Modifiable annotation = field.getAnnotation(Modifiable.class);
       if (annotation != null) {
         Attribute attribute = annotation.value();
-        field.setAccessible(true);
-        VarHandle handle = lookup.unreflectVarHandle(field);
-        handles.add(Map.entry(attribute, new NamedVarHandle(field.getName(), field.getType(), handle)));
+        handles.add(Map.entry(attribute, factory.create(field)));
       }
     }
     return new CachedConfig(handles);
+  }
+
+  private static ConfigEntryFactory varHandleFactory(Class<? extends Configurable> configClass) throws IllegalAccessException {
+    Lookup lookup = MethodHandles.privateLookupIn(configClass, MethodHandles.lookup());
+    return field -> ConfigEntry.fromVarHandle(field.getName(), field.getType(), lookup.unreflectVarHandle(field));
+  }
+
+  private static ConfigEntryFactory nodeFactory() {
+    return field -> ConfigEntry.fromNode(NamingSchemes.LOWER_CASE_DASHED.coerce(field.getName()), field.getType());
+  }
+
+  @FunctionalInterface
+  private interface ConfigEntryFactory {
+    ConfigEntry create(Field field) throws IllegalAccessException;
   }
 }

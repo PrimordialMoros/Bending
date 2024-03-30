@@ -36,30 +36,24 @@ import me.moros.bending.api.config.attribute.AttributeValue;
 import me.moros.bending.api.user.AttributeUser;
 import me.moros.bending.common.config.processor.CachedConfig;
 import me.moros.bending.common.config.processor.ModificationMatrix;
-import me.moros.bending.common.config.processor.NamedVarHandle;
 import me.moros.bending.common.logging.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.reference.ConfigurationReference;
 import org.spongepowered.configurate.serialize.SerializationException;
 
-record ConfigProcessorImpl(Logger logger, ConfigurationReference<CommentedConfigurationNode> root,
+record ConfigProcessorImpl(Logger logger, ConfigurationReference<? extends ConfigurationNode> root,
                            Map<Class<? extends Configurable>, CachedConfig> cache) implements ConfigProcessor {
-  ConfigProcessorImpl(Logger logger, ConfigurationReference<CommentedConfigurationNode> root) {
+  ConfigProcessorImpl(Logger logger, ConfigurationReference<? extends ConfigurationNode> root) {
     this(logger, root, new ConcurrentHashMap<>());
   }
 
-  @Override
-  public <T extends Configurable> T calculate(AttributeUser user, AbilityDescription desc, T config) {
-    return process(user, desc, get(config));
+  <T extends Configurable> T get(T def) {
+    return def.external() ? def : deserialize(root.node().node(def.path()), def);
   }
 
   @SuppressWarnings("unchecked")
-  <T extends Configurable> T get(T def) {
-    if (def.external()) {
-      return def;
-    }
-    CommentedConfigurationNode node = root.node().node(def.path());
+  private <T extends Configurable> T deserialize(ConfigurationNode node, T def) {
     try {
       return (T) node.get(def.getClass(), def);
     } catch (SerializationException e) {
@@ -67,14 +61,14 @@ record ConfigProcessorImpl(Logger logger, ConfigurationReference<CommentedConfig
     }
   }
 
-  private <T extends Configurable> T process(AttributeUser user, AbilityDescription desc, T copy) {
-    modifyAttributes(copy, collectActiveModifiers(user, desc));
-    return copy;
+  @Override
+  public <T extends Configurable> T calculate(AttributeUser user, AbilityDescription desc, T config) {
+    return modifyAttributes(collectActiveModifiers(user, desc), config);
   }
 
   @Override
   public Collection<AttributeValue> listAttributes(AttributeUser user, AbilityDescription desc, Configurable config) {
-    return readAttributes(get(config), collectActiveModifiers(user, desc));
+    return readAttributes(collectActiveModifiers(user, desc), config);
   }
 
   private Map<Attribute, ModificationMatrix> collectActiveModifiers(AttributeUser user, AbilityDescription desc) {
@@ -82,35 +76,52 @@ record ConfigProcessorImpl(Logger logger, ConfigurationReference<CommentedConfig
       .collect(Collectors.toMap(AttributeModifier::attribute, ModificationMatrix::from, ModificationMatrix::merge));
   }
 
-  private void modifyAttributes(Configurable instance, Map<Attribute, ModificationMatrix> activeModifiers) {
-    if (activeModifiers.isEmpty()) {
-      return;
-    }
-    var cachedConfig = getCachedConfig(instance);
-    if (cachedConfig != null) {
-      for (var entry : activeModifiers.entrySet()) {
-        Attribute attribute = entry.getKey();
-        ModificationMatrix matrix = entry.getValue();
-        for (var handle : cachedConfig.getVarHandlesFor(attribute)) {
-          handle.modify(instance, matrix);
+  private <T extends Configurable> T modifyAttributes(Map<Attribute, ModificationMatrix> activeModifiers, T config) {
+    if (!activeModifiers.isEmpty()) {
+      var cachedConfig = getCachedConfig(config);
+      if (cachedConfig != null) {
+        if (config.external()) {
+          // TODO Make virtual node for cached config?
+          return modifyAttributes(cachedConfig, activeModifiers, config);
+        } else {
+          return deserialize(modifyAttributes(cachedConfig, activeModifiers, nodeFor(config).copy()), config);
         }
       }
     }
+    return config;
   }
 
-  private Collection<AttributeValue> readAttributes(Configurable instance, Map<Attribute, ModificationMatrix> activeModifiers) {
-    var cachedConfig = getCachedConfig(instance);
+  private <T> T modifyAttributes(CachedConfig cachedConfig, Map<Attribute, ModificationMatrix> activeModifiers, T parent) {
+    for (var entry : activeModifiers.entrySet()) {
+      Attribute attribute = entry.getKey();
+      ModificationMatrix matrix = entry.getValue();
+      for (var handle : cachedConfig.getKeysFor(attribute)) {
+        handle.modify(parent, matrix, t -> logger.warn(t.getMessage(), t));
+      }
+    }
+    return parent;
+  }
+
+  private Collection<AttributeValue> readAttributes(Map<Attribute, ModificationMatrix> activeModifiers, Configurable config) {
+    var cachedConfig = getCachedConfig(config);
     if (cachedConfig == null) {
       return List.of();
     }
     Collection<AttributeValue> attributes = new ArrayList<>();
+    Object parent = config.external() ? config : nodeFor(config);
     for (var entry : cachedConfig) {
       Attribute attribute = entry.getKey();
       ModificationMatrix matrix = activeModifiers.get(attribute);
-      NamedVarHandle handle = entry.getValue();
-      attributes.add(handle.asAttributeValue(instance, attribute, matrix));
+      attributes.add(entry.getValue().asAttributeValue(parent, attribute, matrix));
     }
     return attributes;
+  }
+
+  private ConfigurationNode nodeFor(Configurable instance) {
+    if (instance.external()) {
+      throw new IllegalArgumentException("No node for external config!");
+    }
+    return root.node().node(instance.path());
   }
 
   private @Nullable CachedConfig getCachedConfig(Configurable instance) {

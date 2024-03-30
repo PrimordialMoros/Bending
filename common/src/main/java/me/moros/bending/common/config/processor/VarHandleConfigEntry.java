@@ -20,43 +20,27 @@
 package me.moros.bending.common.config.processor;
 
 import java.lang.invoke.VarHandle;
-import java.util.Map;
-import java.util.function.DoubleFunction;
+import java.util.function.Consumer;
 import java.util.function.DoubleUnaryOperator;
 
-import me.moros.bending.api.config.Configurable;
 import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.AttributeValue;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public record NamedVarHandle(String name, Class<?> type, VarHandle handle) {
-  private static final Map<Class<? extends Number>, DoubleFunction<Number>> CONVERTERS = Map.of(
-    Double.class, x -> x,
-    Integer.class, x -> (int) x,
-    Long.class, x -> (long) x,
-    double.class, x -> x,
-    int.class, x -> (int) x,
-    long.class, x -> (long) x
-  );
-
-  private Number toNative(double value) {
-    return CONVERTERS.getOrDefault(type, x -> x).apply(value);
+record VarHandleConfigEntry(String name, Class<?> type, VarHandle handle) implements ConfigEntry {
+  private Number get(Object parent) {
+    return (Number) handle.get(parent);
   }
 
-  private Number get(Configurable instance) {
-    return (Number) handle.get(instance);
+  @Override
+  public void modify(Object parent, DoubleUnaryOperator operator, Consumer<Throwable> consumer) {
+    double value = operator.applyAsDouble(get(parent).doubleValue());
+    handle.set(parent, toNative(value));
   }
 
-  private void set(Configurable instance, double value) {
-    handle.set(instance, toNative(value));
-  }
-
-  public void modify(Configurable instance, DoubleUnaryOperator operator) {
-    set(instance, operator.applyAsDouble(get(instance).doubleValue()));
-  }
-
-  public AttributeValue asAttributeValue(Configurable instance, Attribute attribute, @Nullable ModificationMatrix matrix) {
-    Number baseValue = get(instance);
+  @Override
+  public AttributeValue asAttributeValue(Object parent, Attribute attribute, @Nullable ModificationMatrix matrix) {
+    Number baseValue = get(parent);
     Number finalValue = baseValue;
     if (matrix != null) {
       double base = baseValue.doubleValue();

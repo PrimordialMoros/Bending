@@ -49,7 +49,6 @@ public record AttributeCommand<C extends Audience>(Commander<C> commander) imple
       .required("ability", AbilityParser.parserGlobal())
       .commandDescription(RichDescription.of(Message.ATTRIBUTE_DESC.build()))
       .permission(Permissions.ATTRIBUTE)
-      .senderType(commander().playerType())
       .handler(c -> onViewConfig(c.get(ContextKeys.BENDING_PLAYER), c.get("ability")))
     );
   }
@@ -63,12 +62,14 @@ public record AttributeCommand<C extends Audience>(Commander<C> commander) imple
         Message.ATTRIBUTE_LIST_HEADER.send(user, desc.displayName());
         attributeInfo.forEach(user::sendMessage);
       }
+    }).exceptionally(e -> {
+      commander().plugin().logger().warn(e.getMessage(), e);
+      return null;
     });
   }
 
-  // TODO caching?
   private List<Component> collectAttributes(User user, AbilityDescription desc) {
-    Configurable config = ReflectionUtil.findStaticField(desc.createAbility(), Configurable.class);
+    Configurable config = ReflectionUtil.findAndCreateInnerClass(desc.createAbility(), Configurable.class);
     if (config == null) {
       return List.of();
     }
