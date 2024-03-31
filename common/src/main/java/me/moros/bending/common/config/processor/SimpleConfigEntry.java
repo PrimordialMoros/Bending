@@ -45,11 +45,11 @@ record SimpleConfigEntry(String name, Class<?> type) implements ConfigEntry {
   }
 
   @Override
-  public AttributeValue asAttributeValue(Object parent, Attribute attribute, @Nullable ModificationMatrix matrix) {
+  public AttributeValue asAttributeValue(Object parent, Attribute attribute, @Nullable DoubleUnaryOperator modifier) {
     double baseValue = node(parent).getDouble();
     Number finalValue = baseValue;
-    if (matrix != null) {
-      double modifiedValue = matrix.applyAsDouble(baseValue);
+    if (modifier != null) {
+      double modifiedValue = modifier.applyAsDouble(baseValue);
       if (baseValue != modifiedValue) {
         finalValue = toNative(modifiedValue);
       }

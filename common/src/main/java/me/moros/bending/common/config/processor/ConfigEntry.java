@@ -45,7 +45,7 @@ public interface ConfigEntry {
 
   void modify(Object parent, DoubleUnaryOperator operator, Consumer<Throwable> consumer);
 
-  AttributeValue asAttributeValue(Object parent, Attribute attribute, @Nullable ModificationMatrix matrix);
+  AttributeValue asAttributeValue(Object parent, Attribute attribute, @Nullable DoubleUnaryOperator modifier);
 
   default Number toNative(double value) {
     return CONVERTERS.getOrDefault(type(), x -> x).apply(value);

@@ -38,7 +38,7 @@ import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class TempArmor extends Temporary {
-  public static final TemporalManager<UUID, TempArmor> MANAGER = new TemporalManager<>(600);
+  public static final TemporalManager<UUID, TempArmor> MANAGER = new TemporalManager<>(2400);
 
   private final LivingEntity entity;
   private boolean reverted = false;

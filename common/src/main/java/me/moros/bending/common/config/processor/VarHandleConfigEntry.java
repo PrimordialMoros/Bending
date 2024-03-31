@@ -39,12 +39,12 @@ record VarHandleConfigEntry(String name, Class<?> type, VarHandle handle) implem
   }
 
   @Override
-  public AttributeValue asAttributeValue(Object parent, Attribute attribute, @Nullable ModificationMatrix matrix) {
+  public AttributeValue asAttributeValue(Object parent, Attribute attribute, @Nullable DoubleUnaryOperator modifier) {
     Number baseValue = get(parent);
     Number finalValue = baseValue;
-    if (matrix != null) {
+    if (modifier != null) {
       double base = baseValue.doubleValue();
-      double modified = matrix.applyAsDouble(base);
+      double modified = modifier.applyAsDouble(base);
       if (base != modified) {
         finalValue = toNative(modified);
       }

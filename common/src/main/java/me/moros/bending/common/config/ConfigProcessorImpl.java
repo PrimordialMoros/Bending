@@ -81,7 +81,6 @@ record ConfigProcessorImpl(Logger logger, ConfigurationReference<? extends Confi
       var cachedConfig = getCachedConfig(config);
       if (cachedConfig != null) {
         if (config.external()) {
-          // TODO Make virtual node for cached config?
           return modifyAttributes(cachedConfig, activeModifiers, config);
         } else {
           return deserialize(modifyAttributes(cachedConfig, activeModifiers, nodeFor(config).copy()), config);
@@ -94,9 +93,9 @@ record ConfigProcessorImpl(Logger logger, ConfigurationReference<? extends Confi
   private <T> T modifyAttributes(CachedConfig cachedConfig, Map<Attribute, ModificationMatrix> activeModifiers, T parent) {
     for (var entry : activeModifiers.entrySet()) {
       Attribute attribute = entry.getKey();
-      ModificationMatrix matrix = entry.getValue();
+      var modifier = entry.getValue();
       for (var handle : cachedConfig.getKeysFor(attribute)) {
-        handle.modify(parent, matrix, t -> logger.warn(t.getMessage(), t));
+        handle.modify(parent, modifier, t -> logger.warn(t.getMessage(), t));
       }
     }
     return parent;
@@ -111,8 +110,8 @@ record ConfigProcessorImpl(Logger logger, ConfigurationReference<? extends Confi
     Object parent = config.external() ? config : nodeFor(config);
     for (var entry : cachedConfig) {
       Attribute attribute = entry.getKey();
-      ModificationMatrix matrix = activeModifiers.get(attribute);
-      attributes.add(entry.getValue().asAttributeValue(parent, attribute, matrix));
+      var modifier = activeModifiers.get(attribute);
+      attributes.add(entry.getValue().asAttributeValue(parent, attribute, modifier));
     }
     return attributes;
   }

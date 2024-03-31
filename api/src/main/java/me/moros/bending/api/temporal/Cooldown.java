@@ -27,7 +27,7 @@ import me.moros.bending.api.user.User;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class Cooldown extends Temporary {
-  public static final TemporalManager<Cooldown, Cooldown> MANAGER = new TemporalManager<>(600, false);
+  public static final TemporalManager<Cooldown, Cooldown> MANAGER = new TemporalManager<>(2400, false);
 
   private final UUID uuid;
   private final AbilityDescription desc;

@@ -23,7 +23,7 @@ import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.element.Element;
 
 /**
- * Represents a policy that determines which abilities or elements can be modified by an attribute modifier.
+ * Represents a policy that determines whether an ability can be modified by an attribute modifier.
  */
 @FunctionalInterface
 public interface ModifyPolicy {
