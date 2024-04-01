@@ -13,3 +13,7 @@ dependencies {
     implementation(libs.minotaur)
     implementation(libs.checker)
 }
+
+kotlin {
+    jvmToolchain(17)
+}
