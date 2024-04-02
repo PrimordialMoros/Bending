@@ -19,6 +19,7 @@
 
 package me.moros.bending.api.collision.geometry;
 
+import me.moros.bending.api.util.Constants;
 import me.moros.math.FastMath;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
@@ -57,10 +58,10 @@ public sealed interface Ray extends Collider permits RayImpl {
   default boolean contains(Vector3d point) {
     double lengthSq = direction().lengthSq();
     if (lengthSq == 0) {
-      return position().distanceSq(point) <= EPSILON;
+      return position().distanceSq(point) < Constants.EPSILON;
     }
     double t = FastMath.clamp(point.subtract(position()).dot(direction()) / lengthSq, 0, 1);
-    return position().add(direction().multiply(t)).distanceSq(point) <= EPSILON;
+    return position().add(direction().multiply(t)).distanceSq(point) < Constants.EPSILON;
   }
 
   static Ray of(Vector3d origin, Vector3d direction) {

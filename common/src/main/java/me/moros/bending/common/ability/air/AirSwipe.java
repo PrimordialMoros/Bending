@@ -44,6 +44,7 @@ import me.moros.bending.api.platform.particle.ParticleBuilder;
 import me.moros.bending.api.platform.sound.SoundEffect;
 import me.moros.bending.api.platform.world.WorldUtil;
 import me.moros.bending.api.user.User;
+import me.moros.bending.api.util.Constants;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
@@ -146,7 +147,7 @@ public class AirSwipe extends AbilityInstance {
   @Override
   public void onCollision(Collision collision) {
     Ability collidedAbility = collision.collidedAbility();
-    if (factor == userConfig.chargeFactor && collision.removeSelf()) {
+    if (Math.abs(factor - userConfig.chargeFactor) < Constants.EPSILON && collision.removeSelf()) {
       if (AbilityInitializer.layer2.containsValue(collidedAbility.description().key())) {
         collision.removeOther(true);
       } else {

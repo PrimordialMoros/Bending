@@ -19,6 +19,7 @@
 
 package me.moros.bending.api.collision.geometry;
 
+import me.moros.bending.api.util.Constants;
 import me.moros.math.Position;
 import me.moros.math.Rotation;
 import me.moros.math.Vector3d;
@@ -55,7 +56,7 @@ public sealed interface OBB extends Collider permits OBBImpl {
 
   @Override
   default boolean contains(Vector3d point) {
-    return closestPosition(point).distanceSq(point) <= EPSILON;
+    return closestPosition(point).distanceSq(point) < Constants.EPSILON;
   }
 
   static OBB of(AABB aabb, Vector3d axis, double angle) {

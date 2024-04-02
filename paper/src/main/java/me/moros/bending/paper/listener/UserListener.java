@@ -38,6 +38,7 @@ import me.moros.bending.api.temporal.TempBlock;
 import me.moros.bending.api.temporal.TempEntity;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.BendingEffect;
+import me.moros.bending.api.util.Constants;
 import me.moros.bending.api.util.metadata.BlockInteraction;
 import me.moros.bending.api.util.metadata.EntityInteraction;
 import me.moros.bending.api.util.metadata.Metadata;
@@ -237,7 +238,7 @@ public record UserListener(Game game) implements Listener, BukkitListener {
       double newDamage = game.activationController().onEntityDamage(entity, cause, oldDamage, origin);
       if (newDamage <= 0) {
         event.setCancelled(true);
-      } else if (oldDamage != newDamage) {
+      } else if (Math.abs(oldDamage - newDamage) > Constants.EPSILON) {
         event.setDamage(newDamage);
       }
     }

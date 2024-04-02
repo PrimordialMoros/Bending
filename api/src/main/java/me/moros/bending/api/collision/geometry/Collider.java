@@ -26,8 +26,6 @@ import me.moros.math.Vector3d;
  * Represents a collider.
  */
 public sealed interface Collider permits AABB, Disk, OBB, Ray, Sphere {
-  double EPSILON = 0.01;
-
   enum Type {SPHERE, AABB, OBB, RAY, DISK}
 
   /**

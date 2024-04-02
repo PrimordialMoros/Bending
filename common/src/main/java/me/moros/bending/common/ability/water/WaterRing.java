@@ -53,6 +53,7 @@ import me.moros.bending.api.platform.world.WorldUtil;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.temporal.TempBlock;
 import me.moros.bending.api.user.User;
+import me.moros.bending.api.util.Constants;
 import me.moros.bending.api.util.ExpiringSet;
 import me.moros.bending.api.util.functional.ExpireRemovalPolicy;
 import me.moros.bending.api.util.functional.Policies;
@@ -280,7 +281,7 @@ public class WaterRing extends AbilityInstance {
   }
 
   public void radius(double radius) {
-    if (radius < 1 || radius > 8 || this.radius == radius) {
+    if (radius < 1 || radius > 8 || Math.abs(radius - this.radius) < Constants.EPSILON) {
       return;
     }
     this.radius = radius;

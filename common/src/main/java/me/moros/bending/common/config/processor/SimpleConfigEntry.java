@@ -24,6 +24,7 @@ import java.util.function.DoubleUnaryOperator;
 
 import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.AttributeValue;
+import me.moros.bending.api.util.Constants;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
@@ -46,14 +47,14 @@ record SimpleConfigEntry(String name, Class<?> type) implements ConfigEntry {
 
   @Override
   public AttributeValue asAttributeValue(Object parent, Attribute attribute, @Nullable DoubleUnaryOperator modifier) {
-    double baseValue = node(parent).getDouble();
-    Number finalValue = baseValue;
+    double base = node(parent).getDouble();
+    Number modifiedNumber = base;
     if (modifier != null) {
-      double modifiedValue = modifier.applyAsDouble(baseValue);
-      if (baseValue != modifiedValue) {
-        finalValue = toNative(modifiedValue);
+      double modified = modifier.applyAsDouble(base);
+      if (Math.abs(modified - base) < Constants.EPSILON) {
+        modifiedNumber = toNative(modified);
       }
     }
-    return AttributeValue.of(attribute, name, baseValue, finalValue);
+    return AttributeValue.of(attribute, name, base, modifiedNumber);
   }
 }

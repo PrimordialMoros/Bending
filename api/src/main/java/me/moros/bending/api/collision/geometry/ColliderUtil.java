@@ -22,6 +22,7 @@ package me.moros.bending.api.collision.geometry;
 import java.util.function.BiPredicate;
 
 import me.moros.bending.api.collision.geometry.Collider.Type;
+import me.moros.bending.api.util.Constants;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 
@@ -182,11 +183,11 @@ final class ColliderUtil {
 
   private static boolean rayIntersection(Ray first, Ray other) {
     Vector3d cross = first.direction().cross(other.direction());
-    if (cross.lengthSq() < Collider.EPSILON) {
+    if (cross.lengthSq() < Constants.EPSILON) {
       return first.contains(other.position()) || other.contains(first.position());
     }
     double planarFactor = other.position().subtract(first.position()).dot(cross);
-    return abs(planarFactor) < Collider.EPSILON;
+    return abs(planarFactor) < Constants.EPSILON;
   }
 
   private static boolean diskIntersection(Disk first, Disk other) {

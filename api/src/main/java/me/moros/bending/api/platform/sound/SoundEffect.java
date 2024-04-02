@@ -93,9 +93,6 @@ public interface SoundEffect extends Keyed {
    * @return the new SoundEffect
    */
   default SoundEffect with(float volume, float pitch) {
-    if (volume == volume() && pitch == pitch()) {
-      return this;
-    }
     return new SoundEffectImpl(name(), source(), volume, pitch);
   }
 }

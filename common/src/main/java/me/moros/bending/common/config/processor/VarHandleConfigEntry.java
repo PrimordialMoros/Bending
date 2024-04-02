@@ -25,6 +25,7 @@ import java.util.function.DoubleUnaryOperator;
 
 import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.AttributeValue;
+import me.moros.bending.api.util.Constants;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 record VarHandleConfigEntry(String name, Class<?> type, VarHandle handle) implements ConfigEntry {
@@ -40,15 +41,15 @@ record VarHandleConfigEntry(String name, Class<?> type, VarHandle handle) implem
 
   @Override
   public AttributeValue asAttributeValue(Object parent, Attribute attribute, @Nullable DoubleUnaryOperator modifier) {
-    Number baseValue = get(parent);
-    Number finalValue = baseValue;
+    Number baseNumber = get(parent);
+    Number modifiedNumber = baseNumber;
     if (modifier != null) {
-      double base = baseValue.doubleValue();
+      double base = baseNumber.doubleValue();
       double modified = modifier.applyAsDouble(base);
-      if (base != modified) {
-        finalValue = toNative(modified);
+      if (Math.abs(modified - base) < Constants.EPSILON) {
+        modifiedNumber = toNative(modified);
       }
     }
-    return AttributeValue.of(attribute, name(), baseValue, finalValue);
+    return AttributeValue.of(attribute, name(), baseNumber, modifiedNumber);
   }
 }

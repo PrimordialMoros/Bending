@@ -48,6 +48,7 @@ import me.moros.bending.api.temporal.TempLight;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.BendingEffect;
 import me.moros.bending.api.util.BendingExplosion;
+import me.moros.bending.api.util.Constants;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.material.MaterialUtil;
@@ -152,7 +153,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
   @Override
   public void onCollision(Collision collision) {
     Ability collidedAbility = collision.collidedAbility();
-    boolean fullyCharged = factor == userConfig.chargeFactor;
+    boolean fullyCharged = Math.abs(factor - userConfig.chargeFactor) < Constants.EPSILON;
     if (fullyCharged && collision.removeSelf()) {
       if (AbilityInitializer.layer2.containsValue(collidedAbility.description().key())) {
         collision.removeOther(true);
@@ -168,7 +169,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
       }
     } else if (collidedAbility instanceof FireBlast other) {
       double collidedFactor = other.factor;
-      if (fullyCharged && collidedFactor == other.userConfig.chargeFactor) {
+      if (fullyCharged && Math.abs(collidedFactor - other.userConfig.chargeFactor) < Constants.EPSILON) {
         Vector3d first = collision.colliderSelf().position();
         Vector3d second = collision.colliderOther().position();
         Vector3d center = first.add(second).multiply(0.5);
@@ -217,7 +218,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
       offset = 0.25 + (factor - 1);
       particleSpeed = 0.02 * factor;
       amount = FastMath.ceil(6 * Math.pow(factor, 4));
-      explosive = factor == userConfig.chargeFactor;
+      explosive = Math.abs(factor - userConfig.chargeFactor) < Constants.EPSILON;
       singleCollision = explosive;
     }
 
