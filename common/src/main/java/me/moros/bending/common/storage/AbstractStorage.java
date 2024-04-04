@@ -27,6 +27,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Function;
@@ -34,7 +35,6 @@ import java.util.function.Supplier;
 
 import me.moros.bending.api.storage.BendingStorage;
 import me.moros.bending.api.user.profile.BenderProfile;
-import me.moros.bending.api.util.Tasker;
 import me.moros.bending.common.logging.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
@@ -45,7 +45,7 @@ abstract class AbstractStorage implements BendingStorage {
 
   protected AbstractStorage(Logger logger) {
     this.logger = logger;
-    this.executor = Tasker.async(); // TODO replace with loom in JDK 21
+    this.executor = Executors.newVirtualThreadPerTaskExecutor();
   }
 
   private <R> CompletableFuture<R> async(Supplier<R> supplier) {

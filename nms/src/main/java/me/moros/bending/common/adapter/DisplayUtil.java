@@ -25,8 +25,10 @@ import me.moros.bending.api.platform.entity.display.ItemDisplay;
 import me.moros.bending.api.platform.entity.display.TextDisplay;
 import me.moros.bending.api.platform.entity.display.TextDisplay.TextFlags;
 import me.moros.bending.api.platform.entity.display.Transformation;
+import me.moros.bending.common.adapter.EntityMeta.EntityStatus;
 import me.moros.math.Position;
 import me.moros.math.Quaternion;
+import net.minecraft.world.entity.EntityType;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -34,21 +36,27 @@ final class DisplayUtil {
   private DisplayUtil() {
   }
 
-  static EntityDataBuilder mapProperties(AbstractPacketUtil packetUtil, EntityDataBuilder builder, Display<?> properties) {
-    builder = applyCommon(builder, properties);
-    if (properties instanceof BlockDisplay display) {
-      builder.setRaw(EntityMeta.BLOCK_STATE_ID, packetUtil.adapt(display.data()));
-    } else if (properties instanceof ItemDisplay display) {
-      builder.setRaw(EntityMeta.DISPLAYED_ITEM, packetUtil.adapt(display.data()));
-      builder.setRaw(EntityMeta.DISPLAY_TYPE, display.displayType().getId());
-    } else if (properties instanceof TextDisplay display) {
-      builder.setRaw(EntityMeta.TEXT, packetUtil.adapt(display.data()));
-      builder.setRaw(EntityMeta.LINE_WIDTH, display.lineWidth());
-      builder.setRaw(EntityMeta.BACKGROUND_COLOR, display.backgroundColor());
-      builder.setRaw(EntityMeta.OPACITY, display.opacity());
-      builder.setRaw(EntityMeta.TEXT_FLAGS, DisplayUtil.packTextDisplayFlagsIntoByte(display.textFlags()));
-    }
-    return builder;
+  static EntityType<?> mapProperties(AbstractPacketUtil packetUtil, EntityDataBuilder builder, Display<?> properties) {
+    applyCommon(builder, properties);
+    return switch (properties) {
+      case BlockDisplay display -> {
+        builder.setRaw(EntityMeta.BLOCK_STATE_ID, packetUtil.adapt(display.data()));
+        yield EntityType.BLOCK_DISPLAY;
+      }
+      case ItemDisplay display -> {
+        builder.setRaw(EntityMeta.DISPLAYED_ITEM, packetUtil.adapt(display.data()));
+        builder.setRaw(EntityMeta.DISPLAY_TYPE, display.displayType().getId());
+        yield EntityType.ITEM_DISPLAY;
+      }
+      case TextDisplay display -> {
+        builder.setRaw(EntityMeta.TEXT, packetUtil.adapt(display.data()));
+        builder.setRaw(EntityMeta.LINE_WIDTH, display.lineWidth());
+        builder.setRaw(EntityMeta.BACKGROUND_COLOR, display.backgroundColor());
+        builder.setRaw(EntityMeta.OPACITY, display.opacity());
+        builder.setRaw(EntityMeta.TEXT_FLAGS, DisplayUtil.packTextDisplayFlagsIntoByte(display.textFlags()));
+        yield EntityType.TEXT_DISPLAY;
+      }
+    };
   }
 
   static EntityDataBuilder applyTransformation(EntityDataBuilder builder, Transformation transformation) {
@@ -62,6 +70,9 @@ final class DisplayUtil {
   }
 
   static EntityDataBuilder applyCommon(EntityDataBuilder builder, Display<?> properties) {
+    if (properties.glowColor() != -1) {
+      builder.withStatus(EntityStatus.GLOWING);
+    }
     return applyTransformation(builder, properties.transformation())
       .setRaw(EntityMeta.INTERPOLATION_DELAY, properties.interpolationDelay())
       .setRaw(EntityMeta.TRANSFORMATION_INTERPOLATION_DURATION, properties.transformationInterpolationDuration())

@@ -31,13 +31,9 @@ import java.util.function.Consumer;
 import io.netty.buffer.Unpooled;
 import me.moros.bending.api.adapter.PacketUtil;
 import me.moros.bending.api.platform.entity.Entity;
-import me.moros.bending.api.platform.entity.display.BlockDisplay;
 import me.moros.bending.api.platform.entity.display.Display;
-import me.moros.bending.api.platform.entity.display.ItemDisplay;
-import me.moros.bending.api.platform.entity.display.TextDisplay;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.world.World;
-import me.moros.bending.common.adapter.EntityMeta.EntityStatus;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.text.Component;
@@ -125,23 +121,9 @@ public abstract class AbstractPacketUtil implements PacketUtil {
   @Override
   public ClientboundPacket createDisplayEntity(Position center, Display<?> properties) {
     final int id = nextEntityId();
-    EntityType<?> type;
-    // TODO pattern matching in java 21
-    if (properties instanceof BlockDisplay) {
-      type = EntityType.BLOCK_DISPLAY;
-    } else if (properties instanceof ItemDisplay) {
-      type = EntityType.ITEM_DISPLAY;
-    } else if (properties instanceof TextDisplay) {
-      type = EntityType.TEXT_DISPLAY;
-    } else {
-      throw new AssertionError(); // sealed interface, not possible
-    }
-    var meta = new EntityDataBuilder(id);
-    if (properties.glowColor() != -1) {
-      meta.withStatus(EntityStatus.GLOWING);
-    }
-    DisplayUtil.mapProperties(this, meta, properties);
-    return wrap(id, new ClientboundBundlePacket(List.of(createEntity(id, center, type, 0), meta.build())));
+    var builder = new EntityDataBuilder(id);
+    var type = DisplayUtil.mapProperties(this, builder, properties);
+    return wrap(id, new ClientboundBundlePacket(List.of(createEntity(id, center, type, 0), builder.build())));
   }
 
   @Override

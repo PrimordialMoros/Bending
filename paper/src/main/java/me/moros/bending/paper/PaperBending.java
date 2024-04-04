@@ -114,7 +114,7 @@ final class PaperBending extends AbstractBending<BendingBootstrap> {
 
   @Override
   public String author() {
-    return parent.getPluginMeta().getAuthors().get(0);
+    return parent.getPluginMeta().getAuthors().getFirst();
   }
 
   @Override

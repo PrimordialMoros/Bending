@@ -92,7 +92,7 @@ public record UserListener(Game game) implements Listener, BukkitListener {
       return;
     }
     if (event.getEntity() instanceof Arrow && event.getEntity().hasMetadata(MetalCable.CABLE_KEY.value())) {
-      MetalCable cable = (MetalCable) event.getEntity().getMetadata(MetalCable.CABLE_KEY.value()).get(0).value();
+      MetalCable cable = (MetalCable) event.getEntity().getMetadata(MetalCable.CABLE_KEY.value()).getFirst().value();
       if (cable != null) {
         var block = event.getHitBlock();
         if (block != null) {

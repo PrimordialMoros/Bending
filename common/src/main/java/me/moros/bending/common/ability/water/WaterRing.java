@@ -157,7 +157,7 @@ public class WaterRing extends AbilityInstance {
   private Block getClosestRingBlock() {
     Vector3d dir = user.direction().withY(0).normalize().multiply(radius);
     Block target = user.world().blockAt(user.eyeBlock().center().add(dir));
-    Block result = ring.get(0);
+    Block result = ring.getFirst();
     Vector3d targetVector = target.toVector3d();
     double minDistance = Double.MAX_VALUE;
     for (Block block : ring) {
