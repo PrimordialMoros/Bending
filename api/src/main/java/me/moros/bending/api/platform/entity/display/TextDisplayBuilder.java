@@ -63,7 +63,7 @@ public final class TextDisplayBuilder extends AbstractDisplayBuilder<Component, 
   }
 
   public TextDisplayBuilder backgroundColor(RGBLike color) {
-    return backgroundColor(255 << 24 | color.red() << 16 | color.green() << 8 | color.blue());
+    return backgroundColor(rgbToInt(color));
   }
 
   public TextDisplayBuilder backgroundColor(int backgroundColor) {

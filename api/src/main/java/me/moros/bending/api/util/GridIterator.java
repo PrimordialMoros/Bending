@@ -30,7 +30,10 @@ import me.moros.math.Vector3d;
 /**
  * Iterator for travelling a line in a grid.
  */
-public class GridIterator implements Iterator<Vector3d> {
+public final class GridIterator implements Iterator<Vector3d> {
+  private static final double BIG_DELTA = 1e30;
+  private static final double EPSILON = 1e-10;
+
   private final short[] signums = new short[3];
   private final Position end;
 
@@ -65,9 +68,9 @@ public class GridIterator implements Iterator<Vector3d> {
     signums[1] = (short) Math.signum(dir.y());
     signums[2] = (short) Math.signum(dir.z());
 
-    deltaDistX = (dir.x() == 0) ? 1e30 : Math.abs(1 / dir.x());
-    deltaDistY = (dir.y() == 0) ? 1e30 : Math.abs(1 / dir.y());
-    deltaDistZ = (dir.z() == 0) ? 1e30 : Math.abs(1 / dir.z());
+    deltaDistX = (dir.x() == 0) ? BIG_DELTA : Math.abs(1 / dir.x());
+    deltaDistY = (dir.y() == 0) ? BIG_DELTA : Math.abs(1 / dir.y());
+    deltaDistZ = (dir.z() == 0) ? BIG_DELTA : Math.abs(1 / dir.z());
 
     //calculate step and initial sideDist
     if (dir.x() < 0) {
@@ -115,9 +118,9 @@ public class GridIterator implements Iterator<Vector3d> {
     }
 
     double closest = Math.min(sideDistX, Math.min(sideDistY, sideDistZ));
-    boolean needsX = sideDistX - closest < 1e-10;
-    boolean needsY = sideDistY - closest < 1e-10;
-    boolean needsZ = sideDistZ - closest < 1e-10;
+    boolean needsX = sideDistX - closest < EPSILON;
+    boolean needsY = sideDistY - closest < EPSILON;
+    boolean needsZ = sideDistZ - closest < EPSILON;
 
     if (needsZ) {
       sideDistZ += deltaDistZ;

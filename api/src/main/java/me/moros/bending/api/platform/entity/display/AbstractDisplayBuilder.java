@@ -23,6 +23,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 import me.moros.math.Vector3d;
+import net.kyori.adventure.util.RGBLike;
 
 @SuppressWarnings("unchecked")
 sealed class AbstractDisplayBuilder<V, T extends AbstractDisplayBuilder<V, T>> implements DisplayBuilder<V, T> permits BlockDisplayBuilder, ItemDisplayBuilder, TextDisplayBuilder {
@@ -179,6 +180,11 @@ sealed class AbstractDisplayBuilder<V, T extends AbstractDisplayBuilder<V, T>> i
   }
 
   @Override
+  public T glowColor(RGBLike color) {
+    return glowColor(rgbToInt(color));
+  }
+
+  @Override
   public T glowColor(int argb) {
     this.glowColor = argb;
     return (T) this;
@@ -209,5 +215,9 @@ sealed class AbstractDisplayBuilder<V, T extends AbstractDisplayBuilder<V, T>> i
   @Override
   public Display<? super V> build() {
     return factory.apply((T) this);
+  }
+
+  protected static int rgbToInt(RGBLike color) {
+    return 255 << 24 | color.red() << 16 | color.green() << 8 | color.blue();
   }
 }

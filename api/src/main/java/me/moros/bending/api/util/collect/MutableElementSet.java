@@ -161,10 +161,12 @@ final class MutableElementSet extends AbstractSet<Element> implements ElementSet
       unseen = elements;
     }
 
+    @Override
     public boolean hasNext() {
       return unseen != 0;
     }
 
+    @Override
     public Element next() {
       if (unseen == 0) {
         throw new NoSuchElementException();

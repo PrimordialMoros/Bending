@@ -69,9 +69,7 @@ public sealed interface DisplayBuilder<V, T extends DisplayBuilder<V, T>> permit
 
   int glowColor();
 
-  default T glowColor(RGBLike color) {
-    return glowColor(255 << 24 | color.red() << 16 | color.green() << 8 | color.blue());
-  }
+  T glowColor(RGBLike color);
 
   T glowColor(int argb);
 

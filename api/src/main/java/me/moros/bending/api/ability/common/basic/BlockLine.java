@@ -102,8 +102,8 @@ public abstract class BlockLine extends MovementResolver implements Updatable {
   public abstract void render(Block block);
 
   protected record Vector2i(int x, int z) {
-    public static Vector2i at(double x, double z) {
-      return new Vector2i(FastMath.floor(x), FastMath.floor(z));
+    public static Vector2i at(int x, int z) {
+      return new Vector2i(x, z);
     }
   }
 }

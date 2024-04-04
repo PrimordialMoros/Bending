@@ -41,6 +41,7 @@ public final class CollisionPair implements Keyed {
   private final boolean removeFirst;
   private final boolean removeSecond;
   private final Key key;
+  private final int hashcode;
 
   CollisionPair(AbilityDescription first, AbilityDescription second, boolean removeFirst, boolean removeSecond) {
     this.first = first;
@@ -48,6 +49,7 @@ public final class CollisionPair implements Keyed {
     this.removeFirst = removeFirst;
     this.removeSecond = removeSecond;
     this.key = createKey(first, second);
+    this.hashcode = 31 * Math.min(first.hashCode(), second.hashCode()) + Math.max(first.hashCode(), second.hashCode());
   }
 
   public AbilityDescription first() {
@@ -78,15 +80,8 @@ public final class CollisionPair implements Keyed {
     return (first.equals(other.first) && second.equals(other.second)) || (first.equals(other.second) && second.equals(other.first));
   }
 
-  private int hashcode;
-
   @Override
   public int hashCode() {
-    if (hashcode == 0) {
-      int maxHash = Math.max(first.hashCode(), second.hashCode());
-      int minHash = Math.min(first.hashCode(), second.hashCode());
-      hashcode = 31 * minHash + maxHash;
-    }
     return hashcode;
   }
 

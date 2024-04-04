@@ -170,8 +170,8 @@ public interface DelegateEntity extends Entity {
   }
 
   @Override
-  default void fallDistance(double fallDistance) {
-    entity().fallDistance(fallDistance);
+  default void fallDistance(double distance) {
+    entity().fallDistance(distance);
   }
 
   @Override
