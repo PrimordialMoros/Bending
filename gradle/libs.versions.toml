@@ -4,17 +4,17 @@ tasker = "1.0.1"
 adventure = "4.16.0"
 adventure-fabric = "5.12.0"
 configurate = "4.2.0-SNAPSHOT"
-cloud = "2.0.0-beta.4"
+cloud = "2.0.0-SNAPSHOT"
 cloud-snapshot = "1.8.0-SNAPSHOT"
 bstats = "3.0.2"
 sponge-api = "11.0.0-SNAPSHOT"
 sponge-common = "1.20.1-11.0.0-SNAPSHOT"
 minecraft = "1.20.4"
-fabric-loom = "1.6.3"
+fabric-loom = "1.6.6"
 fabric-api = "0.96.11+1.20.4"
-fabric-loader = "0.15.7"
+fabric-loader = "0.15.9"
 shadow = "8.1.1"
-flyway = "10.10.0"
+flyway = "10.11.0"
 junit = "5.10.2"
 
 [libraries]
@@ -81,7 +81,7 @@ fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.
 # Bukkit
 inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.13" }
 grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.2" }
-towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.100.1.18" }
+towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.100.2.0" }
 lwc = { module = "com.griefcraft:lwc", version = "2.3.2" }
 worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.9" }
 papi = { module = "me.clip:placeholderapi", version = "2.11.5" }
@@ -109,7 +109,7 @@ junit = ["junit-api", "junit-engine"]
 [plugins]
 jmh = { id = "me.champeau.jmh", version = "0.7.2" }
 fabric-loom = { id = "fabric-loom", version.ref = "fabric-loom" }
-userdev = { id = "io.papermc.paperweight.userdev", version = "1.5.12" }
+userdev = { id = "io.papermc.paperweight.userdev", version = "1.5.13" }
 sponge = { id = "org.spongepowered.gradle.plugin", version = "2.2.0" }
 hangar = { id = "io.papermc.hangar-publish-plugin", version = "0.1.2" }
 run-paper = { id = "xyz.jpenilla.run-paper", version = "2.2.3" }
