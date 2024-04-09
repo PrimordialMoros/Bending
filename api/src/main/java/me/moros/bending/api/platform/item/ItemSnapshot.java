@@ -19,13 +19,11 @@
 
 package me.moros.bending.api.platform.item;
 
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.util.data.DataHolder;
 import me.moros.bending.api.util.functional.Suppliers;
-import net.kyori.adventure.text.Component;
 
 public interface ItemSnapshot extends DataHolder {
   Supplier<ItemSnapshot> AIR = Suppliers.lazy(() -> Platform.instance().factory().itemBuilder(Item.AIR).build());
@@ -33,10 +31,4 @@ public interface ItemSnapshot extends DataHolder {
   Item type();
 
   int amount();
-
-  @Deprecated(forRemoval = true)
-  Optional<String> customName();
-
-  @Deprecated(forRemoval = true)
-  Optional<Component> customDisplayName();
 }

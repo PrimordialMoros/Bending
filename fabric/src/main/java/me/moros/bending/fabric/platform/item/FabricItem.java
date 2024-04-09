@@ -29,8 +29,6 @@ import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.api.util.functional.Suppliers;
 import me.moros.bending.fabric.platform.FabricPersistentDataHolder;
 import me.moros.bending.fabric.platform.PlatformAdapter;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.world.item.ItemStack;
 
 public final class FabricItem implements ItemSnapshot {
@@ -56,18 +54,6 @@ public final class FabricItem implements ItemSnapshot {
   @Override
   public int amount() {
     return handle.getCount();
-  }
-
-  @Deprecated(forRemoval = true)
-  @Override
-  public Optional<String> customName() {
-    return customDisplayName().map(LegacyComponentSerializer.legacySection()::serialize);
-  }
-
-  @Deprecated(forRemoval = true)
-  @Override
-  public Optional<Component> customDisplayName() {
-    return handle.hasCustomHoverName() ? Optional.of(handle.getHoverName().asComponent()) : Optional.empty();
   }
 
   @Override

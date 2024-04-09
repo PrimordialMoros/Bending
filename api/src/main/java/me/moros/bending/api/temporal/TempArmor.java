@@ -125,11 +125,6 @@ public final class TempArmor extends Temporary {
       return safePutItem(EquipmentSlot.FEET, material);
     }
 
-    @Deprecated(forRemoval = true)
-    public Builder boots(@Nullable Item material) {
-      return feet(material);
-    }
-
     public Builder duration(long duration) {
       this.duration = duration;
       return this;

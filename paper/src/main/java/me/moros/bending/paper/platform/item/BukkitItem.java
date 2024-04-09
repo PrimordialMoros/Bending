@@ -29,10 +29,7 @@ import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.api.util.functional.Suppliers;
 import me.moros.bending.paper.platform.BukkitPersistentDataHolder;
 import me.moros.bending.paper.platform.PlatformAdapter;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 public final class BukkitItem implements ItemSnapshot {
   private final Item type;
@@ -57,18 +54,6 @@ public final class BukkitItem implements ItemSnapshot {
   @Override
   public int amount() {
     return handle.getAmount();
-  }
-
-  @Deprecated(forRemoval = true)
-  @Override
-  public Optional<String> customName() {
-    return customDisplayName().map(LegacyComponentSerializer.legacySection()::serialize);
-  }
-
-  @Deprecated(forRemoval = true)
-  @Override
-  public Optional<Component> customDisplayName() {
-    return Optional.ofNullable(handle.getItemMeta()).map(ItemMeta::displayName);
   }
 
   @Override

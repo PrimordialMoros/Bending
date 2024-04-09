@@ -46,7 +46,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public sealed class AbilityDescription implements Keyed, Translatable permits AbilityDescription.Sequence {
   private final Key key;
-  private final String name;
   private final Element element;
   private final Component displayName;
   private final Function<AbilityDescription, ? extends Ability> constructor;
@@ -59,7 +58,6 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
 
   private AbilityDescription(Builder builder) {
     key = builder.key;
-    name = builder.name;
     element = builder.element;
     displayName = builder.displayName;
     constructor = builder.constructor;
@@ -69,11 +67,6 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
     hidden = builder.hidden;
     bypassCooldown = builder.bypassCooldown;
     hashcode = Objects.hash(key, element, activations);
-  }
-
-  @Deprecated(forRemoval = true)
-  public String name() {
-    return name;
   }
 
   public Component displayName() {

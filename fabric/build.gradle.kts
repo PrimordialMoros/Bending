@@ -21,7 +21,6 @@ dependencies {
     modImplementation(libs.fabric.placeholder)
     modImplementation(include(libs.sgui.get())!!)
     modImplementation(include(libs.adventure.fabric.get())!!)
-    modImplementation(include(libs.adventure.legacy.get())!!)
     modImplementation(include(libs.cloud.fabric.get())!!)
     implementation(include(libs.cloud.minecraft.get())!!)
     bendingImplementation(projects.bendingCommon)
