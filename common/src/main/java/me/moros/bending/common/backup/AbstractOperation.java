@@ -21,9 +21,7 @@ package me.moros.bending.common.backup;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.LongAdder;
 
@@ -32,6 +30,7 @@ import me.moros.bending.api.storage.BendingStorage;
 import me.moros.bending.api.user.profile.BenderProfile;
 import me.moros.bending.api.util.Tasker;
 import me.moros.bending.common.Bending;
+import me.moros.tasker.Task;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 abstract sealed class AbstractOperation implements Operation permits ExportOperation, ImportOperation {
@@ -68,22 +67,9 @@ abstract sealed class AbstractOperation implements Operation permits ExportOpera
 
   protected abstract void onFailure(@Nullable Throwable throwable);
 
-  protected final <R> @Nullable R waitForCompletion(CompletableFuture<R> future, LongAdder progress, int total) {
-    R result = null;
-    while (true) {
-      try {
-        result = future.get(5, TimeUnit.SECONDS);
-      } catch (InterruptedException | ExecutionException e) {
-        plugin.logger().error(e.getMessage(), e);
-        break;
-      } catch (TimeoutException e) {
-        logProgress(progress.intValue(), total);
-        continue;
-      }
-      break;
-    }
-    return result;
-  }
-
   protected abstract void logProgress(int current, int total);
+
+  protected final Task createProgressCheckingTask(LongAdder progress, int size) {
+    return Tasker.async().repeat(() -> logProgress(progress.intValue(), size), 5, TimeUnit.SECONDS);
+  }
 }

@@ -28,7 +28,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -98,13 +97,14 @@ final class ImportOperation extends AbstractOperation {
 
   private boolean saveUsers(BenderProfile[] profiles) {
     LongAdder progress = new LongAdder();
-    CompletableFuture<Boolean> future = storage.saveProfilesAsync(Arrays.asList(profiles), progress);
-    Boolean result = waitForCompletion(future, progress, profiles.length);
-    if (Boolean.TRUE.equals(result)) {
-      updateOnline(profiles);
-      return true;
-    }
-    return false;
+    var checker = createProgressCheckingTask(progress, profiles.length);
+    return storage.saveProfilesAsync(Arrays.asList(profiles), progress)
+      .whenComplete((result, t) -> {
+        checker.cancel();
+        if (Boolean.TRUE.equals(result)) {
+          updateOnline(profiles);
+        }
+      }).join();
   }
 
   private void updateOnline(BenderProfile[] profiles) {

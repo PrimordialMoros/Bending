@@ -34,7 +34,6 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.zip.GZIPOutputStream;
 
@@ -116,10 +115,14 @@ final class ExportOperation extends AbstractOperation {
     final Set<UUID> uuids = storage.loadUuids();
     final int size = uuids.size();
     logToAudience(Component.text("Found %d users to export.".formatted(size), ColorPalette.NEUTRAL));
+
     LongAdder progress = new LongAdder();
-    CompletableFuture<Map<UUID, BenderProfile>> future = storage.loadProfilesAsync(uuids, progress);
-    Map<UUID, BenderProfile> result = waitForCompletion(future, progress, size);
-    return result != null ? result.values().toArray(BenderProfile[]::new) : new BenderProfile[0];
+    var checker = createProgressCheckingTask(progress, size);
+    return storage.loadProfilesAsync(uuids, progress)
+      .handle((result, t) -> {
+        checker.cancel();
+        return result == null ? new BenderProfile[0] : result.values().toArray(BenderProfile[]::new);
+      }).join();
   }
 
   @Override
