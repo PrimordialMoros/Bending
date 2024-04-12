@@ -138,6 +138,10 @@ public final class ActivationControllerImpl implements ActivationController {
   @Override
   public void onUserSneak(User user, boolean sneaking) {
     Activation action = sneaking ? Activation.SNEAK : Activation.SNEAK_RELEASE;
+    if (sneaking && user.game().abilityManager(user.worldKey()).destroyUserInstances(user, WaterWave.class)) {
+      return;
+    }
+
     sequenceManager.registerStep(user, action);
     activateAbility(user, action);
   }
