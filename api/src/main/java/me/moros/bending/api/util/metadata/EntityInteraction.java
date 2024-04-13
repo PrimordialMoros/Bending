@@ -27,11 +27,11 @@ import me.moros.bending.api.util.data.DataKey;
 import me.moros.math.Vector3d;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public record EntityInteraction(WeakReference<Entity> entity, @Nullable Vector3d point) implements Interaction<Entity> {
-  public static final DataKey<EntityInteraction> KEY = KeyUtil.data("last-interacted-enttity", EntityInteraction.class);
+public record EntityInteraction(WeakReference<Entity> entity, @Nullable Vector3d point, long timestamp) implements Interaction<Entity> {
+  public static final DataKey<EntityInteraction> KEY = KeyUtil.data("last-interacted-entity", EntityInteraction.class);
 
   public EntityInteraction(Entity entity, @Nullable Vector3d point) {
-    this(new WeakReference<>(entity), point);
+    this(new WeakReference<>(entity), point, System.currentTimeMillis());
   }
 
   @Override

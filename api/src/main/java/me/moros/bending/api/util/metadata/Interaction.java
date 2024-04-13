@@ -22,8 +22,10 @@ package me.moros.bending.api.util.metadata;
 import me.moros.math.Vector3d;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public interface Interaction<T> {
+public sealed interface Interaction<T> permits BlockInteraction, EntityInteraction {
   @Nullable T value();
 
   @Nullable Vector3d point();
+
+  long timestamp();
 }
