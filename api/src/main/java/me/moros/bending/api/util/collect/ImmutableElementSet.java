@@ -56,6 +56,24 @@ final class ImmutableElementSet extends AbstractSet<Element> implements ElementS
   }
 
   @Override
+  public boolean isEmpty() {
+    return elements == 0;
+  }
+
+  @Override
+  public boolean contains(Object e) {
+    if (e == null || e.getClass() != Element.class) {
+      return false;
+    }
+    return (elements & (1 << ((Element) e).ordinal())) != 0;
+  }
+
+  @Override
+  public boolean containsAll(Collection<?> c) {
+    return c instanceof ElementSet other ? ((other.elements() & ~elements) == 0) : super.containsAll(c);
+  }
+
+  @Override
   public Iterator<Element> iterator() {
     return new Itr(elements);
   }
