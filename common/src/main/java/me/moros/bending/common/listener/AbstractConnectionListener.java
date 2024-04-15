@@ -22,6 +22,7 @@ package me.moros.bending.common.listener;
 import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
@@ -34,7 +35,6 @@ import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.user.profile.BenderProfile;
-import me.moros.bending.api.util.Tasker;
 import me.moros.bending.api.util.functional.Suppliers;
 import me.moros.bending.common.logging.Logger;
 
@@ -50,7 +50,7 @@ public abstract class AbstractConnectionListener {
   protected AbstractConnectionListener(Logger logger, Supplier<Game> gameSupplier) {
     this.logger = logger;
     this.gameSupplier = gameSupplier;
-    this.profileCache = Caffeine.newBuilder().maximumSize(64).executor(Tasker.async())
+    this.profileCache = Caffeine.newBuilder().maximumSize(64).executor(Executors.newVirtualThreadPerTaskExecutor())
       .expireAfterWrite(Duration.ofMinutes(2)).buildAsync(this::cacheLoad);
   }
 
