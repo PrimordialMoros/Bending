@@ -19,8 +19,6 @@
 
 package me.moros.bending.api.util;
 
-import java.util.concurrent.Executors;
-
 import me.moros.tasker.executor.AsyncExecutor;
 import me.moros.tasker.executor.SimpleAsyncExecutor;
 import me.moros.tasker.executor.SyncExecutor;
@@ -29,7 +27,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 /**
  * Utility class to easily schedule sync, async tasks.
  */
-public final class Tasker {
+public class Tasker {
   private Tasker() {
   }
 
@@ -37,8 +35,7 @@ public final class Tasker {
   private static final AsyncExecutor ASYNC;
 
   static {
-    int threads = Math.max(1, Runtime.getRuntime().availableProcessors() / 2);
-    ASYNC = new SimpleAsyncExecutor(Executors.newScheduledThreadPool(threads));
+    ASYNC = new SimpleAsyncExecutor();
   }
 
   /**

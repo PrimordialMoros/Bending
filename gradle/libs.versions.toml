@@ -1,6 +1,6 @@
 [versions]
 math = "2.0.0"
-tasker = "1.0.1"
+tasker = "1.1.0"
 adventure = "4.16.0"
 adventure-fabric = "5.12.0"
 configurate = "4.2.0-SNAPSHOT"
