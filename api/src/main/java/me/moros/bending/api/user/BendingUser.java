@@ -348,7 +348,7 @@ sealed class BendingUser implements User permits BendingPlayer {
     if (profile.board()) {
       Tasker.sync().submit(() -> board().updateAll());
     } else {
-      store().add(Board.HIDDEN, Board.dummy());
+      store().add(Board.HIDDEN, true);
     }
     return true;
   }
