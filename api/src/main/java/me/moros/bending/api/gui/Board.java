@@ -27,7 +27,7 @@ import me.moros.bending.api.util.data.DataKey;
  * Represents a bending board that utilizes a scoreboard to render bound abilities and cooldowns.
  */
 public interface Board {
-  DataKey<Board> HIDDEN = KeyUtil.data("hidden-board", Board.class);
+  DataKey<Boolean> HIDDEN = KeyUtil.data("hidden-board", Boolean.class);
 
   /**
    * Check if this instance is enabled.

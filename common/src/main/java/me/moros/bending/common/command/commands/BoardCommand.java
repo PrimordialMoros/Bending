@@ -51,7 +51,7 @@ public record BoardCommand<C extends Audience>(Commander<C> commander) implement
       user.store().remove(Board.HIDDEN);
       Message.BOARD_TOGGLED_ON.send(user);
     } else {
-      user.store().add(Board.HIDDEN, Board.dummy());
+      user.store().add(Board.HIDDEN, true);
       Message.BOARD_TOGGLED_OFF.send(user);
     }
     user.board();
