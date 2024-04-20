@@ -21,6 +21,7 @@ package me.moros.bending.common.command;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
@@ -36,6 +37,7 @@ import me.moros.bending.api.util.KeyUtil;
 import me.moros.bending.api.util.collect.ElementSet;
 import me.moros.bending.common.locale.Message;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -82,6 +84,7 @@ public final class CommandUtil {
       .filter(desc -> !desc.hidden() && desc.canBind())
       .filter(desc -> singleElementSet.equals(desc.elements()))
       .filter(permissionChecker)
+      .sorted(Comparator.comparing(Keyed::key))
       .map(CommandUtil::mapToClickComponent)
       .toList();
     return new AbilityDisplay(Message.ABILITIES.build(), components);
@@ -92,6 +95,7 @@ public final class CommandUtil {
       .filter(desc -> !desc.hidden())
       .filter(desc -> singleElementSet.equals(desc.elements()))
       .filter(permissionChecker)
+      .sorted(Comparator.comparing(Keyed::key))
       .map(CommandUtil::mapToClickComponent)
       .toList();
     return new AbilityDisplay(Message.SEQUENCES.build(), components);
@@ -102,6 +106,7 @@ public final class CommandUtil {
       .filter(desc -> !desc.hidden() && !desc.canBind())
       .filter(desc -> singleElementSet.equals(desc.elements()) && desc.isActivatedBy(Activation.PASSIVE))
       .filter(permissionChecker)
+      .sorted(Comparator.comparing(Keyed::key))
       .map(CommandUtil::mapToClickComponent)
       .toList();
     return new AbilityDisplay(Message.PASSIVES.build(), components);
