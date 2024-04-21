@@ -105,6 +105,11 @@ sealed class BendingUser implements User permits BendingPlayer {
   }
 
   @Override
+  public boolean hasElements(Collection<Element> elements) {
+    return this.elements.containsAll(elements);
+  }
+
+  @Override
   public boolean addElement(Element element) {
     if (!hasElement(element) && game().eventBus().postElementChangeEvent(this, element, ElementAction.ADD)) {
       boolean empty = elements.isEmpty();
@@ -122,7 +127,7 @@ sealed class BendingUser implements User permits BendingPlayer {
   public boolean removeElement(Element element) {
     if (hasElement(element) && game().eventBus().postElementChangeEvent(this, element, ElementAction.REMOVE)) {
       elements.remove(element);
-      slots.validate(desc -> hasElement(desc.element()));
+      slots.validate(desc -> hasElements(desc.elements()));
       validateAbilities();
       board().updateAll();
       return true;
@@ -138,7 +143,7 @@ sealed class BendingUser implements User permits BendingPlayer {
       if (elementPreset != null) {
         slots.fromPreset(elementPreset, this::validate);
       } else {
-        slots.validate(desc -> hasElement(desc.element()));
+        slots.validate(desc -> hasElements(desc.elements()));
         validateAbilities();
       }
       board().updateAll();
@@ -148,7 +153,7 @@ sealed class BendingUser implements User permits BendingPlayer {
   }
 
   private void validateAbilities() {
-    game.abilityManager(worldKey()).destroyUserInstances(this, a -> !hasElement(a.description().element()));
+    game.abilityManager(worldKey()).destroyUserInstances(this, a -> !hasElements(a.description().elements()));
     validatePassives();
   }
 
@@ -280,7 +285,7 @@ sealed class BendingUser implements User permits BendingPlayer {
   }
 
   private boolean validate(AbilityDescription desc) {
-    return desc.canBind() && hasElement(desc.element()) && hasPermission(desc);
+    return desc.canBind() && hasElements(desc.elements()) && hasPermission(desc);
   }
 
   // Presets

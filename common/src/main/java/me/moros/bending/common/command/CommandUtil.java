@@ -33,6 +33,7 @@ import me.moros.bending.api.ability.preset.Preset;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.util.ColorPalette;
 import me.moros.bending.api.util.KeyUtil;
+import me.moros.bending.api.util.collect.ElementSet;
 import me.moros.bending.common.locale.Message;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -67,35 +68,39 @@ public final class CommandUtil {
   }
 
   public static AbilityDisplay collectAll(Predicate<AbilityDescription> permissionChecker, Element element) {
+    ElementSet singleElementSet = ElementSet.of(element);
     var all = List.of(
-      collectAbilities(permissionChecker, element),
-      collectSequences(permissionChecker, element),
-      collectPassives(permissionChecker, element)
+      collectAbilities(permissionChecker, singleElementSet),
+      collectSequences(permissionChecker, singleElementSet),
+      collectPassives(permissionChecker, singleElementSet)
     );
     return new AbilityDisplay(all);
   }
 
-  public static AbilityDisplay collectAbilities(Predicate<AbilityDescription> permissionChecker, Element element) {
+  private static AbilityDisplay collectAbilities(Predicate<AbilityDescription> permissionChecker, ElementSet singleElementSet) {
     var components = Registries.ABILITIES.stream()
-      .filter(desc -> element == desc.element() && !desc.hidden() && desc.canBind())
+      .filter(desc -> !desc.hidden() && desc.canBind())
+      .filter(desc -> singleElementSet.equals(desc.elements()))
       .filter(permissionChecker)
       .map(CommandUtil::mapToClickComponent)
       .toList();
     return new AbilityDisplay(Message.ABILITIES.build(), components);
   }
 
-  public static AbilityDisplay collectSequences(Predicate<AbilityDescription> permissionChecker, Element element) {
+  private static AbilityDisplay collectSequences(Predicate<AbilityDescription> permissionChecker, ElementSet singleElementSet) {
     var components = Registries.SEQUENCES.stream()
-      .filter(desc -> element == desc.element() && !desc.hidden())
+      .filter(desc -> !desc.hidden())
+      .filter(desc -> singleElementSet.equals(desc.elements()))
       .filter(permissionChecker)
       .map(CommandUtil::mapToClickComponent)
       .toList();
     return new AbilityDisplay(Message.SEQUENCES.build(), components);
   }
 
-  public static AbilityDisplay collectPassives(Predicate<AbilityDescription> permissionChecker, Element element) {
+  private static AbilityDisplay collectPassives(Predicate<AbilityDescription> permissionChecker, ElementSet singleElementSet) {
     var components = Registries.ABILITIES.stream()
-      .filter(desc -> element == desc.element() && !desc.hidden() && !desc.canBind() && desc.isActivatedBy(Activation.PASSIVE))
+      .filter(desc -> !desc.hidden() && !desc.canBind())
+      .filter(desc -> singleElementSet.equals(desc.elements()) && desc.isActivatedBy(Activation.PASSIVE))
       .filter(permissionChecker)
       .map(CommandUtil::mapToClickComponent)
       .toList();

@@ -21,6 +21,7 @@ package me.moros.bending.api.config.attribute;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.element.Element;
+import me.moros.bending.api.util.collect.ElementSet;
 import net.kyori.adventure.key.Keyed;
 
 /**
@@ -30,7 +31,8 @@ public interface ModifyPolicy extends Keyed {
   boolean shouldModify(AbilityDescription desc);
 
   static ModifyPolicy of(Element element) {
-    return new ModifyPolicyImpl(element.key(), d -> d.element().equals(element));
+    var singleElementSet = ElementSet.of(element);
+    return new ModifyPolicyImpl(element.key(), d -> d.elements().equals(singleElementSet));
   }
 
   static ModifyPolicy of(AbilityDescription desc) {

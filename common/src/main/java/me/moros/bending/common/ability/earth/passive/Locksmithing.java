@@ -36,6 +36,7 @@ import me.moros.bending.api.platform.item.Inventory;
 import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.platform.sound.Sound;
 import me.moros.bending.api.user.User;
+import me.moros.bending.api.util.ColorPalette;
 import me.moros.bending.api.util.FeaturePermissions;
 import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.bending.api.util.material.MaterialUtil;
@@ -109,13 +110,13 @@ public class Locksmithing extends AbilityInstance {
     }
     container.lock(code);
     Sound.BLOCK_CHEST_LOCKED.asEffect().play(block);
-    user.sendActionBar(Component.text("Locked", description().element().color()));
+    user.sendActionBar(Component.text("Locked", ColorPalette.EARTH));
   }
 
   private void unlockContainer(Lockable container, Block block) {
     container.lock("");
     Sound.BLOCK_CHEST_LOCKED.asEffect(1, 2).play(block);
-    user.sendActionBar(Component.text("Unlocked", description().element().color()));
+    user.sendActionBar(Component.text("Unlocked", ColorPalette.EARTH));
   }
 
   public static void act(User user, Block block) {
