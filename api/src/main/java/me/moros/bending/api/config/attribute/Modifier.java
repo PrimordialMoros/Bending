@@ -19,10 +19,23 @@
 
 package me.moros.bending.api.config.attribute;
 
-public sealed interface AttributeModifier permits AttributeModifierImpl {
-  ModifyPolicy policy();
+import java.util.Objects;
+import java.util.function.DoubleUnaryOperator;
 
-  Attribute attribute();
+public sealed interface Modifier extends DoubleUnaryOperator permits ModifierImpl {
+  Modifier merge(Modifier other);
 
-  Modifier modifier();
+  AttributeModifier asAttributeModifier(ModifyPolicy policy, Attribute attribute);
+
+  static Modifier of(ModifierOperation type, double value) {
+    Objects.requireNonNull(type);
+    if (!Double.isFinite(value)) {
+      throw new IllegalArgumentException("Invalid value " + value);
+    }
+    return switch (type) {
+      case ADDITIVE -> new ModifierImpl(value, 0, 1);
+      case SUMMED_MULTIPLICATIVE -> new ModifierImpl(0, value, 1);
+      case MULTIPLICATIVE -> new ModifierImpl(0, 0, value);
+    };
+  }
 }

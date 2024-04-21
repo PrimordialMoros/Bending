@@ -33,9 +33,9 @@ import me.moros.bending.api.config.Configurable;
 import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.AttributeModifier;
 import me.moros.bending.api.config.attribute.AttributeValue;
+import me.moros.bending.api.config.attribute.Modifier;
 import me.moros.bending.api.user.AttributeUser;
 import me.moros.bending.common.config.processor.CachedConfig;
-import me.moros.bending.common.config.processor.ModificationMatrix;
 import me.moros.bending.common.logging.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -71,12 +71,12 @@ record ConfigProcessorImpl(Logger logger, ConfigurationReference<? extends Confi
     return readAttributes(collectActiveModifiers(user, desc), config);
   }
 
-  private Map<Attribute, ModificationMatrix> collectActiveModifiers(AttributeUser user, AbilityDescription desc) {
-    return user.attributes().filter(modifier -> modifier.policy().shouldModify(desc))
-      .collect(Collectors.toMap(AttributeModifier::attribute, ModificationMatrix::from, ModificationMatrix::merge));
+  private Map<Attribute, Modifier> collectActiveModifiers(AttributeUser user, AbilityDescription desc) {
+    return user.attributeModifiers().stream().filter(modifier -> modifier.policy().shouldModify(desc))
+      .collect(Collectors.toMap(AttributeModifier::attribute, AttributeModifier::modifier, Modifier::merge));
   }
 
-  private <T extends Configurable> T modifyAttributes(Map<Attribute, ModificationMatrix> activeModifiers, T config) {
+  private <T extends Configurable> T modifyAttributes(Map<Attribute, Modifier> activeModifiers, T config) {
     if (!activeModifiers.isEmpty()) {
       var cachedConfig = getCachedConfig(config);
       if (cachedConfig != null) {
@@ -90,7 +90,7 @@ record ConfigProcessorImpl(Logger logger, ConfigurationReference<? extends Confi
     return config;
   }
 
-  private <T> T modifyAttributes(CachedConfig cachedConfig, Map<Attribute, ModificationMatrix> activeModifiers, T parent) {
+  private <T> T modifyAttributes(CachedConfig cachedConfig, Map<Attribute, Modifier> activeModifiers, T parent) {
     for (var entry : activeModifiers.entrySet()) {
       Attribute attribute = entry.getKey();
       var modifier = entry.getValue();
@@ -101,7 +101,7 @@ record ConfigProcessorImpl(Logger logger, ConfigurationReference<? extends Confi
     return parent;
   }
 
-  private Collection<AttributeValue> readAttributes(Map<Attribute, ModificationMatrix> activeModifiers, Configurable config) {
+  private Collection<AttributeValue> readAttributes(Map<Attribute, Modifier> activeModifiers, Configurable config) {
     var cachedConfig = getCachedConfig(config);
     if (cachedConfig == null) {
       return List.of();

@@ -22,7 +22,7 @@ package me.moros.bending.common.command.commands;
 import me.moros.bending.api.ability.Ability;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.config.attribute.Attribute;
-import me.moros.bending.api.config.attribute.AttributeModifier;
+import me.moros.bending.api.config.attribute.Modifier;
 import me.moros.bending.api.config.attribute.ModifierOperation;
 import me.moros.bending.api.config.attribute.ModifyPolicy;
 import me.moros.bending.api.user.User;
@@ -49,12 +49,16 @@ public record ModifierCommand<C extends Audience>(Commander<C> commander) implem
     var builder = commander().rootBuilder().literal("modifier")
       .commandDescription(RichDescription.of(Message.MODIFIER_DESC.build()))
       .permission(Permissions.MODIFY);
+    var policyParser = ArgumentParser.firstOf(EnumParser.enumParser(Element.class), AbilityParser.<C>parserGlobal())
+      .flatMapSuccess(ModifyPolicy.class, (ctx, r) -> successFuture(r.mapEither(ModifyPolicy::of, ModifyPolicy::of)));
     commander().register(builder
       .literal("add")
+      .required("policy", policyParser)
+      .required("attribute", EnumParser.enumParser(Attribute.class))
       .required("modifier", modifierParser())
       .optional("target", UserParser.parser(), DefaultValue.parsed("me"))
       .commandDescription(RichDescription.of(Message.MODIFIER_ADD_DESC.build()))
-      .handler(c -> onModifierAdd(c.sender(), c.get("modifier"), c.get("target")))
+      .handler(c -> onModifierAdd(c.sender(), c.get("policy"), c.get("attribute"), c.get("modifier"), c.get("target")))
     );
     commander().register(builder
       .literal("clear")
@@ -64,27 +68,23 @@ public record ModifierCommand<C extends Audience>(Commander<C> commander) implem
     );
   }
 
-  private ParserDescriptor<C, AttributeModifier> modifierParser() {
-    var policyParser = ArgumentParser.firstOf(EnumParser.enumParser(Element.class), AbilityParser.<C>parserGlobal())
-      .flatMapSuccess(ModifyPolicy.class, (ctx, r) -> successFuture(r.mapEither(ModifyPolicy::of, ModifyPolicy::of)));
+  private ParserDescriptor<C, Modifier> modifierParser() {
     return AggregateParser.<C>builder()
-      .withComponent("policy", policyParser)
-      .withComponent("attribute", EnumParser.enumParser(Attribute.class))
       .withComponent("operation", EnumParser.enumParser(ModifierOperation.class))
       .withComponent("amount", DoubleParser.doubleParser())
-      .withMapper(AttributeModifier.class, (cmdCtx, ctx) -> successFuture(
-        new AttributeModifier(ctx.get("policy"), ctx.get("attribute"), ctx.get("operation"), ctx.get("amount"))
+      .withMapper(Modifier.class, (cmdCtx, ctx) -> successFuture(
+        Modifier.of(ctx.get("operation"), ctx.get("amount"))
       )).build();
   }
 
-  private void onModifierAdd(C sender, AttributeModifier modifier, User user) {
-    user.addAttribute(modifier);
+  private void onModifierAdd(C sender, ModifyPolicy policy, Attribute attribute, Modifier modifier, User user) {
+    user.attributeModifiers().add(policy, attribute, modifier);
     recalculate(user);
     Message.MODIFIER_ADD.send(sender, user.name());
   }
 
   private void onModifierClear(C sender, User user) {
-    user.clearAttributes();
+    user.attributeModifiers().clear();
     recalculate(user);
     Message.MODIFIER_CLEAR.send(sender, user.name());
   }

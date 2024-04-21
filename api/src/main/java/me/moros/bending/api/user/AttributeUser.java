@@ -19,29 +19,12 @@
 
 package me.moros.bending.api.user;
 
-import java.util.stream.Stream;
-
+import me.moros.bending.api.config.attribute.AttributeHolder;
 import me.moros.bending.api.config.attribute.AttributeModifier;
 
 /**
  * Represents a user that has a collection of {@link AttributeModifier}.
  */
 public interface AttributeUser {
-  /**
-   * Add the specified attribute modifier to this instance.
-   * @param modifier the modifier to add
-   * @return true if modifier was successfully added, false otherwise
-   */
-  boolean addAttribute(AttributeModifier modifier);
-
-  /**
-   * Clear all attribute modifiers of this instance.
-   */
-  void clearAttributes();
-
-  /**
-   * Stream all attribute modifiers this instance holds.
-   * @return a stream of this instance's attribute modifiers
-   */
-  Stream<AttributeModifier> attributes();
+  AttributeHolder attributeModifiers();
 }

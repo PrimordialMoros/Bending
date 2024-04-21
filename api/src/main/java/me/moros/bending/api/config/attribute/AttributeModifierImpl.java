@@ -19,10 +19,5 @@
 
 package me.moros.bending.api.config.attribute;
 
-public sealed interface AttributeModifier permits AttributeModifierImpl {
-  ModifyPolicy policy();
-
-  Attribute attribute();
-
-  Modifier modifier();
+record AttributeModifierImpl(ModifyPolicy policy, Attribute attribute, Modifier modifier) implements AttributeModifier {
 }

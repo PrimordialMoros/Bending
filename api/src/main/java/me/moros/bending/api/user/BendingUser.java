@@ -19,21 +19,19 @@
 
 package me.moros.bending.api.user;
 
-import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiPredicate;
-import java.util.stream.Stream;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.Activation;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.preset.Preset;
 import me.moros.bending.api.ability.preset.PresetRegisterResult;
-import me.moros.bending.api.config.attribute.AttributeModifier;
+import me.moros.bending.api.config.attribute.AttributeHolder;
 import me.moros.bending.api.event.ElementChangeEvent.ElementAction;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.gui.Board;
@@ -55,7 +53,7 @@ sealed class BendingUser implements User permits BendingPlayer {
   private final LivingEntity entity;
   private final DataContainer container;
   private final Map<String, TriState> virtualPermissions;
-  private final Collection<AttributeModifier> attributes;
+  private final AttributeHolder attributeMap;
   private final BiPredicate<User, AbilityDescription> condition;
 
   private final ElementSet elements;
@@ -70,7 +68,7 @@ sealed class BendingUser implements User permits BendingPlayer {
     this.entity = entity;
     this.container = DataContainer.blocking(500, TimeUnit.MILLISECONDS);
     this.virtualPermissions = new ConcurrentHashMap<>();
-    this.attributes = ConcurrentHashMap.newKeySet();
+    this.attributeMap = AttributeHolder.createEmpty();
     this.condition = BendingConditions.all();
     this.elements = ElementSet.mutable();
     this.slots = new SlotContainer();
@@ -269,18 +267,8 @@ sealed class BendingUser implements User permits BendingPlayer {
   }
 
   @Override
-  public boolean addAttribute(AttributeModifier modifier) {
-    return attributes.add(modifier);
-  }
-
-  @Override
-  public void clearAttributes() {
-    attributes.clear();
-  }
-
-  @Override
-  public Stream<AttributeModifier> attributes() {
-    return attributes.stream();
+  public AttributeHolder attributeModifiers() {
+    return attributeMap;
   }
 
   private void updateBoard(@Nullable AbilityDescription desc, boolean cooldown) {

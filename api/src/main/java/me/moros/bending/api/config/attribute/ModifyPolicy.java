@@ -21,19 +21,19 @@ package me.moros.bending.api.config.attribute;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.element.Element;
+import net.kyori.adventure.key.Keyed;
 
 /**
  * Represents a policy that determines whether an ability can be modified by an attribute modifier.
  */
-@FunctionalInterface
-public interface ModifyPolicy {
+public interface ModifyPolicy extends Keyed {
   boolean shouldModify(AbilityDescription desc);
 
   static ModifyPolicy of(Element element) {
-    return desc -> desc.element() == element;
+    return new ModifyPolicyImpl(element.key(), d -> d.element().equals(element));
   }
 
   static ModifyPolicy of(AbilityDescription desc) {
-    return desc::equals;
+    return new ModifyPolicyImpl(desc.key(), d -> d.equals(desc));
   }
 }

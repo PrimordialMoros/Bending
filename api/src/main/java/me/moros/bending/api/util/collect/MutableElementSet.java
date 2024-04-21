@@ -139,8 +139,8 @@ final class MutableElementSet extends AbstractSet<Element> implements ElementSet
   }
 
   @Override
-  public boolean equals(Object o) {
-    return o instanceof ElementSet other ? (other.elements() == elements.get()) : super.equals(o);
+  public boolean equals(Object obj) {
+    return obj instanceof ElementSet other ? (other.elements() == elements.get()) : super.equals(obj);
   }
 
   @Override

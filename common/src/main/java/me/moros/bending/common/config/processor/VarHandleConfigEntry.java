@@ -46,7 +46,7 @@ record VarHandleConfigEntry(String name, Class<?> type, VarHandle handle) implem
     if (modifier != null) {
       double base = baseNumber.doubleValue();
       double modified = modifier.applyAsDouble(base);
-      if (Math.abs(modified - base) < Constants.EPSILON) {
+      if (Math.abs(modified - base) > Constants.EPSILON) {
         modifiedNumber = toNative(modified);
       }
     }

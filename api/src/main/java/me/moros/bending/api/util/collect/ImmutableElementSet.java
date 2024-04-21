@@ -84,8 +84,8 @@ final class ImmutableElementSet extends AbstractSet<Element> implements ElementS
   }
 
   @Override
-  public boolean equals(Object o) {
-    return o instanceof ElementSet other ? (other.elements() == elements) : super.equals(o);
+  public boolean equals(Object obj) {
+    return obj instanceof ElementSet other ? (other.elements() == elements) : super.equals(obj);
   }
 
   @Override

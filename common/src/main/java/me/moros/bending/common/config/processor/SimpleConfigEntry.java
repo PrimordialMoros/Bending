@@ -51,7 +51,7 @@ record SimpleConfigEntry(String name, Class<?> type) implements ConfigEntry {
     Number modifiedNumber = base;
     if (modifier != null) {
       double modified = modifier.applyAsDouble(base);
-      if (Math.abs(modified - base) < Constants.EPSILON) {
+      if (Math.abs(modified - base) > Constants.EPSILON) {
         modifiedNumber = toNative(modified);
       }
     }

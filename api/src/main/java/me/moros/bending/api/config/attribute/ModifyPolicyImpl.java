@@ -19,10 +19,31 @@
 
 package me.moros.bending.api.config.attribute;
 
-public sealed interface AttributeModifier permits AttributeModifierImpl {
-  ModifyPolicy policy();
+import java.util.function.Predicate;
 
-  Attribute attribute();
+import me.moros.bending.api.ability.AbilityDescription;
+import net.kyori.adventure.key.Key;
 
-  Modifier modifier();
+record ModifyPolicyImpl(Key key, Predicate<AbilityDescription> predicate) implements ModifyPolicy {
+  @Override
+  public boolean shouldModify(AbilityDescription desc) {
+    return predicate.test(desc);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    ModifyPolicyImpl other = (ModifyPolicyImpl) obj;
+    return key.equals(other.key);
+  }
+
+  @Override
+  public int hashCode() {
+    return key.hashCode();
+  }
 }
