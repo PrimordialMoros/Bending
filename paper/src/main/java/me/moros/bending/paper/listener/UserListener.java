@@ -30,7 +30,6 @@ import me.moros.bending.api.ability.ActionType;
 import me.moros.bending.api.ability.Activation;
 import me.moros.bending.api.ability.DamageSource;
 import me.moros.bending.api.game.Game;
-import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.temporal.ActionLimiter;
 import me.moros.bending.api.temporal.TempArmor;
@@ -416,7 +415,7 @@ public record UserListener(Game game) implements Listener, BukkitListener {
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onPlayerInteractEntityLow(PlayerInteractEntityEvent event) {
-    if (Platform.instance().hasNativeSupport() || disabledWorld(event)) {
+    if (disabledWorld(event)) {
       return;
     }
     if (TempEntity.MANAGER.isTemp(event.getRightClicked().getEntityId())) {
