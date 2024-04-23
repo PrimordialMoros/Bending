@@ -19,6 +19,7 @@
 
 package me.moros.bending.api.user;
 
+import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;

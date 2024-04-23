@@ -59,7 +59,7 @@ public final class LuckPermsHook<T> {
     );
     manager.registerCalculator(new Builder("avatar")
       .suggestions(List.of("true", "false"))
-      .buildWithPredicate(u -> u.elements().size() >= 4)
+      .buildWithPredicate(u -> u.elements().size() >= Element.VALUES.size())
     );
   }
 

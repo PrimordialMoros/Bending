@@ -26,8 +26,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import me.moros.bending.api.platform.Platform;
 import me.moros.tasker.TimerWheel;
-import me.moros.tasker.executor.TickAdapter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -35,7 +35,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @param <K> the key type
  * @param <V> the value type
  */
-public class TemporalManager<K, V extends Temporary> implements TickAdapter {
+public class TemporalManager<K, V extends Temporary> {
   private final TimerWheel wheel;
   private final Map<K, V> instances;
   private final boolean revertOnClear;
@@ -106,7 +106,7 @@ public class TemporalManager<K, V extends Temporary> implements TickAdapter {
   }
 
   public int fromMillis(long duration) {
-    int time = toTicks(duration, TimeUnit.MILLISECONDS);
+    int time = Platform.instance().toTicks(duration, TimeUnit.MILLISECONDS);
     return time <= 0 ? max : Math.min(time, max);
   }
 }
