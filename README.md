@@ -44,7 +44,7 @@ For more information, check the [wiki](https://github.com/PrimordialMoros/Bendin
 
 ## Building
 
-This project requires Java 17 or newer and uses Gradle (which comes with a wrapper, so you don't need to install it).
+This project requires Java 21 or newer and uses Gradle (which comes with a wrapper, so you don't need to install it).
 
 Open a terminal and run `./gradlew build`.
 
