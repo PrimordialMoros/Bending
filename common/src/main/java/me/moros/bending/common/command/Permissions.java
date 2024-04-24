@@ -39,6 +39,6 @@ public final class Permissions {
   public static final String ATTRIBUTE = create("attribute");
 
   private static String create(String node) {
-    return "bending.command" + node;
+    return "bending.command." + node;
   }
 }
