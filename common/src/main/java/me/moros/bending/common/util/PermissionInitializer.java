@@ -58,6 +58,7 @@ public abstract class PermissionInitializer implements Initializer {
         Permissions.RELOAD, Permissions.IMPORT, Permissions.EXPORT, Permissions.ATTRIBUTE)
       .collect(Collectors.toSet());
     children.add("bending.player");
+    children.add("bending.ability.avatarstate");
     children.add(FeaturePermissions.BLUE_FIRE);
     children.add(Permissions.CHOOSE + ".other");
     children.add(Permissions.ADD + ".other");

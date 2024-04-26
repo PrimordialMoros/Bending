@@ -42,6 +42,8 @@ import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.TextColor;
 
 public class ChakraFocus implements Updatable {
+  enum FocusResult {FAIL, PARTIAL, SUCCESS}
+
   private static final int TOTAL_TICKS = 60; // 3s total time
   private static final int VALID_TICK_RANGE = 10; // 500ms
 
@@ -112,25 +114,33 @@ public class ChakraFocus implements Updatable {
     }
   }
 
-  public boolean tryFocus() {
+  FocusResult tryFocus() {
     boolean focused = false;
+    int opened = 0;
     for (var chakra : chakras.values()) {
       if (!chakra.isOpen() && chakra.isFocused(ticks)) {
         chakra.open();
         focused = true;
       }
+      if (chakra.isOpen()) {
+        opened++;
+      }
     }
-    return focused;
+    if (focused) {
+      return opened == chakras.size() ? FocusResult.SUCCESS : FocusResult.PARTIAL;
+    } else {
+      return FocusResult.FAIL;
+    }
   }
 
-  public Set<Chakra> getOpenChakras() {
+  Set<Chakra> getOpenChakras() {
     return chakras.entrySet().stream()
       .filter(e -> e.getValue().isOpen())
       .map(Entry::getKey)
       .collect(Collectors.toSet());
   }
 
-  public void onRemove() {
+  void onRemove() {
     user.hideBossBar(bar);
   }
 
