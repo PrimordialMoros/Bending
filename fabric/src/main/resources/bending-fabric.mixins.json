@@ -10,7 +10,6 @@
     "accessor.CreeperAccess",
     "accessor.EntityAccess",
     "accessor.FallingBlockEntityAccess",
-    "accessor.LockCodeAccess",
     "accessor.ServerLoginPacketListenerImplAccess",
     "block.entity.BaseContainerBlockEntityMixin",
     "block.entity.BeaconBlockEntityMixin",

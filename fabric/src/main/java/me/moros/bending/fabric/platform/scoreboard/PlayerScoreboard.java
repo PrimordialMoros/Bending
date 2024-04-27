@@ -22,6 +22,7 @@ package me.moros.bending.fabric.platform.scoreboard;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import com.google.common.collect.Lists;
@@ -75,7 +76,7 @@ public class PlayerScoreboard extends Scoreboard implements PlayerBoard {
   public void onScoreChanged(ScoreHolder scoreHolder, Objective objective, Score score) {
     super.onScoreChanged(scoreHolder, objective, score);
     if (this.trackedObjectives.contains(objective)) {
-      broadcast(new ClientboundSetScorePacket(scoreHolder.getScoreboardName(), objective.getName(), score.value(), score.display(), score.numberFormat()));
+      broadcast(new ClientboundSetScorePacket(scoreHolder.getScoreboardName(), objective.getName(), score.value(), Optional.ofNullable(score.display()), Optional.ofNullable(score.numberFormat())));
     }
   }
 
@@ -176,7 +177,7 @@ public class PlayerScoreboard extends Scoreboard implements PlayerBoard {
       list.add(new ClientboundSetDisplayObjectivePacket(displaySlot, objective));
     }
     for (PlayerScoreEntry entry : this.listPlayerScores(objective)) {
-      list.add(new ClientboundSetScorePacket(entry.owner(), objective.getName(), entry.value(), entry.display(), entry.numberFormatOverride()));
+      list.add(new ClientboundSetScorePacket(entry.owner(), objective.getName(), entry.value(), Optional.ofNullable(entry.display()), Optional.ofNullable(entry.numberFormatOverride())));
     }
     return list;
   }

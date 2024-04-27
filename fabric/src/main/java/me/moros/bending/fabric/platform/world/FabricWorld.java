@@ -50,7 +50,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.phys.Vec3;
@@ -232,12 +232,12 @@ public record FabricWorld(ServerLevel handle) implements World {
 
   @Override
   public Dimension dimension() {
-    var t = handle().dimensionTypeId();
-    if (t.equals(BuiltinDimensionTypes.OVERWORLD) || t.equals(BuiltinDimensionTypes.OVERWORLD_CAVES)) {
+    var r = handle().dimensionTypeRegistration();
+    if (r.is(BuiltinDimensionTypes.OVERWORLD) || r.is(BuiltinDimensionTypes.OVERWORLD_CAVES)) {
       return Dimension.OVERWORLD;
-    } else if (t.equals(BuiltinDimensionTypes.NETHER)) {
+    } else if (r.is(BuiltinDimensionTypes.NETHER)) {
       return Dimension.NETHER;
-    } else if (t.equals(BuiltinDimensionTypes.END)) {
+    } else if (r.is(BuiltinDimensionTypes.END)) {
       return Dimension.END;
     } else {
       return Dimension.CUSTOM;

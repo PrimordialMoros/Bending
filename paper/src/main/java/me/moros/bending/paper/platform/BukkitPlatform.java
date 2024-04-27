@@ -125,7 +125,7 @@ public class BukkitPlatform implements Platform, PlatformFactory {
     var blockState = world.getBlockState(block.blockX(), block.blockY(), block.blockZ());
     if (MaterialTags.ORES.isTagged(blockState)) {
       var item = new ItemStack(Material.DIAMOND_PICKAXE);
-      item.addEnchantment(Enchantment.LOOT_BONUS_BLOCKS, 2);
+      item.addEnchantment(Enchantment.FORTUNE, 2);
       return blockState.getDrops(item).stream()
         .map(PlatformAdapter::fromBukkitItem).toList();
     }

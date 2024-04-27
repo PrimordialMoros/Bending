@@ -70,8 +70,12 @@ sourceSets.main {
     }
 }
 
+paperweight {
+    reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
+}
+
 bendingPlatform {
-    productionJar = tasks.reobfJar.flatMap { it.outputJar }
+    productionJar = tasks.shadowJar.flatMap { it.archiveFile }
 }
 
 hangarPublish.publications.register("plugin") {

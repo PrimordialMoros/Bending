@@ -24,7 +24,7 @@ import me.moros.bending.common.logging.Logger;
 import org.bukkit.Bukkit;
 
 public final class AdapterLoader {
-  private static final String NATIVE_VERSION = "1.20.4";
+  private static final String NATIVE_VERSION = "1.20.5";
 
   public static final NativeAdapter DUMMY = new NativeAdapter() {
   };
@@ -39,14 +39,14 @@ public final class AdapterLoader {
       return new NativeAdapterImpl();
     } else {
       String s = """
-                
+        
         ****************************************************************
         * Unable to find native adapter for version %s.
         * Some features may be unsupported (for example toast notifications) or induce significant overhead.
         * Packet based abilities will utilize real entities instead which can be slower when spawned in large amounts.
         * It is recommended you find a supported version.
         ****************************************************************
-                
+        
         """.formatted(mcVersion);
       logger.warn(s);
     }

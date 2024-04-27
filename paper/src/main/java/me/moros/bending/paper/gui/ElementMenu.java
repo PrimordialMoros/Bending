@@ -37,8 +37,6 @@ import me.moros.bending.common.gui.AbstractGui;
 import me.moros.bending.common.locale.Message;
 import me.moros.bending.paper.platform.PlatformAdapter;
 import net.kyori.adventure.util.TriState;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
 public final class ElementMenu extends AbstractGui<ItemStack, ChestGui> {
@@ -99,12 +97,7 @@ public final class ElementMenu extends AbstractGui<ItemStack, ChestGui> {
 
   @Override
   protected void handleItemStackGlow(ItemStack itemStack, boolean glow) {
-    itemStack.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-    if (glow) {
-      itemStack.addUnsafeEnchantment(Enchantment.LUCK, 1);
-    } else {
-      itemStack.removeEnchantment(Enchantment.LUCK);
-    }
+    itemStack.editMeta(m -> m.setEnchantmentGlintOverride(glow));
   }
 
   public static ElementGui createMenu(ElementHandler handler, Player player) {

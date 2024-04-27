@@ -22,7 +22,6 @@ package me.moros.bending.fabric.mixin.block.entity;
 import java.util.Optional;
 
 import me.moros.bending.api.platform.block.Lockable;
-import me.moros.bending.fabric.mixin.accessor.LockCodeAccess;
 import net.minecraft.world.LockCode;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,8 +34,7 @@ public abstract class BeaconBlockEntityMixin implements Lockable {
 
   @Override
   public Optional<String> lock() {
-    var pass = ((LockCodeAccess) lockKey).bending$password();
-    return pass.isBlank() ? Optional.empty() : Optional.of(pass);
+    return Optional.of(lockKey.key()).filter(s -> !s.isBlank());
   }
 
   @Override

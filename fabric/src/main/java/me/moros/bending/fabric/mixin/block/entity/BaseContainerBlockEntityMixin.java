@@ -23,14 +23,12 @@ import java.util.Optional;
 
 import me.moros.bending.api.platform.block.Lockable;
 import me.moros.bending.fabric.event.ServerItemEvents;
-import me.moros.bending.fabric.mixin.accessor.LockCodeAccess;
 import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.world.LockCode;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -42,8 +40,7 @@ public abstract class BaseContainerBlockEntityMixin implements Lockable {
 
   @Override
   public Optional<String> lock() {
-    var pass = extractLockCode(lockKey);
-    return pass.isBlank() ? Optional.empty() : Optional.of(pass);
+    return Optional.of(lockKey.key()).filter(s -> !s.isBlank());
   }
 
   @Override
@@ -55,15 +52,10 @@ public abstract class BaseContainerBlockEntityMixin implements Lockable {
     }
   }
 
-  @Unique
-  private static String extractLockCode(LockCode code) {
-    return ((LockCodeAccess) code).bending$password();
-  }
-
   @Inject(method = "canUnlock", at = @At(value = "HEAD"), cancellable = true)
   private static void bending$canUnlock(Player player, LockCode lock, net.minecraft.network.chat.Component name, CallbackInfoReturnable<Boolean> cir) {
     if (!player.isSpectator()) {
-      var result = ServerItemEvents.ACCESS_LOCK.invoker().onAccess(player, extractLockCode(lock), player.getMainHandItem());
+      var result = ServerItemEvents.ACCESS_LOCK.invoker().onAccess(player, lock.key(), player.getMainHandItem());
       if (result == TriState.TRUE) {
         cir.setReturnValue(true);
       } else if (result == TriState.FALSE) {
