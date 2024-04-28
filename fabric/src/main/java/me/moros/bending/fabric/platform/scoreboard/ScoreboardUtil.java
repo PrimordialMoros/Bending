@@ -53,10 +53,10 @@ public class ScoreboardUtil {
     Set<Objective> temp = new HashSet<>();
 
     // Remove old
-    for (int i = 0; i < 3; i++) {
-      Objective obj = previous.getDisplayObjective(DisplaySlot.BY_ID.apply(i));
+    for (DisplaySlot displaySlot : DisplaySlot.values()) {
+      Objective obj = previous.getDisplayObjective(displaySlot);
       if (obj != null && temp.add(obj)) {
-        player.connection.send(new ClientboundSetObjectivePacket(obj, 1));
+        player.connection.send(new ClientboundSetObjectivePacket(obj, ClientboundSetObjectivePacket.METHOD_REMOVE));
       }
     }
     for (var team : previous.getPlayerTeams()) {
@@ -68,6 +68,9 @@ public class ScoreboardUtil {
     // Add new
     for (var team : scoreboard.getPlayerTeams()) {
       player.connection.send(ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(team, true));
+    }
+    if (scoreboard instanceof PlayerScoreboard) { // Already sent
+      return;
     }
     for (DisplaySlot displaySlot : DisplaySlot.values()) {
       Objective obj = scoreboard.getDisplayObjective(displaySlot);

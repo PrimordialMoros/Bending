@@ -138,7 +138,7 @@ public class PlayerScoreboard extends Scoreboard implements PlayerBoard {
   public void onObjectiveChanged(Objective objective) {
     super.onObjectiveChanged(objective);
     if (this.trackedObjectives.contains(objective)) {
-      broadcast(new ClientboundSetObjectivePacket(objective, 2));
+      broadcast(new ClientboundSetObjectivePacket(objective, ClientboundSetObjectivePacket.METHOD_CHANGE));
     }
   }
 
@@ -171,7 +171,7 @@ public class PlayerScoreboard extends Scoreboard implements PlayerBoard {
   @Override
   public List<Packet<?>> getStartTrackingPackets(Objective objective) {
     ArrayList<Packet<?>> list = Lists.newArrayList();
-    list.add(new ClientboundSetObjectivePacket(objective, 0));
+    list.add(new ClientboundSetObjectivePacket(objective, ClientboundSetObjectivePacket.METHOD_ADD));
     for (DisplaySlot displaySlot : DisplaySlot.values()) {
       if (this.getDisplayObjective(displaySlot) != objective) continue;
       list.add(new ClientboundSetDisplayObjectivePacket(displaySlot, objective));
@@ -189,7 +189,7 @@ public class PlayerScoreboard extends Scoreboard implements PlayerBoard {
 
   public List<Packet<?>> getStopTrackingPackets(Objective objective) {
     ArrayList<Packet<?>> list = Lists.newArrayList();
-    list.add(new ClientboundSetObjectivePacket(objective, 1));
+    list.add(new ClientboundSetObjectivePacket(objective, ClientboundSetObjectivePacket.METHOD_REMOVE));
     for (DisplaySlot displaySlot : DisplaySlot.values()) {
       if (this.getDisplayObjective(displaySlot) != objective) continue;
       list.add(new ClientboundSetDisplayObjectivePacket(displaySlot, objective));

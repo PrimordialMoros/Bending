@@ -58,7 +58,6 @@ public final class BoardImpl extends AbstractBoard<PlayerTeam> {
 
   @Override
   public void disableScoreboard() {
-    bendingBoard.setDisplayObjective(DisplaySlot.SIDEBAR, null);
     List.copyOf(bendingBoard.getPlayerTeams()).forEach(bendingBoard::removePlayerTeam);
     bendingBoard.removeObjective(bendingSlots);
     ScoreboardUtil.resetScoreboard(fabricPlayer.handle());
