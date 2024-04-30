@@ -89,8 +89,8 @@ public class BukkitPlatform implements Platform, PlatformFactory {
 
   @Override
   public Optional<Board> buildBoard(User user) {
-    if (user instanceof Player player) {
-      return Optional.of(new BoardImpl(player));
+    if (hasNativeSupport() && user instanceof Player) {
+      return Optional.of(new BoardImpl(user));
     }
     return Optional.empty();
   }

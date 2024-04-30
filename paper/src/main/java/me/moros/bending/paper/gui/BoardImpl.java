@@ -19,70 +19,26 @@
 
 package me.moros.bending.paper.gui;
 
-import me.moros.bending.api.registry.Registries;
-import me.moros.bending.common.gui.AbstractBoard;
+import io.papermc.paper.adventure.PaperAdventure;
+import me.moros.bending.api.user.User;
+import me.moros.bending.common.adapter.Sidebar;
 import me.moros.bending.common.locale.Message;
-import me.moros.bending.paper.platform.PlatformAdapter;
 import net.kyori.adventure.text.Component;
-import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.Criteria;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.RenderType;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.Team;
+import net.minecraft.server.MinecraftServer;
 
-public final class BoardImpl extends AbstractBoard<Team> {
-  private final Player bukkitPlayer;
-  private final Scoreboard bendingBoard;
-  private final Objective bendingSlots;
-
-  public BoardImpl(me.moros.bending.api.platform.entity.player.Player player) {
-    super(Registries.BENDERS.getOrThrow(player.uuid()));
-    this.bukkitPlayer = PlatformAdapter.toBukkitEntity(player);
-    bendingBoard = bukkitPlayer.getServer().getScoreboardManager().getNewScoreboard();
-    bendingSlots = bendingBoard.registerNewObjective("BendingBoard", Criteria.DUMMY, Message.BENDING_BOARD_TITLE.build(), RenderType.INTEGER);
-    bendingSlots.setDisplaySlot(DisplaySlot.SIDEBAR);
-    bukkitPlayer.setScoreboard(bendingBoard);
-    init();
+public final class BoardImpl extends Sidebar {
+  public BoardImpl(User user) {
+    super(MinecraftServer.getServer(), user);
+    init(Message.BENDING_BOARD_TITLE.build());
   }
 
   @Override
-  public void disableScoreboard() {
-    bendingBoard.clearSlot(DisplaySlot.SIDEBAR);
-    bendingBoard.getTeams().forEach(Team::unregister);
-    bendingSlots.unregister();
-    bukkitPlayer.setScoreboard(bukkitPlayer.getServer().getScoreboardManager().getMainScoreboard());
+  protected Component emptySlot(int slot) {
+    return Message.BENDING_BOARD_EMPTY_SLOT.build(slot);
   }
 
   @Override
-  protected void setPrefix(Team team, Component content) {
-    team.prefix(content);
-  }
-
-  @Override
-  protected void setSuffix(Team team, Component content) {
-    team.suffix(content);
-  }
-
-  @Override
-  protected Team getOrCreateTeam(int slot) {
-    Team team = bendingBoard.getTeam(String.valueOf(slot));
-    return team == null ? createTeam(slot, slot).team() : team;
-  }
-
-  @Override
-  protected Indexed<Team> createTeam(int slot, int textSlot) {
-    Team team = bendingBoard.registerNewTeam(String.valueOf(textSlot));
-    String hidden = generateInvisibleLegacyString(textSlot);
-    team.addEntry(hidden);
-    bendingSlots.getScore(hidden).setScore(-slot);
-    return Indexed.create(team, textSlot);
-  }
-
-  @Override
-  protected void removeTeam(Team team) {
-    team.getEntries().forEach(bendingBoard::resetScores);
-    team.unregister();
+  protected net.minecraft.network.chat.Component toNative(Component text) {
+    return PaperAdventure.asVanilla(text);
   }
 }

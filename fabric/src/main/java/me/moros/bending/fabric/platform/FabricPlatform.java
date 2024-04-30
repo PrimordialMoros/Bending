@@ -34,7 +34,6 @@ import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.PlatformFactory;
 import me.moros.bending.api.platform.PlatformType;
 import me.moros.bending.api.platform.block.Block;
-import me.moros.bending.api.platform.entity.DelegatePlayer;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemBuilder;
@@ -90,8 +89,8 @@ public class FabricPlatform implements Platform, PlatformFactory {
 
   @Override
   public Optional<Board> buildBoard(User user) {
-    if (user instanceof DelegatePlayer player) {
-      return Optional.of(new BoardImpl(player));
+    if (user instanceof Player) {
+      return Optional.of(new BoardImpl(server, user));
     }
     return Optional.empty();
   }
