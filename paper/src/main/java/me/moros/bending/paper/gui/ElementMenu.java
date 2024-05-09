@@ -49,7 +49,7 @@ public final class ElementMenu extends AbstractGui<ItemStack, ChestGui> {
     ChestGui gui = new ChestGui(3, ComponentHolder.of(Message.ELEMENTS_GUI_TITLE.build()));
     gui.setOnGlobalClick(event -> event.setCancelled(true));
     OutlinePane background = new OutlinePane(0, 0, 9, 3, Priority.LOWEST);
-    background.addItem(new GuiItem(PlatformAdapter.toBukkitItem(BACKGROUND.get())));
+    background.addItem(new GuiItem(backgroundItem()));
     background.setRepeat(true);
     gui.addPane(background);
     OutlinePane elementsPane = new OutlinePane(1, 1, 7, 1);
@@ -74,6 +74,12 @@ public final class ElementMenu extends AbstractGui<ItemStack, ChestGui> {
     helpPane.addItem(new GuiItem(item), 4, 0);
     gui.addPane(helpPane);
     return gui;
+  }
+
+  private ItemStack backgroundItem() {
+    ItemStack item = PlatformAdapter.toBukkitItem(BACKGROUND.get());
+    item.editMeta(m -> m.setHideTooltip(true));
+    return item;
   }
 
   @Override
