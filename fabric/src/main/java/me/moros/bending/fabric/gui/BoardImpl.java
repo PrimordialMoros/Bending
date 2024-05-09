@@ -19,19 +19,26 @@
 
 package me.moros.bending.fabric.gui;
 
+import java.util.Locale;
+import java.util.function.Supplier;
+
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.adapter.Sidebar;
 import me.moros.bending.common.locale.Message;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.platform.fabric.FabricServerAudiences;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.translation.GlobalTranslator;
 import net.minecraft.server.MinecraftServer;
 
 public final class BoardImpl extends Sidebar {
   private final FabricServerAudiences adapter;
+  private final Supplier<Locale> localeSupplier;
 
   public BoardImpl(MinecraftServer server, User user) {
     super(server, user);
     this.adapter = FabricServerAudiences.of(server);
+    this.localeSupplier = () -> user.get(Identity.LOCALE).orElseThrow();
     init(Message.BENDING_BOARD_TITLE.build());
   }
 
@@ -41,7 +48,7 @@ public final class BoardImpl extends Sidebar {
   }
 
   @Override
-  protected net.minecraft.network.chat.Component toNative(Component text) {
-    return adapter.toNative(text);
+  protected net.minecraft.network.chat.Component toNative(Component component) {
+    return adapter.toNative(GlobalTranslator.render(component, localeSupplier.get()));
   }
 }

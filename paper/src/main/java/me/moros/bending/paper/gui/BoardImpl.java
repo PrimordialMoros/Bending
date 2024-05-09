@@ -38,7 +38,7 @@ public final class BoardImpl extends Sidebar {
   }
 
   @Override
-  protected net.minecraft.network.chat.Component toNative(Component text) {
-    return PaperAdventure.asVanilla(text);
+  protected net.minecraft.network.chat.Component toNative(Component component) {
+    return PaperAdventure.asVanilla(component);
   }
 }

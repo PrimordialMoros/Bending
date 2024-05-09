@@ -104,7 +104,6 @@ public abstract class Sidebar implements Board {
 
   protected abstract Component emptySlot(int slot);
 
-  // TODO handle translations in stream codecs?
   protected abstract net.minecraft.network.chat.Component toNative(Component component);
 
   @Override

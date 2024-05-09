@@ -19,6 +19,8 @@
 
 package me.moros.bending.api.util;
 
+import java.util.concurrent.Executors;
+
 import me.moros.tasker.executor.AsyncExecutor;
 import me.moros.tasker.executor.SimpleAsyncExecutor;
 import me.moros.tasker.executor.SyncExecutor;
@@ -35,7 +37,7 @@ public class Tasker {
   private static final AsyncExecutor ASYNC;
 
   static {
-    ASYNC = new SimpleAsyncExecutor();
+    ASYNC = new SimpleAsyncExecutor(Executors.newVirtualThreadPerTaskExecutor());
   }
 
   /**
