@@ -17,8 +17,20 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.config.attribute;
+package me.moros.bending.api.util.data;
 
-record AttributeValueImpl(Attribute attribute, String name, Number baseValue,
-                          Number finalValue) implements AttributeValue {
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
+
+/**
+ * Something that has an associated {@link DataKey}.
+ * @param <T> the type of data key
+ */
+public interface DataKeyed<T> extends Keyed {
+  DataKey<T> dataKey();
+
+  @Override
+  default Key key() {
+    return dataKey();
+  }
 }

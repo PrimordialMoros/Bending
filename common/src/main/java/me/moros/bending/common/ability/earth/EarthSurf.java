@@ -33,6 +33,7 @@ import me.moros.bending.api.config.attribute.Modifiable;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.platform.particle.Particle;
 import me.moros.bending.api.platform.sound.Sound;
 import me.moros.bending.api.temporal.TempDisplayEntity;
@@ -71,7 +72,7 @@ public class EarthSurf extends AbilityInstance {
     loadConfig();
     charging = true;
     if (method == Activation.FALL) {
-      if (user.fallDistance() < userConfig.fallThreshold || user.sneaking()) {
+      if (user.propertyValue(EntityProperties.FALL_DISTANCE) < userConfig.fallThreshold || user.sneaking()) {
         return false;
       }
       return launch();

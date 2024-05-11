@@ -35,12 +35,12 @@ import me.moros.bending.api.config.attribute.Modifiable;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.platform.entity.EntityType;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.platform.item.PlayerInventory;
-import me.moros.bending.api.platform.property.EntityProperty;
 import me.moros.bending.api.platform.sound.Sound;
 import me.moros.bending.api.platform.sound.SoundEffect;
 import me.moros.bending.api.user.User;
@@ -209,7 +209,7 @@ public class EarthGlove extends AbilityInstance {
     grabbed = true;
     grabbedTarget = entity;
     glove.teleport(grabbedTarget.eyeLocation().subtract(0, grabbedTarget.height() / 2, 0));
-    grabbedTarget.fallDistance(0);
+    grabbedTarget.setProperty(EntityProperties.FALL_DISTANCE, 0F);
     if (isMetal) {
       removalPolicy = Policies.builder()
         .add(Policies.UNDER_WATER)
@@ -248,8 +248,8 @@ public class EarthGlove extends AbilityInstance {
     }
     ItemSnapshot item = Platform.instance().factory().itemBuilder(isMetal ? Item.IRON_INGOT : Item.STONE).build();
     Entity entity = user.world().dropItem(spawnLocation, item, false);
-    entity.invulnerable(true);
-    entity.gravity(isMetal);
+    entity.setProperty(EntityProperties.INVULNERABLE, true);
+    entity.setProperty(EntityProperties.GRAVITY, isMetal);
     entity.add(GLOVE_KEY, this);
     return entity;
   }
@@ -263,7 +263,7 @@ public class EarthGlove extends AbilityInstance {
   public void onDestroy() {
     if (glove != null) {
       if (isMetal) {
-        glove.setProperty(EntityProperty.ALLOW_PICKUP, true);
+        glove.setProperty(EntityProperties.ALLOW_PICKUP, true);
       } else {
         glove.remove();
       }

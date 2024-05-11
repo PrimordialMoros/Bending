@@ -23,6 +23,7 @@ import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.AbilityInstance;
 import me.moros.bending.api.ability.Activation;
 import me.moros.bending.api.platform.block.BlockType;
+import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.platform.entity.EntityUtil;
 import me.moros.bending.api.platform.particle.Particle;
 import me.moros.bending.api.platform.potion.PotionEffect;
@@ -61,7 +62,7 @@ public class EarthCling extends AbilityInstance {
       //noinspection ConstantConditions
       if (!user.onCooldown(user.selectedAbility())) {
         user.applyVelocity(this, Vector3d.ZERO);
-        user.fallDistance(0);
+        user.setProperty(EntityProperties.FALL_DISTANCE, 0F);
       } else {
         if (user.velocity().y() < 0) {
           Particle.CRIT.builder(user.eyeLocation()).count(2).offset(0.05, 0.4, 0.05).spawn(user.world());

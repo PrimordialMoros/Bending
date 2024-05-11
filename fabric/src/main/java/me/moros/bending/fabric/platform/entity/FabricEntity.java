@@ -19,38 +19,31 @@
 
 package me.moros.bending.fabric.platform.entity;
 
-import java.util.IdentityHashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.EntityType;
-import me.moros.bending.api.platform.property.BooleanProperty;
+import me.moros.bending.api.platform.property.Property;
 import me.moros.bending.api.platform.world.World;
 import me.moros.bending.api.util.data.DataKey;
-import me.moros.bending.api.util.functional.Suppliers;
-import me.moros.bending.fabric.mixin.accessor.EntityAccess;
+import me.moros.bending.api.util.data.DataKeyed;
 import me.moros.bending.fabric.platform.FabricMetadata;
 import me.moros.bending.fabric.platform.world.FabricWorld;
-import me.moros.math.FastMath;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.util.TriState;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.projectile.Projectile;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class FabricEntity implements Entity {
   private net.minecraft.world.entity.Entity handle;
-  private final Supplier<Map<BooleanProperty, Boolean>> properties;
 
   public FabricEntity(net.minecraft.world.entity.Entity handle) {
     this.handle = handle;
-    this.properties = Suppliers.lazy(IdentityHashMap::new);
   }
 
   public void setHandle(net.minecraft.world.entity.Entity handle) {
@@ -69,13 +62,8 @@ public class FabricEntity implements Entity {
   }
 
   @Override
-  public Component name() {
-    return handle().getDisplayName().asComponent();
-  }
-
-  @Override
-  public World world() {
-    return new FabricWorld((ServerLevel) handle().level());
+  public UUID uuid() {
+    return handle().getUUID();
   }
 
   @Override
@@ -84,23 +72,8 @@ public class FabricEntity implements Entity {
   }
 
   @Override
-  public double width() {
-    return handle().getBbWidth();
-  }
-
-  @Override
-  public double height() {
-    return handle().getBbHeight();
-  }
-
-  @Override
-  public int yaw() {
-    return FastMath.round(handle().getYRot());
-  }
-
-  @Override
-  public int pitch() {
-    return FastMath.round(handle().getXRot());
+  public World world() {
+    return new FabricWorld((ServerLevel) handle().level());
   }
 
   @Override
@@ -141,63 +114,8 @@ public class FabricEntity implements Entity {
   }
 
   @Override
-  public int maxFreezeTicks() {
-    return handle().getTicksRequiredToFreeze();
-  }
-
-  @Override
-  public int freezeTicks() {
-    return handle().getTicksFrozen();
-  }
-
-  @Override
-  public void freezeTicks(int ticks) {
-    handle().setTicksFrozen(ticks);
-  }
-
-  @Override
-  public int maxFireTicks() {
-    return ((EntityAccess) handle()).bending$maxFireTicks();
-  }
-
-  @Override
-  public int fireTicks() {
-    return handle().getRemainingFireTicks();
-  }
-
-  @Override
-  public void fireTicks(int ticks) {
-    handle().setRemainingFireTicks(ticks);
-  }
-
-  @Override
   public boolean isOnGround() {
     return handle().onGround();
-  }
-
-  @Override
-  public boolean inWater() {
-    return handle().isInWaterOrBubble();
-  }
-
-  @Override
-  public boolean inLava() {
-    return handle().isInLava();
-  }
-
-  @Override
-  public boolean visible() {
-    return !handle().isInvisible();
-  }
-
-  @Override
-  public double fallDistance() {
-    return handle().fallDistance;
-  }
-
-  @Override
-  public void fallDistance(double distance) {
-    handle().fallDistance = (float) distance;
   }
 
   @Override
@@ -211,29 +129,27 @@ public class FabricEntity implements Entity {
   }
 
   @Override
-  public boolean gravity() {
-    return !handle().isNoGravity();
-  }
-
-  @Override
-  public void gravity(boolean value) {
-    handle().setNoGravity(!value);
-  }
-
-  @Override
-  public boolean invulnerable() {
-    return handle().isInvulnerable();
-  }
-
-  @Override
-  public void invulnerable(boolean value) {
-    handle().setInvulnerable(value);
-  }
-
-  @Override
   public boolean teleport(Position position) {
     handle().teleportTo(position.x(), position.y(), position.z());
     return true;
+  }
+
+  @Override
+  public <V> @Nullable V property(DataKeyed<V> dataKeyed) {
+    return FabricEntityProperties.PROPERTIES.getValue(dataKeyed, handle());
+  }
+
+  @Override
+  public <V> boolean setProperty(DataKeyed<V> dataKeyed, V value) {
+    if (dataKeyed instanceof Property<V> property && property.isValidValue(value)) { // TODO improve check?
+      return FabricEntityProperties.PROPERTIES.setValue(property, handle(), value);
+    }
+    return false;
+  }
+
+  @Override
+  public <V> boolean editProperty(DataKeyed<V> dataKeyed, UnaryOperator<V> operator) {
+    return FabricEntityProperties.PROPERTIES.editValue(dataKeyed, handle(), operator);
   }
 
   @Override
@@ -249,30 +165,6 @@ public class FabricEntity implements Entity {
   @Override
   public <T> void remove(DataKey<T> key) {
     FabricMetadata.INSTANCE.metadata(handle()).remove(key);
-  }
-
-  @Override
-  public UUID uuid() {
-    return handle().getUUID();
-  }
-
-  @Override
-  public TriState checkProperty(BooleanProperty property) {
-    var vanillaProperty = PropertyMapper.PROPERTIES.get(property);
-    if (vanillaProperty == null) {
-      return TriState.byBoolean(properties.get().get(property));
-    }
-    return vanillaProperty.get(handle());
-  }
-
-  @Override
-  public void setProperty(BooleanProperty property, boolean value) {
-    var vanillaProperty = PropertyMapper.PROPERTIES.get(property);
-    if (vanillaProperty != null) {
-      vanillaProperty.set(handle(), value);
-    } else {
-      properties.get().put(property, value);
-    }
   }
 
   @Override

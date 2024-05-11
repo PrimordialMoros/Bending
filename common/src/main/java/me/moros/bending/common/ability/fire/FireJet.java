@@ -30,8 +30,8 @@ import me.moros.bending.api.config.Configurable;
 import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.Modifiable;
 import me.moros.bending.api.platform.block.Block;
+import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.platform.particle.ParticleBuilder;
-import me.moros.bending.api.platform.property.EntityProperty;
 import me.moros.bending.api.platform.sound.SoundEffect;
 import me.moros.bending.api.temporal.TempBlock;
 import me.moros.bending.api.temporal.TempLight;
@@ -91,8 +91,8 @@ public class FireJet extends AbilityInstance {
       duration = userConfig.duration;
     }
 
-    wasGliding = user.checkProperty(EntityProperty.GLIDING);
-    user.setProperty(EntityProperty.GLIDING, true);
+    wasGliding = user.checkProperty(EntityProperties.GLIDING);
+    user.setProperty(EntityProperties.GLIDING, true);
 
     removalPolicy = Policies.builder()
       .add(Policies.PARTIALLY_UNDER_WATER)
@@ -131,7 +131,7 @@ public class FireJet extends AbilityInstance {
     double speed = halfSpeed + halfSpeed * Math.sin(Math.PI * timeFactor);
 
     user.applyVelocity(this, user.direction().multiply(speed));
-    user.fallDistance(0);
+    user.setProperty(EntityProperties.FALL_DISTANCE, 0F);
 
     Vector3d target = user.location().add(user.velocity().negate());
     int amount = jetBlast ? 16 : 10;
@@ -152,7 +152,7 @@ public class FireJet extends AbilityInstance {
   @Override
   public void onDestroy() {
     user.addCooldown(description(), jetBlast ? userConfig.jetBlastCooldown : userConfig.cooldown);
-    user.setProperty(EntityProperty.GLIDING, wasGliding);
+    user.setProperty(EntityProperties.GLIDING, wasGliding);
   }
 
   @ConfigSerializable

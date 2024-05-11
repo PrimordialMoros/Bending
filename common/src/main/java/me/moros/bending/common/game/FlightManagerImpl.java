@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import me.moros.bending.api.game.FlightManager;
-import me.moros.bending.api.platform.property.EntityProperty;
+import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.user.User;
 import net.kyori.adventure.util.TriState;
 
@@ -78,8 +78,8 @@ public final class FlightManagerImpl implements FlightManager {
     private FlightImpl(FlightManager manager, User user) {
       this.manager = manager;
       this.user = user;
-      couldFly = user.checkProperty(EntityProperty.ALLOW_FLIGHT);
-      wasFlying = user.checkProperty(EntityProperty.FLYING);
+      couldFly = user.checkProperty(EntityProperties.ALLOW_FLIGHT);
+      wasFlying = user.checkProperty(EntityProperties.FLYING);
       isFlying = TriState.NOT_SET;
     }
 
@@ -91,8 +91,8 @@ public final class FlightManagerImpl implements FlightManager {
     @Override
     public void flying(boolean value) {
       isFlying = TriState.byBoolean(value);
-      user.setProperty(EntityProperty.ALLOW_FLIGHT, value);
-      user.setProperty(EntityProperty.FLYING, value);
+      user.setProperty(EntityProperties.ALLOW_FLIGHT, value);
+      user.setProperty(EntityProperties.FLYING, value);
     }
 
     @Override
@@ -103,13 +103,13 @@ public final class FlightManagerImpl implements FlightManager {
     }
 
     private void revert() {
-      user.setProperty(EntityProperty.ALLOW_FLIGHT, couldFly);
-      user.setProperty(EntityProperty.FLYING, wasFlying);
+      user.setProperty(EntityProperties.ALLOW_FLIGHT, couldFly);
+      user.setProperty(EntityProperties.FLYING, wasFlying);
     }
 
     private void update() {
-      if (user.checkProperty(EntityProperty.FLYING) != isFlying) {
-        user.setProperty(EntityProperty.FLYING, isFlying);
+      if (user.checkProperty(EntityProperties.FLYING) != isFlying) {
+        user.setProperty(EntityProperties.FLYING, isFlying);
       }
     }
   }

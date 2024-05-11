@@ -38,16 +38,6 @@ public interface DelegateLivingEntity extends DelegateEntity, LivingEntity {
   LivingEntity entity();
 
   @Override
-  default boolean ai() {
-    return entity().ai();
-  }
-
-  @Override
-  default void ai(boolean value) {
-    entity().ai(value);
-  }
-
-  @Override
   default double eyeHeight() {
     return entity().eyeHeight();
   }
@@ -60,16 +50,6 @@ public interface DelegateLivingEntity extends DelegateEntity, LivingEntity {
   @Override
   default Ray ray(double range) {
     return entity().ray(range);
-  }
-
-  @Override
-  default boolean sneaking() {
-    return entity().sneaking();
-  }
-
-  @Override
-  default void sneaking(boolean sneaking) {
-    entity().sneaking(sneaking);
   }
 
   @Override
@@ -130,21 +110,6 @@ public interface DelegateLivingEntity extends DelegateEntity, LivingEntity {
   @Override
   default Collection<Potion> activePotions() {
     return entity().activePotions();
-  }
-
-  @Override
-  default int airCapacity() {
-    return entity().airCapacity();
-  }
-
-  @Override
-  default int remainingAir() {
-    return entity().remainingAir();
-  }
-
-  @Override
-  default void remainingAir(int amount) {
-    entity().remainingAir(amount);
   }
 
   @Override

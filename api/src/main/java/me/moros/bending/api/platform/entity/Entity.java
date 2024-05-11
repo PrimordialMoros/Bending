@@ -19,7 +19,9 @@
 
 package me.moros.bending.api.platform.entity;
 
+import java.util.Objects;
 import java.util.UUID;
+import java.util.function.UnaryOperator;
 
 import me.moros.bending.api.ability.Ability;
 import me.moros.bending.api.collision.geometry.AABB;
@@ -30,35 +32,48 @@ import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.property.BooleanProperty;
 import me.moros.bending.api.platform.world.World;
 import me.moros.bending.api.util.data.DataHolder;
+import me.moros.bending.api.util.data.DataKeyed;
+import me.moros.math.FastMath;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.util.TriState;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface Entity extends ForwardingAudience.Single, Damageable, DataHolder {
   int id();
 
   UUID uuid();
 
-  Component name();
+  EntityType type();
+
+  default Component name() {
+    return propertyValue(EntityProperties.NAME);
+  }
 
   World world();
-
-  EntityType type();
 
   default Key worldKey() {
     return world().key();
   }
 
-  double width();
+  default double width() {
+    return propertyValue(EntityProperties.WIDTH);
+  }
 
-  double height();
+  default double height() {
+    return propertyValue(EntityProperties.HEIGHT);
+  }
 
-  int yaw();
+  default int yaw() {
+    return FastMath.round(propertyValue(EntityProperties.YAW));
+  }
 
-  int pitch();
+  default int pitch() {
+    return FastMath.round(propertyValue(EntityProperties.PITCH));
+  }
 
   /**
    * Calculates a vector at the center of the given entity using its height.
@@ -94,18 +109,6 @@ public interface Entity extends ForwardingAudience.Single, Damageable, DataHolde
   boolean valid();
 
   boolean dead();
-
-  int maxFreezeTicks();
-
-  int freezeTicks();
-
-  void freezeTicks(int ticks);
-
-  int maxFireTicks();
-
-  int fireTicks();
-
-  void fireTicks(int ticks);
 
   default AABB bounds() {
     return dimensions(location());
@@ -162,7 +165,9 @@ public interface Entity extends ForwardingAudience.Single, Damageable, DataHolde
    * Check if entity is at least partially submerged in water.
    * @return the result
    */
-  boolean inWater();
+  default boolean inWater() {
+    return propertyValue(EntityProperties.IN_WATER);
+  }
 
   /**
    * Check if entity is fully submerged in water.
@@ -176,7 +181,9 @@ public interface Entity extends ForwardingAudience.Single, Damageable, DataHolde
    * Check if entity is at least partially submerged in lava.
    * @return the result
    */
-  boolean inLava();
+  default boolean inLava() {
+    return propertyValue(EntityProperties.IN_LAVA);
+  }
 
   /**
    * Check if entity is fully submerged in lava.
@@ -186,27 +193,80 @@ public interface Entity extends ForwardingAudience.Single, Damageable, DataHolde
     return inLava() && Platform.instance().nativeAdapter().eyeInLava(this);
   }
 
-  boolean visible();
-
-  double fallDistance();
-
-  void fallDistance(double distance);
+  @Deprecated(forRemoval = true)
+  default boolean visible() {
+    return propertyValue(EntityProperties.VISIBLE);
+  }
 
   void remove();
 
   boolean isProjectile();
 
-  boolean gravity();
-
-  void gravity(boolean value);
-
-  boolean invulnerable();
-
-  void invulnerable(boolean value);
-
   boolean teleport(Position position);
 
-  TriState checkProperty(BooleanProperty property);
+  @Deprecated(forRemoval = true)
+  default double fallDistance() {
+    return propertyValue(EntityProperties.FALL_DISTANCE);
+  }
+
+  @Deprecated(forRemoval = true)
+  default void fallDistance(double distance) {
+    setProperty(EntityProperties.FALL_DISTANCE, (float) distance);
+  }
+
+  @Deprecated(forRemoval = true)
+  default int maxFreezeTicks() {
+    return propertyValue(EntityProperties.REQUIRED_TICKS_TO_FREEZE);
+  }
+
+  @Deprecated(forRemoval = true)
+  default int freezeTicks() {
+    return propertyValue(EntityProperties.FREEZE_TICKS);
+  }
+
+  @Deprecated(forRemoval = true)
+  default void freezeTicks(int ticks) {
+    setProperty(EntityProperties.FREEZE_TICKS, ticks);
+  }
+
+  @Deprecated(forRemoval = true)
+  default int maxFireTicks() {
+    return propertyValue(EntityProperties.FIRE_IMMUNE_TICKS);
+  }
+
+  @Deprecated(forRemoval = true)
+  default int fireTicks() {
+    return propertyValue(EntityProperties.FIRE_TICKS);
+  }
+
+  @Deprecated(forRemoval = true)
+  default void fireTicks(int ticks) {
+    setProperty(EntityProperties.FIRE_TICKS, ticks);
+  }
+
+  @Deprecated(forRemoval = true)
+  default boolean gravity() {
+    return propertyValue(EntityProperties.GRAVITY);
+  }
+
+  @Deprecated(forRemoval = true)
+  default void gravity(boolean value) {
+    setProperty(EntityProperties.GRAVITY, value);
+  }
+
+  @Deprecated(forRemoval = true)
+  default boolean invulnerable() {
+    return propertyValue(EntityProperties.INVULNERABLE);
+  }
+
+  @Deprecated(forRemoval = true)
+  default void invulnerable(boolean value) {
+    setProperty(EntityProperties.INVULNERABLE, value);
+  }
+
+  default TriState checkProperty(BooleanProperty property) {
+    return TriState.byBoolean(property(property));
+  }
 
   default void setProperty(BooleanProperty property, TriState value) {
     if (value != TriState.NOT_SET) {
@@ -214,5 +274,13 @@ public interface Entity extends ForwardingAudience.Single, Damageable, DataHolde
     }
   }
 
-  void setProperty(BooleanProperty property, boolean value);
+  <V> @Nullable V property(DataKeyed<V> dataKeyed);
+
+  default <V> V propertyValue(DataKeyed<V> dataKeyed) {
+    return Objects.requireNonNull(property(dataKeyed));
+  }
+
+  <V> boolean setProperty(DataKeyed<V> dataKeyed, V value);
+
+  <V> boolean editProperty(DataKeyed<V> dataKeyed, UnaryOperator<V> operator);
 }

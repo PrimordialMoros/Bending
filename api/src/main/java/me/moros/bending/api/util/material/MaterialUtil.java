@@ -22,11 +22,11 @@ package me.moros.bending.api.util.material;
 import me.moros.bending.api.platform.Direction;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
+import me.moros.bending.api.platform.block.BlockStateProperties;
 import me.moros.bending.api.platform.block.BlockTag;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemTag;
-import me.moros.bending.api.platform.property.StateProperty;
 import me.moros.bending.api.util.KeyUtil;
 import me.moros.math.FastMath;
 import net.kyori.adventure.key.Key;
@@ -176,7 +176,7 @@ public final class MaterialUtil {
   }
 
   public static boolean isWaterLogged(Block block) {
-    var property = block.state().property(StateProperty.WATERLOGGED);
+    var property = block.state().property(BlockStateProperties.WATERLOGGED);
     return Boolean.TRUE.equals(property);
   }
 
@@ -244,15 +244,15 @@ public final class MaterialUtil {
   }
 
   public static boolean isSourceBlock(Block block) {
-    var level = block.state().property(StateProperty.LEVEL);
+    var level = block.state().property(BlockStateProperties.LEVEL);
     return level != null && level == 0;
   }
 
   public static BlockState lavaData(int level) {
-    return BlockType.LAVA.defaultState().withProperty(StateProperty.LEVEL, FastMath.clamp(level, 0, 15));
+    return BlockType.LAVA.defaultState().withProperty(BlockStateProperties.LEVEL, FastMath.clamp(level, 0, 15));
   }
 
   public static BlockState waterData(int level) {
-    return BlockType.WATER.defaultState().withProperty(StateProperty.LEVEL, FastMath.clamp(level, 0, 15));
+    return BlockType.WATER.defaultState().withProperty(BlockStateProperties.LEVEL, FastMath.clamp(level, 0, 15));
   }
 }

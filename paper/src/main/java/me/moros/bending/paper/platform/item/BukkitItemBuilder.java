@@ -23,14 +23,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import me.moros.bending.api.locale.Translation;
 import me.moros.bending.api.platform.item.ItemBuilder;
 import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.api.util.metadata.Metadata;
 import me.moros.bending.paper.platform.PlatformAdapter;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.translation.GlobalTranslator;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class BukkitItemBuilder implements ItemBuilder {
   private final ItemStack stack;
@@ -43,6 +46,11 @@ public class BukkitItemBuilder implements ItemBuilder {
     this.stack = stack;
   }
 
+  // TODO remove when components are properly supported
+  private @Nullable Component tryRender(@Nullable Component input) {
+    return input == null ? null : GlobalTranslator.render(input, Translation.DEFAULT_LOCALE);
+  }
+
   @Override
   public ItemBuilder name(Component name) {
     this.name = name;
@@ -51,7 +59,7 @@ public class BukkitItemBuilder implements ItemBuilder {
 
   @Override
   public ItemBuilder lore(List<Component> lore) {
-    this.lore = lore;
+    this.lore = List.copyOf(lore);
     return this;
   }
 
@@ -77,8 +85,8 @@ public class BukkitItemBuilder implements ItemBuilder {
     var copy = stack.clone();
     copy.setAmount(amount);
     copy.editMeta(m -> {
-      m.displayName(name);
-      m.lore(lore);
+      m.displayName(tryRender(name));
+      m.lore(lore == null ? null : lore.stream().map(this::tryRender).toList());
       m.setUnbreakable(unbreakable);
       var data = m.getPersistentDataContainer();
       for (var entry : meta.entrySet()) {

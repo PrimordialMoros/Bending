@@ -35,6 +35,7 @@ import me.moros.bending.api.config.attribute.Modifiable;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockTag;
+import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.platform.item.PlayerInventory;
 import me.moros.bending.api.platform.particle.ParticleBuilder;
@@ -114,9 +115,9 @@ public class HeatControl extends AbilityInstance {
         } else if (time > startTime + userConfig.cookInterval && cook()) {
           startTime = System.currentTimeMillis();
         }
-        int freezeTicks = user.freezeTicks();
+        int freezeTicks = user.propertyValue(EntityProperties.FREEZE_TICKS);
         if (freezeTicks > 1) {
-          user.freezeTicks(freezeTicks - 2);
+          user.setProperty(EntityProperties.FREEZE_TICKS, freezeTicks - 2);
         }
         solidify.processQueue(1);
       } else {

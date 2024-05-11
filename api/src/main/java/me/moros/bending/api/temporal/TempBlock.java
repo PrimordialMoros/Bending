@@ -33,8 +33,8 @@ import me.moros.bending.api.ability.DamageSource;
 import me.moros.bending.api.platform.Direction;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
+import me.moros.bending.api.platform.block.BlockStateProperties;
 import me.moros.bending.api.platform.block.BlockType;
-import me.moros.bending.api.platform.property.StateProperty;
 import me.moros.bending.api.platform.world.World.Dimension;
 import me.moros.bending.api.platform.world.WorldUtil;
 import me.moros.bending.api.util.material.MaterialUtil;
@@ -320,7 +320,7 @@ public final class TempBlock extends Temporary {
     // Handle falling water
     private BlockState calculateWaterData(Block above) {
       int level;
-      var property = above.state().property(StateProperty.LEVEL);
+      var property = above.state().property(BlockStateProperties.LEVEL);
       if (property != null) {
         level = property;
         if (level <= 7) {
@@ -346,12 +346,12 @@ public final class TempBlock extends Temporary {
         }
       }
       BlockState old = block.state();
-      var waterlogged = old.property(StateProperty.WATERLOGGED);
+      var waterlogged = old.property(BlockStateProperties.WATERLOGGED);
       if (waterlogged != null) {
         if (waterlogged && newData.type().isAir()) {
-          return old.withProperty(StateProperty.WATERLOGGED, false);
+          return old.withProperty(BlockStateProperties.WATERLOGGED, false);
         } else if (infiniteWater || (!waterlogged && newData.type() == BlockType.WATER)) {
-          return old.withProperty(StateProperty.WATERLOGGED, true);
+          return old.withProperty(BlockStateProperties.WATERLOGGED, true);
         }
       }
       return newData;

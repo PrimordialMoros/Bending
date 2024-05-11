@@ -19,20 +19,15 @@
 
 package me.moros.bending.api.platform.property;
 
+import me.moros.bending.api.platform.entity.EntityProperties;
+
+@Deprecated(forRemoval = true)
 public interface EntityProperty {
-  BooleanProperty SNEAKING = bool("sneaking");
-  BooleanProperty SPRINTING = bool("sprinting");
-  BooleanProperty ALLOW_FLIGHT = bool("allowflight");
-  BooleanProperty FLYING = bool("flying");
-  BooleanProperty GLIDING = bool("gliding");
-  BooleanProperty CHARGED = bool("charged");
-  BooleanProperty ALLOW_PICKUP = bool("allowpickup");
-
-  private static IntegerProperty integer(String name, int min, int max) {
-    return new IntegerProperty(name, min, max);
-  }
-
-  private static BooleanProperty bool(String name) {
-    return new BooleanProperty(name);
-  }
+  BooleanProperty SNEAKING = EntityProperties.SNEAKING;
+  BooleanProperty SPRINTING = EntityProperties.SPRINTING;
+  BooleanProperty ALLOW_FLIGHT = EntityProperties.ALLOW_FLIGHT;
+  BooleanProperty FLYING = EntityProperties.FLYING;
+  BooleanProperty GLIDING = EntityProperties.GLIDING;
+  BooleanProperty CHARGED = EntityProperties.CHARGED;
+  BooleanProperty ALLOW_PICKUP = EntityProperties.ALLOW_PICKUP;
 }

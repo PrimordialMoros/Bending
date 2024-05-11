@@ -36,7 +36,6 @@ import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.projectile.AbstractArrow.Pickup;
 import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.item.ItemStack;
@@ -93,18 +92,6 @@ public class FabricLivingEntity extends FabricEntity implements LivingEntity {
   }
 
   @Override
-  public boolean ai() {
-    return handle() instanceof Mob mob && !mob.isNoAi();
-  }
-
-  @Override
-  public void ai(boolean value) {
-    if (handle() instanceof Mob mob) {
-      mob.setNoAi(!value);
-    }
-  }
-
-  @Override
   public double eyeHeight() {
     return handle().getEyeHeight();
   }
@@ -138,21 +125,6 @@ public class FabricLivingEntity extends FabricEntity implements LivingEntity {
   @Override
   public Collection<Potion> activePotions() {
     return handle().getActiveEffects().stream().map(PlatformAdapter::fromFabricPotion).toList();
-  }
-
-  @Override
-  public int airCapacity() {
-    return handle().getMaxAirSupply();
-  }
-
-  @Override
-  public int remainingAir() {
-    return handle().getAirSupply();
-  }
-
-  @Override
-  public void remainingAir(int amount) {
-    handle().setAirSupply(amount);
   }
 
   @Override

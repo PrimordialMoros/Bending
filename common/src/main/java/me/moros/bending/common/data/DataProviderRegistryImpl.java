@@ -17,8 +17,18 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.config.attribute;
+package me.moros.bending.common.data;
 
-record AttributeValueImpl(Attribute attribute, String name, Number baseValue,
-                          Number finalValue) implements AttributeValue {
+import java.util.Map;
+
+import me.moros.bending.api.util.data.DataKey;
+import me.moros.bending.api.util.data.DataKeyed;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+record DataProviderRegistryImpl<T>(Map<DataKey<?>, Object> providerMap) implements DataProviderRegistry<T> {
+  @SuppressWarnings("unchecked")
+  @Override
+  public <V> @Nullable DataProvider<T, V> getProvider(DataKeyed<V> dataKeyed) {
+    return (DataProvider<T, V>) providerMap.get(dataKeyed.dataKey());
+  }
 }

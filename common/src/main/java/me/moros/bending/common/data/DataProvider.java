@@ -17,8 +17,14 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.config.attribute;
+package me.moros.bending.common.data;
 
-record AttributeValueImpl(Attribute attribute, String name, Number baseValue,
-                          Number finalValue) implements AttributeValue {
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+public sealed interface DataProvider<T, V> permits DataProviderImpl {
+  boolean supports(T instance);
+
+  @Nullable V get(T instance);
+
+  boolean set(T instance, V value);
 }

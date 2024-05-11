@@ -25,8 +25,8 @@ import me.moros.bending.api.config.BendingProperties;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
+import me.moros.bending.api.platform.block.BlockStateProperties;
 import me.moros.bending.api.platform.block.BlockType;
-import me.moros.bending.api.platform.property.StateProperty;
 import me.moros.math.FastMath;
 
 public final class TempLight extends Temporary {
@@ -71,9 +71,9 @@ public final class TempLight extends Temporary {
   }
 
   private void render(boolean waterlogged) {
-    BlockState state = BlockType.LIGHT.defaultState().withProperty(StateProperty.LEVEL, level);
+    BlockState state = BlockType.LIGHT.defaultState().withProperty(BlockStateProperties.LEVEL, level);
     if (waterlogged) {
-      state = state.withProperty(StateProperty.WATERLOGGED, true);
+      state = state.withProperty(BlockStateProperties.WATERLOGGED, true);
     }
     Platform.instance().nativeAdapter().fakeBlock(block, state).broadcast(block.world(), block);
   }
@@ -104,7 +104,7 @@ public final class TempLight extends Temporary {
       if (mat.isAir()) {
         return Type.NORMAL;
       } else if (mat == BlockType.WATER) {
-        var property = state.property(StateProperty.LEVEL);
+        var property = state.property(BlockStateProperties.LEVEL);
         if (property != null && property == 0) {
           return Type.WATER;
         }
@@ -114,7 +114,7 @@ public final class TempLight extends Temporary {
   }
 
   public static Builder builder(int level) {
-    return new Builder(FastMath.clamp(level, 1, StateProperty.LEVEL.max()));
+    return new Builder(FastMath.clamp(level, 1, BlockStateProperties.LEVEL.max()));
   }
 
   private enum Type {NORMAL, WATER, INVALID}

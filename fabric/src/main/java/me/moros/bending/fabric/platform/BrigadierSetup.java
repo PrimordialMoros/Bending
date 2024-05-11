@@ -31,7 +31,8 @@ public final class BrigadierSetup {
 
   public static <C extends Audience> void setup(BrigadierManagerHolder<C, ?> holder) {
     holder.brigadierManager().registerMapping(
-      new TypeToken<AbilityParser<C>>() {},
+      new TypeToken<AbilityParser<C>>() {
+      },
       builder -> builder.toConstant(ResourceLocationArgument.id()).cloudSuggestions()
     );
   }

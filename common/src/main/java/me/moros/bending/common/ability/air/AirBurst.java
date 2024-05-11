@@ -37,6 +37,7 @@ import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.Modifiable;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.platform.particle.ParticleBuilder;
 import me.moros.bending.api.platform.sound.SoundEffect;
 import me.moros.bending.api.platform.world.WorldUtil;
@@ -81,7 +82,7 @@ public class AirBurst extends AbilityInstance {
     removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(description())).build();
     released = false;
     if (method == Activation.FALL) {
-      if (user.fallDistance() < userConfig.fallThreshold || user.sneaking()) {
+      if (user.propertyValue(EntityProperties.FALL_DISTANCE) < userConfig.fallThreshold || user.sneaking()) {
         return false;
       }
       release(Mode.FALL);
@@ -202,7 +203,7 @@ public class AirBurst extends AbilityInstance {
         velocity = velocity.add(push.multiply(factor * 0.5));
       }
       entity.applyVelocity(AirBurst.this, velocity);
-      entity.fallDistance(0);
+      entity.setProperty(EntityProperties.FALL_DISTANCE, 0F);
       return false;
     }
 

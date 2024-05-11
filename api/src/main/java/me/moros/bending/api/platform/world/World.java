@@ -21,6 +21,7 @@ package me.moros.bending.api.platform.world;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import me.moros.bending.api.collision.raytrace.BlockRayTrace;
@@ -32,6 +33,7 @@ import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.EntityType;
 import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.platform.particle.ParticleContext;
 import me.moros.math.Position;
@@ -135,6 +137,16 @@ public interface World extends Keyed, ForwardingAudience, BlockGetter, BlockSett
    * @see #isDay()
    */
   boolean isNight();
+
+  Entity createEntity(Position pos, EntityType type);
+
+  boolean addEntity(Entity entity);
+
+  default Optional<Entity> spawnEntity(Position pos, EntityType type, Consumer<Entity> consumer) {
+    Entity entity = createEntity(pos, type);
+    consumer.accept(entity);
+    return addEntity(entity) ? Optional.of(entity) : Optional.empty();
+  }
 
   default Entity dropItem(Position pos, ItemSnapshot item) {
     return dropItem(pos, item, true);

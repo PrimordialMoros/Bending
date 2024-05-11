@@ -23,7 +23,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import me.moros.bending.api.ability.AbilityDescription;
-import me.moros.bending.api.platform.property.EntityProperty;
+import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.user.User;
 import net.kyori.adventure.util.TriState;
 
@@ -50,7 +50,7 @@ public enum Policies implements RemovalPolicy {
   /**
    * Checks if the user is flying.
    */
-  FLYING((u, d) -> u.checkProperty(EntityProperty.FLYING) == TriState.TRUE),
+  FLYING((u, d) -> u.checkProperty(EntityProperties.FLYING) == TriState.TRUE),
   /**
    * Checks if the user is submerged underwater.
    */

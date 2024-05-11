@@ -33,6 +33,7 @@ import java.util.UUID;
 import me.moros.bending.api.ability.ActionType;
 import me.moros.bending.api.ability.Updatable.UpdateResult;
 import me.moros.bending.api.event.ActionLimitEvent;
+import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.user.User;
@@ -41,6 +42,7 @@ import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.bossbar.BossBar.Color;
 import net.kyori.adventure.bossbar.BossBar.Overlay;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.util.TriState;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class ActionLimiter extends Temporary {
@@ -56,7 +58,7 @@ public final class ActionLimiter extends Temporary {
 
   private final UUID uuid;
   private final LivingEntity entity;
-  private final boolean hadAI;
+  private final TriState hadAI;
   private final Set<ActionType> limitedActions;
 
   private boolean reverted = false;
@@ -65,14 +67,13 @@ public final class ActionLimiter extends Temporary {
     this.uuid = entity.uuid();
     this.entity = entity;
     this.limitedActions = EnumSet.copyOf(limitedActions);
-    hadAI = entity.ai();
+    this.hadAI = entity.checkProperty(EntityProperties.AI);
+    entity.setProperty(EntityProperties.AI, false);
     if (entity instanceof Player player) {
       if (ticks > 2) {
         BossBar bar = BossBar.bossBar(Component.text("Restricted"), 1, Color.YELLOW, Overlay.PROGRESS);
         BARS.putIfAbsent(uuid, BendingBar.of(bar, player, ticks));
       }
-    } else {
-      entity.ai(false);
     }
     MANAGER.addEntry(uuid, this, ticks);
   }
@@ -88,7 +89,7 @@ public final class ActionLimiter extends Temporary {
     if (bar != null) {
       bar.onRemove();
     }
-    entity.ai(hadAI);
+    entity.setProperty(EntityProperties.AI, hadAI);
     return true;
   }
 

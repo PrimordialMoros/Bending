@@ -27,10 +27,10 @@ import java.util.concurrent.ThreadLocalRandom;
 import me.moros.bending.api.platform.Direction;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
+import me.moros.bending.api.platform.block.BlockStateProperties;
 import me.moros.bending.api.platform.block.BlockTag;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.particle.Particle;
-import me.moros.bending.api.platform.property.StateProperty;
 import me.moros.bending.api.platform.sound.SoundEffect;
 import me.moros.bending.api.temporal.TempBlock;
 import me.moros.bending.api.user.User;
@@ -57,7 +57,7 @@ public final class WorldUtil {
    */
   public static void tryLightBlock(Block block) {
     if (MaterialUtil.isCampfire(block) || BlockTag.CANDLES.isTagged(block)) {
-      block.setState(block.state().withProperty(StateProperty.LIT, true));
+      block.setState(block.state().withProperty(BlockStateProperties.LIT, true));
     }
   }
 
@@ -108,7 +108,7 @@ public final class WorldUtil {
       }
       return true;
     } else if (MaterialUtil.isCampfire(block) || BlockTag.CANDLES.isTagged(block)) {
-      block.setState(block.state().withProperty(StateProperty.LIT, false));
+      block.setState(block.state().withProperty(BlockStateProperties.LIT, false));
     }
     return false;
   }
@@ -128,15 +128,15 @@ public final class WorldUtil {
       int level;
       if (block.type() == BlockType.SNOW_BLOCK) {
         snow = BlockType.SNOW.defaultState();
-        level = StateProperty.LAYERS.max();
+        level = BlockStateProperties.LAYERS.max();
       } else {
         snow = block.state();
-        level = Objects.requireNonNull(snow.property(StateProperty.LAYERS));
+        level = Objects.requireNonNull(snow.property(BlockStateProperties.LAYERS));
       }
-      if (level == StateProperty.LAYERS.min()) {
+      if (level == BlockStateProperties.LAYERS.min()) {
         block.setType(BlockType.AIR);
       } else {
-        block.setState(snow.withProperty(StateProperty.LAYERS, level - 1));
+        block.setState(snow.withProperty(BlockStateProperties.LAYERS, level - 1));
       }
       return true;
     } else if (WaterMaterials.isIceBendable(block)) {

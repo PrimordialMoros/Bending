@@ -36,9 +36,9 @@ import me.moros.bending.api.config.attribute.Modifiable;
 import me.moros.bending.api.platform.Direction;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
+import me.moros.bending.api.platform.block.BlockStateProperties;
 import me.moros.bending.api.platform.block.BlockType;
-import me.moros.bending.api.platform.property.EntityProperty;
-import me.moros.bending.api.platform.property.StateProperty;
+import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.platform.sound.SoundEffect;
 import me.moros.bending.api.temporal.TempBlock;
 import me.moros.bending.api.temporal.TempBlock.Builder;
@@ -143,7 +143,7 @@ public class WaterSpout extends AbilityInstance implements SpoutAbility {
       ignore.clear();
       Block block = user.block();
       TempBlock.water().build(block).ifPresent(tb -> column.add(block));
-      BlockState state = BlockType.BUBBLE_COLUMN.defaultState().withProperty(StateProperty.DRAG, false);
+      BlockState state = BlockType.BUBBLE_COLUMN.defaultState().withProperty(BlockStateProperties.DRAG, false);
       Builder bubbles = TempBlock.builder(state);
       for (int i = 1; i < distance - 1; i++) {
         bubbles.build(block.offset(Direction.DOWN, i)).ifPresent(tb -> column.add(tb.block()));
@@ -153,7 +153,7 @@ public class WaterSpout extends AbilityInstance implements SpoutAbility {
 
     @Override
     public void postRender() {
-      if (user.checkProperty(EntityProperty.FLYING) != TriState.TRUE) {
+      if (user.checkProperty(EntityProperties.FLYING) != TriState.TRUE) {
         user.applyVelocity(WaterSpout.this, user.velocity().add(g));
       }
       if (ThreadLocalRandom.current().nextInt(8) == 0) {

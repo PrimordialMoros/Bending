@@ -17,8 +17,34 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.config.attribute;
+package me.moros.bending.api.platform.property;
 
-record AttributeValueImpl(Attribute attribute, String name, Number baseValue,
-                          Number finalValue) implements AttributeValue {
+import me.moros.bending.api.util.data.DataKey;
+
+sealed class SimpleProperty<T> implements Property<T> permits BooleanProperty, DoubleProperty, FloatProperty, IntegerProperty {
+  private final DataKey<T> key;
+
+  SimpleProperty(DataKey<T> key) {
+    this.key = key;
+  }
+
+  public final DataKey<T> dataKey() {
+    return key;
+  }
+
+  @Override
+  public final boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj instanceof Property<?> other) {
+      return key.equals(other.key());
+    }
+    return false;
+  }
+
+  @Override
+  public final int hashCode() {
+    return key.hashCode();
+  }
 }

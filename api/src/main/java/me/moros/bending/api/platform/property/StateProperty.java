@@ -19,20 +19,15 @@
 
 package me.moros.bending.api.platform.property;
 
+import me.moros.bending.api.platform.block.BlockStateProperties;
+
+@Deprecated(forRemoval = true)
 public interface StateProperty {
-  BooleanProperty DRAG = bool("drag");
-  BooleanProperty LIT = bool("lit");
-  BooleanProperty OPEN = bool("open");
-  BooleanProperty WATERLOGGED = bool("waterlogged");
+  BooleanProperty DRAG = BlockStateProperties.DRAG;
+  BooleanProperty LIT = BlockStateProperties.LIT;
+  BooleanProperty OPEN = BlockStateProperties.OPEN;
+  BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
-  IntegerProperty LAYERS = integer("layers", 1, 8);
-  IntegerProperty LEVEL = integer("level", 0, 15);
-
-  private static IntegerProperty integer(String name, int min, int max) {
-    return new IntegerProperty(name, min, max);
-  }
-
-  private static BooleanProperty bool(String name) {
-    return new BooleanProperty(name);
-  }
+  IntegerProperty LAYERS = BlockStateProperties.LAYERS;
+  IntegerProperty LEVEL = BlockStateProperties.LEVEL;
 }

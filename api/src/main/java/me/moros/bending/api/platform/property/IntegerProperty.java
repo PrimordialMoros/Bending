@@ -19,24 +19,30 @@
 
 package me.moros.bending.api.platform.property;
 
-public final class IntegerProperty extends Property<Integer> {
+import me.moros.bending.api.util.KeyUtil;
+import me.moros.bending.api.util.data.DataKey;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+public final class IntegerProperty extends SimpleProperty<Integer> {
   private final int min;
   private final int max;
 
   IntegerProperty(String name, int min, int max) {
-    super(name, Integer.class);
+    super(DataKey.wrap(KeyUtil.simple(name), Integer.class));
     this.min = min;
     this.max = max;
-    if (min < 0 || max <= min) {
-      throw new IllegalArgumentException("Invalid range. Min: " + min + ", Max: " + max);
-    }
   }
 
   public int min() {
-    return this.min;
+    return min;
   }
 
   public int max() {
-    return this.max;
+    return max;
+  }
+
+  @Override
+  public boolean isValidValue(@Nullable Integer value) {
+    return value != null && value >= min() && value <= max();
   }
 }
