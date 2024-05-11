@@ -115,10 +115,7 @@ public class HeatControl extends AbilityInstance {
         } else if (time > startTime + userConfig.cookInterval && cook()) {
           startTime = System.currentTimeMillis();
         }
-        int freezeTicks = user.propertyValue(EntityProperties.FREEZE_TICKS);
-        if (freezeTicks > 1) {
-          user.setProperty(EntityProperties.FREEZE_TICKS, freezeTicks - 2);
-        }
+        user.editProperty(EntityProperties.FREEZE_TICKS, freezeTicks -> freezeTicks - 2);
         solidify.processQueue(1);
       } else {
         solidify.clear();

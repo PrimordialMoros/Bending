@@ -268,9 +268,7 @@ public class Lightning extends AbilityInstance {
 
   private void onEntityHit(Entity entity) {
     if (affectedEntities.add(entity.uuid())) {
-      if (entity.type() == EntityType.CREEPER && entity instanceof LivingEntity creeper) {
-        creeper.setProperty(EntityProperties.CHARGED, true);
-      }
+      entity.setProperty(EntityProperties.CHARGED, true);
       boolean hitWater = entity.inWater();
       boolean grounded = entity.isOnGround();
       boolean hasMetalArmor = entity instanceof LivingEntity livingEntity && InventoryUtil.hasMetalArmor(livingEntity);

@@ -108,7 +108,7 @@ junit = ["junit-api", "junit-engine"]
 [plugins]
 jmh = { id = "me.champeau.jmh", version = "0.7.2" }
 fabric-loom = { id = "fabric-loom", version.ref = "fabric-loom" }
-userdev = { id = "io.papermc.paperweight.userdev", version = "1.7.0" }
+userdev = { id = "io.papermc.paperweight.userdev", version = "1.7.1" }
 sponge = { id = "org.spongepowered.gradle.plugin", version = "2.2.0" }
 hangar = { id = "io.papermc.hangar-publish-plugin", version = "0.1.2" }
 run-paper = { id = "xyz.jpenilla.run-paper", version = "2.3.0" }

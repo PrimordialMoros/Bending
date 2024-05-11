@@ -38,7 +38,7 @@ public sealed interface Property<T> extends DataKeyed<T> permits SimpleProperty 
   }
 
   static DoubleProperty doubleProp(String name, double min, double max) {
-    if (max <= min) {
+    if (min > max) {
       throw new IllegalArgumentException("Invalid range. Min: " + min + ", Max: " + max);
     }
     return new DoubleProperty(name, min, max);
@@ -49,7 +49,7 @@ public sealed interface Property<T> extends DataKeyed<T> permits SimpleProperty 
   }
 
   static FloatProperty floatProp(String name, float min, float max) {
-    if (max <= min) {
+    if (min > max) {
       throw new IllegalArgumentException("Invalid range. Min: " + min + ", Max: " + max);
     }
     return new FloatProperty(name, min, max);

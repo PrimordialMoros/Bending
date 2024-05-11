@@ -49,7 +49,7 @@ public final class EntityProperties {
   public static final IntegerProperty MAX_OXYGEN = intProp("max_oxygen");
   public static final IntegerProperty REMAINING_OXYGEN = intProp("remaining_oxygen", -20, 300);
   public static final IntegerProperty REQUIRED_TICKS_TO_FREEZE = intProp("required_ticks_to_freeze");
-  public static final IntegerProperty FREEZE_TICKS = intProp("freeze_ticks");
+  public static final IntegerProperty FREEZE_TICKS = intProp("freeze_ticks", 0, Integer.MAX_VALUE);
   public static final IntegerProperty FIRE_IMMUNE_TICKS = intProp("fire_immune_ticks");
   public static final IntegerProperty FIRE_TICKS = intProp("fire_ticks");
 
