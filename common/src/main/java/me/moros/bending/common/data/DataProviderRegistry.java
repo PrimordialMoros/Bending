@@ -26,6 +26,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
+import me.moros.bending.api.platform.property.Property;
 import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.api.util.data.DataKeyed;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -42,9 +43,11 @@ public sealed interface DataProviderRegistry<T> permits DataProviderRegistryImpl
   }
 
   default <V> boolean setValue(DataKeyed<V> dataKeyed, T instance, V value) {
-    var provider = getProvider(dataKeyed);
-    if (provider != null) {
-      return provider.set(instance, value);
+    if (dataKeyed instanceof Property<V> property && property.isValidValue(value)) {
+      var provider = getProvider(dataKeyed);
+      if (provider != null) {
+        return provider.set(instance, value);
+      }
     }
     return false;
   }
@@ -53,7 +56,12 @@ public sealed interface DataProviderRegistry<T> permits DataProviderRegistryImpl
     var provider = getProvider(dataKeyed);
     if (provider != null) {
       V oldValue = provider.get(instance);
-      return oldValue != null && provider.set(instance, operator.apply(oldValue));
+      if (oldValue != null) {
+        V value = operator.apply(oldValue);
+        if (dataKeyed instanceof Property<V> property && property.isValidValue(value)) {
+          return provider.set(instance, value);
+        }
+      }
     }
     return false;
   }

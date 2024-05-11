@@ -25,7 +25,6 @@ import java.util.function.UnaryOperator;
 
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.EntityType;
-import me.moros.bending.api.platform.property.Property;
 import me.moros.bending.api.platform.world.World;
 import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.api.util.data.DataKeyed;
@@ -141,10 +140,7 @@ public class FabricEntity implements Entity {
 
   @Override
   public <V> boolean setProperty(DataKeyed<V> dataKeyed, V value) {
-    if (dataKeyed instanceof Property<V> property && property.isValidValue(value)) { // TODO improve check?
-      return FabricEntityProperties.PROPERTIES.setValue(property, handle(), value);
-    }
-    return false;
+    return FabricEntityProperties.PROPERTIES.setValue(dataKeyed, handle(), value);
   }
 
   @Override
