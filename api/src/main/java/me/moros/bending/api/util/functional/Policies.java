@@ -34,7 +34,7 @@ public enum Policies implements RemovalPolicy {
   /**
    * Checks if the user is dead.
    */
-  DEAD((u, d) -> u.dead()),
+  DEAD((u, d) -> u.propertyValue(EntityProperties.DEAD)),
   /**
    * Checks if the user is invalid or disconnected.
    */

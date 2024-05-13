@@ -52,16 +52,6 @@ public class FabricLivingEntity extends FabricEntity implements LivingEntity {
   }
 
   @Override
-  public double health() {
-    return handle().getHealth();
-  }
-
-  @Override
-  public double maxHealth() {
-    return handle().getMaxHealth();
-  }
-
-  @Override
   public boolean damage(double damage) {
     return handle().hurt(handle().damageSources().generic(), (float) damage);
   }

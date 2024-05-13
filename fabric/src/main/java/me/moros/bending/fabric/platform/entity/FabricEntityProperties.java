@@ -20,9 +20,14 @@
 package me.moros.bending.fabric.platform.entity;
 
 import me.moros.bending.api.platform.entity.EntityProperties;
+import me.moros.bending.api.platform.entity.EntityType;
 import me.moros.bending.common.data.DataProviderRegistry;
 import me.moros.bending.fabric.mixin.accessor.CreeperAccess;
 import me.moros.bending.fabric.mixin.accessor.EntityAccess;
+import me.moros.bending.fabric.platform.world.FabricWorld;
+import me.moros.math.Vector3d;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -98,7 +103,11 @@ final class FabricEntityProperties {
         .get(Entity::isInLava))
       .create(EntityProperties.VISIBLE, Entity.class, b -> b
         .get(e -> !e.isInvisible()))
+      .create(EntityProperties.DEAD, Entity.class, b -> b
+        .get(e -> !e.isAlive()))
       // integer
+      .create(EntityProperties.ENTITY_ID, Entity.class, b -> b
+        .get(Entity::getId))
       .create(EntityProperties.MAX_OXYGEN, Entity.class, b -> b
         .get(Entity::getMaxAirSupply))
       .create(EntityProperties.REMAINING_OXYGEN, Entity.class, b -> b
@@ -127,9 +136,32 @@ final class FabricEntityProperties {
       .create(EntityProperties.FALL_DISTANCE, Entity.class, b -> b
         .get(e -> e.fallDistance)
         .set((e, v) -> e.fallDistance = v))
+      .create(EntityProperties.MAX_HEALTH, LivingEntity.class, b -> b
+        .get(LivingEntity::getMaxHealth))
+      .create(EntityProperties.HEALTH, LivingEntity.class, b -> b
+        .get(LivingEntity::getHealth))
       // misc
       .create(EntityProperties.NAME, Entity.class, b -> b
         .get(e -> e.getName().asComponent()))
+      .create(EntityProperties.POSITION, Entity.class, b -> b
+        .get(e -> Vector3d.of(e.getX(), e.getY(), e.getZ()))
+        .set((e, v) -> e.moveTo(v.x(), v.y(), v.z())))
+      .create(EntityProperties.VELOCITY, Entity.class, b -> b
+        .valueOperator(Vector3d::clampVelocity)
+        .get(e -> {
+          var vel = e.getDeltaMovement();
+          return Vector3d.of(vel.x(), vel.y(), vel.z());
+        })
+        .set((e, v) -> {
+          e.setDeltaMovement(v.x(), v.y(), v.z());
+          e.hurtMarked = true;
+        }))
+      .create(EntityProperties.WORLD, Entity.class, b -> b
+        .get(e -> new FabricWorld((ServerLevel) e.level())))
+      .create(EntityProperties.UUID, Entity.class, b -> b
+        .get(Entity::getUUID))
+      .create(EntityProperties.ENTITY_TYPE, Entity.class, b -> b
+        .get(e -> EntityType.registry().getOrThrow(BuiltInRegistries.ENTITY_TYPE.getKey(e.getType()))))
       .build();
   }
 }

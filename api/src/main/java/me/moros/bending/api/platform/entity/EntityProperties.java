@@ -19,11 +19,15 @@
 
 package me.moros.bending.api.platform.entity;
 
+import java.util.UUID;
+
 import me.moros.bending.api.platform.property.BooleanProperty;
 import me.moros.bending.api.platform.property.DoubleProperty;
 import me.moros.bending.api.platform.property.FloatProperty;
 import me.moros.bending.api.platform.property.IntegerProperty;
-import me.moros.bending.api.platform.property.Property;
+import me.moros.bending.api.platform.world.World;
+import me.moros.bending.api.util.data.DataKeyed;
+import me.moros.math.Vector3d;
 import net.kyori.adventure.text.Component;
 
 import static me.moros.bending.api.platform.property.Property.*;
@@ -45,7 +49,9 @@ public final class EntityProperties {
   public static final BooleanProperty IN_WATER = boolProp("in_water");
   public static final BooleanProperty IN_LAVA = boolProp("in_lava");
   public static final BooleanProperty VISIBLE = boolProp("visible");
+  public static final BooleanProperty DEAD = boolProp("dead");
 
+  public static final IntegerProperty ENTITY_ID = intProp("entity_id");
   public static final IntegerProperty MAX_OXYGEN = intProp("max_oxygen");
   public static final IntegerProperty REMAINING_OXYGEN = intProp("remaining_oxygen", -20, 300);
   public static final IntegerProperty REQUIRED_TICKS_TO_FREEZE = intProp("required_ticks_to_freeze");
@@ -56,9 +62,17 @@ public final class EntityProperties {
   public static final DoubleProperty WIDTH = doubleProp("width", 0, 256);
   public static final DoubleProperty HEIGHT = doubleProp("height", 0, 256);
 
-  public static final FloatProperty YAW = floatProp("yaw", -180, 180);
-  public static final FloatProperty PITCH = floatProp("pitch", -180, 180);
+  public static final FloatProperty YAW = floatProp("yaw");
+  public static final FloatProperty PITCH = floatProp("pitch");
   public static final FloatProperty FALL_DISTANCE = floatProp("fall_distance");
+  public static final FloatProperty MAX_HEALTH = floatProp("max_health", 0, Float.MAX_VALUE);
+  public static final FloatProperty HEALTH = floatProp("health", 0, Float.MAX_VALUE);
 
-  public static final Property<Component> NAME = prop("name", Component.class);
+  public static final DataKeyed<Component> NAME = prop("name", Component.class);
+  public static final DataKeyed<Vector3d> POSITION = prop("position", Vector3d.class);
+  public static final DataKeyed<Vector3d> VELOCITY = prop("velocity", Vector3d.class);
+  public static final DataKeyed<World> WORLD = prop("world", World.class);
+  public static final DataKeyed<UUID> UUID = prop("uuid", UUID.class);
+  public static final DataKeyed<EntityType> ENTITY_TYPE = prop("entity_type", EntityType.class);
+
 }

@@ -20,21 +20,13 @@
 package me.moros.bending.fabric.platform.entity;
 
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.UnaryOperator;
 
 import me.moros.bending.api.platform.entity.Entity;
-import me.moros.bending.api.platform.entity.EntityType;
-import me.moros.bending.api.platform.world.World;
 import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.api.util.data.DataKeyed;
 import me.moros.bending.fabric.platform.FabricMetadata;
-import me.moros.bending.fabric.platform.world.FabricWorld;
-import me.moros.math.Position;
-import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.projectile.Projectile;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -56,60 +48,8 @@ public class FabricEntity implements Entity {
   }
 
   @Override
-  public int id() {
-    return handle().getId();
-  }
-
-  @Override
-  public UUID uuid() {
-    return handle().getUUID();
-  }
-
-  @Override
-  public EntityType type() {
-    return EntityType.registry().getOrThrow(BuiltInRegistries.ENTITY_TYPE.getKey(handle().getType()));
-  }
-
-  @Override
-  public World world() {
-    return new FabricWorld((ServerLevel) handle().level());
-  }
-
-  @Override
-  public Vector3d location() {
-    var pos = handle().position();
-    return Vector3d.of(pos.x(), pos.y(), pos.z());
-  }
-
-  @Override
-  public Vector3d direction() {
-    double xRadians = Math.toRadians(handle().getYRot());
-    double yRadians = Math.toRadians(handle().getXRot());
-    double a = Math.cos(yRadians);
-    return Vector3d.of(-a * Math.sin(xRadians), -Math.sin(yRadians), a * Math.cos(xRadians));
-  }
-
-  @Override
-  public Vector3d velocity() {
-    var vel = handle().getDeltaMovement();
-    return Vector3d.of(vel.x(), vel.y(), vel.z());
-  }
-
-  @Override
-  public void velocity(Vector3d velocity) {
-    var clamped = velocity.clampVelocity();
-    handle().setDeltaMovement(clamped.x(), clamped.y(), clamped.z());
-    handle().hurtMarked = true;
-  }
-
-  @Override
   public boolean valid() {
     return handle().isAlive();
-  }
-
-  @Override
-  public boolean dead() {
-    return !handle().isAlive();
   }
 
   @Override
@@ -125,12 +65,6 @@ public class FabricEntity implements Entity {
   @Override
   public boolean isProjectile() {
     return handle() instanceof Projectile;
-  }
-
-  @Override
-  public boolean teleport(Position position) {
-    handle().teleportTo(position.x(), position.y(), position.z());
-    return true;
   }
 
   @Override

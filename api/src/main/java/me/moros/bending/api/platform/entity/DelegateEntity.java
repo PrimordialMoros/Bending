@@ -20,16 +20,12 @@
 package me.moros.bending.api.platform.entity;
 
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.UnaryOperator;
 
 import me.moros.bending.api.ability.AbilityDescription;
-import me.moros.bending.api.platform.world.World;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.api.util.data.DataKeyed;
-import me.moros.math.Position;
-import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -40,53 +36,8 @@ public interface DelegateEntity extends Entity {
   Entity entity();
 
   @Override
-  default int id() {
-    return entity().id();
-  }
-
-  @Override
-  default UUID uuid() {
-    return entity().uuid();
-  }
-
-  @Override
-  default World world() {
-    return entity().world();
-  }
-
-  @Override
-  default EntityType type() {
-    return entity().type();
-  }
-
-  @Override
-  default Vector3d location() {
-    return entity().location();
-  }
-
-  @Override
-  default Vector3d direction() {
-    return entity().direction();
-  }
-
-  @Override
-  default Vector3d velocity() {
-    return entity().velocity();
-  }
-
-  @Override
-  default void velocity(Vector3d velocity) {
-    entity().velocity(velocity);
-  }
-
-  @Override
   default boolean valid() {
     return entity().valid();
-  }
-
-  @Override
-  default boolean dead() {
-    return entity().dead();
   }
 
   @Override
@@ -102,11 +53,6 @@ public interface DelegateEntity extends Entity {
   @Override
   default boolean isProjectile() {
     return entity().isProjectile();
-  }
-
-  @Override
-  default boolean teleport(Position position) {
-    return entity().teleport(position);
   }
 
   @Override
@@ -137,16 +83,6 @@ public interface DelegateEntity extends Entity {
   @Override
   default <T> void remove(DataKey<T> key) {
     entity().remove(key);
-  }
-
-  @Override
-  default double health() {
-    return entity().health();
-  }
-
-  @Override
-  default double maxHealth() {
-    return entity().maxHealth();
   }
 
   @Override

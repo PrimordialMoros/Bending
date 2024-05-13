@@ -33,7 +33,6 @@ import me.moros.bending.api.platform.property.BooleanProperty;
 import me.moros.bending.api.platform.world.World;
 import me.moros.bending.api.util.data.DataHolder;
 import me.moros.bending.api.util.data.DataKeyed;
-import me.moros.math.FastMath;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.ForwardingAudience;
@@ -43,17 +42,25 @@ import net.kyori.adventure.util.TriState;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface Entity extends ForwardingAudience.Single, Damageable, DataHolder {
-  int id();
+  default int id() {
+    return propertyValue(EntityProperties.ENTITY_ID);
+  }
 
-  UUID uuid();
+  default UUID uuid() {
+    return propertyValue(EntityProperties.UUID);
+  }
 
-  EntityType type();
+  default EntityType type() {
+    return propertyValue(EntityProperties.ENTITY_TYPE);
+  }
 
   default Component name() {
     return propertyValue(EntityProperties.NAME);
   }
 
-  World world();
+  default World world() {
+    return propertyValue(EntityProperties.WORLD);
+  }
 
   default Key worldKey() {
     return world().key();
@@ -67,12 +74,12 @@ public interface Entity extends ForwardingAudience.Single, Damageable, DataHolde
     return propertyValue(EntityProperties.HEIGHT);
   }
 
-  default int yaw() {
-    return FastMath.round(propertyValue(EntityProperties.YAW));
+  default float yaw() {
+    return propertyValue(EntityProperties.YAW);
   }
 
-  default int pitch() {
-    return FastMath.round(propertyValue(EntityProperties.PITCH));
+  default float pitch() {
+    return propertyValue(EntityProperties.PITCH);
   }
 
   /**
@@ -87,13 +94,24 @@ public interface Entity extends ForwardingAudience.Single, Damageable, DataHolde
     return world().blockAt(location());
   }
 
-  Vector3d location();
+  default Vector3d location() {
+    return propertyValue(EntityProperties.POSITION);
+  }
 
-  Vector3d direction();
+  default Vector3d direction() {
+    double xRadians = Math.toRadians(propertyValue(EntityProperties.YAW));
+    double yRadians = Math.toRadians(propertyValue(EntityProperties.PITCH));
+    double a = Math.cos(yRadians);
+    return Vector3d.of(-a * Math.sin(xRadians), -Math.sin(yRadians), a * Math.cos(xRadians));
+  }
 
-  Vector3d velocity();
+  default Vector3d velocity() {
+    return propertyValue(EntityProperties.VELOCITY);
+  }
 
-  void velocity(Vector3d velocity);
+  default void velocity(Vector3d velocity) {
+    setProperty(EntityProperties.VELOCITY, velocity);
+  }
 
   /**
    * Set this entity's velocity and post a {@link VelocityEvent} if it's a LivingEntity.
@@ -108,7 +126,10 @@ public interface Entity extends ForwardingAudience.Single, Damageable, DataHolde
 
   boolean valid();
 
-  boolean dead();
+  @Deprecated(forRemoval = true)
+  default boolean dead() {
+    return propertyValue(EntityProperties.DEAD);
+  }
 
   default AABB bounds() {
     return dimensions(location());
@@ -202,7 +223,9 @@ public interface Entity extends ForwardingAudience.Single, Damageable, DataHolde
 
   boolean isProjectile();
 
-  boolean teleport(Position position);
+  default boolean teleport(Position position) {
+    return setProperty(EntityProperties.POSITION, position.toVector3d());
+  }
 
   @Deprecated(forRemoval = true)
   default double fallDistance() {
@@ -283,4 +306,18 @@ public interface Entity extends ForwardingAudience.Single, Damageable, DataHolde
   <V> boolean setProperty(DataKeyed<V> dataKeyed, V value);
 
   <V> boolean editProperty(DataKeyed<V> dataKeyed, UnaryOperator<V> operator);
+
+  @Deprecated(forRemoval = true)
+  @Override
+  default double maxHealth() {
+    var health = property(EntityProperties.MAX_HEALTH);
+    return health == null ? 0 : health.doubleValue();
+  }
+
+  @Deprecated(forRemoval = true)
+  @Override
+  default double health() {
+    var health = property(EntityProperties.HEALTH);
+    return health == null ? 0 : health.doubleValue();
+  }
 }

@@ -19,13 +19,21 @@
 
 package me.moros.bending.paper.platform.entity;
 
+import java.util.Objects;
+
 import me.moros.bending.api.platform.entity.EntityProperties;
+import me.moros.bending.api.platform.entity.EntityType;
 import me.moros.bending.common.data.DataProviderRegistry;
+import me.moros.bending.paper.platform.world.BukkitWorld;
+import me.moros.math.Vector3d;
+import org.bukkit.Location;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 
 final class BukkitEntityProperties {
   private BukkitEntityProperties() {
@@ -72,7 +80,11 @@ final class BukkitEntityProperties {
         .get(Entity::isInLava))
       .create(EntityProperties.VISIBLE, Entity.class, b -> b
         .get(e -> !e.isInvisible()))
+      .create(EntityProperties.DEAD, Entity.class, b -> b
+        .get(Entity::isDead))
       // integer
+      .create(EntityProperties.ENTITY_ID, Entity.class, b -> b
+        .get(Entity::getEntityId))
       .create(EntityProperties.MAX_OXYGEN, LivingEntity.class, b -> b
         .get(LivingEntity::getMaximumAir))
       .create(EntityProperties.REMAINING_OXYGEN, LivingEntity.class, b -> b
@@ -101,9 +113,29 @@ final class BukkitEntityProperties {
       .create(EntityProperties.FALL_DISTANCE, Entity.class, b -> b
         .get(Entity::getFallDistance)
         .set(Entity::setFallDistance))
+      .create(EntityProperties.MAX_HEALTH, LivingEntity.class, b -> b
+        .get(e -> (float) Objects.requireNonNull(e.getAttribute(Attribute.GENERIC_MAX_HEALTH)).getValue()))
+      .create(EntityProperties.HEALTH, LivingEntity.class, b -> b
+        .get(e -> (float) e.getHealth()))
       // misc
       .create(EntityProperties.NAME, Entity.class, b -> b
         .get(Entity::name))
+      .create(EntityProperties.POSITION, Entity.class, b -> b
+        .get(e -> Vector3d.of(e.getX(), e.getY(), e.getZ()))
+        .set((e, v) -> e.teleport(new Location(e.getWorld(), v.x(), v.y(), v.z()))))
+      .create(EntityProperties.VELOCITY, Entity.class, b -> b
+        .valueOperator(Vector3d::clampVelocity)
+        .get(e -> {
+          var vel = e.getVelocity();
+          return Vector3d.of(vel.getX(), vel.getY(), vel.getZ());
+        })
+        .set((e, v) -> e.setVelocity(new Vector(v.x(), v.y(), v.z()))))
+      .create(EntityProperties.WORLD, Entity.class, b -> b
+        .get(e -> new BukkitWorld(e.getWorld())))
+      .create(EntityProperties.UUID, Entity.class, b -> b
+        .get(Entity::getUniqueId))
+      .create(EntityProperties.ENTITY_TYPE, Entity.class, b -> b
+        .get(e -> EntityType.registry().getOrThrow(e.getType().key())))
       .build();
   }
 }

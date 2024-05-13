@@ -20,7 +20,6 @@
 package me.moros.bending.paper.platform.entity;
 
 import java.util.Collection;
-import java.util.Objects;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.DamageSource;
@@ -39,15 +38,11 @@ import me.moros.bending.paper.platform.item.BukkitInventory;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import org.bukkit.Location;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.AbstractArrow.PickupStatus;
 import org.bukkit.util.Vector;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class BukkitLivingEntity extends BukkitEntity implements LivingEntity {
-  private AttributeInstance maxHealth;
-
   public BukkitLivingEntity(org.bukkit.entity.LivingEntity handle) {
     super(handle);
   }
@@ -92,19 +87,6 @@ public class BukkitLivingEntity extends BukkitEntity implements LivingEntity {
   @Override
   public Collection<Potion> activePotions() {
     return handle().getActivePotionEffects().stream().map(PlatformAdapter::fromBukkitPotion).toList();
-  }
-
-  @Override
-  public double health() {
-    return handle().getHealth();
-  }
-
-  @Override
-  public double maxHealth() {
-    if (maxHealth == null) {
-      maxHealth = Objects.requireNonNull(handle().getAttribute(Attribute.GENERIC_MAX_HEALTH));
-    }
-    return maxHealth.getValue();
   }
 
   @Override

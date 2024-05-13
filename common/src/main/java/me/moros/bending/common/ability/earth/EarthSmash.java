@@ -291,8 +291,7 @@ public class EarthSmash extends AbilityInstance {
     }
   }
 
-  @FunctionalInterface
-  interface EarthSmashState extends Updatable {
+  private interface EarthSmashState extends Updatable {
     default boolean canGrab() {
       return false;
     }
