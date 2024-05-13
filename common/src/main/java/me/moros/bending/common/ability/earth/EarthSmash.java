@@ -283,7 +283,7 @@ public class EarthSmash extends AbilityInstance {
       shatter = true;
     }
     if (shatter) {
-      if (collidedAbility.description().element() == Element.FIRE || collidedAbility instanceof LavaDisk) {
+      if (collidedAbility.description().elements().contains(Element.FIRE) || collidedAbility instanceof LavaDisk) {
         boulder.updateData((k, v) -> BlockType.MAGMA_BLOCK.defaultState());
       }
       collision.removeSelf(false);

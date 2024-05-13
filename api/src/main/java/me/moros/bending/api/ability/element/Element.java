@@ -21,9 +21,11 @@ package me.moros.bending.api.ability.element;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import me.moros.bending.api.util.ColorPalette;
 import me.moros.bending.api.util.KeyUtil;
+import me.moros.bending.api.util.collect.ElementSet;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.text.Component;
@@ -106,6 +108,6 @@ public enum Element implements Keyed, Translatable {
     return null;
   }
 
-  public static final List<Element> VALUES = List.of(values());
+  public static final Set<Element> VALUES = ElementSet.copyOf(List.of(values()));
   public static final List<String> NAMES = List.of("Air", "Water", "Earth", "Fire");
 }

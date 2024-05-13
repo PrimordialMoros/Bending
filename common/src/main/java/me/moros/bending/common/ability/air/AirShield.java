@@ -171,7 +171,7 @@ public class AirShield extends AbilityInstance {
           }
         }
       });
-    } else if (collidedAbility.description().element() == Element.FIRE) {
+    } else if (collidedAbility.description().elements().contains(Element.FIRE)) {
       double r = userConfig.radius;
       Vector3d pos = center.add(collision.colliderOther().position().subtract(center).normalize().multiply(r));
       ParticleBuilder.fire(collidedAbility.user(), pos).count(20).offset(0.1).extra(0.05).spawn(user.world());

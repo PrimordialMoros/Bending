@@ -120,7 +120,7 @@ public class Combustion extends AbilityInstance implements Explosive {
       other.exploded = true;
     } else if (collidedAbility instanceof Explosive) {
       explode();
-    } else if (collidedAbility.description().element() == Element.EARTH && collision.removeSelf()) {
+    } else if (collidedAbility.description().elements().contains(Element.EARTH) && collision.removeSelf()) {
       explode();
     }
   }

@@ -28,6 +28,7 @@ import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.util.FeaturePermissions;
+import me.moros.bending.api.util.collect.ElementSet;
 import me.moros.bending.common.command.Permissions;
 import net.kyori.adventure.util.TriState;
 
@@ -57,6 +58,7 @@ public abstract class PermissionInitializer implements Initializer {
         Permissions.RELOAD, Permissions.IMPORT, Permissions.EXPORT, Permissions.ATTRIBUTE)
       .collect(Collectors.toSet());
     children.add("bending.player");
+    children.add("bending.ability.avatarstate");
     children.add(FeaturePermissions.BLUE_FIRE);
     children.add(Permissions.CHOOSE + ".other");
     children.add(Permissions.ADD + ".other");
@@ -86,7 +88,8 @@ public abstract class PermissionInitializer implements Initializer {
   }
 
   private Collection<String> collect(Element element) {
-    return Registries.ABILITIES.stream().filter(a -> a.element() == element)
+    ElementSet singleElementSet = ElementSet.of(element);
+    return Registries.ABILITIES.stream().filter(a -> singleElementSet.equals(a.elements()))
       .map(AbilityDescription::permissions).flatMap(Collection::stream).collect(Collectors.toSet());
   }
 

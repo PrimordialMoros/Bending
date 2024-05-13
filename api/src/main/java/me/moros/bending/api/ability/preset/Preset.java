@@ -122,7 +122,7 @@ public final class Preset {
 
   private TextColor dominantColor() {
     Map<Element, Integer> counter = new EnumMap<>(Element.class);
-    forEach((desc, idx) -> counter.merge(desc.element(), 1, Integer::sum));
+    forEach((desc, idx) -> desc.elements().forEach(element -> counter.merge(element, 1, Integer::sum)));
     return counter.entrySet().stream().max(Entry.comparingByValue())
       .map(e -> e.getKey().color()).orElse(ColorPalette.NEUTRAL);
   }

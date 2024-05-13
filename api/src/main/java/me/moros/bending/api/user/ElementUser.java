@@ -19,6 +19,7 @@
 
 package me.moros.bending.api.user;
 
+import java.util.Collection;
 import java.util.Set;
 
 import me.moros.bending.api.ability.element.Element;
@@ -40,6 +41,13 @@ public interface ElementUser {
    * @return true the user has the specified element, false otherwise
    */
   boolean hasElement(Element element);
+
+  /**
+   * Check if the user has all the specified elements.
+   * @param elements the elements to check
+   * @return true the user has the specified elements, false otherwise
+   */
+  boolean hasElements(Collection<Element> elements);
 
   /**
    * Attempt to add the specified element to the user. Calls an {@link ElementChangeEvent}.

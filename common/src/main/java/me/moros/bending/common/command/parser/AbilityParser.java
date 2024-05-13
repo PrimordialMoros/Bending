@@ -61,7 +61,7 @@ public final class AbilityParser<C extends Audience> implements ArgumentParser<C
     if (validBindsOnly) {
       predicate = predicate.and(AbilityDescription::canBind);
       if (user != null) {
-        predicate = predicate.and(desc -> user.hasElement(desc.element()));
+        predicate = predicate.and(desc -> user.hasElements(desc.elements()));
       }
     }
     if (user != null) {

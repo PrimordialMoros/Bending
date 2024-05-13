@@ -39,7 +39,7 @@ public final class BendingConditions {
   /**
    * Checks if user has the required element.
    */
-  public static final BiPredicate<User, AbilityDescription> ELEMENT = (u, d) -> u.hasElement(d.element());
+  public static final BiPredicate<User, AbilityDescription> ELEMENT = (u, d) -> u.hasElements(d.elements());
   /**
    * Checks if user is not a spectator.
    */

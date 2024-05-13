@@ -20,9 +20,10 @@
 package me.moros.bending.api.platform;
 
 import me.moros.bending.api.adapter.NativeAdapter;
+import me.moros.tasker.executor.TickAdapter;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
-public interface Platform {
+public interface Platform extends TickAdapter {
   /**
    * Disregard, internal use only
    */

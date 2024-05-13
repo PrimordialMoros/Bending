@@ -26,17 +26,21 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 import me.moros.bending.api.ability.element.Element;
+import me.moros.bending.api.util.ColorPalette;
 import me.moros.bending.api.util.KeyUtil;
+import me.moros.bending.api.util.collect.ElementSet;
 import me.moros.bending.api.util.functional.Suppliers;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.translation.Translatable;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -46,7 +50,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public sealed class AbilityDescription implements Keyed, Translatable permits AbilityDescription.Sequence {
   private final Key key;
-  private final Element element;
+  private final ElementSet elements;
   private final Component displayName;
   private final Function<AbilityDescription, ? extends Ability> constructor;
   private final EnumSet<Activation> activations;
@@ -58,7 +62,7 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
 
   private AbilityDescription(Builder builder) {
     key = builder.key;
-    element = builder.element;
+    elements = ElementSet.copyOf(builder.elements);
     displayName = builder.displayName;
     constructor = builder.constructor;
     activations = builder.activations;
@@ -66,15 +70,20 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
     canBind = builder.canBind && !isActivatedBy(Activation.SEQUENCE);
     hidden = builder.hidden;
     bypassCooldown = builder.bypassCooldown;
-    hashcode = Objects.hash(key, element, activations);
+    hashcode = Objects.hash(key, elements, activations);
   }
 
   public Component displayName() {
     return displayName;
   }
 
+  @Deprecated(forRemoval = true)
   public Element element() {
-    return element;
+    return elements.iterator().next();
+  }
+
+  public Set<Element> elements() {
+    return elements;
   }
 
   public boolean canBind() {
@@ -120,7 +129,7 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
       return false;
     }
     AbilityDescription other = (AbilityDescription) obj;
-    return key.equals(other.key) && element == other.element && activations.equals(other.activations);
+    return key.equals(other.key) && elements.equals(other.elements) && activations.equals(other.activations);
   }
 
   @Override
@@ -232,7 +241,7 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
     private final Key key;
     private final String name;
     private Component displayName;
-    private Element element;
+    private final ElementSet elements = ElementSet.mutable();
     private final Function<AbilityDescription, ? extends Ability> constructor;
     private EnumSet<Activation> activations;
     private Collection<String> requiredPermissions;
@@ -253,7 +262,15 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
     }
 
     public Builder element(Element element) {
-      this.element = element;
+      this.elements.add(element);
+      return this;
+    }
+
+    public Builder element(Element first, Element @Nullable ... elements) {
+      this.elements.add(first);
+      if (elements != null) {
+        this.elements.addAll(List.of(elements));
+      }
       return this;
     }
 
@@ -310,13 +327,16 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
     }
 
     private void validate() {
-      Objects.requireNonNull(element, "Element cannot be null");
+      if (elements.isEmpty()) {
+        throw new IllegalStateException("Elements cannot be empty");
+      }
       Objects.requireNonNull(activations, "Activations cannot be null");
       if (activations.isEmpty()) {
         throw new IllegalStateException("Activation methods cannot be empty");
       }
       if (displayName == null) {
-        displayName = Component.text(name, element.color());
+        TextColor color = elements.size() > 2 ? ColorPalette.AVATAR : elements.iterator().next().color();
+        displayName = Component.text(name, color);
       }
     }
 

@@ -99,7 +99,7 @@ public class AbilityManagerImpl implements AbilityManager {
     Collection<AbilityDescription> allPassives = Registries.ABILITIES.stream().filter(isPassive).toList();
     destroyUserInstances(user, a -> isPassive.test(a.description()));
     for (AbilityDescription passive : allPassives) {
-      if (user.hasElement(passive.element()) && user.hasPermission(passive)) {
+      if (user.hasElements(passive.elements()) && user.hasPermission(passive)) {
         Ability ability = passive.createAbility();
         if (ability.activate(user, Activation.PASSIVE)) {
           addAbility(ability);

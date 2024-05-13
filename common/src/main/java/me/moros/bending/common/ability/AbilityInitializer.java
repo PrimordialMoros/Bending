@@ -46,6 +46,7 @@ import me.moros.bending.common.ability.air.Tornado;
 import me.moros.bending.common.ability.air.passive.AirAgility;
 import me.moros.bending.common.ability.air.passive.GracefulDescent;
 import me.moros.bending.common.ability.air.sequence.AirWheel;
+import me.moros.bending.common.ability.avatar.AvatarState;
 import me.moros.bending.common.ability.earth.*;
 import me.moros.bending.common.ability.earth.passive.DensityShift;
 import me.moros.bending.common.ability.earth.passive.EarthCling;
@@ -120,6 +121,7 @@ public final class AbilityInitializer implements Initializer {
     initWater();
     initEarth();
     initFire();
+    initAvatar();
 
     Registries.ABILITIES.register(abilities);
     Registries.COLLISIONS.register(buildCollisions());
@@ -415,5 +417,10 @@ public final class AbilityInitializer implements Initializer {
         .add(fireShield, SNEAK, INTERACT_BLOCK, INTERACT_BLOCK, SNEAK_RELEASE)
       );
     abilities.add(fireWheel);
+  }
+
+  private void initAvatar() {
+    abilities.add(AbilityDescription.builder("AvatarState", AvatarState::new)
+      .element(AIR, WATER, EARTH, FIRE).activation(ATTACK, SNEAK).build());
   }
 }
