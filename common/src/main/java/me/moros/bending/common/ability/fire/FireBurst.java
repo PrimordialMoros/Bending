@@ -148,7 +148,7 @@ public class FireBurst extends AbilityInstance {
       rays = RayUtil.sphere(user, userConfig.sphereRange);
     }
     rays.forEach(r -> streams.add(new FireStream(r)));
-    removalPolicy = Policies.builder().build();
+    removalPolicy = Policies.defaults();
     user.addCooldown(description(), userConfig.cooldown);
   }
 

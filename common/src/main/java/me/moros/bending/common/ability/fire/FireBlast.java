@@ -138,7 +138,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
       factor += deltaFactor;
     }
     charging = false;
-    removalPolicy = Policies.builder().build();
+    removalPolicy = Policies.defaults();
     user.addCooldown(description(), cooldown);
     Vector3d origin = user.mainHandSide();
     Vector3d lookingDir = user.direction().multiply(userConfig.range * factor);

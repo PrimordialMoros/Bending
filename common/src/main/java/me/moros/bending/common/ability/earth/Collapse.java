@@ -96,7 +96,7 @@ public class Collapse extends AbilityInstance {
     }
     if (!pillars.isEmpty()) {
       user.addCooldown(description(), userConfig.cooldown);
-      removalPolicy = Policies.builder().build();
+      removalPolicy = Policies.defaults();
       return true;
     }
     return false;
@@ -111,7 +111,7 @@ public class Collapse extends AbilityInstance {
       block.world().findBottom(block, this.height, predicate).flatMap(this::createPillar).ifPresent(pillars::add);
     }
     if (!pillars.isEmpty()) {
-      removalPolicy = Policies.builder().build();
+      removalPolicy = Policies.defaults();
       return true;
     }
     return false;

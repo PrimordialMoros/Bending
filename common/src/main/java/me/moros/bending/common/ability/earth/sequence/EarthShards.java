@@ -66,7 +66,7 @@ public class EarthShards extends AbilityInstance {
   public boolean activate(User user, Activation method) {
     this.user = user;
     loadConfig();
-    removalPolicy = Policies.builder().build();
+    removalPolicy = Policies.defaults();
     user.addCooldown(description(), userConfig.cooldown);
     return true;
   }

@@ -87,7 +87,7 @@ public class OctopusForm extends AbilityInstance {
 
     this.user = user;
     loadConfig();
-    removalPolicy = Policies.builder().build();
+    removalPolicy = Policies.defaults();
     ring = WaterRing.getOrCreateInstance(user);
     return ring != null;
   }

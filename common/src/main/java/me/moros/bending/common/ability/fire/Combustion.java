@@ -81,7 +81,7 @@ public class Combustion extends AbilityInstance implements Explosive {
     this.user = user;
     loadConfig();
     beam = new CombustBeam();
-    removalPolicy = Policies.builder().build();
+    removalPolicy = Policies.defaults();
     user.addCooldown(description(), userConfig.cooldown);
     return true;
   }

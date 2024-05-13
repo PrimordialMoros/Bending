@@ -96,7 +96,7 @@ public class IceSpike extends AbilityInstance {
     }
     if (!pillars.isEmpty()) {
       user.addCooldown(description(), field ? userConfig.fieldCooldown : userConfig.columnCooldown);
-      removalPolicy = Policies.builder().build();
+      removalPolicy = Policies.defaults();
       return true;
     }
     return false;

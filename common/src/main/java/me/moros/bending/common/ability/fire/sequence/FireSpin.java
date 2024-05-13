@@ -75,7 +75,7 @@ public class FireSpin extends AbilityInstance {
     VectorUtil.circle(Vector3d.PLUS_I, Vector3d.PLUS_J, 40).forEach(
       v -> streams.add(new FireStream(Ray.of(origin, v.multiply(userConfig.range))))
     );
-    removalPolicy = Policies.builder().build();
+    removalPolicy = Policies.defaults();
     user.addCooldown(description(), userConfig.cooldown);
     return true;
   }

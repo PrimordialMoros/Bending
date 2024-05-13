@@ -84,7 +84,7 @@ public class RaiseEarth extends AbilityInstance {
     }
     if (!pillars.isEmpty()) {
       user.addCooldown(description(), wall ? userConfig.wallCooldown : userConfig.columnCooldown);
-      removalPolicy = Policies.builder().build();
+      removalPolicy = Policies.defaults();
       return true;
     }
     return false;
@@ -100,7 +100,7 @@ public class RaiseEarth extends AbilityInstance {
     this.interval = interval;
     raiseWall(height, width);
     if (!pillars.isEmpty()) {
-      removalPolicy = Policies.builder().build();
+      removalPolicy = Policies.defaults();
       return true;
     }
     return false;

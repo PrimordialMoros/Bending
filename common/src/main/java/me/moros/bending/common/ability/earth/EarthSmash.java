@@ -112,7 +112,7 @@ public class EarthSmash extends AbilityInstance {
     loadConfig();
 
     state = new ChargeState();
-    removalPolicy = Policies.builder().build();
+    removalPolicy = Policies.defaults();
     swappedSlotsPolicy = SwappedSlotsRemovalPolicy.of(description());
 
     return true;

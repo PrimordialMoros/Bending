@@ -194,7 +194,7 @@ public class Lightning extends AbilityInstance {
     direction = target.subtract(origin).normalize();
     arcIterator = new Arc(origin, target, point).iterator();
     user.addCooldown(description(), userConfig.cooldown);
-    removalPolicy = Policies.builder().build();
+    removalPolicy = Policies.defaults();
     launched = true;
   }
 

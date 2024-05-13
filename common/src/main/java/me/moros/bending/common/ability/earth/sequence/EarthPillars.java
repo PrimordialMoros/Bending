@@ -95,7 +95,7 @@ public class EarthPillars extends AbilityInstance {
 
     if (!pillars.isEmpty()) {
       user.addCooldown(description(), userConfig.cooldown);
-      removalPolicy = Policies.builder().build();
+      removalPolicy = Policies.defaults();
       return true;
     }
     return false;

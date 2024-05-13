@@ -85,7 +85,7 @@ public class HeatControl extends AbilityInstance {
     }
     this.user = user;
     loadConfig();
-    removalPolicy = Policies.builder().build();
+    removalPolicy = Policies.defaults();
     startTime = System.currentTimeMillis();
     return true;
   }

@@ -179,7 +179,7 @@ public class AvatarState extends AbilityInstance {
     int durationTicks = Platform.instance().toTicks(duration, TimeUnit.MILLISECONDS);
     int glowTicks = fullAvatarState ? durationTicks : 8;
     user.addPotion(PotionEffect.GLOWING.builder().duration(glowTicks).amplifier(0).build());
-    removalPolicy = Policies.builder().build();
+    removalPolicy = Policies.defaults();
 
     setupAvatarStateBar(elementsWithOpenChakras, fullAvatarState, durationTicks);
     resetCooldownsAndEffects(elementsWithOpenChakras, fullAvatarState);

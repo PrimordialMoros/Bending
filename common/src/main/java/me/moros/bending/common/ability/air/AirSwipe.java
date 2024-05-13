@@ -141,7 +141,7 @@ public class AirSwipe extends AbilityInstance {
     VectorUtil.createArc(dir, rotateAxis, Math.PI / 36, steps).forEach(
       v -> streams.add(new AirStream(Ray.of(origin, v.multiply(userConfig.range * factor))))
     );
-    removalPolicy = Policies.builder().build();
+    removalPolicy = Policies.defaults();
   }
 
   @Override

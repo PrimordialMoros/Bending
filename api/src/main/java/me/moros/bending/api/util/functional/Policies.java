@@ -22,61 +22,61 @@ package me.moros.bending.api.util.functional;
 import java.util.HashSet;
 import java.util.Set;
 
-import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.platform.entity.EntityProperties;
-import me.moros.bending.api.user.User;
 import net.kyori.adventure.util.TriState;
 
 /**
  * Built-in policies to check whether an ability needs to be removed.
  */
-public enum Policies implements RemovalPolicy {
+public final class Policies {
+  private Policies() {
+  }
+
   /**
    * Checks if the user is dead.
    */
-  DEAD((u, d) -> u.propertyValue(EntityProperties.DEAD)),
+  public static final RemovalPolicy DEAD = (u, d) -> u.propertyValue(EntityProperties.DEAD);
   /**
    * Checks if the user is invalid or disconnected.
    */
-  INVALID((u, d) -> !u.valid()),
+  public static final RemovalPolicy INVALID = (u, d) -> !u.valid();
   /**
    * Checks if the user is sneaking.
    */
-  SNEAKING((u, d) -> u.sneaking()),
+  public static final RemovalPolicy SNEAKING = (u, d) -> u.sneaking();
   /**
    * Checks if the user is NOT sneaking.
    */
-  NOT_SNEAKING((u, d) -> !u.sneaking()),
+  public static final RemovalPolicy NOT_SNEAKING = (u, d) -> !u.sneaking();
   /**
    * Checks if the user is flying.
    */
-  FLYING((u, d) -> u.checkProperty(EntityProperties.FLYING) == TriState.TRUE),
+  public static final RemovalPolicy FLYING = (u, d) -> u.checkProperty(EntityProperties.FLYING) == TriState.TRUE;
   /**
    * Checks if the user is submerged underwater.
    */
-  UNDER_WATER((u, d) -> u.underWater()),
+  public static final RemovalPolicy UNDER_WATER = (u, d) -> u.underWater();
   /**
    * Checks if the user is in water.
    */
-  PARTIALLY_UNDER_WATER((u, d) -> u.inWater()),
+  public static final RemovalPolicy PARTIALLY_UNDER_WATER = (u, d) -> u.inWater();
   /**
    * Checks if the user is submerged under lava.
    */
-  UNDER_LAVA((u, d) -> u.underLava()),
+  public static final RemovalPolicy UNDER_LAVA = (u, d) -> u.underLava();
   /**
    * Checks if the user is in lava.
    */
-  PARTIALLY_UNDER_LAVA((u, d) -> u.inLava());
+  public static final RemovalPolicy PARTIALLY_UNDER_LAVA = (u, d) -> u.inLava();
 
-  private final RemovalPolicy policy;
+  private static final RemovalPolicy DEFAULT = builder().build();
 
-  Policies(RemovalPolicy policy) {
-    this.policy = policy;
-  }
-
-  @Override
-  public boolean test(User user, AbilityDescription desc) {
-    return policy.test(user, desc);
+  /**
+   * Convenience method to retrieve the default removal policy.
+   * @return a composite RemovalPolicy that includes {@link Policies#DEAD} and {@link Policies#INVALID}.
+   */
+  public static RemovalPolicy defaults() {
+    return DEFAULT;
   }
 
   /**
@@ -113,4 +113,3 @@ public enum Policies implements RemovalPolicy {
     }
   }
 }
-

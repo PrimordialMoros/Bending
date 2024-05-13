@@ -194,7 +194,7 @@ public class Shockwave extends AbilityInstance {
     if (streams.update() == UpdateResult.REMOVE) {
       return false;
     }
-    removalPolicy = Policies.builder().build();
+    removalPolicy = Policies.defaults();
     user.addCooldown(description(), userConfig.cooldown);
     return true;
   }

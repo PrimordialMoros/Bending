@@ -132,7 +132,7 @@ public class IceCrawl extends AbilityInstance {
       Optional<Block> src = states.chainStore().stream().findAny();
       if (src.isPresent()) {
         iceLine = new Line(src.get());
-        removalPolicy = Policies.builder().build();
+        removalPolicy = Policies.defaults();
         user.addCooldown(description(), userConfig.cooldown);
       }
     }

@@ -79,7 +79,7 @@ public class FireKick extends AbilityInstance {
     VectorUtil.createArc(direction, rotateAxis, Math.PI / 30, 11).forEach(
       v -> streams.add(new FireStream(Ray.of(origin, v.multiply(userConfig.range))))
     );
-    removalPolicy = Policies.builder().build();
+    removalPolicy = Policies.defaults();
     user.addCooldown(description(), userConfig.cooldown);
     return true;
   }

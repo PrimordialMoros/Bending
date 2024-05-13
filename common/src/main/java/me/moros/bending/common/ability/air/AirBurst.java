@@ -149,7 +149,7 @@ public class AirBurst extends AbilityInstance {
       default -> RayUtil.sphere(user, userConfig.sphereRange);
     };
     rays.forEach(r -> streams.add(new AirStream(r)));
-    removalPolicy = Policies.builder().build();
+    removalPolicy = Policies.defaults();
     user.addCooldown(description(), userConfig.cooldown);
   }
 

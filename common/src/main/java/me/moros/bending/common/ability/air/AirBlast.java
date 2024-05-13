@@ -145,7 +145,7 @@ public class AirBlast extends AbilityInstance {
       target = temp;
     }
     Vector3d direction = target.subtract(origin).normalize();
-    removalPolicy = Policies.builder().build();
+    removalPolicy = Policies.defaults();
     user.addCooldown(description(), userConfig.cooldown);
     stream = new AirStream(Ray.of(origin, direction.multiply(userConfig.range)));
   }

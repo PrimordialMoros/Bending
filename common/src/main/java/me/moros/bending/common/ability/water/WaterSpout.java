@@ -83,7 +83,7 @@ public class WaterSpout extends AbilityInstance implements SpoutAbility {
       return false;
     }
 
-    removalPolicy = Policies.builder().build();
+    removalPolicy = Policies.defaults();
 
     spout = new Spout();
     return true;

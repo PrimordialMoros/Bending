@@ -155,7 +155,7 @@ public class WaterManipulation extends AbilityInstance {
       if (WaterMaterials.isWaterBendable(source)) {
         isIce = WaterMaterials.isIceBendable(source);
         manip = new Manip(source);
-        removalPolicy = Policies.builder().build();
+        removalPolicy = Policies.defaults();
         user.addCooldown(description(), userConfig.cooldown);
         TempBlock.air().build(source);
       }

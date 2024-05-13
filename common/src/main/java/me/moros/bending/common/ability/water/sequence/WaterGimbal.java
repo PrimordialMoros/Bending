@@ -150,7 +150,7 @@ public class WaterGimbal extends AbilityInstance {
     State state = states.current();
     if (state instanceof Gimbal) {
       launched = true;
-      removalPolicy = Policies.builder().build();
+      removalPolicy = Policies.defaults();
       state.complete();
       user.addCooldown(description(), userConfig.cooldown);
     }

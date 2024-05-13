@@ -69,7 +69,7 @@ public class AirSpout extends AbilityInstance implements SpoutAbility {
     if (AbstractSpout.blockCast(user.block(), h) == null) {
       return false;
     }
-    removalPolicy = Policies.builder().build();
+    removalPolicy = Policies.defaults();
     spout = new Spout();
     return true;
   }

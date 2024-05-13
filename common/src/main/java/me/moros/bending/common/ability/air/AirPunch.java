@@ -77,7 +77,7 @@ public class AirPunch extends AbilityInstance {
     double factor = (length == 0) ? 1 : FastMath.clamp(1 / length, 0.5, 1.5);
     Sound.ENTITY_BREEZE_SHOOT.asEffect(1, (float) factor).play(user.world(), origin);
     stream = new AirStream(Ray.of(origin, lookingDir), 1.2, factor);
-    removalPolicy = Policies.builder().build();
+    removalPolicy = Policies.defaults();
     return true;
   }
 

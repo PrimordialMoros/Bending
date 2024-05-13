@@ -69,7 +69,7 @@ public class PhaseChange extends AbilityInstance {
     }
     this.user = user;
     loadConfig();
-    removalPolicy = Policies.builder().build();
+    removalPolicy = Policies.defaults();
     return true;
   }
 

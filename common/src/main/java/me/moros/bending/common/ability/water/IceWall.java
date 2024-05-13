@@ -83,7 +83,7 @@ public class IceWall extends AbilityInstance {
     raiseWall(userConfig.maxHeight, userConfig.width);
     if (!pillars.isEmpty()) {
       user.addCooldown(description(), userConfig.cooldown);
-      removalPolicy = Policies.builder().build();
+      removalPolicy = Policies.defaults();
       return true;
     }
     return false;
