@@ -28,6 +28,7 @@ import me.moros.bending.api.config.Configurable;
 import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.Modifiable;
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.platform.entity.EntityUtil;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.item.InventoryUtil;
@@ -112,7 +113,7 @@ public class HealingWaters extends AbilityInstance {
       return false;
     }
     EntityUtil.removeNegativeEffects(target);
-    if (target.health() < target.maxHealth()) {
+    if (target.propertyValue(EntityProperties.HEALTH) < target.propertyValue(EntityProperties.MAX_HEALTH)) {
       ParticleBuilder.rgb(target.center(), "#00FFFF").count(6).offset(0.35).spawn(user.world());
       int ticks = FastMath.floor(userConfig.duration / 50.0);
       if (EntityUtil.tryAddPotion(target, PotionEffect.REGENERATION, ticks, userConfig.power - 1)) {

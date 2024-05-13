@@ -44,6 +44,7 @@ import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.platform.particle.Particle;
 import me.moros.bending.api.platform.sound.SoundEffect;
 import me.moros.bending.api.platform.world.WorldUtil;
@@ -101,7 +102,7 @@ public class Shockwave extends AbilityInstance {
     removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(description())).build();
     released = false;
     if (method == Activation.FALL) {
-      if (user.fallDistance() < userConfig.fallThreshold || user.sneaking()) {
+      if (user.propertyValue(EntityProperties.FALL_DISTANCE) < userConfig.fallThreshold || user.sneaking()) {
         return false;
       }
       if (!release(false)) {

@@ -46,7 +46,7 @@ public final class Translation implements Keyed, Iterable<Entry<String, MessageF
     this.key = key;
     this.locale = locale;
     this.formats = Map.copyOf(formats);
-    this.hashcode = Objects.hash(this.key, this.formats.hashCode());
+    this.hashcode = Objects.hash(this.key, this.formats);
   }
 
   /**

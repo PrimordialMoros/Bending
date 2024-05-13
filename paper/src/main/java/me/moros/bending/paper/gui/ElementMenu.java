@@ -37,8 +37,6 @@ import me.moros.bending.common.gui.AbstractGui;
 import me.moros.bending.common.locale.Message;
 import me.moros.bending.paper.platform.PlatformAdapter;
 import net.kyori.adventure.util.TriState;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
 public final class ElementMenu extends AbstractGui<ItemStack, ChestGui> {
@@ -51,7 +49,7 @@ public final class ElementMenu extends AbstractGui<ItemStack, ChestGui> {
     ChestGui gui = new ChestGui(3, ComponentHolder.of(Message.ELEMENTS_GUI_TITLE.build()));
     gui.setOnGlobalClick(event -> event.setCancelled(true));
     OutlinePane background = new OutlinePane(0, 0, 9, 3, Priority.LOWEST);
-    background.addItem(new GuiItem(PlatformAdapter.toBukkitItem(BACKGROUND.get())));
+    background.addItem(new GuiItem(backgroundItem()));
     background.setRepeat(true);
     gui.addPane(background);
     OutlinePane elementsPane = new OutlinePane(1, 1, 7, 1);
@@ -78,6 +76,12 @@ public final class ElementMenu extends AbstractGui<ItemStack, ChestGui> {
     return gui;
   }
 
+  private ItemStack backgroundItem() {
+    ItemStack item = PlatformAdapter.toBukkitItem(BACKGROUND.get());
+    item.editMeta(m -> m.setHideTooltip(true));
+    return item;
+  }
+
   @Override
   public boolean show(Player player) {
     handle().show(PlatformAdapter.toBukkitEntity(player));
@@ -99,12 +103,7 @@ public final class ElementMenu extends AbstractGui<ItemStack, ChestGui> {
 
   @Override
   protected void handleItemStackGlow(ItemStack itemStack, boolean glow) {
-    itemStack.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-    if (glow) {
-      itemStack.addUnsafeEnchantment(Enchantment.LUCK, 1);
-    } else {
-      itemStack.removeEnchantment(Enchantment.LUCK);
-    }
+    itemStack.editMeta(m -> m.setEnchantmentGlintOverride(glow));
   }
 
   public static ElementGui createMenu(ElementHandler handler, Player player) {

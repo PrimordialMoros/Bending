@@ -19,17 +19,13 @@
 
 package me.moros.bending.fabric.platform.entity;
 
-import java.util.Locale;
-
 import me.lucko.fabric.api.permissions.v0.Permissions;
-import me.moros.bending.api.locale.Translation;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.PlayerInventory;
 import me.moros.bending.fabric.platform.item.FabricPlayerInventory;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.util.TriState;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.HumanoidArm;
@@ -55,11 +51,6 @@ public class FabricPlayer extends FabricLivingEntity implements Player {
   }
 
   @Override
-  public Locale locale() {
-    return handle().getOrDefault(Identity.LOCALE, Translation.DEFAULT_LOCALE);
-  }
-
-  @Override
   public PlayerInventory inventory() {
     return new FabricPlayerInventory(handle());
   }
@@ -67,16 +58,6 @@ public class FabricPlayer extends FabricLivingEntity implements Player {
   @Override
   public boolean valid() {
     return !handle().hasDisconnected();
-  }
-
-  @Override
-  public boolean sneaking() {
-    return handle().isShiftKeyDown();
-  }
-
-  @Override
-  public void sneaking(boolean sneaking) {
-    handle().setShiftKeyDown(sneaking);
   }
 
   @Override

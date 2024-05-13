@@ -19,8 +19,11 @@
 
 package me.moros.bending.api.platform.property;
 
-public final class BooleanProperty extends Property<Boolean> {
+import me.moros.bending.api.util.KeyUtil;
+import me.moros.bending.api.util.data.DataKey;
+
+public final class BooleanProperty extends SimpleProperty<Boolean> {
   BooleanProperty(String name) {
-    super(name, Boolean.class);
+    super(DataKey.wrap(KeyUtil.simple(name), Boolean.class));
   }
 }

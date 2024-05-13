@@ -19,21 +19,54 @@
 
 package me.moros.bending.api.platform.property;
 
-public abstract sealed class Property<T extends Comparable<T>> permits IntegerProperty, BooleanProperty {
-  private final String name;
-  private final Class<T> type;
+import me.moros.bending.api.util.KeyUtil;
+import me.moros.bending.api.util.data.DataKey;
+import me.moros.bending.api.util.data.DataKeyed;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-  protected Property(String name, Class<T> type) {
-    this.name = name;
-    this.type = type;
+public sealed interface Property<T> extends DataKeyed<T> permits SimpleProperty {
+  default boolean isValidValue(@Nullable T value) {
+    return value != null;
   }
 
-  public String name() {
-    return name;
+  static BooleanProperty boolProp(String name) {
+    return new BooleanProperty(name);
   }
 
-  public Class<T> type() {
-    return type;
+  static DoubleProperty doubleProp(String name) {
+    return doubleProp(name, -Double.MAX_VALUE, Double.MAX_VALUE);
+  }
+
+  static DoubleProperty doubleProp(String name, double min, double max) {
+    if (min > max) {
+      throw new IllegalArgumentException("Invalid range. Min: " + min + ", Max: " + max);
+    }
+    return new DoubleProperty(name, min, max);
+  }
+
+  static FloatProperty floatProp(String name) {
+    return floatProp(name, -Float.MAX_VALUE, Float.MAX_VALUE);
+  }
+
+  static FloatProperty floatProp(String name, float min, float max) {
+    if (min > max) {
+      throw new IllegalArgumentException("Invalid range. Min: " + min + ", Max: " + max);
+    }
+    return new FloatProperty(name, min, max);
+  }
+
+  static IntegerProperty intProp(String name) {
+    return intProp(name, Integer.MIN_VALUE, Integer.MAX_VALUE);
+  }
+
+  static IntegerProperty intProp(String name, int min, int max) {
+    if (min > max) {
+      throw new IllegalArgumentException("Invalid range. Min: " + min + ", Max: " + max);
+    }
+    return new IntegerProperty(name, min, max);
+  }
+
+  static <T> Property<T> prop(String name, Class<T> type) {
+    return new SimpleProperty<>(DataKey.wrap(KeyUtil.simple(name), type));
   }
 }
-

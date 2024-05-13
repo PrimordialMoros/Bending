@@ -106,7 +106,7 @@ public abstract class AbstractPacketUtil implements PacketUtil {
   @Override
   public ClientboundPacket createFallingBlock(Position center, me.moros.bending.api.platform.block.BlockState state, Vector3d velocity, boolean gravity) {
     final int id = nextEntityId();
-    Collection<Packet<ClientGamePacketListener>> packets = new ArrayList<>();
+    Collection<Packet<? super ClientGamePacketListener>> packets = new ArrayList<>();
     final int blockDataId = net.minecraft.world.level.block.Block.getId(adapt(state));
     packets.add(createEntity(id, center, EntityType.FALLING_BLOCK, blockDataId));
     if (!gravity) {
@@ -191,7 +191,7 @@ public abstract class AbstractPacketUtil implements PacketUtil {
     buf.writeByte(0);
     buf.writeByte(0);
     buf.writeBoolean(false);
-    return new ClientboundTeleportEntityPacket(buf);
+    return ClientboundTeleportEntityPacket.STREAM_CODEC.decode(buf);
   }
 
   protected ClientboundPacket wrap(Packet<?> packet) {

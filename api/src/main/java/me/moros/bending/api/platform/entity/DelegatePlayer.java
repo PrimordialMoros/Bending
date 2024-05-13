@@ -19,8 +19,6 @@
 
 package me.moros.bending.api.platform.entity;
 
-import java.util.Locale;
-
 import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.PlayerInventory;
@@ -40,11 +38,6 @@ public interface DelegatePlayer extends DelegateLivingEntity, Player {
   @Override
   default boolean isOnGround() {
     return entity().isOnGround();
-  }
-
-  @Override
-  default Locale locale() {
-    return entity().locale();
   }
 
   @Override

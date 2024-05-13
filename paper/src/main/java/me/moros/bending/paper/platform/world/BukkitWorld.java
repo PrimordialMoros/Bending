@@ -21,6 +21,7 @@ package me.moros.bending.paper.platform.world;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
@@ -34,6 +35,7 @@ import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.block.Lockable;
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.EntityType;
 import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.platform.particle.ParticleContext;
 import me.moros.bending.api.platform.world.World;
@@ -204,6 +206,28 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
   @Override
   public boolean isNight() {
     return handle().getEnvironment() == Environment.NORMAL && !handle().isDayTime();
+  }
+
+  @Override
+  public Entity createEntity(Position pos, EntityType type) {
+    var bukkitType = Registry.ENTITY_TYPE.get(PlatformAdapter.nsk(type.key()));
+    var entityType = bukkitType == null ? null : bukkitType.getEntityClass();
+    return create(Objects.requireNonNull(entityType), pos);
+  }
+
+  private <T extends org.bukkit.entity.Entity> Entity create(Class<T> entityClass, Position pos) {
+    var loc = new Location(handle(), pos.x(), pos.y(), pos.z());
+    return PlatformAdapter.fromBukkitEntity(handle().createEntity(loc, entityClass));
+  }
+
+  @Override
+  public boolean addEntity(Entity entity) {
+    var bukkitEntity = PlatformAdapter.toBukkitEntity(entity);
+    if (bukkitEntity.isInWorld()) {
+      return false;
+    }
+    handle().addEntity(bukkitEntity);
+    return true;
   }
 
   @Override

@@ -283,7 +283,7 @@ public class EarthSmash extends AbilityInstance {
       shatter = true;
     }
     if (shatter) {
-      if (collidedAbility.description().element() == Element.FIRE || collidedAbility instanceof LavaDisk) {
+      if (collidedAbility.description().elements().contains(Element.FIRE) || collidedAbility instanceof LavaDisk) {
         boulder.updateData((k, v) -> BlockType.MAGMA_BLOCK.defaultState());
       }
       collision.removeSelf(false);
@@ -291,8 +291,7 @@ public class EarthSmash extends AbilityInstance {
     }
   }
 
-  @FunctionalInterface
-  interface EarthSmashState extends Updatable {
+  private interface EarthSmashState extends Updatable {
     default boolean canGrab() {
       return false;
     }

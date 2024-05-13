@@ -30,17 +30,12 @@ import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.item.Inventory;
 import me.moros.bending.api.platform.potion.Potion;
 import me.moros.bending.api.platform.potion.PotionEffect;
-import me.moros.bending.api.platform.property.EntityProperty;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.util.TriState;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface LivingEntity extends Entity {
-  boolean ai();
-
-  void ai(boolean value);
-
   double eyeHeight();
 
   default Block eyeBlock() {
@@ -71,11 +66,11 @@ public interface LivingEntity extends Entity {
   }
 
   default boolean sneaking() {
-    return checkProperty(EntityProperty.SNEAKING) == TriState.TRUE;
+    return propertyValue(EntityProperties.SNEAKING);
   }
 
   default void sneaking(boolean sneaking) {
-    setProperty(EntityProperty.SNEAKING, sneaking);
+    setProperty(EntityProperties.SNEAKING, sneaking);
   }
 
   @Nullable Inventory inventory();
@@ -164,11 +159,30 @@ public interface LivingEntity extends Entity {
     return false;
   }
 
-  int airCapacity();
+  @Deprecated(forRemoval = true)
+  default boolean ai() {
+    return property(EntityProperties.AI) == Boolean.TRUE;
+  }
 
-  int remainingAir();
+  @Deprecated(forRemoval = true)
+  default void ai(boolean value) {
+    setProperty(EntityProperties.AI, value);
+  }
 
-  void remainingAir(int amount);
+  @Deprecated(forRemoval = true)
+  default int airCapacity() {
+    return propertyValue(EntityProperties.MAX_OXYGEN);
+  }
+
+  @Deprecated(forRemoval = true)
+  default int remainingAir() {
+    return propertyValue(EntityProperties.REMAINING_OXYGEN);
+  }
+
+  @Deprecated(forRemoval = true)
+  default void remainingAir(int amount) {
+    setProperty(EntityProperties.REMAINING_OXYGEN, amount);
+  }
 
   Entity shootArrow(Position origin, Vector3d direction, double power);
 }

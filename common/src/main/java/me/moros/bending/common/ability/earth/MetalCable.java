@@ -39,6 +39,7 @@ import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.platform.entity.EntityType;
 import me.moros.bending.api.platform.item.InventoryUtil;
 import me.moros.bending.api.platform.item.Item;
@@ -253,7 +254,7 @@ public class MetalCable extends AbilityInstance {
     }
     double offset = FastMath.clamp(cable.location().y() - entity.location().y(), 0, entity.height());
     attached = new AttachedEntity(entity, offset);
-    entity.fallDistance(0);
+    entity.setProperty(EntityProperties.FALL_DISTANCE, 0F);
     hasHit = true;
   }
 
@@ -276,7 +277,7 @@ public class MetalCable extends AbilityInstance {
       Vector3d targetLocation = user.rayTrace(userConfig.projectileRange).cast(user.world()).entityCenterOrPosition();
       Vector3d velocity = targetLocation.subtract(location).normalize().multiply(userConfig.launchSpeed);
       attachedEntity.handle().applyVelocity(this, velocity.add(0, 0.2, 0));
-      attachedEntity.handle().fallDistance(0);
+      attachedEntity.handle().setProperty(EntityProperties.FALL_DISTANCE, 0F);
     }
     attached = null;
     remove();

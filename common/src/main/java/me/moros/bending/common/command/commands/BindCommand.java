@@ -19,8 +19,6 @@
 
 package me.moros.bending.common.command.commands;
 
-import java.util.Collection;
-
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.preset.Preset;
@@ -81,9 +79,11 @@ public record BindCommand<C extends Audience>(Commander<C> commander) implements
       Message.ABILITY_BIND_NO_PERMISSION.send(user, ability.displayName());
       return;
     }
-    if (!user.hasElement(ability.element())) {
-      Message.ABILITY_BIND_REQUIRES_ELEMENT.send(user, ability.displayName(), ability.element().displayName());
-      return;
+    for (var element : ability.elements()) {
+      if (!user.hasElement(element)) {
+        Message.ABILITY_BIND_REQUIRES_ELEMENT.send(user, ability.displayName(), element.displayName());
+        return;
+      }
     }
     if (slot == 0) {
       slot = user.currentSlot();
@@ -103,7 +103,7 @@ public record BindCommand<C extends Audience>(Commander<C> commander) implements
   }
 
   private void onBindList(C sender, User user) {
-    Collection<Element> elements = user.elements();
+    var elements = user.elements();
     Component elementHover;
     if (elements.isEmpty()) {
       elementHover = Message.NO_ELEMENTS.build();

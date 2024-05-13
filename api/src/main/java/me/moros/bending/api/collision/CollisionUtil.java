@@ -24,6 +24,7 @@ import java.util.function.Predicate;
 import me.moros.bending.api.collision.geometry.AABB;
 import me.moros.bending.api.collision.geometry.Collider;
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.platform.entity.EntityType;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.entity.player.GameMode;
@@ -124,7 +125,7 @@ public final class CollisionUtil {
     } else if (entity.type() == EntityType.FALLING_BLOCK) {
       return !TempEntity.MANAGER.isTemp(entity.id());
     } else if (entity.type() == EntityType.ARMOR_STAND) {
-      return entity.visible();
+      return entity.propertyValue(EntityProperties.VISIBLE);
     }
     return true;
   }

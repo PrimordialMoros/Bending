@@ -19,107 +19,26 @@
 
 package me.moros.bending.paper.platform.entity;
 
-import java.util.IdentityHashMap;
-import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
-import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 import me.moros.bending.api.platform.entity.Entity;
-import me.moros.bending.api.platform.entity.EntityType;
-import me.moros.bending.api.platform.property.BooleanProperty;
-import me.moros.bending.api.platform.world.World;
 import me.moros.bending.api.util.data.DataKey;
-import me.moros.bending.api.util.functional.Suppliers;
+import me.moros.bending.api.util.data.DataKeyed;
 import me.moros.bending.paper.platform.BukkitDataHolder;
-import me.moros.bending.paper.platform.world.BukkitWorld;
-import me.moros.math.FastMath;
-import me.moros.math.Position;
-import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.util.TriState;
-import org.bukkit.Location;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Projectile;
-import org.bukkit.util.Vector;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class BukkitEntity implements Entity {
   private final org.bukkit.entity.Entity handle;
-  private final Supplier<Map<BooleanProperty, Boolean>> properties;
 
   public BukkitEntity(org.bukkit.entity.Entity handle) {
     this.handle = handle;
-    this.properties = Suppliers.lazy(IdentityHashMap::new);
   }
 
   public org.bukkit.entity.Entity handle() {
     return handle;
-  }
-
-  @Override
-  public int id() {
-    return handle().getEntityId();
-  }
-
-  @Override
-  public Component name() {
-    return handle().name();
-  }
-
-  @Override
-  public World world() {
-    return new BukkitWorld(handle().getWorld());
-  }
-
-  @Override
-  public EntityType type() {
-    return EntityType.registry().getOrThrow(handle().getType().key());
-  }
-
-  @Override
-  public double width() {
-    return handle().getWidth();
-  }
-
-  @Override
-  public double height() {
-    return handle().getHeight();
-  }
-
-  @Override
-  public int yaw() {
-    return FastMath.round(handle().getYaw());
-  }
-
-  @Override
-  public int pitch() {
-    return FastMath.round(handle().getPitch());
-  }
-
-  @Override
-  public Vector3d location() {
-    return Vector3d.of(handle().getX(), handle().getY(), handle().getZ());
-  }
-
-  @Override
-  public Vector3d direction() {
-    double xRadians = Math.toRadians(handle().getYaw());
-    double yRadians = Math.toRadians(handle().getPitch());
-    double a = Math.cos(yRadians);
-    return Vector3d.of(-a * Math.sin(xRadians), -Math.sin(yRadians), a * Math.cos(xRadians));
-  }
-
-  @Override
-  public Vector3d velocity() {
-    var vel = handle().getVelocity();
-    return Vector3d.of(vel.getX(), vel.getY(), vel.getZ());
-  }
-
-  @Override
-  public void velocity(Vector3d velocity) {
-    var vel = velocity.clampVelocity();
-    handle().setVelocity(new Vector(vel.x(), vel.y(), vel.z()));
   }
 
   @Override
@@ -128,68 +47,8 @@ public class BukkitEntity implements Entity {
   }
 
   @Override
-  public boolean dead() {
-    return handle().isDead();
-  }
-
-  @Override
-  public int maxFreezeTicks() {
-    return handle().getMaxFreezeTicks();
-  }
-
-  @Override
-  public int freezeTicks() {
-    return handle().getFreezeTicks();
-  }
-
-  @Override
-  public void freezeTicks(int ticks) {
-    handle().setFreezeTicks(ticks);
-  }
-
-  @Override
-  public int maxFireTicks() {
-    return handle().getMaxFireTicks();
-  }
-
-  @Override
-  public int fireTicks() {
-    return handle().getFireTicks();
-  }
-
-  @Override
-  public void fireTicks(int ticks) {
-    handle().setFireTicks(ticks);
-  }
-
-  @Override
   public boolean isOnGround() {
     return handle().isOnGround();
-  }
-
-  @Override
-  public boolean inWater() {
-    return handle().isInWaterOrBubbleColumn();
-  }
-
-  @Override
-  public boolean inLava() {
-    return handle().isInLava();
-  }
-
-  @Override
-  public boolean visible() {
-    return !(handle() instanceof ArmorStand stand) || stand.isVisible();
-  }
-
-  @Override
-  public double fallDistance() {
-    return handle().getFallDistance();
-  }
-
-  @Override
-  public void fallDistance(double distance) {
-    handle().setFallDistance((float) distance);
   }
 
   @Override
@@ -203,53 +62,33 @@ public class BukkitEntity implements Entity {
   }
 
   @Override
-  public boolean gravity() {
-    return handle().hasGravity();
+  public <V> @Nullable V property(DataKeyed<V> dataKeyed) {
+    return BukkitEntityProperties.PROPERTIES.getValue(dataKeyed, handle());
   }
 
   @Override
-  public void gravity(boolean value) {
-    handle().setGravity(value);
+  public <V> boolean setProperty(DataKeyed<V> dataKeyed, V value) {
+    return BukkitEntityProperties.PROPERTIES.setValue(dataKeyed, handle(), value);
   }
 
   @Override
-  public boolean invulnerable() {
-    return handle().isInvulnerable();
+  public <V> boolean editProperty(DataKeyed<V> dataKeyed, UnaryOperator<V> operator) {
+    return BukkitEntityProperties.PROPERTIES.editValue(dataKeyed, handle(), operator);
   }
 
   @Override
-  public void invulnerable(boolean value) {
-    handle().setInvulnerable(value);
+  public <T> Optional<T> get(DataKey<T> key) {
+    return new BukkitDataHolder(handle()).get(key);
   }
 
   @Override
-  public boolean teleport(Position position) {
-    var w = handle().getWorld();
-    return handle().teleport(new Location(w, position.x(), position.y(), position.z()));
+  public <T> void add(DataKey<T> key, T value) {
+    new BukkitDataHolder(handle()).add(key, value);
   }
 
   @Override
-  public UUID uuid() {
-    return handle().getUniqueId();
-  }
-
-  @Override
-  public TriState checkProperty(BooleanProperty property) {
-    var bukkitProperty = PropertyMapper.PROPERTIES.get(property);
-    if (bukkitProperty == null) {
-      return TriState.byBoolean(properties.get().get(property));
-    }
-    return bukkitProperty.get(handle());
-  }
-
-  @Override
-  public void setProperty(BooleanProperty property, boolean value) {
-    var bukkitProperty = PropertyMapper.PROPERTIES.get(property);
-    if (bukkitProperty != null) {
-      bukkitProperty.set(handle(), value);
-    } else {
-      properties.get().put(property, value);
-    }
+  public <T> void remove(DataKey<T> key) {
+    new BukkitDataHolder(handle()).remove(key);
   }
 
   @Override
@@ -271,20 +110,5 @@ public class BukkitEntity implements Entity {
   @Override
   public int hashCode() {
     return handle.hashCode();
-  }
-
-  @Override
-  public <T> Optional<T> get(DataKey<T> key) {
-    return new BukkitDataHolder(handle()).get(key);
-  }
-
-  @Override
-  public <T> void add(DataKey<T> key, T value) {
-    new BukkitDataHolder(handle()).add(key, value);
-  }
-
-  @Override
-  public <T> void remove(DataKey<T> key) {
-    new BukkitDataHolder(handle()).remove(key);
   }
 }

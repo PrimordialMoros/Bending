@@ -19,8 +19,6 @@
 
 package me.moros.bending.paper.platform.entity;
 
-import java.util.Locale;
-
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.platform.entity.player.Player;
@@ -51,11 +49,6 @@ public class BukkitPlayer extends BukkitLivingEntity implements Player {
   }
 
   @Override
-  public Locale locale() {
-    return handle().locale();
-  }
-
-  @Override
   public PlayerInventory inventory() {
     return new BukkitPlayerInventory(handle());
   }
@@ -63,16 +56,6 @@ public class BukkitPlayer extends BukkitLivingEntity implements Player {
   @Override
   public boolean valid() {
     return handle().isConnected();
-  }
-
-  @Override
-  public boolean sneaking() {
-    return handle().isSneaking();
-  }
-
-  @Override
-  public void sneaking(boolean sneaking) {
-    handle().setSneaking(sneaking);
   }
 
   @Override

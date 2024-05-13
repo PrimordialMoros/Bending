@@ -24,9 +24,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import me.moros.bending.api.event.TickEffectEvent;
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.platform.entity.EntityUtil;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.potion.PotionEffect;
+import me.moros.bending.api.platform.property.IntegerProperty;
 import me.moros.bending.api.user.User;
 import me.moros.math.FastMath;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -39,29 +41,35 @@ public enum BendingEffect {
    * FreezeTick effect that freezes the target as if they were in powdered snow.
    * This effect is applied cumulatively.
    */
-  FROST_TICK(135, true, Entity::maxFreezeTicks, Entity::freezeTicks, Entity::freezeTicks),
+  FROST_TICK(135, true, 140, EntityProperties.FREEZE_TICKS),
   /**
    * FireTick effect that burns the target as if they were standing in fire.
    * Applying this effect overrides previous instances of it.
    */
-  FIRE_TICK(15, false, e -> 100, Entity::fireTicks, Entity::fireTicks);
+  FIRE_TICK(15, false, 100, EntityProperties.FIRE_TICKS);
 
   public static final int MAX_BLOCK_FIRE_TICKS = 100;
 
   private final Map<LivingEntity, User> instances;
   private final int visual;
   private final boolean cumulative;
-  private final TickGetter maxTicks;
-  private final TickGetter currentTicks;
-  private final TickSetter handler;
+  private final int maxTicks;
+  private final IntegerProperty property;
 
-  BendingEffect(int visual, boolean cumulative, TickGetter maxTicks, TickGetter getter, TickSetter setter) {
+  BendingEffect(int visual, boolean cumulative, int maxTicks, IntegerProperty property) {
     instances = new ConcurrentHashMap<>();
     this.visual = visual;
     this.cumulative = cumulative;
     this.maxTicks = maxTicks;
-    this.currentTicks = getter;
-    this.handler = setter;
+    this.property = property;
+  }
+
+  private int getCurrentTicks(Entity entity) {
+    return entity.propertyValue(property);
+  }
+
+  private void setCurrentTicks(Entity entity, int value) {
+    entity.setProperty(property, value);
   }
 
   /**
@@ -91,9 +99,9 @@ public enum BendingEffect {
     if (this == FROST_TICK) {
       handleFreeze(entity, duration);
     }
-    int current = Math.max(0, currentTicks.get(entity));
+    int current = Math.max(0, getCurrentTicks(entity));
     if (current < duration) {
-      handler.set(entity, Math.min(maxTicks.get(entity), cumulative ? current + duration : duration));
+      setCurrentTicks(entity, Math.min(maxTicks, cumulative ? current + duration : duration));
       trackEntity(entity, source);
     }
   }
@@ -111,7 +119,7 @@ public enum BendingEffect {
    * @param entity the entity to remove the effect from
    */
   public void reset(Entity entity) {
-    handler.set(entity, -1);
+    setCurrentTicks(entity, -1);
     if (entity instanceof LivingEntity livingEntity) {
       instances.remove(livingEntity);
     }
@@ -134,7 +142,7 @@ public enum BendingEffect {
 
   public static void cleanup() {
     for (BendingEffect tick : values()) {
-      tick.instances.keySet().removeIf(e -> !e.valid() || tick.currentTicks.get(e) <= 0);
+      tick.instances.keySet().removeIf(e -> !e.valid() || tick.getCurrentTicks(e) <= 0);
     }
   }
 
@@ -142,16 +150,6 @@ public enum BendingEffect {
     for (BendingEffect tick : values()) {
       tick.reset(entity);
     }
-  }
-
-  @FunctionalInterface
-  private interface TickGetter {
-    int get(Entity entity);
-  }
-
-  @FunctionalInterface
-  private interface TickSetter {
-    void set(Entity entity, int ticks);
   }
 }
 

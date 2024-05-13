@@ -53,20 +53,21 @@ public class BukkitBlockState implements BlockState {
     return other instanceof BukkitBlockState b && handle().matches(b.handle());
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public <V extends Comparable<V>> @Nullable V property(Property<V> property) {
-    var bukkitProperty = PropertyMapper.PROPERTIES.get(property);
-    return bukkitProperty == null ? null : (V) bukkitProperty.get(handle());
+    return BukkitBlockStateProperties.PROPERTIES.getValue(property, handle());
   }
 
   @Override
   public <V extends Comparable<V>> BlockState withProperty(Property<V> property, V value) {
-    var bukkitProperty = PropertyMapper.PROPERTIES.get(property);
-    if (bukkitProperty != null) {
-      var result = bukkitProperty.set(handle(), value);
-      if (result != null) {
-        return new BukkitBlockState(result, type());
+    if (property.isValidValue(value)) {
+      var provider = BukkitBlockStateProperties.PROPERTIES.getProvider(property);
+      if (provider != null && provider.supports(handle())) {
+        var copy = handle().clone();
+        boolean result = provider.set(copy, value);
+        if (result && !copy.equals(handle())) {
+          return new BukkitBlockState(copy, type());
+        }
       }
     }
     return this;

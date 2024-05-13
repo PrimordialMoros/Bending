@@ -38,13 +38,13 @@ public record FabricBlockState(net.minecraft.world.level.block.state.BlockState 
 
   @Override
   public <V extends Comparable<V>> @Nullable V property(Property<V> property) {
-    var vanillaProperty = PropertyMapper.find(property);
+    var vanillaProperty = FabricBlockStateProperties.find(property);
     return vanillaProperty == null ? null : handle().getOptionalValue(vanillaProperty).orElse(null);
   }
 
   @Override
   public <V extends Comparable<V>> BlockState withProperty(Property<V> property, V value) {
-    var vanillaProperty = PropertyMapper.find(property);
+    var vanillaProperty = FabricBlockStateProperties.find(property);
     if (vanillaProperty != null) {
       var state = handle().trySetValue(vanillaProperty, value);
       if (state != handle()) {

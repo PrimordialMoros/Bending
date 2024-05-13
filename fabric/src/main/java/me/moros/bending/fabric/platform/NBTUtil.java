@@ -55,6 +55,9 @@ public final class NBTUtil {
   }
 
   public static <T> @Nullable T read(CompoundTag tag, DataKey<T> key) {
+    if (!tag.contains(key.asString())) {
+      return null;
+    }
     var adapter = getAdapter(key.type());
     return adapter == null ? null : adapter.reader().read(tag, key.asString());
   }

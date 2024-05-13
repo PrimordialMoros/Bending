@@ -19,5 +19,6 @@
 
 package me.moros.bending.api.config.attribute;
 
-record AttributeValueImpl(Attribute attribute, String name, Number baseValue, Number finalValue) implements AttributeValue {
+record AttributeValueImpl(Attribute attribute, String name, Number baseValue,
+                          Number finalValue) implements AttributeValue {
 }

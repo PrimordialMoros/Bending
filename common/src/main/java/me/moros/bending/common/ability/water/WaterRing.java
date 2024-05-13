@@ -318,7 +318,7 @@ public class WaterRing extends AbilityInstance {
   }
 
   private void launchShard() {
-    if (!user.canBend(description()) || ring.isEmpty()) {
+    if (ring.isEmpty()) {
       return;
     }
     long time = System.currentTimeMillis();

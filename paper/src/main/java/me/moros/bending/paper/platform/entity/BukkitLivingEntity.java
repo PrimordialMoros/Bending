@@ -20,7 +20,6 @@
 package me.moros.bending.paper.platform.entity;
 
 import java.util.Collection;
-import java.util.Objects;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.DamageSource;
@@ -39,15 +38,11 @@ import me.moros.bending.paper.platform.item.BukkitInventory;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import org.bukkit.Location;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.AbstractArrow.PickupStatus;
 import org.bukkit.util.Vector;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class BukkitLivingEntity extends BukkitEntity implements LivingEntity {
-  private AttributeInstance maxHealth;
-
   public BukkitLivingEntity(org.bukkit.entity.LivingEntity handle) {
     super(handle);
   }
@@ -55,54 +50,6 @@ public class BukkitLivingEntity extends BukkitEntity implements LivingEntity {
   @Override
   public org.bukkit.entity.LivingEntity handle() {
     return (org.bukkit.entity.LivingEntity) super.handle();
-  }
-
-  @Override
-  public double health() {
-    return handle().getHealth();
-  }
-
-  @Override
-  public double maxHealth() {
-    if (maxHealth == null) {
-      maxHealth = Objects.requireNonNull(handle().getAttribute(Attribute.GENERIC_MAX_HEALTH));
-    }
-    return maxHealth.getValue();
-  }
-
-  @Override
-  public boolean damage(double damage) {
-    handle().damage(damage);
-    return true;
-  }
-
-  @Override
-  public boolean damage(double damage, Entity source) {
-    handle().damage(damage, PlatformAdapter.toBukkitEntity(source));
-    return true;
-  }
-
-  @Override
-  public boolean damage(double damage, User source, AbilityDescription desc) {
-    BendingDamageEvent event = source.game().eventBus().postAbilityDamageEvent(source, desc, this, damage);
-    double dmg = event.damage();
-    if (event.cancelled() || dmg <= 0) {
-      return false;
-    }
-    if (type() == EntityType.PLAYER) {
-      DamageUtil.cacheDamageSource(uuid(), DamageSource.of(source.name(), desc));
-    }
-    return Platform.instance().nativeAdapter().damage(event);
-  }
-
-  @Override
-  public boolean ai() {
-    return handle().hasAI();
-  }
-
-  @Override
-  public void ai(boolean value) {
-    handle().setAI(value);
   }
 
   @Override
@@ -143,18 +90,28 @@ public class BukkitLivingEntity extends BukkitEntity implements LivingEntity {
   }
 
   @Override
-  public int airCapacity() {
-    return handle().getMaximumAir();
+  public boolean damage(double damage) {
+    handle().damage(damage);
+    return true;
   }
 
   @Override
-  public int remainingAir() {
-    return handle().getRemainingAir();
+  public boolean damage(double damage, Entity source) {
+    handle().damage(damage, PlatformAdapter.toBukkitEntity(source));
+    return true;
   }
 
   @Override
-  public void remainingAir(int amount) {
-    handle().setRemainingAir(amount);
+  public boolean damage(double damage, User source, AbilityDescription desc) {
+    BendingDamageEvent event = source.game().eventBus().postAbilityDamageEvent(source, desc, this, damage);
+    double dmg = event.damage();
+    if (event.cancelled() || dmg <= 0) {
+      return false;
+    }
+    if (type() == EntityType.PLAYER) {
+      DamageUtil.cacheDamageSource(uuid(), DamageSource.of(source.name(), desc));
+    }
+    return Platform.instance().nativeAdapter().damage(event);
   }
 
   @Override

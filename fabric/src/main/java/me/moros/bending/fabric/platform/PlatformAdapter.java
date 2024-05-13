@@ -19,8 +19,6 @@
 
 package me.moros.bending.fabric.platform;
 
-import java.util.Objects;
-
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.damage.DamageCause;
@@ -41,6 +39,7 @@ import me.moros.bending.fabric.platform.entity.FabricPlayer;
 import me.moros.bending.fabric.platform.item.FabricItem;
 import me.moros.bending.fabric.platform.world.FabricWorld;
 import net.kyori.adventure.key.Key;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -58,8 +57,8 @@ public final class PlatformAdapter {
   private PlatformAdapter() {
   }
 
-  public static MobEffect toFabricPotion(PotionEffect effect) {
-    return Objects.requireNonNull(BuiltInRegistries.MOB_EFFECT.get(rsl(effect.key())));
+  public static Holder<MobEffect> toFabricPotion(PotionEffect effect) {
+    return BuiltInRegistries.MOB_EFFECT.getHolder(rsl(effect.key())).orElseThrow();
   }
 
   public static MobEffectInstance toFabricPotion(Potion p) {
@@ -67,7 +66,7 @@ public final class PlatformAdapter {
   }
 
   public static Potion fromFabricPotion(MobEffectInstance p) {
-    var effect = PotionEffect.registry().getOrThrow(BuiltInRegistries.MOB_EFFECT.getKey(p.getEffect()));
+    var effect = PotionEffect.registry().getOrThrow(BuiltInRegistries.MOB_EFFECT.getKey(p.getEffect().value()));
     return Potion.builder(effect).duration(p.getDuration()).amplifier(p.getAmplifier())
       .ambient(p.isAmbient()).particles(p.isVisible()).icon(p.showIcon()).build();
   }

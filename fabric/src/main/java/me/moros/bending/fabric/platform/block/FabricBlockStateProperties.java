@@ -21,29 +21,32 @@ package me.moros.bending.fabric.platform.block;
 
 import java.util.Map;
 
-import me.moros.bending.api.platform.property.Property;
-import me.moros.bending.api.platform.property.StateProperty;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.Property;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static java.util.Map.entry;
+import static me.moros.bending.api.platform.block.BlockStateProperties.*;
 
-final class PropertyMapper {
-  static final Map<Property<?>, net.minecraft.world.level.block.state.properties.Property<?>> PROPERTIES;
+final class FabricBlockStateProperties {
+  private FabricBlockStateProperties() {
+  }
+
+  private static final Map<me.moros.bending.api.platform.property.Property<?>, Property<?>> PROPERTIES;
 
   static {
     PROPERTIES = Map.ofEntries(
-      entry(StateProperty.DRAG, BlockStateProperties.DRAG),
-      entry(StateProperty.LIT, BlockStateProperties.LIT),
-      entry(StateProperty.OPEN, BlockStateProperties.OPEN),
-      entry(StateProperty.WATERLOGGED, BlockStateProperties.WATERLOGGED),
-      entry(StateProperty.LAYERS, BlockStateProperties.LAYERS),
-      entry(StateProperty.LEVEL, BlockStateProperties.LEVEL)
+      entry(DRAG, BlockStateProperties.DRAG),
+      entry(LIT, BlockStateProperties.LIT),
+      entry(OPEN, BlockStateProperties.OPEN),
+      entry(WATERLOGGED, BlockStateProperties.WATERLOGGED),
+      entry(LAYERS, BlockStateProperties.LAYERS),
+      entry(LEVEL, BlockStateProperties.LEVEL)
     );
   }
 
   @SuppressWarnings("unchecked")
-  static <V extends Comparable<V>> net.minecraft.world.level.block.state.properties.@Nullable Property<V> find(Property<V> property) {
-    return (net.minecraft.world.level.block.state.properties.Property<V>) PropertyMapper.PROPERTIES.get(property);
+  static <V extends Comparable<V>> @Nullable Property<V> find(me.moros.bending.api.platform.property.Property<V> property) {
+    return (Property<V>) FabricBlockStateProperties.PROPERTIES.get(property);
   }
 }

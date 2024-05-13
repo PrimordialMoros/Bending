@@ -23,13 +23,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.function.Supplier;
 
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.element.ElementHandler;
 import me.moros.bending.api.gui.ElementGui;
+import me.moros.bending.api.locale.Translation;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
@@ -41,6 +41,7 @@ import me.moros.bending.api.util.functional.Suppliers;
 import me.moros.bending.common.command.Permissions;
 import me.moros.bending.common.locale.Message;
 import me.moros.bending.common.locale.Message.Args0;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -77,11 +78,11 @@ public abstract class AbstractGui<ItemStack, T> implements ElementGui {
   protected abstract T construct(Map<Element, ItemStack> elementMap);
 
   protected DataWrapper createElementButton(Element element) {
-    Component itemName = GlobalTranslator.render(element.displayName(), player.locale())
-      .decoration(TextDecoration.ITALIC, false);
-    List<Component> lore = generateLore(player.locale(), element);
+    List<Component> lore = generateLore(element);
     var item = Platform.instance().factory().itemBuilder(mapElement(element))
-      .name(itemName).lore(lore).build();
+      .name(element.displayName().decoration(TextDecoration.ITALIC, false))
+      .lore(lore)
+      .build();
     return new DataWrapper(element, item);
   }
 
@@ -118,15 +119,15 @@ public abstract class AbstractGui<ItemStack, T> implements ElementGui {
   }
 
   protected ItemSnapshot generateHelpItem() {
-    Component itemName = GlobalTranslator.render(Message.ELEMENTS_GUI_HELP_TITLE.build(), player.locale())
-      .decoration(TextDecoration.ITALIC, false);
     List<Component> lore = ActionType.VALUES.stream().map(type -> type.toEntry(player)).toList();
     return Platform.instance().factory().itemBuilder(Item.BOOK)
-      .name(itemName).lore(lore).build();
+      .name(Message.ELEMENTS_GUI_HELP_TITLE.build().decoration(TextDecoration.ITALIC, false))
+      .lore(lore)
+      .build();
   }
 
-  private static List<Component> generateLore(Locale locale, Element element) {
-    Component base = GlobalTranslator.render(element.description(), locale);
+  private List<Component> generateLore(Element element) {
+    Component base = GlobalTranslator.render(element.description(), player.getOrDefault(Identity.LOCALE, Translation.DEFAULT_LOCALE));
     String raw = PlainTextComponentSerializer.plainText().serialize(base);
     List<Component> lore = new ArrayList<>();
     for (String s : TextUtil.wrap(raw, 36)) {
@@ -179,9 +180,10 @@ public abstract class AbstractGui<ItemStack, T> implements ElementGui {
     }
 
     private Component toEntry(Player player) {
-      return GlobalTranslator.render(message.build(), player.locale())
+      return message.build().style(s -> s
         .decoration(TextDecoration.ITALIC, false)
-        .decoration(TextDecoration.STRIKETHROUGH, !player.hasPermission(permission));
+        .decoration(TextDecoration.STRIKETHROUGH, !player.hasPermission(permission))
+      );
     }
 
     private static final Collection<ActionType> VALUES = List.of(values());

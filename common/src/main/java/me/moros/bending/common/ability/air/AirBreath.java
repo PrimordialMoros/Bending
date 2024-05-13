@@ -36,6 +36,7 @@ import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.Modifiable;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.particle.ParticleBuilder;
 import me.moros.bending.api.platform.sound.SoundEffect;
@@ -92,7 +93,7 @@ public class AirBreath extends AbilityInstance {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-    user.remainingAir(Math.max(-20, user.remainingAir() - 5));
+    user.editProperty(EntityProperties.REMAINING_OXYGEN, air -> air - 5);
     Vector3d offset = Vector3d.of(0, -0.1, 0);
     Ray ray = Ray.of(user.eyeLocation().add(offset), user.direction().multiply(userConfig.range));
     streams.add(new AirStream(ray));
@@ -140,7 +141,7 @@ public class AirBreath extends AbilityInstance {
       entity.applyVelocity(AirBreath.this, ray.direction().normalize().multiply(userConfig.knockback));
       BendingEffect.FIRE_TICK.reset(entity);
       if (entity instanceof LivingEntity livingEntity) {
-        livingEntity.remainingAir(Math.min(livingEntity.airCapacity(), livingEntity.remainingAir() + 1));
+        livingEntity.editProperty(EntityProperties.REMAINING_OXYGEN, air -> air + 1);
       }
       return false;
     }

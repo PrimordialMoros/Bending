@@ -34,7 +34,6 @@ import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.PlatformFactory;
 import me.moros.bending.api.platform.PlatformType;
 import me.moros.bending.api.platform.block.Block;
-import me.moros.bending.api.platform.entity.DelegatePlayer;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemBuilder;
@@ -44,8 +43,8 @@ import me.moros.bending.fabric.adapter.NativeAdapterImpl;
 import me.moros.bending.fabric.gui.BoardImpl;
 import me.moros.bending.fabric.gui.ElementMenu;
 import me.moros.bending.fabric.platform.item.FabricItemBuilder;
-import net.fabricmc.fabric.api.tag.convention.v1.ConventionalBlockTags;
-import net.fabricmc.fabric.api.tag.convention.v1.TagUtil;
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags;
+import net.fabricmc.fabric.api.tag.convention.v2.TagUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
@@ -90,8 +89,8 @@ public class FabricPlatform implements Platform, PlatformFactory {
 
   @Override
   public Optional<Board> buildBoard(User user) {
-    if (user instanceof DelegatePlayer player) {
-      return Optional.of(new BoardImpl(player));
+    if (user instanceof Player) {
+      return Optional.of(new BoardImpl(server, user));
     }
     return Optional.empty();
   }
@@ -127,7 +126,7 @@ public class FabricPlatform implements Platform, PlatformFactory {
     var state = level.getBlockState(pos);
     if (TagUtil.isIn(server.registryAccess(), ConventionalBlockTags.ORES, state.getBlock())) {
       var item = new ItemStack(Items.DIAMOND_PICKAXE);
-      item.enchant(Enchantments.BLOCK_FORTUNE, 2);
+      item.enchant(Enchantments.FORTUNE, 2);
       return net.minecraft.world.level.block.Block.getDrops(state, level, pos, level.getBlockEntity(pos), null, item)
         .stream().map(PlatformAdapter::fromFabricItem).toList();
     }

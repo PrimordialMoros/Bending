@@ -40,6 +40,7 @@ import me.moros.bending.api.config.attribute.Modifiable;
 import me.moros.bending.api.platform.Direction;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.functional.Policies;
@@ -75,7 +76,7 @@ public class EarthPillars extends AbilityInstance {
 
     factor = 1;
     if (method == Activation.FALL) {
-      double dist = user.fallDistance();
+      double dist = user.propertyValue(EntityProperties.FALL_DISTANCE);
       if (dist < userConfig.fallThreshold || user.sneaking()) {
         return false;
       }

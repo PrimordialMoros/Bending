@@ -19,38 +19,22 @@
 
 package me.moros.bending.fabric.platform.entity;
 
-import java.util.IdentityHashMap;
-import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
-import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 import me.moros.bending.api.platform.entity.Entity;
-import me.moros.bending.api.platform.entity.EntityType;
-import me.moros.bending.api.platform.property.BooleanProperty;
-import me.moros.bending.api.platform.world.World;
 import me.moros.bending.api.util.data.DataKey;
-import me.moros.bending.api.util.functional.Suppliers;
-import me.moros.bending.fabric.mixin.accessor.EntityAccess;
+import me.moros.bending.api.util.data.DataKeyed;
 import me.moros.bending.fabric.platform.FabricMetadata;
-import me.moros.bending.fabric.platform.world.FabricWorld;
-import me.moros.math.FastMath;
-import me.moros.math.Position;
-import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.util.TriState;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.projectile.Projectile;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class FabricEntity implements Entity {
   private net.minecraft.world.entity.Entity handle;
-  private final Supplier<Map<BooleanProperty, Boolean>> properties;
 
   public FabricEntity(net.minecraft.world.entity.Entity handle) {
     this.handle = handle;
-    this.properties = Suppliers.lazy(IdentityHashMap::new);
   }
 
   public void setHandle(net.minecraft.world.entity.Entity handle) {
@@ -64,140 +48,13 @@ public class FabricEntity implements Entity {
   }
 
   @Override
-  public int id() {
-    return handle().getId();
-  }
-
-  @Override
-  public Component name() {
-    return handle().getDisplayName().asComponent();
-  }
-
-  @Override
-  public World world() {
-    return new FabricWorld((ServerLevel) handle().level());
-  }
-
-  @Override
-  public EntityType type() {
-    return EntityType.registry().getOrThrow(BuiltInRegistries.ENTITY_TYPE.getKey(handle().getType()));
-  }
-
-  @Override
-  public double width() {
-    return handle().getBbWidth();
-  }
-
-  @Override
-  public double height() {
-    return handle().getBbHeight();
-  }
-
-  @Override
-  public int yaw() {
-    return FastMath.round(handle().getYRot());
-  }
-
-  @Override
-  public int pitch() {
-    return FastMath.round(handle().getXRot());
-  }
-
-  @Override
-  public Vector3d location() {
-    var pos = handle().position();
-    return Vector3d.of(pos.x(), pos.y(), pos.z());
-  }
-
-  @Override
-  public Vector3d direction() {
-    double xRadians = Math.toRadians(handle().getYRot());
-    double yRadians = Math.toRadians(handle().getXRot());
-    double a = Math.cos(yRadians);
-    return Vector3d.of(-a * Math.sin(xRadians), -Math.sin(yRadians), a * Math.cos(xRadians));
-  }
-
-  @Override
-  public Vector3d velocity() {
-    var vel = handle().getDeltaMovement();
-    return Vector3d.of(vel.x(), vel.y(), vel.z());
-  }
-
-  @Override
-  public void velocity(Vector3d velocity) {
-    var clamped = velocity.clampVelocity();
-    handle().setDeltaMovement(clamped.x(), clamped.y(), clamped.z());
-    handle().hurtMarked = true;
-  }
-
-  @Override
   public boolean valid() {
     return handle().isAlive();
   }
 
   @Override
-  public boolean dead() {
-    return !handle().isAlive();
-  }
-
-  @Override
-  public int maxFreezeTicks() {
-    return handle().getTicksRequiredToFreeze();
-  }
-
-  @Override
-  public int freezeTicks() {
-    return handle().getTicksFrozen();
-  }
-
-  @Override
-  public void freezeTicks(int ticks) {
-    handle().setTicksFrozen(ticks);
-  }
-
-  @Override
-  public int maxFireTicks() {
-    return ((EntityAccess) handle()).bending$maxFireTicks();
-  }
-
-  @Override
-  public int fireTicks() {
-    return handle().getRemainingFireTicks();
-  }
-
-  @Override
-  public void fireTicks(int ticks) {
-    handle().setRemainingFireTicks(ticks);
-  }
-
-  @Override
   public boolean isOnGround() {
     return handle().onGround();
-  }
-
-  @Override
-  public boolean inWater() {
-    return handle().isInWaterOrBubble();
-  }
-
-  @Override
-  public boolean inLava() {
-    return handle().isInLava();
-  }
-
-  @Override
-  public boolean visible() {
-    return !handle().isInvisible();
-  }
-
-  @Override
-  public double fallDistance() {
-    return handle().fallDistance;
-  }
-
-  @Override
-  public void fallDistance(double distance) {
-    handle().fallDistance = (float) distance;
   }
 
   @Override
@@ -211,29 +68,18 @@ public class FabricEntity implements Entity {
   }
 
   @Override
-  public boolean gravity() {
-    return !handle().isNoGravity();
+  public <V> @Nullable V property(DataKeyed<V> dataKeyed) {
+    return FabricEntityProperties.PROPERTIES.getValue(dataKeyed, handle());
   }
 
   @Override
-  public void gravity(boolean value) {
-    handle().setNoGravity(!value);
+  public <V> boolean setProperty(DataKeyed<V> dataKeyed, V value) {
+    return FabricEntityProperties.PROPERTIES.setValue(dataKeyed, handle(), value);
   }
 
   @Override
-  public boolean invulnerable() {
-    return handle().isInvulnerable();
-  }
-
-  @Override
-  public void invulnerable(boolean value) {
-    handle().setInvulnerable(value);
-  }
-
-  @Override
-  public boolean teleport(Position position) {
-    handle().teleportTo(position.x(), position.y(), position.z());
-    return true;
+  public <V> boolean editProperty(DataKeyed<V> dataKeyed, UnaryOperator<V> operator) {
+    return FabricEntityProperties.PROPERTIES.editValue(dataKeyed, handle(), operator);
   }
 
   @Override
@@ -249,30 +95,6 @@ public class FabricEntity implements Entity {
   @Override
   public <T> void remove(DataKey<T> key) {
     FabricMetadata.INSTANCE.metadata(handle()).remove(key);
-  }
-
-  @Override
-  public UUID uuid() {
-    return handle().getUUID();
-  }
-
-  @Override
-  public TriState checkProperty(BooleanProperty property) {
-    var vanillaProperty = PropertyMapper.PROPERTIES.get(property);
-    if (vanillaProperty == null) {
-      return TriState.byBoolean(properties.get().get(property));
-    }
-    return vanillaProperty.get(handle());
-  }
-
-  @Override
-  public void setProperty(BooleanProperty property, boolean value) {
-    var vanillaProperty = PropertyMapper.PROPERTIES.get(property);
-    if (vanillaProperty != null) {
-      vanillaProperty.set(handle(), value);
-    } else {
-      properties.get().put(property, value);
-    }
   }
 
   @Override

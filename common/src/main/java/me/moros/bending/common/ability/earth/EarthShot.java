@@ -42,6 +42,7 @@ import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.platform.particle.Particle;
 import me.moros.bending.api.platform.particle.ParticleBuilder;
 import me.moros.bending.api.platform.sound.SoundEffect;
@@ -290,7 +291,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
     if (prematureLaunch) {
       origin = projectile.center();
       Vector3d dir = getTarget(null).subtract(origin).normalize().multiply(userConfig.speed);
-      projectile.gravity(true);
+      projectile.setProperty(EntityProperties.GRAVITY, true);
       projectile.applyVelocity(this, dir.add(0, 0.2, 0));
     } else {
       origin = readySource.center();

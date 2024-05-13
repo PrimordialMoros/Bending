@@ -37,6 +37,7 @@ import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.Modifiable;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.temporal.TempBlock;
 import me.moros.bending.api.temporal.TempBlock.Builder;
 import me.moros.bending.api.user.User;
@@ -100,7 +101,7 @@ public class WaterWave extends AbilityInstance {
     // scale down to 0 speed near the end
     double factor = 1 - ((System.currentTimeMillis() - startTime) / (double) userConfig.duration);
     user.applyVelocity(this, user.direction().multiply(userConfig.speed * factor));
-    user.fallDistance(0);
+    user.setProperty(EntityProperties.FALL_DISTANCE, 0F);
 
     Vector3d center = user.location().add(Vector3d.MINUS_J);
     Collection<TempBlock> toRevert = new ArrayList<>();

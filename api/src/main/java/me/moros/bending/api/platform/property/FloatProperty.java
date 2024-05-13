@@ -17,31 +17,32 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.fabric.platform.scoreboard;
+package me.moros.bending.api.platform.property;
 
-import java.util.Collection;
-import java.util.List;
-
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.server.ServerScoreboard;
-import net.minecraft.world.scores.DisplaySlot;
-import net.minecraft.world.scores.Objective;
-import net.minecraft.world.scores.PlayerTeam;
+import me.moros.bending.api.util.KeyUtil;
+import me.moros.bending.api.util.data.DataKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-record PlayerBoardImpl(ServerScoreboard handle) implements PlayerBoard {
-  @Override
-  public List<Packet<?>> getStartTrackingPackets(Objective objective) {
-    return handle().getStartTrackingPackets(objective);
+public final class FloatProperty extends SimpleProperty<Float> {
+  private final float min;
+  private final float max;
+
+  FloatProperty(String name, float min, float max) {
+    super(DataKey.wrap(KeyUtil.simple(name), Float.class));
+    this.min = min;
+    this.max = max;
+  }
+
+  public float min() {
+    return min;
+  }
+
+  public float max() {
+    return max;
   }
 
   @Override
-  public Collection<PlayerTeam> getPlayerTeams() {
-    return handle().getPlayerTeams();
-  }
-
-  @Override
-  public @Nullable Objective getDisplayObjective(DisplaySlot displaySlot) {
-    return handle().getDisplayObjective(displaySlot);
+  public boolean isValidValue(@Nullable Float value) {
+    return value != null && value >= min() && value <= max();
   }
 }

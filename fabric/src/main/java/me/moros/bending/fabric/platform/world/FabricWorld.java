@@ -21,6 +21,7 @@ package me.moros.bending.fabric.platform.world;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
@@ -33,6 +34,7 @@ import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.block.Lockable;
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.EntityType;
 import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.platform.particle.ParticleContext;
 import me.moros.bending.api.platform.world.World;
@@ -47,10 +49,13 @@ import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.phys.Vec3;
@@ -198,6 +203,34 @@ public record FabricWorld(ServerLevel handle) implements World {
   }
 
   @Override
+  public Entity createEntity(Position pos, EntityType type) {
+    if (type == EntityType.PLAYER) {
+      throw new IllegalArgumentException("Cannot create a Player!");
+    }
+    final double x = pos.x();
+    final double y = pos.y();
+    final double z = pos.z();
+    net.minecraft.world.entity.Entity entity = null;
+    // Handle edge cases with specialised constructor
+    if (type == EntityType.FALLING_BLOCK) {
+      entity = FallingBlockEntityAccess.bending$create(handle(), x, y, z, Blocks.SAND.defaultBlockState());
+    } else if (type == EntityType.ITEM) {
+      entity = new ItemEntity(handle(), x, y, z, Items.STONE.getDefaultInstance());
+    }
+    if (entity == null) {
+      var entityType = BuiltInRegistries.ENTITY_TYPE.get(PlatformAdapter.rsl(type.key()));
+      entity = Objects.requireNonNull(entityType.create(handle()));
+      entity.moveTo(x, y, z);
+    }
+    return PlatformAdapter.fromFabricEntity(entity);
+  }
+
+  @Override
+  public boolean addEntity(Entity entity) {
+    return handle().addFreshEntity(PlatformAdapter.toFabricEntity(entity));
+  }
+
+  @Override
   public boolean breakNaturally(int x, int y, int z) {
     return handle().destroyBlock(new BlockPos(x, y, z), true);
   }
@@ -232,12 +265,12 @@ public record FabricWorld(ServerLevel handle) implements World {
 
   @Override
   public Dimension dimension() {
-    var t = handle().dimensionTypeId();
-    if (t.equals(BuiltinDimensionTypes.OVERWORLD) || t.equals(BuiltinDimensionTypes.OVERWORLD_CAVES)) {
+    var r = handle().dimensionTypeRegistration();
+    if (r.is(BuiltinDimensionTypes.OVERWORLD) || r.is(BuiltinDimensionTypes.OVERWORLD_CAVES)) {
       return Dimension.OVERWORLD;
-    } else if (t.equals(BuiltinDimensionTypes.NETHER)) {
+    } else if (r.is(BuiltinDimensionTypes.NETHER)) {
       return Dimension.NETHER;
-    } else if (t.equals(BuiltinDimensionTypes.END)) {
+    } else if (r.is(BuiltinDimensionTypes.END)) {
       return Dimension.END;
     } else {
       return Dimension.CUSTOM;

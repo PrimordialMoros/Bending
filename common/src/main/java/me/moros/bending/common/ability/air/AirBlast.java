@@ -35,6 +35,7 @@ import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.Modifiable;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.platform.particle.ParticleBuilder;
 import me.moros.bending.api.platform.sound.SoundEffect;
 import me.moros.bending.api.platform.world.WorldUtil;
@@ -219,7 +220,7 @@ public class AirBlast extends AbilityInstance {
         velocity = velocity.add(push.multiply(factor * 0.5));
       }
       entity.applyVelocity(AirBlast.this, velocity);
-      entity.fallDistance(0);
+      entity.setProperty(EntityProperties.FALL_DISTANCE, 0F);
       return false;
     }
 

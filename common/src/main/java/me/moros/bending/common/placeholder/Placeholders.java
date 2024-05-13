@@ -70,7 +70,7 @@ interface Placeholders {
   }
 
   private static Component withElementColor(User user, Function<Element, Component> function, Component nonBender, Component avatar) {
-    Collection<Element> userElements = user.elements();
+    var userElements = user.elements();
     if (userElements.isEmpty()) {
       return nonBender;
     } else if (userElements.size() > 1) {

@@ -31,14 +31,12 @@ import me.moros.bending.api.user.User;
 import me.moros.bending.common.gui.AbstractGui;
 import me.moros.bending.common.locale.Message;
 import me.moros.bending.fabric.platform.PlatformAdapter;
-import me.moros.bending.fabric.platform.item.ItemUtil;
 import net.kyori.adventure.platform.fabric.FabricServerAudiences;
 import net.kyori.adventure.util.TriState;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.util.Unit;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemStack.TooltipPart;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.enchantment.Enchantments;
 
 public final class ElementMenu extends AbstractGui<ItemStack, SimpleGui> {
   private ElementMenu(ElementHandler handler, Player player) {
@@ -51,6 +49,7 @@ public final class ElementMenu extends AbstractGui<ItemStack, SimpleGui> {
     SimpleGui gui = new SimpleGui(MenuType.GENERIC_9x3, player, false);
     gui.setTitle(FabricServerAudiences.of(player.server).toNative(Message.ELEMENTS_GUI_TITLE.build()));
     var fill = PlatformAdapter.toFabricItem(BACKGROUND.get());
+    fill.set(DataComponents.HIDE_TOOLTIP, Unit.INSTANCE);
     for (int i = 0; i < gui.getSize(); i++) {
       gui.setSlot(i, fill);
     }
@@ -62,7 +61,7 @@ public final class ElementMenu extends AbstractGui<ItemStack, SimpleGui> {
       var item = PlatformAdapter.toFabricItem(data.item());
       handleItemStackGlow(item, user.hasElement(element));
       elementMap.put(element, item);
-      gui.setSlot(offset, PlatformAdapter.toFabricItem(data.item()), (idx, ct, ct2, g) -> {
+      gui.setSlot(offset, item, (idx, ct, ct2, g) -> {
         ActionType action = mapType(ct.shift, ct.isLeft, ct.isRight);
         if (action != null && handleAction(action, data) == TriState.FALSE) {
           handle().close();
@@ -80,15 +79,7 @@ public final class ElementMenu extends AbstractGui<ItemStack, SimpleGui> {
 
   @Override
   protected void handleItemStackGlow(ItemStack itemStack, boolean glow) {
-    ItemUtil.hideFlag(itemStack, TooltipPart.ENCHANTMENTS);
-    if (glow) {
-      itemStack.enchant(Enchantments.FISHING_LUCK, 1);
-    } else {
-      var enchants = EnchantmentHelper.getEnchantments(itemStack);
-      if (enchants.remove(Enchantments.FISHING_LUCK) != null) {
-        EnchantmentHelper.setEnchantments(enchants, itemStack);
-      }
-    }
+    itemStack.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, glow);
   }
 
   public static ElementGui createMenu(ElementHandler handler, Player player) {

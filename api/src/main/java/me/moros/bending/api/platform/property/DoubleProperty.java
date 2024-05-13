@@ -17,26 +17,32 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.fabric.platform.scoreboard;
+package me.moros.bending.api.platform.property;
 
-import java.util.Collection;
-import java.util.List;
-
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.server.ServerScoreboard;
-import net.minecraft.world.scores.DisplaySlot;
-import net.minecraft.world.scores.Objective;
-import net.minecraft.world.scores.PlayerTeam;
+import me.moros.bending.api.util.KeyUtil;
+import me.moros.bending.api.util.data.DataKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public interface PlayerBoard {
-  List<Packet<?>> getStartTrackingPackets(Objective objective);
+public final class DoubleProperty extends SimpleProperty<Double> {
+  private final double min;
+  private final double max;
 
-  Collection<PlayerTeam> getPlayerTeams();
+  DoubleProperty(String name, double min, double max) {
+    super(DataKey.wrap(KeyUtil.simple(name), Double.class));
+    this.min = min;
+    this.max = max;
+  }
 
-  @Nullable Objective getDisplayObjective(DisplaySlot displaySlot);
+  public double min() {
+    return min;
+  }
 
-  static PlayerBoard from(ServerScoreboard serverScoreboard) {
-    return new PlayerBoardImpl(serverScoreboard);
+  public double max() {
+    return max;
+  }
+
+  @Override
+  public boolean isValidValue(@Nullable Double value) {
+    return value != null && value >= min() && value <= max();
   }
 }

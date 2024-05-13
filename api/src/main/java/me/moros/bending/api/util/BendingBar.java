@@ -50,8 +50,10 @@ public final class BendingBar implements Updatable {
       return UpdateResult.REMOVE;
     }
     float factor = FastMath.clamp((duration - ticks) / (float) duration, 0, 1);
-    ++ticks;
-    audience.showBossBar(bar.progress(factor));
+    bar.progress(factor);
+    if (ticks++ == 0) {
+      audience.showBossBar(bar);
+    }
     return UpdateResult.CONTINUE;
   }
 

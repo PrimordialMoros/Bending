@@ -29,28 +29,31 @@ import me.moros.bending.api.util.data.DataHolder;
 import me.moros.bending.api.util.data.DataKey;
 import net.kyori.adventure.platform.fabric.FabricServerAudiences;
 import net.kyori.adventure.text.Component;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.item.component.Unbreakable;
 
 public class FabricItemBuilder implements ItemBuilder {
   private final Map<DataKey<?>, Object> meta = new HashMap<>();
   private final ItemStack stack;
-  private final MinecraftServer server;
+  private final FabricServerAudiences adapter;
 
   public FabricItemBuilder(ItemStack stack, MinecraftServer server) {
     this.stack = stack;
-    this.server = server;
+    this.adapter = FabricServerAudiences.of(server);
   }
 
   @Override
   public ItemBuilder name(Component name) {
-    stack.setHoverName(FabricServerAudiences.of(server).toNative(name));
+    stack.set(DataComponents.CUSTOM_NAME, adapter.toNative(name));
     return this;
   }
 
   @Override
   public ItemBuilder lore(List<Component> lore) {
-    ItemUtil.setLore(stack, lore);
+    stack.set(DataComponents.LORE, new ItemLore(lore.stream().map(adapter::toNative).toList()));
     return this;
   }
 
@@ -62,7 +65,11 @@ public class FabricItemBuilder implements ItemBuilder {
 
   @Override
   public ItemBuilder unbreakable(boolean unbreakable) {
-    ItemUtil.setUnbreakable(stack, unbreakable);
+    if (unbreakable) {
+      stack.set(DataComponents.UNBREAKABLE, new Unbreakable(false));
+    } else {
+      stack.remove(DataComponents.UNBREAKABLE);
+    }
     return this;
   }
 

@@ -29,11 +29,11 @@ import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.Modifiable;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
+import me.moros.bending.api.platform.block.BlockStateProperties;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.EntityType;
 import me.moros.bending.api.platform.item.Inventory;
-import me.moros.bending.api.platform.property.StateProperty;
 import me.moros.bending.api.platform.sound.Sound;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.functional.Policies;
@@ -108,9 +108,9 @@ public class FerroControl extends AbilityInstance {
       return;
     }
     BlockState state = block.state();
-    var open = state.property(StateProperty.OPEN);
+    var open = state.property(BlockStateProperties.OPEN);
     if (open != null) {
-      block.setState(state.withProperty(StateProperty.OPEN, !open));
+      block.setState(state.withProperty(BlockStateProperties.OPEN, !open));
       Sound sound;
       if (state.type() == BlockType.IRON_DOOR) {
         sound = !open ? Sound.BLOCK_IRON_DOOR_OPEN : Sound.BLOCK_IRON_DOOR_CLOSE;

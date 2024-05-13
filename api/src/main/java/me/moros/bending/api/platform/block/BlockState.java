@@ -49,6 +49,5 @@ public interface BlockState extends Keyed, PropertyHolder {
     return Particle.BLOCK_MARKER.builder(this, center);
   }
 
-  @Override
   <V extends Comparable<V>> BlockState withProperty(Property<V> property, V value);
 }

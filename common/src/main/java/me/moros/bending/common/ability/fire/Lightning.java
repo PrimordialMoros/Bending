@@ -50,12 +50,12 @@ import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.platform.entity.EntityType;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.item.InventoryUtil;
 import me.moros.bending.api.platform.particle.Particle;
 import me.moros.bending.api.platform.particle.ParticleBuilder;
-import me.moros.bending.api.platform.property.EntityProperty;
 import me.moros.bending.api.platform.sound.SoundEffect;
 import me.moros.bending.api.platform.world.WorldUtil;
 import me.moros.bending.api.registry.Registries;
@@ -268,9 +268,7 @@ public class Lightning extends AbilityInstance {
 
   private void onEntityHit(Entity entity) {
     if (affectedEntities.add(entity.uuid())) {
-      if (entity.type() == EntityType.CREEPER && entity instanceof LivingEntity creeper) {
-        creeper.setProperty(EntityProperty.CHARGED, true);
-      }
+      entity.setProperty(EntityProperties.CHARGED, true);
       boolean hitWater = entity.inWater();
       boolean grounded = entity.isOnGround();
       boolean hasMetalArmor = entity instanceof LivingEntity livingEntity && InventoryUtil.hasMetalArmor(livingEntity);

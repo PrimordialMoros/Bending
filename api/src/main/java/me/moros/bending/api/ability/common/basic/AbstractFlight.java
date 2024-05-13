@@ -20,7 +20,7 @@
 package me.moros.bending.api.ability.common.basic;
 
 import me.moros.bending.api.game.FlightManager.Flight;
-import me.moros.bending.api.platform.property.EntityProperty;
+import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.user.User;
 import net.kyori.adventure.util.TriState;
 
@@ -37,16 +37,16 @@ abstract class AbstractFlight {
   }
 
   void cleanup() {
-    user.setProperty(EntityProperty.SPRINTING, sprinting);
+    user.setProperty(EntityProperties.SPRINTING, sprinting);
     flight.flying(false);
     flight.release();
   }
 
   void resetSprintAndFall() {
-    user.fallDistance(0);
+    user.setProperty(EntityProperties.FALL_DISTANCE, 0F);
     if (sprinting == TriState.NOT_SET) {
-      sprinting = user.checkProperty(EntityProperty.SNEAKING);
+      sprinting = user.checkProperty(EntityProperties.SPRINTING);
     }
-    user.setProperty(EntityProperty.SPRINTING, false);
+    user.setProperty(EntityProperties.SPRINTING, false);
   }
 }

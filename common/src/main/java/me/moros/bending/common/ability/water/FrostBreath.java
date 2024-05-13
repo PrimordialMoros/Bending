@@ -42,6 +42,7 @@ import me.moros.bending.api.platform.Direction;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.platform.particle.Particle;
 import me.moros.bending.api.platform.sound.SoundEffect;
 import me.moros.bending.api.platform.world.WorldUtil;
@@ -101,7 +102,7 @@ public class FrostBreath extends AbilityInstance {
       return UpdateResult.REMOVE;
     }
     affectedEntities.clear();
-    user.remainingAir(Math.max(-20, user.remainingAir() - 5));
+    user.editProperty(EntityProperties.REMAINING_OXYGEN, air -> air - 5);
     Vector3d offset = Vector3d.of(0, -0.1, 0);
     Ray ray = Ray.of(user.eyeLocation().add(offset), user.direction().multiply(userConfig.range));
     streams.add(new FrostStream(ray));
