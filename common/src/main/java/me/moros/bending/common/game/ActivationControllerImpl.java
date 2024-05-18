@@ -237,7 +237,7 @@ public final class ActivationControllerImpl implements ActivationController {
     AirBlast.switchMode(user);
     EarthLine.switchMode(user);
     HealingWaters.switchMode(user);
-    HeatControl.toggleLight(user);
+    HeatControl.toggleMode(user);
 
     sequenceManager.registerStep(user, method);
     activateAbility(user, method);

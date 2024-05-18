@@ -19,16 +19,17 @@
 
 package me.moros.bending.common.ability.water;
 
+import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.AbilityInstance;
 import me.moros.bending.api.ability.Activation;
-import me.moros.bending.api.ability.common.basic.PhaseTransformer;
 import me.moros.bending.api.config.Configurable;
 import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.Modifiable;
@@ -39,8 +40,10 @@ import me.moros.bending.api.temporal.TempBlock;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
+import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.common.config.ConfigManager;
+import me.moros.bending.common.util.BatchQueue;
 import me.moros.math.Vector3d;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
@@ -51,8 +54,7 @@ public class PhaseChange extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
-  private final Freeze freeze = new Freeze();
-  private final Melt melt = new Melt();
+  private PhaseTransformer phaseTransformer;
 
   public PhaseChange(AbilityDescription desc) {
     super(desc);
@@ -60,17 +62,15 @@ public class PhaseChange extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
-    if (method == Activation.ATTACK) {
-      user.game().abilityManager(user.worldKey()).firstInstance(user, PhaseChange.class).ifPresent(PhaseChange::freeze);
-      return false;
-    } else if (method == Activation.SNEAK) {
-      user.game().abilityManager(user.worldKey()).firstInstance(user, PhaseChange.class).ifPresent(PhaseChange::melt);
-      return false;
-    }
     this.user = user;
     loadConfig();
-    removalPolicy = Policies.defaults();
-    return true;
+
+    if (method == Activation.ATTACK) {
+      freeze();
+    } else if (method == Activation.SNEAK) {
+      melt();
+    }
+    return phaseTransformer != null && !phaseTransformer.isEmpty();
   }
 
   @Override
@@ -80,38 +80,38 @@ public class PhaseChange extends AbilityInstance {
 
   @Override
   public UpdateResult update() {
-    if (removalPolicy.test(user, description()) || !user.canBend(description())) {
-      freeze.clear();
-      melt.clear();
-      return UpdateResult.CONTINUE;
+    if (removalPolicy.test(user, description())) {
+      return UpdateResult.REMOVE;
     }
-    freeze.processQueue(userConfig.freezeSpeed);
-    if (user.sneaking() && description().equals(user.selectedAbility())) {
-      melt.processQueue(userConfig.meltSpeed);
-    } else {
-      melt.clear();
-    }
-    return UpdateResult.CONTINUE;
+    return phaseTransformer.processQueue() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
   }
 
-  public void freeze() {
-    if (user.onCooldown(description())) {
-      return;
+  @Override
+  public void onDestroy() {
+    if (phaseTransformer != null) {
+      phaseTransformer.clear();
     }
+  }
+
+  private void freeze() {
+    phaseTransformer = new Freeze(user, new ArrayDeque<>(), userConfig.freezeSpeed);
     Vector3d center = user.rayTrace(userConfig.freezeRange).ignoreLiquids(false).blocks(user.world()).position();
-    if (freeze.fillQueue(getShuffledBlocks(center, userConfig.freezeRadius, MaterialUtil::isWater))) {
+    if (phaseTransformer.fillQueue(getShuffledBlocks(center, userConfig.freezeRadius, MaterialUtil::isWater))) {
       user.addCooldown(description(), userConfig.freezeCooldown);
     }
+    removalPolicy = Policies.builder().build();
   }
 
-  public void melt() {
-    if (user.onCooldown(description())) {
-      return;
-    }
+  private void melt() {
+    phaseTransformer = new Melt(user, new ArrayDeque<>(), userConfig.meltSpeed);
     Vector3d center = user.rayTrace(userConfig.meltRange).blocks(user.world()).position();
-    if (melt.fillQueue(getShuffledBlocks(center, userConfig.meltRadius, MaterialUtil::isMeltable))) {
+    if (phaseTransformer.fillQueue(getShuffledBlocks(center, userConfig.meltRadius, MaterialUtil::isMeltable))) {
       user.addCooldown(description(), 500);
     }
+    removalPolicy = Policies.builder()
+      .add(Policies.NOT_SNEAKING)
+      .add(SwappedSlotsRemovalPolicy.of(description()))
+      .build();
   }
 
   private Collection<Block> getShuffledBlocks(Vector3d center, double radius, Predicate<Block> predicate) {
@@ -121,13 +121,19 @@ public class PhaseChange extends AbilityInstance {
     return newBlocks;
   }
 
-  private class Freeze extends PhaseTransformer {
+  private interface PhaseTransformer extends BatchQueue<Block> {
+    int batchSize();
+
+    default boolean processQueue() {
+      processQueue(batchSize());
+      return queue().isEmpty();
+    }
+  }
+
+  private record Freeze(User user, Queue<Block> queue, int batchSize) implements PhaseTransformer {
     @Override
-    protected boolean processBlock(Block block) {
-      if (!MaterialUtil.isWater(block) || !TempBlock.isBendable(block)) {
-        return false;
-      }
-      if (!user.canBuild(block)) {
+    public boolean process(Block block) {
+      if (!TempBlock.isBendable(block) || !MaterialUtil.isWater(block) || !user.canBuild(block)) {
         return false;
       }
       TempBlock.ice().build(block);
@@ -138,13 +144,10 @@ public class PhaseChange extends AbilityInstance {
     }
   }
 
-  private class Melt extends PhaseTransformer {
+  private record Melt(User user, Queue<Block> queue, int batchSize) implements PhaseTransformer {
     @Override
-    protected boolean processBlock(Block block) {
-      if (!TempBlock.isBendable(block)) {
-        return false;
-      }
-      return WorldUtil.tryMelt(user, block);
+    public boolean process(Block block) {
+      return TempBlock.isBendable(block) && WorldUtil.tryMelt(user, block);
     }
   }
 

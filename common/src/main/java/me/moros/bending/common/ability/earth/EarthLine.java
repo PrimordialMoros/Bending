@@ -53,6 +53,7 @@ import me.moros.bending.api.temporal.TempDisplayEntity;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.ColorPalette;
 import me.moros.bending.api.util.KeyUtil;
+import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
@@ -66,6 +67,8 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class EarthLine extends AbilityInstance {
   private enum Mode {NORMAL, PRISON}
+
+  private static final DataKey<Mode> KEY = KeyUtil.data("earthline-mode", Mode.class);
 
   private static final Config config = ConfigManager.load(Config::new);
 
@@ -140,7 +143,7 @@ public class EarthLine extends AbilityInstance {
       state.complete();
       Block source = states.chainStore().stream().findAny().orElse(null);
       if (source != null) {
-        Mode mode = user.store().get(KeyUtil.data("earthline-mode", Mode.class)).orElse(Mode.NORMAL);
+        Mode mode = user.store().get(KEY).orElse(Mode.NORMAL);
         earthLine = new Line(source, mode);
         removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(description())).build();
         user.addCooldown(description(), userConfig.cooldown);
@@ -150,9 +153,8 @@ public class EarthLine extends AbilityInstance {
 
   public static void switchMode(User user) {
     if (user.hasAbilitySelected("earthline")) {
-      var key = KeyUtil.data("earthline-mode", Mode.class);
-      if (user.store().canEdit(key)) {
-        Mode mode = user.store().toggle(key, Mode.NORMAL);
+      if (user.store().canEdit(KEY)) {
+        Mode mode = user.store().toggle(KEY, Mode.NORMAL);
         user.sendActionBar(Component.text("Mode: " + mode.name(), ColorPalette.TEXT_COLOR));
       }
     }

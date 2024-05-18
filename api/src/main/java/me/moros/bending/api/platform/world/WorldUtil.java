@@ -78,10 +78,7 @@ public final class WorldUtil {
    * @return true if lava was cooled down, false otherwise
    */
   public static boolean tryCoolLava(User user, Block block) {
-    if (!user.canBuild(block)) {
-      return false;
-    }
-    if (MaterialUtil.isLava(block)) {
+    if (MaterialUtil.isLava(block) && user.canBuild(block)) {
       block.setType(MaterialUtil.isSourceBlock(block) ? BlockType.OBSIDIAN : BlockType.COBBLESTONE);
       if (ThreadLocalRandom.current().nextBoolean()) {
         playLavaExtinguishEffect(block);
@@ -108,7 +105,7 @@ public final class WorldUtil {
       }
       return true;
     } else if (MaterialUtil.isCampfire(block) || BlockTag.CANDLES.isTagged(block)) {
-      block.setState(block.state().withProperty(BlockStateProperties.LIT, false));
+      return block.setState(block.state().withProperty(BlockStateProperties.LIT, false));
     }
     return false;
   }

@@ -37,6 +37,7 @@ import me.moros.bending.api.platform.potion.PotionEffect;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.ColorPalette;
 import me.moros.bending.api.util.KeyUtil;
+import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
@@ -47,6 +48,8 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class HealingWaters extends AbilityInstance {
   private enum Mode {SELF, OTHERS}
+
+  private static final DataKey<Mode> KEY = KeyUtil.data("healingwaters-mode", Mode.class);
 
   private static final Config config = ConfigManager.load(Config::new);
 
@@ -98,7 +101,7 @@ public class HealingWaters extends AbilityInstance {
 
   private boolean tryHeal() {
     LivingEntity target;
-    Mode mode = user.store().get(KeyUtil.data("healingwaters-mode", Mode.class)).orElse(Mode.SELF);
+    Mode mode = user.store().get(KEY).orElse(Mode.SELF);
     if (mode == Mode.OTHERS) {
       Entity entity = user.rayTrace(userConfig.range + 1).cast(user.world()).entity();
       if (entity instanceof LivingEntity living) {
@@ -125,9 +128,8 @@ public class HealingWaters extends AbilityInstance {
 
   public static void switchMode(User user) {
     if (user.hasAbilitySelected("healingwaters")) {
-      var key = KeyUtil.data("healingwaters-mode", Mode.class);
-      if (user.store().canEdit(key)) {
-        Mode mode = user.store().toggle(key, Mode.SELF);
+      if (user.store().canEdit(KEY)) {
+        Mode mode = user.store().toggle(KEY, Mode.SELF);
         user.sendActionBar(Component.text("Healing: " + mode.name(), ColorPalette.TEXT_COLOR));
       }
     }

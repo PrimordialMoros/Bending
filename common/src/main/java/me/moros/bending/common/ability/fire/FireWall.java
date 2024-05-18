@@ -265,7 +265,7 @@ public class FireWall extends AbilityInstance {
 
   private void cleanupLight(@Nullable Collection<TempLight> collection) {
     if (collection != null && !collection.isEmpty()) {
-      collection.forEach(TempLight::unlockAndRevert);
+      collection.forEach(TempLight::unlock);
       collection.clear();
     }
   }

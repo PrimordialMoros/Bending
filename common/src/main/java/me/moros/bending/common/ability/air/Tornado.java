@@ -37,6 +37,7 @@ import me.moros.bending.api.platform.sound.SoundEffect;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.ColorPalette;
 import me.moros.bending.api.util.KeyUtil;
+import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.api.util.functional.ExpireRemovalPolicy;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
@@ -50,6 +51,8 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Tornado extends AbilityInstance {
   private enum Mode {PUSH, PULL}
+
+  private static final DataKey<Mode> KEY = KeyUtil.data("tornado-mode", Mode.class);
 
   private static final Config config = ConfigManager.load(Config::new);
 
@@ -77,7 +80,7 @@ public class Tornado extends AbilityInstance {
       .add(Policies.UNDER_WATER)
       .add(Policies.UNDER_LAVA)
       .build();
-    mode = user.store().get(KeyUtil.data("tornado-mode", Mode.class)).orElse(Mode.PUSH);
+    mode = user.store().get(KEY).orElse(Mode.PUSH);
     startTime = System.currentTimeMillis();
     return true;
   }
@@ -175,9 +178,8 @@ public class Tornado extends AbilityInstance {
 
   public static void switchMode(User user) {
     if (user.hasAbilitySelected("tornado")) {
-      var key = KeyUtil.data("tornado-mode", Mode.class);
-      if (user.store().canEdit(key)) {
-        Mode mode = user.store().toggle(key, Mode.PUSH);
+      if (user.store().canEdit(KEY)) {
+        Mode mode = user.store().toggle(KEY, Mode.PUSH);
         user.sendActionBar(Component.text("Mode: " + mode.name(), ColorPalette.TEXT_COLOR));
         user.game().abilityManager(user.worldKey()).firstInstance(user, Tornado.class).ifPresent(t -> t.mode = mode);
       }

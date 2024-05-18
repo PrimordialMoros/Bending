@@ -17,38 +17,34 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.ability.common.basic;
+package me.moros.bending.common.util;
 
-import java.util.ArrayDeque;
 import java.util.Collection;
-import java.util.Deque;
+import java.util.Queue;
 
-import me.moros.bending.api.platform.block.Block;
+public interface BatchQueue<E> {
+  Queue<E> queue();
 
-@Deprecated(forRemoval = true)
-public abstract class PhaseTransformer {
-  private final Deque<Block> queue;
-
-  protected PhaseTransformer() {
-    queue = new ArrayDeque<>(32);
+  default boolean isEmpty() {
+    return queue().isEmpty();
   }
 
-  public boolean fillQueue(Collection<Block> blocks) {
-    return queue.addAll(blocks);
+  default void clear() {
+    queue().clear();
   }
 
-  public void processQueue(int amount) {
+  default boolean fillQueue(Collection<? extends E> elements) {
+    return queue().addAll(elements);
+  }
+
+  default void processQueue(int amount) {
     int counter = 0;
-    while (!queue.isEmpty() && counter <= amount) {
-      if (processBlock(queue.poll())) {
+    while (!queue().isEmpty() && counter <= amount) {
+      if (process(queue().poll())) {
         counter++;
       }
     }
   }
 
-  public void clear() {
-    queue.clear();
-  }
-
-  protected abstract boolean processBlock(Block block);
+  boolean process(E element);
 }

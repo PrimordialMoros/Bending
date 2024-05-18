@@ -53,7 +53,7 @@ import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.ServicePriority;
 import org.incendo.cloud.execution.ExecutionCoordinator;
-import org.incendo.cloud.paper.PaperCommandManager;
+import org.incendo.cloud.paper.LegacyPaperCommandManager;
 
 final class PaperBending extends AbstractBending<BendingBootstrap> {
   PaperBending(BendingBootstrap parent, Path dir, Logger logger) {
@@ -74,7 +74,7 @@ final class PaperBending extends AbstractBending<BendingBootstrap> {
     pluginManager.registerEvents(new ConnectionListener(logger(), game), parent);
     pluginManager.registerEvents(new WorldListener(game), parent);
 
-    var manager = PaperCommandManager.createNative(parent, ExecutionCoordinator.simpleCoordinator());
+    var manager = LegacyPaperCommandManager.createNative(parent, ExecutionCoordinator.simpleCoordinator());
     // TODO change to brigadier
     manager.registerAsynchronousCompletions();
     Commander.create(manager, Player.class, this).init();

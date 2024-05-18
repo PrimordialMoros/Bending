@@ -46,6 +46,7 @@ import me.moros.bending.api.platform.particle.Particle;
 import me.moros.bending.api.platform.sound.SoundEffect;
 import me.moros.bending.api.temporal.TempBlock;
 import me.moros.bending.api.user.User;
+import me.moros.bending.api.util.FeaturePermissions;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
@@ -150,7 +151,7 @@ public class EarthBlast extends AbilityInstance {
 
   private static boolean tryDestroy(User user) {
     Collection<EarthBlast> blasts = user.game().abilityManager(user.worldKey()).instances(EarthBlast.class)
-      .filter(eb -> eb.blast != null && !user.equals(eb.user)).toList();
+      .filter(eb -> eb.blast != null && !user.equals(eb.user) && eb.blast.blastType.canBend(user)).toList();
     Ray ray = user.ray(config.shatterRange + 2);
     double distSq = config.shatterRange * config.shatterRange;
     for (EarthBlast eb : blasts) {
@@ -192,19 +193,43 @@ public class EarthBlast extends AbilityInstance {
     }
   }
 
+  private enum BlastType {
+    EARTH,
+    METAL,
+    LAVA;
+
+    private boolean canBend(User user) {
+      return switch (this) {
+        case EARTH -> true;
+        case METAL -> user.hasPermission(FeaturePermissions.METAL);
+        case LAVA -> user.hasPermission(FeaturePermissions.LAVA);
+      };
+    }
+
+    private double calculateDamage(double damage) {
+      return switch (this) {
+        case EARTH -> damage;
+        case METAL -> BendingProperties.instance().metalModifier(damage);
+        case LAVA -> BendingProperties.instance().magmaModifier(damage);
+      };
+    }
+  }
+
   private class Blast extends BlockShot {
+    private final BlastType blastType;
     private final double damage;
     private double electrified = 1;
 
     public Blast(Block block) {
       super(user, block, MaterialUtil.solidType(block.type()), userConfig.range, 20);
       if (EarthMaterials.isMetalBendable(block)) {
-        damage = BendingProperties.instance().metalModifier(userConfig.damage);
+        this.blastType = BlastType.METAL;
       } else if (EarthMaterials.isLavaBendable(block)) {
-        damage = BendingProperties.instance().magmaModifier(userConfig.damage);
+        this.blastType = BlastType.LAVA;
       } else {
-        damage = userConfig.damage;
+        this.blastType = BlastType.EARTH;
       }
+      this.damage = blastType.calculateDamage(userConfig.damage);
     }
 
     @Override
@@ -234,7 +259,7 @@ public class EarthBlast extends AbilityInstance {
     }
 
     private boolean electrify() {
-      if (electrified <= 1 && EarthMaterials.METAL_BENDABLE.isTagged(type)) {
+      if (blastType == BlastType.METAL && electrified <= 1) {
         electrified = 2;
         return true;
       }

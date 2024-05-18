@@ -43,6 +43,7 @@ import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.BendingEffect;
 import me.moros.bending.api.util.ColorPalette;
 import me.moros.bending.api.util.KeyUtil;
+import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.api.util.functional.OutOfRangeRemovalPolicy;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
@@ -55,6 +56,8 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class AirBlast extends AbilityInstance {
   private enum Mode {PUSH, PULL}
+
+  private static final DataKey<Mode> KEY = KeyUtil.data("airblast-mode", Mode.class);
 
   private static final Config config = ConfigManager.load(Config::new);
 
@@ -139,7 +142,7 @@ public class AirBlast extends AbilityInstance {
   private void launch() {
     launched = true;
     Vector3d target = user.rayTrace(userConfig.range).cast(user.world()).entityCenterOrPosition();
-    if (user.store().get(KeyUtil.data("airblast-mode", Mode.class)).orElse(Mode.PUSH) == Mode.PULL) {
+    if (user.store().get(KEY).orElse(Mode.PUSH) == Mode.PULL) {
       Vector3d temp = origin;
       origin = target;
       target = temp;
@@ -157,9 +160,8 @@ public class AirBlast extends AbilityInstance {
 
   public static void switchMode(User user) {
     if (user.hasAbilitySelected("airblast")) {
-      var key = KeyUtil.data("airblast-mode", Mode.class);
-      if (user.store().canEdit(key)) {
-        Mode mode = user.store().toggle(key, Mode.PUSH);
+      if (user.store().canEdit(KEY)) {
+        Mode mode = user.store().toggle(KEY, Mode.PUSH);
         user.sendActionBar(Component.text("Mode: " + mode.name(), ColorPalette.TEXT_COLOR));
       }
     }

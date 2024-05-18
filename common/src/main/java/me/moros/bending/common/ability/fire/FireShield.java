@@ -39,6 +39,7 @@ import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.Modifiable;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.EntityType;
 import me.moros.bending.api.platform.particle.ParticleBuilder;
 import me.moros.bending.api.platform.sound.SoundEffect;
 import me.moros.bending.api.temporal.TempLight;
@@ -127,7 +128,9 @@ public class FireShield extends AbilityInstance {
 
   private boolean onEntityHit(Entity entity) {
     if (sphere && entity.isProjectile()) {
-      entity.remove();
+      if (entity.type() != EntityType.TRIDENT) {
+        entity.remove();
+      }
       return true;
     }
     BendingEffect.FIRE_TICK.apply(user, entity);
@@ -144,12 +147,7 @@ public class FireShield extends AbilityInstance {
   @Override
   public void onDestroy() {
     user.addCooldown(description(), sphere ? userConfig.shieldCooldown : userConfig.diskCooldown);
-    if (sphere) {
-      TempLight light = ((SphereShield) shield).light;
-      if (light != null) {
-        light.unlockAndRevert();
-      }
-    }
+    shield.onDestroy();
   }
 
   @Override
@@ -173,11 +171,14 @@ public class FireShield extends AbilityInstance {
     void render();
 
     Collider collider();
+
+    void onDestroy();
   }
 
   private final class DiskShield implements Shield {
     private Disk disk;
     private Vector3d location;
+    private TempLight light;
     private long nextRenderTime = 0;
     private int ticks = 6;
 
@@ -198,7 +199,6 @@ public class FireShield extends AbilityInstance {
 
     @Override
     public void render() {
-      TempLight.builder(++ticks).rate(1).duration(200).build(user.world().blockAt(location));
       long time = System.currentTimeMillis();
       if (time < nextRenderTime) {
         return;
@@ -216,21 +216,42 @@ public class FireShield extends AbilityInstance {
         }
         rotation.applyTo(array, array);
       }
+      createLight(user.world().blockAt(location));
+    }
+
+    private void createLight(Block block) {
+      if (light != null && !light.block().equals(block)) {
+        light.unlock();
+      }
+      light = TempLight.builder(++ticks).rate(1).duration(userConfig.diskDuration + 750).build(block)
+        .map(TempLight::lock).orElse(null);
     }
 
     @Override
     public Collider collider() {
       return disk;
     }
+
+    @Override
+    public void onDestroy() {
+      if (light != null) {
+        light.unlock();
+        light = null;
+      }
+    }
   }
 
   private final class SphereShield implements Shield {
     private Sphere sphere;
-    private int currentPoint = 0;
     private TempLight light;
+    private int currentPoint = 0;
 
     private SphereShield() {
       update();
+    }
+
+    private Vector3d center() {
+      return user.center();
     }
 
     @Override
@@ -264,21 +285,23 @@ public class FireShield extends AbilityInstance {
         }
       }
       Block block = user.world().blockAt(center);
-      if (light == null || currentPoint <= 10) {
-        createLight(block);
-      } else if (!block.equals(light.block())) {
-        light.unlockAndRevert();
-        createLight(block);
-      }
+      createLight(block);
     }
 
     private void createLight(Block block) {
-      light = TempLight.builder(5 + currentPoint).rate(1)
-        .duration(userConfig.shieldDuration).build(block).map(TempLight::lock).orElse(null);
+      if (light != null && !light.block().equals(block)) {
+        light.unlock();
+      }
+      light = TempLight.builder(5 + currentPoint).rate(1).duration(userConfig.shieldDuration + 750).build(block)
+        .map(TempLight::lock).orElse(null);
     }
 
-    private Vector3d center() {
-      return user.center();
+    @Override
+    public void onDestroy() {
+      if (light != null) {
+        light.unlock();
+        light = null;
+      }
     }
   }
 

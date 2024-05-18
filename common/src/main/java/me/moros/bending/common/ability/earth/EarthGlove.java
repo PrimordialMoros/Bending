@@ -61,7 +61,9 @@ import org.spongepowered.configurate.objectmapping.meta.Comment;
 public class EarthGlove extends AbilityInstance {
   public static final DataKey<EarthGlove> GLOVE_KEY = KeyUtil.data("earth-glove", EarthGlove.class);
 
-  enum Side {RIGHT, LEFT}
+  private enum Side {RIGHT, LEFT}
+
+  private static final DataKey<Side> KEY = KeyUtil.data("glove-side", Side.class);
 
   private static final Config config = ConfigManager.load(Config::new);
 
@@ -223,8 +225,7 @@ public class EarthGlove extends AbilityInstance {
   }
 
   private boolean launchEarthGlove() {
-    var key = KeyUtil.data("glove-side", Side.class);
-    Side side = user.store().toggle(key, Side.RIGHT);
+    Side side = user.store().toggle(KEY, Side.RIGHT);
     Vector3d gloveSpawnLocation = user.handSide(side == Side.RIGHT);
     Vector3d target = user.rayTrace(userConfig.range).cast(user.world()).entityCenterOrPosition();
     glove = buildGlove(gloveSpawnLocation.subtract(0, 0.2, 0));

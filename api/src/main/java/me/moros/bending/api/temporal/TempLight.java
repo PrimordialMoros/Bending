@@ -19,6 +19,7 @@
 
 package me.moros.bending.api.temporal;
 
+import java.util.List;
 import java.util.Optional;
 
 import me.moros.bending.api.config.BendingProperties;
@@ -30,47 +31,67 @@ import me.moros.bending.api.platform.block.BlockType;
 import me.moros.math.FastMath;
 
 public final class TempLight extends Temporary {
-  public static final TemporalManager<Block, TempLight> MANAGER = new TemporalManager<>(600);
+  public static final TemporalManager<Block, TempLight> MANAGER = new TemporalManager<>(600) {
+    @Override
+    public void tick() {
+      List<TempLight> toRemove = MANAGER.stream().filter(TempLight::tick).toList();
+      toRemove.forEach(TempLight::revertFully);
+      super.tick();
+    }
+  };
 
   private final Block block;
   private int level;
-  private int repeat;
   private final int rate;
   private boolean lock = false;
   private boolean reverted = false;
+  private Type lastType;
+  private boolean skipTick = false;
 
-  private TempLight(Block block, int level, int rate, int ticks) {
+  private TempLight(Block block, int level, int rate, int ticks, Type type) {
     this.block = block;
     this.level = level;
     this.rate = rate;
+    this.lastType = type;
+    render();
     MANAGER.addEntry(block, this, ticks);
   }
 
   @Override
   public boolean revert() {
-    repeat = 0;
-    if (reverted || lock) {
+    if (reverted) {
+      return false;
+    }
+    revertFully();
+    return true;
+  }
+
+  private void revertFully() {
+    if (!reverted) {
+      Platform.instance().nativeAdapter().fakeBlock(block, block.state()).broadcast(block.world(), block);
+      MANAGER.removeEntry(block);
+      reverted = true;
+    }
+  }
+
+  private boolean tick() {
+    skipTick ^= true;
+    if (lock || reverted || skipTick) {
       return false;
     }
     level -= rate;
-    Type type = isValid(block, level);
-    if (level <= 0 || type == Type.INVALID) {
-      reverted = true;
-      Platform.instance().nativeAdapter().fakeBlock(block, block.state()).broadcast(block.world(), block);
-      MANAGER.removeEntry(block);
-      return true;
+    if (level > 0) {
+      lastType = isValid(block, level);
+      if (lastType != Type.INVALID) {
+        render();
+        return false;
+      }
     }
-    render(type == Type.WATER);
-    repeat = 2;
-    return false;
+    return true;
   }
 
-  @Override
-  public int repeat() {
-    return repeat;
-  }
-
-  private void render(boolean waterlogged) {
+  private void render() {
+    boolean waterlogged = lastType == Type.WATER;
     BlockState state = BlockType.LIGHT.defaultState().withProperty(BlockStateProperties.LEVEL, level);
     if (waterlogged) {
       state = state.withProperty(BlockStateProperties.WATERLOGGED, true);
@@ -83,8 +104,13 @@ public final class TempLight extends Temporary {
     return this;
   }
 
-  public TempLight unlockAndRevert() {
+  public void unlock() {
     lock = false;
+  }
+
+  @Deprecated(forRemoval = true)
+  public TempLight unlockAndRevert() {
+    unlock();
     revert();
     return this;
   }
@@ -123,7 +149,7 @@ public final class TempLight extends Temporary {
     private final int level;
 
     private int rate = 3;
-    private long duration = 100;
+    private long duration = 750;
 
     private Builder(int level) {
       this.level = level;
@@ -151,13 +177,12 @@ public final class TempLight extends Temporary {
       if (light != null) {
         if (light.level < level) {
           light.level = level;
-          light.render(type == Type.WATER);
+          light.lastType = type;
+          light.render();
         }
         return Optional.of(light);
       }
-      light = new TempLight(block, level, rate, MANAGER.fromMillis(duration));
-      light.render(type == Type.WATER);
-      return Optional.of(light);
+      return Optional.of(new TempLight(block, level, rate, MANAGER.fromMillis(duration), type));
     }
   }
 }

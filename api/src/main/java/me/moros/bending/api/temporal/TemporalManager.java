@@ -25,6 +25,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 
 import me.moros.bending.api.platform.Platform;
 import me.moros.tasker.TimerWheel;
@@ -108,5 +109,9 @@ public class TemporalManager<K, V extends Temporary> {
   public int fromMillis(long duration) {
     int time = Platform.instance().toTicks(duration, TimeUnit.MILLISECONDS);
     return time <= 0 ? max : Math.min(time, max);
+  }
+
+  protected Stream<V> stream() {
+    return instances.values().stream();
   }
 }
