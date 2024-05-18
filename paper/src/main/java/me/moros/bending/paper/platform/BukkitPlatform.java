@@ -19,11 +19,11 @@
 
 package me.moros.bending.paper.platform;
 
-import java.time.Duration;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import com.destroystokyo.paper.MaterialTags;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -63,7 +63,7 @@ public class BukkitPlatform implements Platform, PlatformFactory {
     this.adapter = AdapterLoader.loadAdapter(logger);
     this.hasNativeSupport = adapter != AdapterLoader.DUMMY;
     this.campfireRecipesCache = Caffeine.newBuilder()
-      .expireAfterAccess(Duration.ofMinutes(10))
+      .expireAfterAccess(10, TimeUnit.MINUTES)
       .build(this::findCampfireRecipe);
   }
 

@@ -19,10 +19,10 @@
 
 package me.moros.bending.api.protection;
 
-import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
@@ -80,6 +80,6 @@ public enum ProtectionCache {
    * @see Caffeine
    */
   private LoadingCache<Block, Boolean> buildCache(User user) {
-    return Caffeine.newBuilder().expireAfterAccess(Duration.ofMillis(5000)).build(b -> canBuildPostCache(user, b));
+    return Caffeine.newBuilder().expireAfterAccess(5, TimeUnit.SECONDS).build(b -> canBuildPostCache(user, b));
   }
 }

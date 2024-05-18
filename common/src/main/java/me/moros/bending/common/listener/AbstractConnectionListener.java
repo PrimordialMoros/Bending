@@ -19,7 +19,6 @@
 
 package me.moros.bending.common.listener;
 
-import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
@@ -51,7 +50,7 @@ public abstract class AbstractConnectionListener {
     this.logger = logger;
     this.gameSupplier = gameSupplier;
     this.profileCache = Caffeine.newBuilder().maximumSize(64).executor(Executors.newVirtualThreadPerTaskExecutor())
-      .expireAfterWrite(Duration.ofMinutes(2)).buildAsync(this::cacheLoad);
+      .expireAfterWrite(2, TimeUnit.MINUTES).buildAsync(this::cacheLoad);
   }
 
   private Game game() {

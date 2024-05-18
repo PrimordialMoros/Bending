@@ -19,12 +19,12 @@
 
 package me.moros.bending.common.game;
 
-import java.time.Duration;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
@@ -44,7 +44,7 @@ public final class SequenceManagerImpl implements SequenceManager {
   SequenceManagerImpl(ActivationController controller) {
     this.controller = controller;
     cache = Caffeine.newBuilder()
-      .expireAfterAccess(Duration.ofSeconds(10))
+      .expireAfterAccess(10, TimeUnit.SECONDS)
       .build(u -> new ArrayDeque<>(Sequence.MAX_STEPS));
     tryInitRegistry();
   }

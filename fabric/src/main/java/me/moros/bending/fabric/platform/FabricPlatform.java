@@ -19,10 +19,10 @@
 
 package me.moros.bending.fabric.platform;
 
-import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
@@ -63,7 +63,7 @@ public class FabricPlatform implements Platform, PlatformFactory {
     new FabricRegistryInitializer().init();
     this.adapter = new NativeAdapterImpl(server);
     this.campfireRecipesCache = Caffeine.newBuilder()
-      .expireAfterAccess(Duration.ofMinutes(10))
+      .expireAfterAccess(10, TimeUnit.MINUTES)
       .build(this::findCampfireRecipe);
   }
 

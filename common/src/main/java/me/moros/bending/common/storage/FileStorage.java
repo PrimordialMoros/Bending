@@ -23,11 +23,11 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
@@ -59,7 +59,7 @@ final class FileStorage extends AbstractStorage {
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
-    this.locks = Caffeine.newBuilder().expireAfterAccess(Duration.ofMinutes(10)).build(key -> new ReentrantLock());
+    this.locks = Caffeine.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES).build(key -> new ReentrantLock());
     this.semaphore = new Semaphore(Math.max(Runtime.getRuntime().availableProcessors(), 2));
   }
 
