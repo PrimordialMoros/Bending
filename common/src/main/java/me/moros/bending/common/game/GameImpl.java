@@ -22,7 +22,9 @@ package me.moros.bending.common.game;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import me.moros.bending.api.config.ConfigProcessor;
 import me.moros.bending.api.event.EventBus;
@@ -32,6 +34,7 @@ import me.moros.bending.api.game.FlightManager;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.game.WorldManager;
 import me.moros.bending.api.registry.Registries;
+import me.moros.bending.api.registry.Registry;
 import me.moros.bending.api.storage.BendingStorage;
 import me.moros.bending.api.temporal.ActionLimiter;
 import me.moros.bending.api.temporal.Cooldown;
@@ -45,6 +48,7 @@ import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.BendingEffect;
 import me.moros.bending.api.util.Tasker;
 import me.moros.bending.api.util.TextUtil;
+import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.common.Bending;
 import me.moros.bending.common.event.EventBusImpl;
 import me.moros.bending.common.storage.StorageFactory;
@@ -80,11 +84,10 @@ public final class GameImpl implements Game {
   }
 
   private void lockRegistries() {
-    var keys = Registries.keys().toList();
-    eventBus.postRegistryLockEvent(keys);
-    for (var key : keys) {
-      Objects.requireNonNull(Registries.get(key)).lock();
-    }
+    Map<DataKey<?>, Registry<?, ?>> registries = Registries.keys().map(Registries::getOrThrow)
+      .filter(r -> !r.isLocked()).collect(Collectors.toMap(Registry::key, Function.identity()));
+    eventBus.postRegistryLockEvent(registries.keySet());
+    registries.values().forEach(Registry::lock);
   }
 
   private void printInfo() {

@@ -21,6 +21,7 @@ package me.moros.bending.api.registry;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import me.moros.bending.api.ability.AbilityDescription;
@@ -37,6 +38,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * Holds all the built-in registries.
  */
+@SuppressWarnings("unchecked")
 public final class Registries {
   private static final Map<DataKey<?>, Registry<Key, ? extends Keyed>> REGISTRIES_BY_KEY = new HashMap<>();
   private static final Map<Class<? extends Keyed>, Registry<Key, ? extends Keyed>> REGISTRIES_BY_CLASS = new HashMap<>();
@@ -55,12 +57,15 @@ public final class Registries {
     return REGISTRIES_BY_KEY.keySet().stream();
   }
 
-  @SuppressWarnings("unchecked")
   public static <T> @Nullable Registry<Key, T> get(DataKey<T> type) {
     return (Registry<Key, T>) REGISTRIES_BY_KEY.get(type);
   }
 
-  @SuppressWarnings("unchecked")
+  public static <T> Registry<Key, T> getOrThrow(DataKey<T> type) {
+    return Objects.requireNonNull(get(type));
+  }
+
+  @Deprecated(forRemoval = true)
   public static <T extends Keyed> @Nullable Registry<Key, T> get(Class<T> type) {
     return (Registry<Key, T>) REGISTRIES_BY_CLASS.get(type);
   }

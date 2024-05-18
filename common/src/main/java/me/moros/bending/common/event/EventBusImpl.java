@@ -93,7 +93,9 @@ public class EventBusImpl implements EventBus {
 
   @Override
   public void postRegistryLockEvent(Collection<DataKey<?>> keys) {
-    post(new RegistryLockEventImpl(keys));
+    if (!keys.isEmpty()) {
+      post(new RegistryLockEventImpl(keys));
+    }
   }
 
   @Override
