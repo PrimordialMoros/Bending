@@ -19,6 +19,10 @@
 
 package me.moros.bending.api.user;
 
+import java.util.concurrent.TimeUnit;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.gui.Board;
 import me.moros.bending.api.platform.Platform;
@@ -32,10 +36,13 @@ import net.kyori.adventure.util.TriState;
  * {@link User} implementation for players.
  */
 final class BendingPlayer extends BendingUser implements DelegatePlayer {
+  private final Cache<String, Boolean> permissionCache;
+
   private Board board;
 
   BendingPlayer(Game game, Player player) {
     super(game, player);
+    this.permissionCache = Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.SECONDS).build();
     this.board = Board.dummy();
   }
 
@@ -60,7 +67,7 @@ final class BendingPlayer extends BendingUser implements DelegatePlayer {
 
   @Override
   public boolean hasPermission(String permission) {
-    return entity().hasPermission(permission);
+    return permissionCache.get(permission, entity()::hasPermission);
   }
 
   @Override

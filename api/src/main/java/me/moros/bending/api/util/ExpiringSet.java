@@ -24,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.Scheduler;
 
 /**
  * Represents a set with expiring elements based on a {@link Caffeine} cache.
@@ -47,10 +46,7 @@ public class ExpiringSet<E> {
    * @param unit the time unit
    */
   public ExpiringSet(long duration, TimeUnit unit) {
-    cache = Caffeine.newBuilder()
-      .expireAfterWrite(duration, unit)
-      .scheduler(Scheduler.systemScheduler())
-      .build();
+    cache = Caffeine.newBuilder().expireAfterWrite(duration, unit).build();
   }
 
   /**

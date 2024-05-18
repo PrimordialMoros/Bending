@@ -24,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.Scheduler;
 import me.moros.bending.api.ability.DamageSource;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -37,7 +36,6 @@ public final class DamageUtil {
 
   private static final Cache<UUID, DamageSource> CACHE = Caffeine.newBuilder()
     .expireAfterWrite(100, TimeUnit.MILLISECONDS)
-    .scheduler(Scheduler.systemScheduler())
     .build();
 
   public static void cacheDamageSource(UUID uuid, @Nullable DamageSource source) {

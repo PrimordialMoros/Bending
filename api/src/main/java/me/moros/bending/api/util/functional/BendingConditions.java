@@ -33,6 +33,10 @@ public final class BendingConditions {
   }
 
   /**
+   * Checks if user can bend (hasn't toggled bending off).
+   */
+  public static final BiPredicate<User, AbilityDescription> CAN_BEND = (u, d) -> u.canBend();
+  /**
    * Checks if ability is on cooldown.
    */
   public static final BiPredicate<User, AbilityDescription> COOLDOWN = (u, d) -> d.bypassCooldown() || !u.onCooldown(d);
@@ -49,10 +53,6 @@ public final class BendingConditions {
    */
   public static final BiPredicate<User, AbilityDescription> PERMISSION = (u, d) -> u.hasPermission(d);
   /**
-   * Checks if user can bend (hasn't toggled bending off).
-   */
-  public static final BiPredicate<User, AbilityDescription> CAN_BEND = (u, d) -> u.canBend();
-  /**
    * Checks if the user is in a bending enabled world.
    */
   public static final BiPredicate<User, AbilityDescription> WORLD = (u, d) -> u.game().worldManager().isEnabled(u.worldKey());
@@ -61,11 +61,11 @@ public final class BendingConditions {
 
   static {
     ALL = Stream.of(
-      COOLDOWN,
+      CAN_BEND,
       ELEMENT,
       GAMEMODE,
+      COOLDOWN,
       WORLD,
-      CAN_BEND,
       PERMISSION
     ).reduce((u, d) -> true, BiPredicate::and);
   }
