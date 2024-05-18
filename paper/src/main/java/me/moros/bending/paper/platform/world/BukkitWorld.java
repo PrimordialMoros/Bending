@@ -88,7 +88,7 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
   }
 
   @Override
-  public boolean isTileEntity(Position position) {
+  public boolean isBlockEntity(Position position) {
     var state = handle().getBlockAt(position.blockX(), position.blockY(), position.blockZ()).getState(false);
     return state instanceof TileState;
   }

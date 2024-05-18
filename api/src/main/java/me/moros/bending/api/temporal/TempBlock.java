@@ -358,7 +358,7 @@ public final class TempBlock extends Temporary {
     }
 
     public Optional<TempBlock> build(Block block) {
-      if (block.world().isTileEntity(block)) {
+      if (block.world().isBlockEntity(block)) {
         return Optional.empty();
       }
       BlockState current = block.state();

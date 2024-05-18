@@ -103,7 +103,7 @@ public record FabricWorld(ServerLevel handle) implements World {
   }
 
   @Override
-  public boolean isTileEntity(Position position) {
+  public boolean isBlockEntity(Position position) {
     return blockEntity(position.blockX(), position.blockY(), position.blockZ()) != null;
   }
 

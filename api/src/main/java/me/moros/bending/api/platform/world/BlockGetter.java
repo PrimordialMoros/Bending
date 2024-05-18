@@ -193,7 +193,12 @@ public interface BlockGetter {
 
   DataHolder blockMetadata(int x, int y, int z);
 
-  boolean isTileEntity(Position position);
+  @Deprecated(forRemoval = true)
+  default boolean isTileEntity(Position position) {
+    return isBlockEntity(position);
+  }
+
+  boolean isBlockEntity(Position position);
 
   @Nullable Lockable containerLock(Position position);
 }

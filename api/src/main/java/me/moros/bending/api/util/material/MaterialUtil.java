@@ -137,7 +137,7 @@ public final class MaterialUtil {
   }
 
   public static boolean isUnbreakable(Block block) {
-    return UNBREAKABLES.isTagged(block) || CONTAINERS.isTagged(block) || block.world().isTileEntity(block);
+    return UNBREAKABLES.isTagged(block) || CONTAINERS.isTagged(block) || block.world().isBlockEntity(block);
   }
 
   public static boolean isIgnitable(Block block) {
