@@ -14,7 +14,7 @@ fabric-loom = "1.6.11"
 fabric-api = "0.98.0+1.20.6"
 fabric-loader = "0.15.11"
 shadow = "8.1.1"
-flyway = "10.12.0"
+flyway = "10.13.0"
 junit = "5.10.2"
 
 [libraries]
@@ -78,11 +78,11 @@ sgui = { module = "eu.pb4:sgui", version = "1.5.1+1.20.5" }
 fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.3.1" }
 
 # Bukkit
-inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.13" }
+inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.14" }
 grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.3" }
 towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.100.2.8" }
-lwc = { module = "com.griefcraft:lwc", version = "2.3.2" }
-worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.9" }
+lwc = { module = "com.griefcraft:lwc", version = "2.4.0" }
+worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.10" }
 papi = { module = "me.clip:placeholderapi", version = "2.11.5" }
 
 # Sponge

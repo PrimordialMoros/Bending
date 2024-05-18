@@ -40,6 +40,7 @@ import me.moros.bending.api.config.attribute.Modifiable;
 import me.moros.bending.api.platform.Direction;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.EntityType;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.particle.ParticleBuilder;
 import me.moros.bending.api.platform.sound.SoundEffect;
@@ -235,7 +236,9 @@ public class FireWall extends AbilityInstance {
     }
 
     if (entity.isProjectile()) {
-      entity.remove();
+      if (entity.type() != EntityType.TRIDENT) {
+        entity.remove();
+      }
       return true;
     }
 
