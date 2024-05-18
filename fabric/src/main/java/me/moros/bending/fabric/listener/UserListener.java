@@ -85,7 +85,7 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
     ServerPlayerEvents.INTERACT.register(this::onLeftClickAir);
     ServerPlayerEvents.TOGGLE_SNEAK.register(this::onUserSneak);
     ServerPlayerEvents.TOGGLE_SPRINT.register(this::onUserSprint);
-    EntityElytraEvents.ALLOW.register(this::onUserGlide);
+    EntityElytraEvents.CUSTOM.register(this::onUserGlide);
     AttackBlockCallback.EVENT.register(this::onLeftClickBlock);
     UseBlockCallback.EVENT.register(this::onRightClickBlock);
     UseItemCallback.EVENT.register(this::onRightClickAir);
@@ -239,15 +239,15 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
     return true;
   }
 
-  private boolean onUserGlide(LivingEntity entity) {
+  private boolean onUserGlide(LivingEntity entity, boolean tickElytra) {
     if (entity.level() instanceof ServerLevel world && !disabledWorld(world)) {
       if (ActionLimiter.isLimited(entity.getUUID(), ActionType.MOVE)) {
         return false;
       }
       User user = Registries.BENDERS.get(entity.getUUID());
-      return user == null || !game().activationController().onUserGlide(user);
+      return user != null && game().activationController().onUserGlide(user);
     }
-    return true;
+    return false;
   }
 
   private void onUserGameModeChange(ServerPlayer player, GameType gameType) {
