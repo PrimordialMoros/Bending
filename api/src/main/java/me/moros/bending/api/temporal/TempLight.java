@@ -108,13 +108,6 @@ public final class TempLight extends Temporary {
     lock = false;
   }
 
-  @Deprecated(forRemoval = true)
-  public TempLight unlockAndRevert() {
-    unlock();
-    revert();
-    return this;
-  }
-
   public Block block() {
     return block;
   }

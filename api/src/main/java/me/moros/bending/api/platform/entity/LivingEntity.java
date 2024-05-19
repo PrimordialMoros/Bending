@@ -159,30 +159,5 @@ public interface LivingEntity extends Entity {
     return false;
   }
 
-  @Deprecated(forRemoval = true)
-  default boolean ai() {
-    return property(EntityProperties.AI) == Boolean.TRUE;
-  }
-
-  @Deprecated(forRemoval = true)
-  default void ai(boolean value) {
-    setProperty(EntityProperties.AI, value);
-  }
-
-  @Deprecated(forRemoval = true)
-  default int airCapacity() {
-    return propertyValue(EntityProperties.MAX_OXYGEN);
-  }
-
-  @Deprecated(forRemoval = true)
-  default int remainingAir() {
-    return propertyValue(EntityProperties.REMAINING_OXYGEN);
-  }
-
-  @Deprecated(forRemoval = true)
-  default void remainingAir(int amount) {
-    setProperty(EntityProperties.REMAINING_OXYGEN, amount);
-  }
-
   Entity shootArrow(Position origin, Vector3d direction, double power);
 }

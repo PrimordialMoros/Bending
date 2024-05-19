@@ -41,7 +41,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @SuppressWarnings("unchecked")
 public final class Registries {
   private static final Map<DataKey<?>, Registry<Key, ? extends Keyed>> REGISTRIES_BY_KEY = new HashMap<>();
-  private static final Map<Class<? extends Keyed>, Registry<Key, ? extends Keyed>> REGISTRIES_BY_CLASS = new HashMap<>();
 
   public static final Registry<Key, AbilityDescription> ABILITIES = create("ability", AbilityDescription.class);
   public static final Registry<Key, Sequence> SEQUENCES = create("sequence", Sequence.class);
@@ -65,15 +64,9 @@ public final class Registries {
     return Objects.requireNonNull(get(type));
   }
 
-  @Deprecated(forRemoval = true)
-  public static <T extends Keyed> @Nullable Registry<Key, T> get(Class<T> type) {
-    return (Registry<Key, T>) REGISTRIES_BY_CLASS.get(type);
-  }
-
   private static <T extends Keyed> Registry<Key, T> create(String name, Class<T> clazz) {
     Registry<Key, T> registry = Registry.simpleBuilder(KeyUtil.data("registry." + name, clazz)).build();
     REGISTRIES_BY_KEY.put(registry.key(), registry);
-    REGISTRIES_BY_CLASS.put(clazz, registry);
     return registry;
   }
 }

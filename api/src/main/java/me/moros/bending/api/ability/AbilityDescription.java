@@ -77,11 +77,6 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
     return displayName;
   }
 
-  @Deprecated(forRemoval = true)
-  public Element element() {
-    return elements.iterator().next();
-  }
-
   public Set<Element> elements() {
     return elements;
   }

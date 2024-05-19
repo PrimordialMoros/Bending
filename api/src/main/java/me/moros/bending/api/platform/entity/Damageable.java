@@ -23,12 +23,6 @@ import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.user.User;
 
 public interface Damageable {
-  @Deprecated(forRemoval = true)
-  double maxHealth();
-
-  @Deprecated(forRemoval = true)
-  double health();
-
   default boolean damage(double damage) {
     return false;
   }

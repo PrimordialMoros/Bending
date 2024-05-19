@@ -20,10 +20,8 @@
 package me.moros.bending.api.platform.entity.player;
 
 import java.util.List;
-import java.util.Locale;
 
 import me.moros.bending.api.collision.geometry.AABB;
-import me.moros.bending.api.locale.Translation;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.Entity;
@@ -31,16 +29,10 @@ import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.PlayerInventory;
 import me.moros.math.Vector3d;
-import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 
 public interface Player extends LivingEntity {
   boolean hasPermission(String permission);
-
-  @Deprecated(forRemoval = true)
-  default Locale locale() {
-    return getOrDefault(Identity.LOCALE, Translation.DEFAULT_LOCALE);
-  }
 
   @Override
   PlayerInventory inventory();

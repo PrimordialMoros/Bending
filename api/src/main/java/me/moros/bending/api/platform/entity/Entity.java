@@ -126,11 +126,6 @@ public interface Entity extends ForwardingAudience.Single, Damageable, DataHolde
 
   boolean valid();
 
-  @Deprecated(forRemoval = true)
-  default boolean dead() {
-    return propertyValue(EntityProperties.DEAD);
-  }
-
   default AABB bounds() {
     return dimensions(location());
   }
@@ -214,77 +209,12 @@ public interface Entity extends ForwardingAudience.Single, Damageable, DataHolde
     return inLava() && Platform.instance().nativeAdapter().eyeInLava(this);
   }
 
-  @Deprecated(forRemoval = true)
-  default boolean visible() {
-    return propertyValue(EntityProperties.VISIBLE);
-  }
-
   void remove();
 
   boolean isProjectile();
 
   default boolean teleport(Position position) {
     return setProperty(EntityProperties.POSITION, position.toVector3d());
-  }
-
-  @Deprecated(forRemoval = true)
-  default double fallDistance() {
-    return propertyValue(EntityProperties.FALL_DISTANCE);
-  }
-
-  @Deprecated(forRemoval = true)
-  default void fallDistance(double distance) {
-    setProperty(EntityProperties.FALL_DISTANCE, (float) distance);
-  }
-
-  @Deprecated(forRemoval = true)
-  default int maxFreezeTicks() {
-    return propertyValue(EntityProperties.REQUIRED_TICKS_TO_FREEZE);
-  }
-
-  @Deprecated(forRemoval = true)
-  default int freezeTicks() {
-    return propertyValue(EntityProperties.FREEZE_TICKS);
-  }
-
-  @Deprecated(forRemoval = true)
-  default void freezeTicks(int ticks) {
-    setProperty(EntityProperties.FREEZE_TICKS, ticks);
-  }
-
-  @Deprecated(forRemoval = true)
-  default int maxFireTicks() {
-    return propertyValue(EntityProperties.FIRE_IMMUNE_TICKS);
-  }
-
-  @Deprecated(forRemoval = true)
-  default int fireTicks() {
-    return propertyValue(EntityProperties.FIRE_TICKS);
-  }
-
-  @Deprecated(forRemoval = true)
-  default void fireTicks(int ticks) {
-    setProperty(EntityProperties.FIRE_TICKS, ticks);
-  }
-
-  @Deprecated(forRemoval = true)
-  default boolean gravity() {
-    return propertyValue(EntityProperties.GRAVITY);
-  }
-
-  @Deprecated(forRemoval = true)
-  default void gravity(boolean value) {
-    setProperty(EntityProperties.GRAVITY, value);
-  }
-
-  @Deprecated(forRemoval = true)
-  default boolean invulnerable() {
-    return propertyValue(EntityProperties.INVULNERABLE);
-  }
-
-  @Deprecated(forRemoval = true)
-  default void invulnerable(boolean value) {
-    setProperty(EntityProperties.INVULNERABLE, value);
   }
 
   default TriState checkProperty(BooleanProperty property) {
@@ -306,18 +236,4 @@ public interface Entity extends ForwardingAudience.Single, Damageable, DataHolde
   <V> boolean setProperty(DataKeyed<V> dataKeyed, V value);
 
   <V> boolean editProperty(DataKeyed<V> dataKeyed, UnaryOperator<V> operator);
-
-  @Deprecated(forRemoval = true)
-  @Override
-  default double maxHealth() {
-    var health = property(EntityProperties.MAX_HEALTH);
-    return health == null ? 0 : health.doubleValue();
-  }
-
-  @Deprecated(forRemoval = true)
-  @Override
-  default double health() {
-    var health = property(EntityProperties.HEALTH);
-    return health == null ? 0 : health.doubleValue();
-  }
 }
