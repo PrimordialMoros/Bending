@@ -30,6 +30,7 @@ import me.moros.bending.api.platform.damage.DamageCause;
 import me.moros.bending.api.platform.entity.DelegateEntity;
 import me.moros.bending.api.platform.entity.DelegateLivingEntity;
 import me.moros.bending.api.platform.entity.DelegatePlayer;
+import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.platform.potion.Potion;
@@ -219,5 +220,14 @@ public final class PlatformAdapter {
 
   public static BlockData toBukkitData(BlockState state) {
     return ((BukkitBlockState) state).handle();
+  }
+
+  public static GameMode fromBukkitGameMode(org.bukkit.GameMode gameMode) {
+    return switch (gameMode) {
+      case SURVIVAL -> GameMode.SURVIVAL;
+      case CREATIVE -> GameMode.CREATIVE;
+      case ADVENTURE -> GameMode.ADVENTURE;
+      case SPECTATOR -> GameMode.SPECTATOR;
+    };
   }
 }

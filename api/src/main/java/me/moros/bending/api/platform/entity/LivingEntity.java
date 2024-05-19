@@ -96,15 +96,16 @@ public interface LivingEntity extends Entity {
    */
   default Vector3d mainHandSide() {
     Vector3d dir = direction().multiply(0.4);
-    return switch (isRightHanded()) {
+    return switch (TriState.byBoolean(property(EntityProperties.RIGHT_HAND))) {
       case TRUE -> handSide(true);
       case FALSE -> handSide(false);
       case NOT_SET -> eyeLocation().add(dir);
     };
   }
 
+  @Deprecated(forRemoval = true)
   default TriState isRightHanded() {
-    return TriState.NOT_SET;
+    return TriState.byBoolean(property(EntityProperties.RIGHT_HAND));
   }
 
   /**

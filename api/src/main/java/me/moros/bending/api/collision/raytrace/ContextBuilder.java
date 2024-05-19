@@ -26,6 +26,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.platform.entity.player.Player;
@@ -204,7 +205,7 @@ public final class ContextBuilder {
   }
 
   private static boolean userPredicate(Entity check, Entity entity) {
-    if (check instanceof Player player && player.gamemode() == GameMode.SPECTATOR) {
+    if (check.property(EntityProperties.GAMEMODE) == GameMode.SPECTATOR) {
       return false;
     }
     return check instanceof LivingEntity && !check.uuid().equals(entity.uuid());

@@ -20,13 +20,10 @@
 package me.moros.bending.paper.platform.entity;
 
 import me.moros.bending.api.platform.entity.Entity;
-import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.PlayerInventory;
 import me.moros.bending.paper.platform.PlatformAdapter;
 import me.moros.bending.paper.platform.item.BukkitPlayerInventory;
-import net.kyori.adventure.util.TriState;
-import org.bukkit.inventory.MainHand;
 
 public class BukkitPlayer extends BukkitLivingEntity implements Player {
   public BukkitPlayer(org.bukkit.entity.Player handle) {
@@ -39,13 +36,13 @@ public class BukkitPlayer extends BukkitLivingEntity implements Player {
   }
 
   @Override
-  public boolean isOnGround() {
-    return Player.super.isOnGround();
+  public boolean valid() {
+    return handle().isConnected();
   }
 
   @Override
-  public boolean hasPermission(String permission) {
-    return handle().hasPermission(permission);
+  public boolean isOnGround() {
+    return Player.super.isOnGround();
   }
 
   @Override
@@ -54,23 +51,8 @@ public class BukkitPlayer extends BukkitLivingEntity implements Player {
   }
 
   @Override
-  public boolean valid() {
-    return handle().isConnected();
-  }
-
-  @Override
-  public TriState isRightHanded() {
-    return TriState.byBoolean(handle().getMainHand() == MainHand.RIGHT);
-  }
-
-  @Override
-  public GameMode gamemode() {
-    return switch (handle().getGameMode()) {
-      case SURVIVAL -> GameMode.SURVIVAL;
-      case CREATIVE -> GameMode.CREATIVE;
-      case ADVENTURE -> GameMode.ADVENTURE;
-      case SPECTATOR -> GameMode.SPECTATOR;
-    };
+  public boolean hasPermission(String permission) {
+    return handle().hasPermission(permission);
   }
 
   @Override

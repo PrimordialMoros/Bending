@@ -29,7 +29,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 /**
  * Utility class to easily schedule sync, async tasks.
  */
-public class Tasker {
+public final class Tasker {
   private Tasker() {
   }
 

@@ -28,7 +28,6 @@ import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.platform.entity.EntityType;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.entity.player.GameMode;
-import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.temporal.TempEntity;
 import me.moros.bending.api.user.User;
 import me.moros.math.Vector3d;
@@ -120,8 +119,9 @@ public final class CollisionUtil {
   }
 
   private static boolean isValidEntity(Entity entity) {
-    if (entity instanceof Player player) {
-      return player.gamemode() != GameMode.SPECTATOR;
+    EntityType type = entity.type();
+    if (type == EntityType.PLAYER) {
+      return entity.property(EntityProperties.GAMEMODE) != GameMode.SPECTATOR;
     } else if (entity.type() == EntityType.FALLING_BLOCK) {
       return !TempEntity.MANAGER.isTemp(entity.id());
     } else if (entity.type() == EntityType.ARMOR_STAND) {

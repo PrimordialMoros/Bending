@@ -21,6 +21,7 @@ package me.moros.bending.api.platform.entity;
 
 import java.util.UUID;
 
+import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.platform.property.BooleanProperty;
 import me.moros.bending.api.platform.property.DoubleProperty;
 import me.moros.bending.api.platform.property.FloatProperty;
@@ -74,5 +75,6 @@ public final class EntityProperties {
   public static final DataKeyed<World> WORLD = prop("world", World.class);
   public static final DataKeyed<UUID> UUID = prop("uuid", UUID.class);
   public static final DataKeyed<EntityType> ENTITY_TYPE = prop("entity_type", EntityType.class);
-
+  public static final DataKeyed<Boolean> RIGHT_HAND = prop("right_hand", Boolean.class);
+  public static final DataKeyed<GameMode> GAMEMODE = prop("gamemode", GameMode.class);
 }

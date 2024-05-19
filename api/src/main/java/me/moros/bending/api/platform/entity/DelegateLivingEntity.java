@@ -21,8 +21,6 @@ package me.moros.bending.api.platform.entity;
 
 import java.util.Collection;
 
-import me.moros.bending.api.collision.geometry.Ray;
-import me.moros.bending.api.collision.raytrace.ContextBuilder;
 import me.moros.bending.api.platform.item.Inventory;
 import me.moros.bending.api.platform.potion.Potion;
 import me.moros.bending.api.platform.potion.PotionEffect;
@@ -43,48 +41,8 @@ public interface DelegateLivingEntity extends DelegateEntity, LivingEntity {
   }
 
   @Override
-  default Ray ray() {
-    return entity().ray();
-  }
-
-  @Override
-  default Ray ray(double range) {
-    return entity().ray(range);
-  }
-
-  @Override
   default @Nullable Inventory inventory() {
     return entity().inventory();
-  }
-
-  @Override
-  default ContextBuilder rayTrace(double range) {
-    return entity().rayTrace(range);
-  }
-
-  @Override
-  default ContextBuilder rayTrace(Vector3d origin, Vector3d dir) {
-    return entity().rayTrace(origin, dir);
-  }
-
-  @Override
-  default Vector3d mainHandSide() {
-    return entity().mainHandSide();
-  }
-
-  @Override
-  default Vector3d handSide(boolean right) {
-    return entity().handSide(right);
-  }
-
-  @Override
-  default Vector3d rightSide() {
-    return entity().rightSide();
-  }
-
-  @Override
-  default Vector3d leftSide() {
-    return entity().leftSide();
   }
 
   @Override

@@ -27,6 +27,7 @@ import me.moros.bending.api.game.Game;
 import me.moros.bending.api.gui.Board;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.entity.DelegatePlayer;
+import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.util.FeaturePermissions;
@@ -53,7 +54,7 @@ final class BendingPlayer extends BendingUser implements DelegatePlayer {
 
   @Override
   public boolean isSpectator() {
-    return gamemode() == GameMode.SPECTATOR;
+    return propertyValue(EntityProperties.GAMEMODE) == GameMode.SPECTATOR;
   }
 
   @Override

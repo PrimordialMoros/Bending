@@ -21,14 +21,11 @@ package me.moros.bending.fabric.platform.entity;
 
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import me.moros.bending.api.platform.entity.Entity;
-import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.PlayerInventory;
 import me.moros.bending.fabric.platform.item.FabricPlayerInventory;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.util.TriState;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.HumanoidArm;
 
 public class FabricPlayer extends FabricLivingEntity implements Player {
   public FabricPlayer(ServerPlayer handle) {
@@ -41,13 +38,13 @@ public class FabricPlayer extends FabricLivingEntity implements Player {
   }
 
   @Override
-  public boolean isOnGround() {
-    return Player.super.isOnGround();
+  public boolean valid() {
+    return !handle().hasDisconnected();
   }
 
   @Override
-  public boolean hasPermission(String permission) {
-    return Permissions.check(handle(), permission, handle().serverLevel().getServer().getOperatorUserPermissionLevel());
+  public boolean isOnGround() {
+    return Player.super.isOnGround();
   }
 
   @Override
@@ -56,23 +53,8 @@ public class FabricPlayer extends FabricLivingEntity implements Player {
   }
 
   @Override
-  public boolean valid() {
-    return !handle().hasDisconnected();
-  }
-
-  @Override
-  public TriState isRightHanded() {
-    return TriState.byBoolean(handle().getMainArm() == HumanoidArm.RIGHT);
-  }
-
-  @Override
-  public GameMode gamemode() {
-    return switch (handle().gameMode.getGameModeForPlayer()) {
-      case SURVIVAL -> GameMode.SURVIVAL;
-      case CREATIVE -> GameMode.CREATIVE;
-      case ADVENTURE -> GameMode.ADVENTURE;
-      case SPECTATOR -> GameMode.SPECTATOR;
-    };
+  public boolean hasPermission(String permission) {
+    return Permissions.check(handle(), permission, handle().serverLevel().getServer().getOperatorUserPermissionLevel());
   }
 
   @Override

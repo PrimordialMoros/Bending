@@ -64,7 +64,7 @@ cloud-sponge = { module = "cloud.commandframework:cloud-sponge", version.ref = "
 
 # Databases
 mysql = { module = "com.mysql:mysql-connector-j", version = "8.4.0" }
-mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.3.3" }
+mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.4.0" }
 postgresql = { module = "org.postgresql:postgresql", version = "42.7.3" }
 h2 = { module = "com.h2database:h2", version = "2.2.224" }
 hsql = { module = "org.hsqldb:hsqldb", version = "2.7.2" }
@@ -80,7 +80,7 @@ fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.
 # Bukkit
 inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.14" }
 grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.3" }
-towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.100.2.8" }
+towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.100.2.9" }
 lwc = { module = "com.griefcraft:lwc", version = "2.4.0" }
 worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.10" }
 papi = { module = "me.clip:placeholderapi", version = "2.11.5" }
@@ -88,7 +88,7 @@ papi = { module = "me.clip:placeholderapi", version = "2.11.5" }
 # Sponge
 sponge-api = { module = "org.spongepowered:spongeapi", version.ref = "sponge-api" }
 sponge-common = { module = "org.spongepowered:sponge", version.ref = "sponge-common" }
-sponge-mixin = { module = "org.spongepowered:mixin", version = "0.8.5" }
+sponge-mixin = { module = "org.spongepowered:mixin", version = "0.8.6" }
 
 # Plugins for build-logic
 shadow = { module = "com.github.johnrengelman:shadow", version.ref = "shadow" }

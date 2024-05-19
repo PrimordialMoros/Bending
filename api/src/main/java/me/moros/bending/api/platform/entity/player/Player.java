@@ -32,11 +32,6 @@ import me.moros.math.Vector3d;
 import net.kyori.adventure.text.Component;
 
 public interface Player extends LivingEntity {
-  boolean hasPermission(String permission);
-
-  @Override
-  PlayerInventory inventory();
-
   /**
    * Accurately checks if this player is standing on ground using {@link AABB}.
    * @return true if entity standing on ground, false otherwise
@@ -53,7 +48,10 @@ public interface Player extends LivingEntity {
     return false;
   }
 
-  GameMode gamemode();
+  @Override
+  PlayerInventory inventory();
+
+  boolean hasPermission(String permission);
 
   boolean canSee(Entity other);
 

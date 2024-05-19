@@ -19,7 +19,6 @@
 
 package me.moros.bending.api.platform.entity;
 
-import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.PlayerInventory;
 
@@ -31,6 +30,11 @@ public interface DelegatePlayer extends DelegateLivingEntity, Player {
   Player entity();
 
   @Override
+  default boolean hasPermission(String permission) {
+    return entity().hasPermission(permission);
+  }
+
+  @Override
   default PlayerInventory inventory() {
     return entity().inventory();
   }
@@ -38,11 +42,6 @@ public interface DelegatePlayer extends DelegateLivingEntity, Player {
   @Override
   default boolean isOnGround() {
     return entity().isOnGround();
-  }
-
-  @Override
-  default GameMode gamemode() {
-    return entity().gamemode();
   }
 
   @Override

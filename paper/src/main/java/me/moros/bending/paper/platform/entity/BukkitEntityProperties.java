@@ -24,6 +24,7 @@ import java.util.Objects;
 import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.platform.entity.EntityType;
 import me.moros.bending.common.data.DataProviderRegistry;
+import me.moros.bending.paper.platform.PlatformAdapter;
 import me.moros.bending.paper.platform.world.BukkitWorld;
 import me.moros.math.Vector3d;
 import org.bukkit.Location;
@@ -33,6 +34,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.MainHand;
 import org.bukkit.util.Vector;
 
 final class BukkitEntityProperties {
@@ -136,6 +138,10 @@ final class BukkitEntityProperties {
         .get(Entity::getUniqueId))
       .create(EntityProperties.ENTITY_TYPE, Entity.class, b -> b
         .get(e -> EntityType.registry().getOrThrow(e.getType().key())))
+      .create(EntityProperties.RIGHT_HAND, Player.class, b -> b
+        .get(e -> e.getMainHand() == MainHand.RIGHT))
+      .create(EntityProperties.GAMEMODE, Player.class, b -> b
+        .get(e -> PlatformAdapter.fromBukkitGameMode(e.getGameMode())))
       .build();
   }
 }

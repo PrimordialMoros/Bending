@@ -25,6 +25,7 @@ import me.moros.bending.api.platform.damage.DamageCause;
 import me.moros.bending.api.platform.entity.DelegateEntity;
 import me.moros.bending.api.platform.entity.DelegateLivingEntity;
 import me.moros.bending.api.platform.entity.DelegatePlayer;
+import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
@@ -52,6 +53,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.GameType;
 
 public final class PlatformAdapter {
   private PlatformAdapter() {
@@ -181,5 +183,14 @@ public final class PlatformAdapter {
 
   public static net.minecraft.world.level.block.state.BlockState toFabricData(BlockState state) {
     return ((FabricBlockState) state).handle();
+  }
+
+  public static GameMode fromFabricGameMode(GameType gameType) {
+    return switch (gameType) {
+      case SURVIVAL -> GameMode.SURVIVAL;
+      case CREATIVE -> GameMode.CREATIVE;
+      case ADVENTURE -> GameMode.ADVENTURE;
+      case SPECTATOR -> GameMode.SPECTATOR;
+    };
   }
 }

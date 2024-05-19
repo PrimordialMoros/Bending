@@ -24,12 +24,14 @@ import me.moros.bending.api.platform.entity.EntityType;
 import me.moros.bending.common.data.DataProviderRegistry;
 import me.moros.bending.fabric.mixin.accessor.CreeperAccess;
 import me.moros.bending.fabric.mixin.accessor.EntityAccess;
+import me.moros.bending.fabric.platform.PlatformAdapter;
 import me.moros.bending.fabric.platform.world.FabricWorld;
 import me.moros.math.Vector3d;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -162,6 +164,10 @@ final class FabricEntityProperties {
         .get(Entity::getUUID))
       .create(EntityProperties.ENTITY_TYPE, Entity.class, b -> b
         .get(e -> EntityType.registry().getOrThrow(BuiltInRegistries.ENTITY_TYPE.getKey(e.getType()))))
+      .create(EntityProperties.RIGHT_HAND, ServerPlayer.class, b -> b
+        .get(e -> e.getMainArm() == HumanoidArm.RIGHT))
+      .create(EntityProperties.GAMEMODE, ServerPlayer.class, b -> b
+        .get(e -> PlatformAdapter.fromFabricGameMode(e.gameMode.getGameModeForPlayer())))
       .build();
   }
 }
