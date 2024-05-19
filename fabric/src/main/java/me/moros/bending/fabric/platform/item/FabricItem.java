@@ -35,11 +35,13 @@ public final class FabricItem implements ItemSnapshot {
   private final Item type;
   private final ItemStack handle;
   private final Supplier<DataHolder> holderSupplier;
+  private final int hashcode;
 
   public FabricItem(ItemStack handle) {
     this.type = PlatformAdapter.fromFabricItem(handle.getItem());
     this.handle = handle.copy();
     this.holderSupplier = Suppliers.lazy(() -> FabricPersistentDataHolder.create(this.handle));
+    this.hashcode = ItemStack.hashItemAndComponents(this.handle);
   }
 
   public ItemStack copy() {
@@ -62,12 +64,18 @@ public final class FabricItem implements ItemSnapshot {
   }
 
   @Override
-  public <T> void add(DataKey<T> key, T value) {
-    holderSupplier.get().add(key, value);
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    return ItemStack.isSameItemSameComponents(handle, ((FabricItem) obj).handle);
   }
 
   @Override
-  public <T> void remove(DataKey<T> key) {
-    holderSupplier.get().remove(key);
+  public int hashCode() {
+    return hashcode;
   }
 }

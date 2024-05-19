@@ -17,27 +17,23 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.platform.item;
+package me.moros.bending.paper.platform;
 
-import java.util.function.Supplier;
+import io.leangen.geantyref.TypeToken;
+import me.moros.bending.common.command.parser.AbilityParser;
+import net.kyori.adventure.audience.Audience;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
+import org.incendo.cloud.brigadier.BrigadierManagerHolder;
 
-import me.moros.bending.api.platform.Platform;
-import me.moros.bending.api.util.data.DataHolder;
-import me.moros.bending.api.util.data.DataKey;
-import me.moros.bending.api.util.functional.Suppliers;
-
-public interface ItemSnapshot extends DataHolder {
-  Supplier<ItemSnapshot> AIR = Suppliers.lazy(() -> Platform.instance().factory().itemBuilder(Item.AIR).build());
-
-  Item type();
-
-  int amount();
-
-  @Override
-  default <T> void add(DataKey<T> key, T value) {
+public final class BrigadierSetup {
+  private BrigadierSetup() {
   }
 
-  @Override
-  default <T> void remove(DataKey<T> key) {
+  public static <C extends Audience> void setup(BrigadierManagerHolder<C, ?> holder) {
+    holder.brigadierManager().registerMapping(
+      new TypeToken<AbilityParser<C>>() {
+      },
+      builder -> builder.toConstant(ResourceLocationArgument.id()).cloudSuggestions()
+    );
   }
 }

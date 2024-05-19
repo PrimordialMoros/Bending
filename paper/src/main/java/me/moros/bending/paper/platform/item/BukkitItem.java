@@ -35,11 +35,13 @@ public final class BukkitItem implements ItemSnapshot {
   private final Item type;
   private final ItemStack handle;
   private final Supplier<DataHolder> holderSupplier;
+  private final int hashcode;
 
   public BukkitItem(ItemStack handle) {
     this.type = PlatformAdapter.fromBukkitItem(handle.getType());
     this.handle = handle.clone();
     this.holderSupplier = Suppliers.lazy(() -> BukkitPersistentDataHolder.create(this.handle));
+    this.hashcode = this.handle.hashCode();
   }
 
   public ItemStack copy() {
@@ -62,12 +64,18 @@ public final class BukkitItem implements ItemSnapshot {
   }
 
   @Override
-  public <T> void add(DataKey<T> key, T value) {
-    holderSupplier.get().add(key, value);
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    return handle.equals(((BukkitItem) obj).handle);
   }
 
   @Override
-  public <T> void remove(DataKey<T> key) {
-    holderSupplier.get().remove(key);
+  public int hashCode() {
+    return hashcode;
   }
 }

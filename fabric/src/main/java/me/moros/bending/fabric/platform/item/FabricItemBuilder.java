@@ -27,6 +27,7 @@ import me.moros.bending.api.platform.item.ItemBuilder;
 import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.util.data.DataHolder;
 import me.moros.bending.api.util.data.DataKey;
+import me.moros.bending.fabric.platform.FabricPersistentDataHolder;
 import net.kyori.adventure.platform.fabric.FabricServerAudiences;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.component.DataComponents;
@@ -80,8 +81,9 @@ public class FabricItemBuilder implements ItemBuilder {
     }
     stack.setCount(amount);
     var fabricItem = new FabricItem(stack);
+    var store = FabricPersistentDataHolder.create(stack);
     for (var entry : meta.entrySet()) {
-      addMeta(fabricItem, entry.getKey(), entry.getValue()); // Get around type erasure
+      addMeta(store, entry.getKey(), entry.getValue()); // Get around type erasure
     }
     return fabricItem;
   }

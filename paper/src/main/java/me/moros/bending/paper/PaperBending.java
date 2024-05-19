@@ -41,6 +41,7 @@ import me.moros.bending.paper.listener.BlockListener;
 import me.moros.bending.paper.listener.ConnectionListener;
 import me.moros.bending.paper.listener.UserListener;
 import me.moros.bending.paper.listener.WorldListener;
+import me.moros.bending.paper.platform.BrigadierSetup;
 import me.moros.bending.paper.platform.BukkitPermissionInitializer;
 import me.moros.bending.paper.platform.BukkitPlatform;
 import me.moros.bending.paper.protection.ProtectionInitializer;
@@ -75,8 +76,8 @@ final class PaperBending extends AbstractBending<BendingBootstrap> {
     pluginManager.registerEvents(new WorldListener(game), parent);
 
     var manager = LegacyPaperCommandManager.createNative(parent, ExecutionCoordinator.simpleCoordinator());
-    // TODO change to brigadier
-    manager.registerAsynchronousCompletions();
+    manager.registerBrigadier();
+    BrigadierSetup.setup(manager);
     Commander.create(manager, Player.class, this).init();
 
     parent.getServer().getServicesManager().register(Game.class, game, parent, ServicePriority.Normal);
