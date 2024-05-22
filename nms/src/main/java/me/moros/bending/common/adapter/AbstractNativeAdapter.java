@@ -77,7 +77,7 @@ public abstract class AbstractNativeAdapter extends AbstractPacketUtil implement
       "bending.ability.generic.death")
       .arguments(event.target().name(), event.user().name(), event.ability().displayName());
     var bendingSource = DamageSource.of(event.user().name(), event.ability());
-    var damageSource = new AbilityDamageSource(adapt(event.user().entity()), adapt(deathMsg), bendingSource);
+    var damageSource = new AbilityDamageSource(adapt(event.user()), adapt(deathMsg), bendingSource);
     boolean result = target.hurt(damageSource, (float) event.damage());
     target.invulnerableTime = capturedInvulnerableTime;
     return result;

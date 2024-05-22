@@ -30,7 +30,6 @@ import me.moros.bending.api.ability.preset.Preset;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.gui.Board;
 import me.moros.bending.api.platform.block.Block;
-import me.moros.bending.api.platform.entity.DelegateLivingEntity;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.protection.ProtectionCache;
@@ -48,7 +47,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * Represents a user that can bend.
  */
-public sealed interface User extends DelegateLivingEntity, ElementUser, AttributeUser, PresetUser permits BendingUser {
+public sealed interface User extends LivingEntity, ElementUser, AttributeUser, PresetUser permits BendingUser {
   /**
    * Get the game object that this user belongs to.
    * @return the game

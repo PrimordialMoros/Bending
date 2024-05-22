@@ -31,6 +31,7 @@ import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.temporal.TempEntity;
 import me.moros.bending.api.user.User;
 import me.moros.math.Vector3d;
+import net.kyori.adventure.util.TriState;
 
 /**
  * Utility class to handle detect and handle ability collisions with entities.
@@ -125,7 +126,7 @@ public final class CollisionUtil {
     } else if (entity.type() == EntityType.FALLING_BLOCK) {
       return !TempEntity.MANAGER.isTemp(entity.id());
     } else if (entity.type() == EntityType.ARMOR_STAND) {
-      return entity.propertyValue(EntityProperties.VISIBLE);
+      return entity.checkProperty(EntityProperties.INVISIBLE) != TriState.TRUE;
     }
     return true;
   }

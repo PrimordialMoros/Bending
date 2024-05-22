@@ -1,5 +1,5 @@
 plugins {
-    id("base-conventions")
+    id("bending.base-conventions")
     id("org.spongepowered.gradle.vanilla")
 }
 

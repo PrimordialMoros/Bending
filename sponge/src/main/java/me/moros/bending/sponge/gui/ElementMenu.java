@@ -26,11 +26,12 @@ import java.util.Map;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.element.ElementHandler;
 import me.moros.bending.api.gui.ElementGui;
-import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.platform.entity.player.Player;
-import me.moros.bending.api.user.BendingPlayer;
+import me.moros.bending.api.registry.Registries;
+import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.Tasker;
 import me.moros.bending.common.gui.AbstractGui;
+import me.moros.bending.common.locale.Message;
 import me.moros.bending.sponge.platform.PlatformAdapter;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.enchantment.Enchantment;
@@ -48,8 +49,8 @@ import org.spongepowered.plugin.PluginContainer;
 public final class ElementMenu extends AbstractGui<ItemStack, InventoryMenu> {
   private static PluginContainer container;
 
-  private ElementMenu(ElementHandler handler, BendingPlayer user) {
-    super(handler, user);
+  private ElementMenu(ElementHandler handler, Player player) {
+    super(handler, player);
   }
 
   @Override
@@ -67,12 +68,13 @@ public final class ElementMenu extends AbstractGui<ItemStack, InventoryMenu> {
     gui.setReadOnly(true);
     gui.setTitle(Message.ELEMENTS_GUI_TITLE.build());
     inv.set(4, PlatformAdapter.toSpongeItem(generateHelpItem()));
+    User user = Registries.BENDERS.getOrThrow(player().uuid());
     int offset = 10;
     Map<Integer, DataWrapper> dataMap = new HashMap<>();
     for (Element element : Element.VALUES) {
       var data = createElementButton(element);
       var item = PlatformAdapter.toSpongeItem(data.item());
-      handleItemStackGlow(item, user().hasElement(element));
+      handleItemStackGlow(item, user.hasElement(element));
       elementMap.put(element, item);
       inv.set(offset, item);
       dataMap.put(offset, data);
@@ -99,7 +101,7 @@ public final class ElementMenu extends AbstractGui<ItemStack, InventoryMenu> {
   }
 
   private void close() {
-    var spongePlayer = PlatformAdapter.toSpongeEntity(user());
+    var spongePlayer = PlatformAdapter.toSpongeEntity(player());
     Tasker.sync().submit(spongePlayer::closeInventory);
   }
 
@@ -113,7 +115,7 @@ public final class ElementMenu extends AbstractGui<ItemStack, InventoryMenu> {
     }
   }
 
-  public static ElementGui createMenu(ElementHandler handler, BendingPlayer player) {
+  public static ElementGui createMenu(ElementHandler handler, Player player) {
     return new ElementMenu(handler, player);
   }
 

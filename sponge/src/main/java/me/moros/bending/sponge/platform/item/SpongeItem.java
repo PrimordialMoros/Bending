@@ -25,9 +25,6 @@ import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.sponge.platform.PlatformAdapter;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.inventory.ItemStack;
 
 public record SpongeItem(Item type, int amount, ItemStack handle) implements ItemSnapshot {
@@ -36,27 +33,23 @@ public record SpongeItem(Item type, int amount, ItemStack handle) implements Ite
   }
 
   @Override
-  public Optional<String> customName() {
-    return customDisplayName().map(LegacyComponentSerializer.legacySection()::serialize);
-  }
-
-  @Override
-  public Optional<Component> customDisplayName() {
-    return handle().get(Keys.CUSTOM_NAME);
-  }
-
-  @Override
   public <T> Optional<T> get(DataKey<T> key) {
     return handle().get(PlatformAdapter.dataKey(key));
   }
 
   @Override
-  public <T> void add(DataKey<T> key, T value) {
-    handle().offer(PlatformAdapter.dataKey(key), value);
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    return handle.equals(((SpongeItem) obj).handle);
   }
 
   @Override
-  public <T> void remove(DataKey<T> key) {
-    handle().remove(PlatformAdapter.dataKey(key));
+  public int hashCode() {
+    return handle.hashCode();
   }
 }

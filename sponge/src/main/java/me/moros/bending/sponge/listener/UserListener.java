@@ -19,15 +19,10 @@
 
 package me.moros.bending.sponge.listener;
 
-import java.util.ListIterator;
-
-import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.ActionType;
 import me.moros.bending.api.ability.Activation;
 import me.moros.bending.api.ability.DamageSource;
-import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.game.Game;
-import me.moros.bending.api.locale.Message;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.temporal.ActionLimiter;
 import me.moros.bending.api.temporal.TempArmor;
@@ -35,23 +30,21 @@ import me.moros.bending.api.temporal.TempBlock;
 import me.moros.bending.api.temporal.TempEntity;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.BendingEffect;
-import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.api.util.metadata.BlockInteraction;
 import me.moros.bending.api.util.metadata.EntityInteraction;
 import me.moros.bending.api.util.metadata.Metadata;
 import me.moros.bending.common.ability.earth.EarthGlove;
 import me.moros.bending.common.ability.earth.MetalCable;
-import me.moros.bending.sponge.platform.AbilityDamageSource;
+import me.moros.bending.common.locale.Message;
 import me.moros.bending.sponge.platform.PlatformAdapter;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TranslatableComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.api.data.value.Value.Mutable;
 import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -87,9 +80,8 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
-import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.LocatableSnapshot;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -229,11 +221,10 @@ public class UserListener extends SpongeListener {
 
   private void onFireDamage(Living living, LocatableBlock block) {
     TempBlock tb = TempBlock.MANAGER.get(PlatformAdapter.fromSpongeBlock(block)).orElse(null);
-    if (tb != null) {
-      var entity = PlatformAdapter.fromSpongeEntity(living);
-      int ticks = entity.fireTicks();
-      if (ticks > BendingEffect.MAX_BLOCK_FIRE_TICKS) {
-        entity.fireTicks(FastMath.ceil(BendingEffect.MAX_BLOCK_FIRE_TICKS));
+    Mutable<Ticks> ticks = living.fireTicks().orElse(null);
+    if (tb != null && ticks != null) {
+      if (ticks.get().ticks() > BendingEffect.MAX_BLOCK_FIRE_TICKS) {
+        ticks.set(Ticks.of(FastMath.ceil(BendingEffect.MAX_BLOCK_FIRE_TICKS)));
       }
     }
   }
@@ -267,11 +258,8 @@ public class UserListener extends SpongeListener {
   public void onPlayerDeath(DestructEntityEvent.Death event, @Getter("entity") ServerPlayer player) {
     DamageSource source = event.cause().first(DamageSource.class).orElseGet(() -> blockCause(event.cause()));
     if (source != null) {
-      AbilityDescription ability = source.ability();
-      TranslatableComponent msg = Component.translatable(ability.deathKey(), Message.ABILITY_GENERIC_DEATH_KEY)
-        .args(player.displayName().get(), source.name(), ability.displayName());
       // TODO check rendering
-      event.setMessage(msg);
+      event.setMessage(Message.ABILITY_DEATH_MESSAGE.build(player.displayName().get(), source.name(), source.ability()));
     }
   }
 
@@ -323,24 +311,6 @@ public class UserListener extends SpongeListener {
   public void onItemDrop(DropItemEvent.Destruct event) {
     var key = PlatformAdapter.dataKey(Metadata.ARMOR_KEY);
     event.filterEntities(e -> e.get(key).isEmpty());
-  }
-
-  @Listener(order = Order.LAST)
-  public void onItemDrop(DropItemEvent.Pre event, @First Living entity, @First AbilityDamageSource source) {
-    if (disabledWorld(entity) || entity instanceof ServerPlayer) {
-      return;
-    }
-    if (source.ability().element() == Element.FIRE) {
-      ListIterator<ItemStackSnapshot> it = event.droppedItems().listIterator();
-      while (it.hasNext()) {
-        ItemStackSnapshot item = it.next();
-        var mapped = MaterialUtil.COOKABLE.get(PlatformAdapter.fromSpongeItem(item.type()));
-        ItemType flamed = mapped == null ? null : PlatformAdapter.toSpongeItemType(mapped);
-        if (flamed != null) {
-          it.set(ItemStack.of(flamed, item.quantity()).createSnapshot());
-        }
-      }
-    }
   }
 
   @Listener(order = Order.EARLY)

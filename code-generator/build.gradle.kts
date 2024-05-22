@@ -1,6 +1,6 @@
 plugins {
     application
-    id("base-conventions")
+    id("bending.base-conventions")
 }
 
 application {

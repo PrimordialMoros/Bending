@@ -146,7 +146,7 @@ public final class TempArmor extends Temporary {
       for (var entry : armorItems) {
         inv.item(entry.getKey(), entry.getValue());
       }
-      return Optional.of(new TempArmor(user.entity(), MANAGER.fromMillis(duration)));
+      return Optional.of(new TempArmor(user, MANAGER.fromMillis(duration)));
     }
 
     private ItemSnapshot createArmorItem(Item type) {

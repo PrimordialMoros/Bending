@@ -19,30 +19,17 @@
 
 package me.moros.bending.sponge.adapter;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.world.World;
 import me.moros.bending.common.adapter.AbstractNativeAdapter;
-import me.moros.bending.sponge.mixin.accessor.AdvancementProgressAccess;
-import me.moros.bending.sponge.mixin.accessor.CriterionProgressAccess;
 import me.moros.bending.sponge.mixin.accessor.EntityAccess;
-import me.moros.bending.sponge.platform.block.SpongeBlockState;
-import me.moros.bending.sponge.platform.world.SpongeWorld;
+import me.moros.bending.sponge.platform.PlatformAdapter;
 import net.kyori.adventure.text.Component;
-import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.CriterionProgress;
-import net.minecraft.advancements.FrameType;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.Sponge;
@@ -55,12 +42,17 @@ public final class NativeAdapterImpl extends AbstractNativeAdapter {
 
   @Override
   protected ServerLevel adapt(World world) {
-    return (ServerLevel) ((SpongeWorld) world).handle();
+    return (ServerLevel) PlatformAdapter.toSpongeWorld(world);
   }
 
   @Override
   protected BlockState adapt(me.moros.bending.api.platform.block.BlockState state) {
-    return (BlockState) ((SpongeBlockState) state).handle();
+    return (BlockState) PlatformAdapter.toSpongeData(state);
+  }
+
+  @Override
+  protected Entity adapt(me.moros.bending.api.platform.entity.Entity entity) {
+    return (Entity) PlatformAdapter.toSpongeEntity(entity);
   }
 
   @Override
@@ -75,28 +67,6 @@ public final class NativeAdapterImpl extends AbstractNativeAdapter {
 
   @Override
   protected int nextEntityId() {
-    return EntityAccess.idCounter().incrementAndGet();
-  }
-
-  @Override
-  protected ClientboundUpdateAdvancementsPacket createNotificationPacket(Item item, Component title) {
-    String identifier = "bending:notification";
-    ResourceLocation id = new ResourceLocation(identifier);
-    String criteriaId = "bending:criteria_progress";
-    ItemStack icon = adapt(item);
-    net.minecraft.network.chat.Component nmsTitle = SpongeAdventure.asVanilla(title);
-    net.minecraft.network.chat.Component nmsDesc = net.minecraft.network.chat.Component.empty();
-    FrameType type = FrameType.TASK;
-    var advancement = Advancement.Builder.advancement()
-      .display(icon, nmsTitle, nmsDesc, null, type, true, false, true)
-      .addCriterion(criteriaId, new Criterion()).build(id);
-    // Bypass sponge mixins
-    Map<String, CriterionProgress> map = new HashMap<>();
-    var criterion = new CriterionProgress();
-    //noinspection DataFlowIssue
-    ((CriterionProgressAccess) criterion).setDate(new Date());
-    map.put(criteriaId, criterion);
-    var progressMap = Map.of(id, AdvancementProgressAccess.bending$create(map));
-    return new ClientboundUpdateAdvancementsPacket(false, List.of(advancement), Set.of(), progressMap);
+    return EntityAccess.bending$idCounter().incrementAndGet();
   }
 }

@@ -28,7 +28,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(Entity.class)
 public interface EntityAccess {
   @Accessor("ENTITY_COUNTER")
-  static AtomicInteger idCounter() {
+  static AtomicInteger bending$idCounter() {
     throw new AssertionError();
   }
 }

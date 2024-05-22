@@ -37,13 +37,13 @@ public record SpongeBlockState(org.spongepowered.api.block.BlockState handle, Bl
 
   @Override
   public <V extends Comparable<V>> @Nullable V property(Property<V> property) {
-    var spongeProperty = PropertyMapper.find(property);
+    var spongeProperty = SpongeBlockStateProperties.find(property);
     return spongeProperty == null ? null : handle().stateProperty(spongeProperty).orElse(null);
   }
 
   @Override
   public <V extends Comparable<V>> BlockState withProperty(Property<V> property, V value) {
-    var spongeProperty = PropertyMapper.find(property);
+    var spongeProperty = SpongeBlockStateProperties.find(property);
     if (spongeProperty != null) {
       return handle().withStateProperty(spongeProperty, value)
         .map(h -> new SpongeBlockState(h, type())).orElse(this);

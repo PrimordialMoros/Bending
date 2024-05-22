@@ -1,5 +1,5 @@
 plugins {
-    id("base-conventions")
+    id("bending.base-conventions")
     id("com.modrinth.minotaur")
 }
 
@@ -23,18 +23,18 @@ tasks {
         configurations = listOf(project.configurations.getByName("bendingImplementation"))
         archiveClassifier = ""
         archiveBaseName = project.name
-        from("$rootDir/LICENSE") {
-            rename { "${rootProject.name.uppercase()}_${it}" }
+        from(rootDir.resolve("LICENSE")) {
+            rename { "${it}_${rootProject.name.uppercase()}" }
         }
         val excluded = setOf("checker-qual", "error_prone_annotations", "geantyref", "slf4j-api")
         dependencies {
-            reloc("org.bstats", "bstats")
-            reloc("com.seiama.event", "eventbus")
-            reloc("me.moros.storage", "storage")
             exclude {
                 excluded.contains(it.moduleName)
             }
         }
+        reloc("org.bstats", "bstats")
+        reloc("com.seiama.event", "eventbus")
+        reloc("me.moros.storage", "storage")
         mergeServiceFiles()
     }
     val copyJar = register("copyJar", CopyFile::class) {

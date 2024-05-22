@@ -21,17 +21,16 @@ package me.moros.bending.sponge;
 
 import java.nio.file.Path;
 
-import cloud.commandframework.execution.CommandExecutionCoordinator;
-import cloud.commandframework.sponge.SpongeCommandManager;
 import com.google.inject.Inject;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.util.metadata.Metadata;
 import me.moros.bending.common.AbstractBending;
 import me.moros.bending.common.command.Commander;
+import me.moros.bending.common.hook.LuckPermsHook;
+import me.moros.bending.common.hook.PresetLimits;
 import me.moros.bending.common.util.ReflectionUtil;
 import me.moros.bending.sponge.gui.ElementMenu;
-import me.moros.bending.sponge.hook.LuckPermsHook;
 import me.moros.bending.sponge.listener.BlockListener;
 import me.moros.bending.sponge.listener.ConnectionListener;
 import me.moros.bending.sponge.listener.PlaceholderListener;
@@ -45,10 +44,14 @@ import me.moros.bending.sponge.platform.SpongePermissionInitializer;
 import me.moros.bending.sponge.platform.SpongePlatform;
 import me.moros.tasker.sponge.SpongeExecutor;
 import org.bstats.sponge.Metrics;
+import org.incendo.cloud.SenderMapper;
+import org.incendo.cloud.execution.ExecutionCoordinator;
+import org.incendo.cloud.sponge.SpongeCommandManager;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.datapack.DataPacks;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.entity.damage.DamageScalings;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
@@ -76,8 +79,8 @@ public final class SpongeBending extends AbstractBending<PluginContainer> {
     metricsFactory.make(8717);
 
     SpongeCommandManager<CommandSender> manager = new SpongeCommandManager<>(
-      container, CommandExecutionCoordinator.simpleCoordinator(),
-      CommandSender::cause, CommandSender::from
+      container, ExecutionCoordinator.simpleCoordinator(),
+      SenderMapper.create(CommandSender::from, CommandSender::cause)
     );
     Commander.create(manager, PlayerCommandSender.class, this).init();
   }
@@ -100,7 +103,8 @@ public final class SpongeBending extends AbstractBending<PluginContainer> {
   @Listener
   public void onGameLoad(LoadedGameEvent event) { // Plugins, Game-scoped registries are ready
     if (game != null && event.game().pluginManager().plugin("LuckPerms").isPresent()) {
-      LuckPermsHook.register(event.game().serviceProvider());
+      var hook = LuckPermsHook.register(ServerPlayer::uniqueId);
+      registerNamedAddon(PresetLimits.NAME, hook::presetLimits);
     }
   }
 
@@ -143,7 +147,7 @@ public final class SpongeBending extends AbstractBending<PluginContainer> {
 
   @Override
   public String author() {
-    return parent.metadata().contributors().get(0).name();
+    return parent.metadata().contributors().getFirst().name();
   }
 
   @Override

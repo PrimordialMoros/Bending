@@ -49,7 +49,9 @@ public final class EntityProperties {
   public static final BooleanProperty INVULNERABLE = boolProp("invulnerable");
   public static final BooleanProperty IN_WATER = boolProp("in_water");
   public static final BooleanProperty IN_LAVA = boolProp("in_lava");
+  @Deprecated(forRemoval = true)
   public static final BooleanProperty VISIBLE = boolProp("visible");
+  public static final BooleanProperty INVISIBLE = boolProp("invisible");
   public static final BooleanProperty DEAD = boolProp("dead");
 
   public static final IntegerProperty ENTITY_ID = intProp("entity_id");

@@ -20,22 +20,15 @@
 package me.moros.bending.sponge.platform.entity;
 
 import java.util.Optional;
-import java.util.UUID;
+import java.util.function.UnaryOperator;
 
 import me.moros.bending.api.platform.entity.Entity;
-import me.moros.bending.api.platform.entity.EntityType;
-import me.moros.bending.api.platform.world.World;
 import me.moros.bending.api.util.data.DataKey;
+import me.moros.bending.api.util.data.DataKeyed;
 import me.moros.bending.sponge.platform.PlatformAdapter;
-import me.moros.bending.sponge.platform.world.SpongeWorld;
-import me.moros.math.FastMath;
-import me.moros.math.Position;
-import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.text.Component;
-import org.spongepowered.api.data.Keys;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.api.registry.RegistryTypes;
 
 public class SpongeEntity implements Entity {
   private final org.spongepowered.api.entity.Entity handle;
@@ -48,142 +41,14 @@ public class SpongeEntity implements Entity {
     return handle;
   }
 
-  protected net.minecraft.world.entity.Entity nmsEntity() {
-    return (net.minecraft.world.entity.Entity) handle();
-  }
-
-  @Override
-  public int id() {
-    return nmsEntity().getId();
-  }
-
-  @Override
-  public Component name() {
-    return handle().displayName().get();
-  }
-
-  @Override
-  public World world() {
-    return new SpongeWorld(handle().serverLocation().world());
-  }
-
-  @Override
-  public EntityType type() {
-    return EntityType.registry().getOrThrow(PlatformAdapter.fromRsk(handle().type().key(RegistryTypes.ENTITY_TYPE)));
-  }
-
-  @Override
-  public double width() {
-    return nmsEntity().getBbWidth();
-  }
-
-  @Override
-  public double height() {
-    return nmsEntity().getBbHeight();
-  }
-
-  @Override
-  public int yaw() {
-    return FastMath.round(handle().rotation().y());
-  }
-
-  @Override
-  public int pitch() {
-    return FastMath.round(handle().rotation().x());
-  }
-
-  @Override
-  public Vector3d location() {
-    var loc = handle().serverLocation();
-    return Vector3d.of(loc.x(), loc.y(), loc.z());
-  }
-
-  @Override
-  public Vector3d direction() {
-    var dir = handle().direction();
-    return Vector3d.of(dir.x(), dir.y(), dir.z());
-  }
-
-  @Override
-  public Vector3d velocity() {
-    var vel = handle().velocity().get();
-    return Vector3d.of(vel.x(), vel.y(), vel.z());
-  }
-
-  @Override
-  public void velocity(Vector3d velocity) {
-    var vel = velocity.clampVelocity();
-    handle().offer(Keys.VELOCITY, org.spongepowered.math.vector.Vector3d.from(vel.x(), vel.y(), vel.z()));
-  }
-
   @Override
   public boolean valid() {
     return handle().isLoaded();
   }
 
   @Override
-  public boolean dead() {
-    return !nmsEntity().isAlive();
-  }
-
-  @Override
-  public int maxFreezeTicks() {
-    return nmsEntity().getTicksRequiredToFreeze();
-  }
-
-  @Override
-  public int freezeTicks() {
-    return nmsEntity().getTicksFrozen();
-  }
-
-  @Override
-  public void freezeTicks(int ticks) {
-    nmsEntity().setTicksFrozen(ticks);
-  }
-
-  @Override
-  public int maxFireTicks() {
-    return (int) handle().fireImmuneTicks().get().ticks();
-  }
-
-  @Override
-  public int fireTicks() {
-    return nmsEntity().getRemainingFireTicks();
-  }
-
-  @Override
-  public void fireTicks(int ticks) {
-    nmsEntity().setRemainingFireTicks(ticks);
-  }
-
-  @Override
   public boolean isOnGround() {
     return handle().onGround().get();
-  }
-
-  @Override
-  public boolean inWater() {
-    return nmsEntity().isInWaterOrBubble();
-  }
-
-  @Override
-  public boolean inLava() {
-    return nmsEntity().isInLava();
-  }
-
-  @Override
-  public boolean visible() {
-    return !nmsEntity().isInvisible();
-  }
-
-  @Override
-  public double fallDistance() {
-    return handle().getDouble(Keys.FALL_DISTANCE).orElse(0);
-  }
-
-  @Override
-  public void fallDistance(double distance) {
-    handle().offer(Keys.FALL_DISTANCE, distance);
   }
 
   @Override
@@ -197,29 +62,18 @@ public class SpongeEntity implements Entity {
   }
 
   @Override
-  public boolean gravity() {
-    return !nmsEntity().isNoGravity();
+  public <V> @Nullable V property(DataKeyed<V> dataKeyed) {
+    return SpongeEntityProperties.PROPERTIES.getValue(dataKeyed, handle());
   }
 
   @Override
-  public void gravity(boolean value) {
-    nmsEntity().setNoGravity(!value);
+  public <V> boolean setProperty(DataKeyed<V> dataKeyed, V value) {
+    return SpongeEntityProperties.PROPERTIES.setValue(dataKeyed, handle(), value);
   }
 
   @Override
-  public boolean invulnerable() {
-    return nmsEntity().isInvulnerable();
-  }
-
-  @Override
-  public void invulnerable(boolean value) {
-    nmsEntity().setInvulnerable(value);
-  }
-
-  @Override
-  public boolean teleport(Position position) {
-    var vec = org.spongepowered.math.vector.Vector3d.from(position.x(), position.y(), position.z());
-    return handle().setPosition(vec);
+  public <V> boolean editProperty(DataKeyed<V> dataKeyed, UnaryOperator<V> operator) {
+    return SpongeEntityProperties.PROPERTIES.editValue(dataKeyed, handle(), operator);
   }
 
   @Override
@@ -235,11 +89,6 @@ public class SpongeEntity implements Entity {
   @Override
   public <T> void remove(DataKey<T> key) {
     handle().remove(PlatformAdapter.dataKey(key));
-  }
-
-  @Override
-  public UUID uuid() {
-    return handle().uniqueId();
   }
 
   @Override

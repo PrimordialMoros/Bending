@@ -1,6 +1,6 @@
 plugins {
-    id("platform-conventions")
-    alias(libs.plugins.userdev)
+    id("bending.platform-conventions")
+    alias(libs.plugins.paperweight.userdev)
     alias(libs.plugins.hangar)
     alias(libs.plugins.run.paper)
 }
@@ -50,7 +50,7 @@ tasks {
         }
     }
     named<Copy>("processResources") {
-        filesMatching("*plugin.yml") {
+        filesMatching("paper-plugin.yml") {
             expand("version" to project.version)
         }
     }

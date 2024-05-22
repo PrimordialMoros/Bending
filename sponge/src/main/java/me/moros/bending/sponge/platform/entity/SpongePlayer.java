@@ -19,21 +19,13 @@
 
 package me.moros.bending.sponge.platform.entity;
 
-import java.util.Locale;
-import java.util.Objects;
-
 import me.moros.bending.api.platform.entity.Entity;
-import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.platform.entity.player.Player;
-import me.moros.bending.api.platform.item.Inventory;
+import me.moros.bending.api.platform.item.PlayerInventory;
 import me.moros.bending.sponge.platform.PlatformAdapter;
 import me.moros.bending.sponge.platform.item.SpongePlayerInventory;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.util.TriState;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.type.HandPreferences;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.registry.RegistryTypes;
 
 public class SpongePlayer extends SpongeLivingEntity implements Player {
   public SpongePlayer(ServerPlayer handle) {
@@ -46,49 +38,23 @@ public class SpongePlayer extends SpongeLivingEntity implements Player {
   }
 
   @Override
-  public boolean isOnGround() {
-    return Player.super.isOnGround();
-  }
-
-  @Override
-  public boolean hasPermission(String permission) {
-    return handle().hasPermission(permission);
-  }
-
-  @Override
-  public Locale locale() {
-    return handle().locale();
-  }
-
-  @Override
-  public Inventory inventory() {
-    return new SpongePlayerInventory(handle());
-  }
-
-  @Override
   public boolean valid() {
     return handle().isOnline();
   }
 
   @Override
-  public boolean sneaking() {
-    return handle().sneaking().get();
+  public boolean isOnGround() {
+    return Player.super.isOnGround();
   }
 
   @Override
-  public void sneaking(boolean sneaking) {
-    handle().offer(Keys.IS_SNEAKING, sneaking);
+  public PlayerInventory inventory() {
+    return new SpongePlayerInventory(handle());
   }
 
   @Override
-  public TriState isRightHanded() {
-    return TriState.byBoolean(handle().dominantHand().get() == HandPreferences.RIGHT.get());
-  }
-
-  @Override
-  public GameMode gamemode() {
-    var name = handle().gameMode().get().key(RegistryTypes.GAME_MODE).value();
-    return Objects.requireNonNull(GameMode.registry().fromString(name));
+  public boolean hasPermission(String permission) {
+    return handle().hasPermission(permission);
   }
 
   @Override

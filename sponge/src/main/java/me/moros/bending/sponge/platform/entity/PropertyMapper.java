@@ -19,27 +19,52 @@
 
 package me.moros.bending.sponge.platform.entity;
 
-import java.util.Map;
+import java.util.function.Function;
 
-import me.moros.bending.api.platform.property.BooleanProperty;
-import me.moros.bending.api.platform.property.EntityProperty;
+import me.moros.bending.common.data.DataProviderBuilder;
 import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
-
-import static java.util.Map.entry;
+import org.spongepowered.api.entity.Entity;
 
 final class PropertyMapper {
-  static final Map<BooleanProperty, Key<Value<Boolean>>> PROPERTIES;
+  private PropertyMapper() {
+  }
 
-  static {
-    PROPERTIES = Map.ofEntries(
-      entry(EntityProperty.SNEAKING, Keys.IS_SNEAKING),
-      entry(EntityProperty.SPRINTING, Keys.IS_SPRINTING),
-      entry(EntityProperty.ALLOW_FLIGHT, Keys.CAN_FLY),
-      entry(EntityProperty.FLYING, Keys.IS_FLYING),
-      entry(EntityProperty.GLIDING, Keys.IS_ELYTRA_FLYING),
-      entry(EntityProperty.CHARGED, Keys.IS_CHARGED)
-    );
+  static <T1 extends Entity, V> void readOnly(DataProviderBuilder<Entity, T1, V> builder,
+                                              Key<Value<V>> key) {
+    new Getter<T1, V, V>(key, Function.identity()).accept(builder);
+  }
+
+  static <T1 extends Entity, V> void property(DataProviderBuilder<Entity, T1, V> builder,
+                                              Key<Value<V>> key) {
+    new GetterSetter<T1, V, V>(key, Function.identity(), Function.identity()).accept(builder);
+  }
+
+  static <T1 extends Entity, V1, V> void readOnly(DataProviderBuilder<Entity, T1, V> builder,
+                                                  Key<Value<V1>> key,
+                                                  Function<V1, V> getterMapper) {
+    new Getter<T1, V, V1>(key, getterMapper).accept(builder);
+  }
+
+  static <T1 extends Entity, V1, V> void property(DataProviderBuilder<Entity, T1, V> builder,
+                                                  Key<Value<V1>> key,
+                                                  Function<V1, V> getterMapper,
+                                                  Function<V, V1> setterMapper) {
+    new GetterSetter<T1, V, V1>(key, getterMapper, setterMapper).accept(builder);
+  }
+
+  private record Getter<T extends Entity, V, V1>(Key<Value<V1>> key,
+                                                 Function<V1, V> getterMapper) {
+    private void accept(DataProviderBuilder<Entity, T, V> builder) {
+      builder.get(e -> e.get(key).map(getterMapper).orElseThrow());
+    }
+  }
+
+  private record GetterSetter<T extends Entity, V, V1>(Key<Value<V1>> key,
+                                                       Function<V1, V> getterMapper,
+                                                       Function<V, V1> setterMapper) {
+    private void accept(DataProviderBuilder<Entity, T, V> builder) {
+      builder.get(e -> e.get(key).map(getterMapper).orElseThrow()).set((e, v) -> e.offer(key, setterMapper.apply(v)));
+    }
   }
 }

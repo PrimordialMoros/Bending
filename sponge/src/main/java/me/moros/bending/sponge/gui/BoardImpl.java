@@ -19,88 +19,27 @@
 
 package me.moros.bending.sponge.gui;
 
-import me.moros.bending.api.locale.Message;
-import me.moros.bending.api.user.BendingPlayer;
-import me.moros.bending.common.gui.AbstractBoard;
-import me.moros.bending.sponge.platform.PlatformAdapter;
+import me.moros.bending.api.user.User;
+import me.moros.bending.common.adapter.Sidebar;
+import me.moros.bending.common.locale.Message;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.scoreboard.Scoreboard;
-import org.spongepowered.api.scoreboard.Team;
-import org.spongepowered.api.scoreboard.criteria.Criteria;
-import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
-import org.spongepowered.api.scoreboard.objective.Objective;
-import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayModes;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
-public final class BoardImpl extends AbstractBoard<Team> {
-  private final ServerPlayer spongePlayer;
-  private final Scoreboard bendingBoard;
-  private final Objective bendingSlots;
-
-  public BoardImpl(BendingPlayer user) {
-    super(user);
-    this.spongePlayer = PlatformAdapter.toSpongeEntity(user);
-    bendingBoard = Scoreboard.builder().build();
-    bendingSlots = Objective.builder().name("BendingBoard").criterion(Criteria.DUMMY)
-      .displayName(Message.BENDING_BOARD_TITLE.build()).objectiveDisplayMode(ObjectiveDisplayModes.INTEGER).build();
-    bendingBoard.addObjective(bendingSlots);
-    bendingBoard.updateDisplaySlot(bendingSlots, DisplaySlots.SIDEBAR);
-    spongePlayer.setScoreboard(bendingBoard);
-    init();
+public final class BoardImpl extends Sidebar {
+  public BoardImpl(User user) {
+    super((MinecraftServer) Sponge.server(), user);
+    init(Message.BENDING_BOARD_TITLE.build());
   }
 
   @Override
-  public void disableScoreboard() {
-    bendingBoard.clearSlot(DisplaySlots.SIDEBAR);
-    bendingBoard.teams().forEach(Team::unregister);
-    Sponge.game().server().serverScoreboard().ifPresent(spongePlayer::setScoreboard);
+  protected Component emptySlot(int slot) {
+    return Message.BENDING_BOARD_EMPTY_SLOT.build(slot);
   }
 
   @Override
-  protected void setPrefix(Team team, Component content) {
-    team.setPrefix(content);
-  }
-
-  @Override
-  protected void setSuffix(Team team, Component content) {
-    team.setSuffix(content);
-  }
-
-  @Override
-  protected Team getOrCreateTeam(int slot) {
-    return bendingBoard.team(String.valueOf(slot)).orElseGet(() -> createTeam(slot, slot).team());
-  }
-
-  @Override
-  protected Indexed<Team> createTeam(int slot, int textSlot) {
-    Team team = Team.builder().name(String.valueOf(textSlot)).build();
-    bendingBoard.registerTeam(team);
-    Component hidden = generateInvisibleLegacy(textSlot);
-    team.addMember(hidden);
-    bendingSlots.findOrCreateScore(hidden).setScore(-slot);
-    return Indexed.create(team, textSlot);
-  }
-
-  @Override
-  protected void removeTeam(Team team) {
-    team.members().forEach(bendingBoard::removeScores);
-    team.unregister();
-  }
-
-  private static final Component[] CHAT_CODES;
-
-  static {
-    var arr = NamedTextColor.NAMES.values().toArray(NamedTextColor[]::new);
-    CHAT_CODES = new Component[arr.length];
-    for (int i = 0; i < arr.length; i++) {
-      CHAT_CODES[i] = Component.text(" ", arr[i]);
-    }
-  }
-
-  private static Component generateInvisibleLegacy(int slot) {
-    Component hidden = CHAT_CODES[slot % CHAT_CODES.length];
-    return slot <= CHAT_CODES.length ? hidden : hidden.append(generateInvisibleLegacy(slot - CHAT_CODES.length));
+  protected net.minecraft.network.chat.Component toNative(Component component) {
+    return SpongeAdventure.asVanilla(component);
   }
 }

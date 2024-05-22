@@ -22,29 +22,33 @@ package me.moros.bending.sponge.platform.block;
 import java.util.Map;
 
 import me.moros.bending.api.platform.property.Property;
-import me.moros.bending.api.platform.property.StateProperty;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.state.BooleanStateProperties;
 import org.spongepowered.api.state.IntegerStateProperties;
+import org.spongepowered.api.state.StateProperty;
 
 import static java.util.Map.entry;
+import static me.moros.bending.api.platform.block.BlockStateProperties.*;
 
-final class PropertyMapper {
-  static final Map<Property<?>, org.spongepowered.api.state.StateProperty<?>> PROPERTIES;
+final class SpongeBlockStateProperties {
+  private SpongeBlockStateProperties() {
+  }
+
+  private static final Map<Property<?>, StateProperty<?>> PROPERTIES;
 
   static {
     PROPERTIES = Map.ofEntries(
-      entry(StateProperty.DRAG, BooleanStateProperties.property_DRAG()),
-      entry(StateProperty.LIT, BooleanStateProperties.property_LIT()),
-      entry(StateProperty.OPEN, BooleanStateProperties.property_OPEN()),
-      entry(StateProperty.WATERLOGGED, BooleanStateProperties.property_WATERLOGGED()),
-      entry(StateProperty.LAYERS, IntegerStateProperties.property_LAYERS()),
-      entry(StateProperty.LEVEL, IntegerStateProperties.property_LEVEL())
+      entry(DRAG, BooleanStateProperties.property_DRAG()),
+      entry(LIT, BooleanStateProperties.property_LIT()),
+      entry(OPEN, BooleanStateProperties.property_OPEN()),
+      entry(WATERLOGGED, BooleanStateProperties.property_WATERLOGGED()),
+      entry(LAYERS, IntegerStateProperties.property_LAYERS()),
+      entry(LEVEL, IntegerStateProperties.property_LEVEL())
     );
   }
 
   @SuppressWarnings("unchecked")
-  static <V extends Comparable<V>> org.spongepowered.api.state.@Nullable StateProperty<V> find(Property<V> property) {
-    return (org.spongepowered.api.state.StateProperty<V>) PropertyMapper.PROPERTIES.get(property);
+  static <V extends Comparable<V>> @Nullable StateProperty<V> find(Property<V> property) {
+    return (StateProperty<V>) SpongeBlockStateProperties.PROPERTIES.get(property);
   }
 }

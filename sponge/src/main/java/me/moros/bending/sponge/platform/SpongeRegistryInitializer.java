@@ -134,14 +134,13 @@ final class SpongeRegistryInitializer implements RegistryInitializer {
 
   private BlockProperties mapProperties(BlockType type, org.spongepowered.api.block.BlockState data) {
     var nms = (net.minecraft.world.level.block.state.BlockState) data;
-    // TODO check deprecated
     return BlockProperties.builder(type, nms.getBlock().getDescriptionId())
       .isAir(nms.isAir())
-      .isSolid(nms.isSolid())
+      .isSolid(data.getOrElse(Keys.IS_SOLID, true))
       .isLiquid(data.getOrElse(Keys.MATTER_TYPE, null) == MatterTypes.LIQUID.get())
       .isFlammable(data.getOrElse(Keys.IS_FLAMMABLE, false))
       .hasGravity(data.getOrElse(Keys.IS_GRAVITY_AFFECTED, false))
-      .isCollidable(nms.blocksMotion())
+      .isCollidable(data.getOrElse(Keys.IS_PASSABLE, false))
       .hardness(nms.getBlock().defaultDestroyTime())
       .soundGroup(mapSoundGroup(nms.getSoundType())).build();
   }

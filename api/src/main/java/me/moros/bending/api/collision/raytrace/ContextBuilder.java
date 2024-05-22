@@ -29,7 +29,6 @@ import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.entity.player.GameMode;
-import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.world.World;
 import me.moros.math.FastMath;
 import me.moros.math.Position;

@@ -129,6 +129,7 @@ public class TempEntity extends Temporary {
       this.state = state;
     }
 
+    @Override
     public Entity entity() {
       return fallingBlock;
     }

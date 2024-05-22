@@ -47,6 +47,6 @@ final class FabricBlockStateProperties {
 
   @SuppressWarnings("unchecked")
   static <V extends Comparable<V>> @Nullable Property<V> find(me.moros.bending.api.platform.property.Property<V> property) {
-    return (Property<V>) FabricBlockStateProperties.PROPERTIES.get(property);
+    return (Property<V>) PROPERTIES.get(property);
   }
 }

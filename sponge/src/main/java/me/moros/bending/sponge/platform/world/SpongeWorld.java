@@ -21,10 +21,12 @@ package me.moros.bending.sponge.platform.world;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
 import me.moros.bending.api.collision.geometry.AABB;
+import me.moros.bending.api.collision.raytrace.BlockRayTrace;
 import me.moros.bending.api.collision.raytrace.CompositeRayTrace;
 import me.moros.bending.api.collision.raytrace.Context;
 import me.moros.bending.api.collision.raytrace.RayTrace;
@@ -32,27 +34,32 @@ import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.block.Lockable;
 import me.moros.bending.api.platform.entity.Entity;
+import me.moros.bending.api.platform.entity.EntityType;
 import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.platform.particle.ParticleContext;
 import me.moros.bending.api.platform.world.World;
 import me.moros.bending.api.util.data.DataHolder;
-import me.moros.bending.sponge.mixin.accessor.FallingBlockEntityAccess;
 import me.moros.bending.sponge.platform.PlatformAdapter;
 import me.moros.bending.sponge.platform.SpongeDataHolder;
 import me.moros.bending.sponge.platform.block.LockableImpl;
 import me.moros.bending.sponge.platform.particle.ParticleMapper;
+import me.moros.math.FastMath;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Item;
+import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.api.world.server.ServerWorld;
 
@@ -92,7 +99,7 @@ public record SpongeWorld(ServerWorld handle) implements World {
   }
 
   @Override
-  public boolean isTileEntity(Position position) {
+  public boolean isBlockEntity(Position position) {
     return handle().blockEntity(position.blockX(), position.blockY(), position.blockZ()).isPresent();
   }
 
@@ -152,6 +159,28 @@ public record SpongeWorld(ServerWorld handle) implements World {
   }
 
   @Override
+  public BlockRayTrace rayTraceBlocks(Context context) {
+    var source = org.spongepowered.math.vector.Vector3d.from(context.origin().x(), context.origin().y(), context.origin().z());
+    var dir = org.spongepowered.math.vector.Vector3d.from(context.dir().x(), context.dir().y(), context.dir().z());
+    return org.spongepowered.api.util.blockray.RayTrace.block()
+      .world(handle()).sourcePosition(source).direction(dir).limit(FastMath.ceil(context.range()))
+      .continueWhileBlock(b -> {
+        var pos = b.blockPosition();
+        var type = b.blockState().type();
+        return type == BlockTypes.AIR.get()
+          || type == BlockTypes.CAVE_AIR.get()
+          || type == BlockTypes.VOID_AIR.get()
+          || context.ignore(pos.x(), pos.y(), pos.z());
+      })
+      .execute().map(r -> {
+        var pos = r.hitPosition();
+        var blockPos = r.selectedObject().blockPosition();
+        return RayTrace.hit(Vector3d.of(pos.x(), pos.y(), pos.z()), blockAt(blockPos.x(), blockPos.y(), blockPos.z()));
+      })
+      .orElse(RayTrace.miss(context.endPoint()));
+  }
+
+  @Override
   public CompositeRayTrace rayTraceEntities(Context context, double range) {
     Entity result = null;
     Vector3d resPos = null;
@@ -190,6 +219,18 @@ public record SpongeWorld(ServerWorld handle) implements World {
   }
 
   @Override
+  public Entity createEntity(Position pos, EntityType type) {
+    var entityType = Sponge.server().registry(RegistryTypes.ENTITY_TYPE).value(PlatformAdapter.rsk(type.key()));
+    var vec = org.spongepowered.math.vector.Vector3d.from(pos.x(), pos.y(), pos.z());
+    return PlatformAdapter.fromSpongeEntity(handle().createEntity(Objects.requireNonNull(entityType), vec));
+  }
+
+  @Override
+  public boolean addEntity(Entity entity) {
+    return handle().spawnEntity(PlatformAdapter.toSpongeEntity(entity));
+  }
+
+  @Override
   public boolean breakNaturally(int x, int y, int z) {
     return handle().destroyBlock(org.spongepowered.math.vector.Vector3i.from(x, y, z), true);
   }
@@ -199,21 +240,23 @@ public record SpongeWorld(ServerWorld handle) implements World {
     var vec = org.spongepowered.math.vector.Vector3d.from(pos.x(), pos.y(), pos.z());
     Item droppedItem = handle().createEntity(EntityTypes.ITEM, vec);
     droppedItem.item().set(PlatformAdapter.toSpongeItemSnapshot(item));
-    droppedItem.offer(Keys.INFINITE_PICKUP_DELAY, true);
+    if (!canPickup) {
+      droppedItem.offer(Keys.PICKUP_DELAY, Ticks.infinite());
+    }
     handle().spawnEntity(droppedItem);
     return PlatformAdapter.fromSpongeEntity(droppedItem);
   }
 
   @Override
   public Entity createFallingBlock(Position pos, BlockState state, boolean gravity) {
-    var data = (net.minecraft.world.level.block.state.BlockState) PlatformAdapter.toSpongeData(state);
-    var fabricEntity = FallingBlockEntityAccess.bending$create(nms(), pos.x(), pos.y(), pos.z(), data);
-    fabricEntity.time = 1; // Is this needed?
-    fabricEntity.setNoGravity(!gravity);
-    fabricEntity.dropItem = false;
-    ((FallingBlockEntityAccess) fabricEntity).bending$cancelDrop(true);
-    nms().addFreshEntity(fabricEntity);
-    return PlatformAdapter.fromSpongeEntity((org.spongepowered.api.entity.Entity) fabricEntity);
+    var vec = org.spongepowered.math.vector.Vector3d.from(pos.x(), pos.y(), pos.z());
+    var entity = handle().createEntity(EntityTypes.FALLING_BLOCK, vec);
+    entity.offer(Keys.IS_GRAVITY_AFFECTED, gravity);
+    entity.offer(Keys.CAN_DROP_AS_ITEM, false);
+    entity.offer(Keys.CAN_PLACE_AS_BLOCK, false);
+    entity.offer(Keys.BLOCK_STATE, PlatformAdapter.toSpongeData(state));
+    handle().spawnEntity(entity);
+    return PlatformAdapter.fromSpongeEntity(entity);
   }
 
   @Override

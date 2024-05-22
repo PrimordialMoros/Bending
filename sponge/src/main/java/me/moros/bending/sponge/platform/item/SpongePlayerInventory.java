@@ -26,8 +26,9 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
+import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult.Type;
 
-public class SpongePlayerInventory extends SpongeInventory {
+public class SpongePlayerInventory extends SpongeInventory implements me.moros.bending.api.platform.item.PlayerInventory {
   private final PlayerInventory handle;
 
   public SpongePlayerInventory(ServerPlayer player) {
@@ -46,15 +47,22 @@ public class SpongePlayerInventory extends SpongeInventory {
   }
 
   @Override
-  public int add(ItemSnapshot item) {
+  public void offer(ItemSnapshot item) {
     var spongeItem = PlatformAdapter.toSpongeItem(item);
     var result = handle.offer(spongeItem);
-    return result.rejectedItems().size();
+    if (result.type() != Type.SUCCESS) {
+      result.revert();
+    }
   }
 
   @Override
   public boolean remove(Item type, int amount) {
     var queried = handle.query(QueryTypes.ITEM_TYPE.get().of(PlatformAdapter.toSpongeItemType(type)));
-    return !queried.poll(amount).revertOnFailure();
+    var result = queried.poll(amount);
+    if (result.type() != Type.SUCCESS) {
+      result.revert();
+      return false;
+    }
+    return true;
   }
 }

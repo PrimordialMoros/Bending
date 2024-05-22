@@ -27,7 +27,7 @@ import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.util.Initializer;
 import me.moros.bending.fabric.platform.FabricMetadata;
-import me.moros.bending.fabric.platform.entity.FabricEntity;
+import me.moros.bending.fabric.platform.PlatformAdapter;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
@@ -58,7 +58,7 @@ public record WorldListener(Supplier<Game> gameSupplier) implements FabricListen
     var uuid = newEntity.getUUID();
     User user = Registries.BENDERS.get(uuid);
     if (user != null) {
-      ((FabricEntity) user.entity()).setHandle(newEntity);
+      PlatformAdapter.toFabricEntityWrapper(user).setHandle(newEntity);
       onChangeWorld(uuid, origin, destination);
     }
   }

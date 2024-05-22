@@ -1,5 +1,5 @@
 plugins {
-    id("platform-conventions")
+    id("bending.platform-conventions")
     alias(libs.plugins.fabric.loom)
 }
 
@@ -15,8 +15,8 @@ repositories {
 dependencies {
     minecraft(libs.fabric.minecraft)
     mappings(loom.officialMojangMappings())
-    modImplementation(libs.fabric.api)
     modImplementation(libs.fabric.loader)
+    modImplementation(libs.fabric.api)
     modImplementation(libs.fabric.permissions)
     modImplementation(libs.fabric.placeholder)
     modImplementation(include(libs.sgui.get())!!)

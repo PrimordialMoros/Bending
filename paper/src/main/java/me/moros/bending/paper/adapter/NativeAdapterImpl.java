@@ -19,8 +19,6 @@
 
 package me.moros.bending.paper.adapter;
 
-import java.util.Objects;
-
 import io.papermc.paper.adventure.PaperAdventure;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.world.World;
@@ -34,7 +32,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.block.data.CraftBlockData;
 import org.bukkit.craftbukkit.entity.CraftEntity;
@@ -46,8 +43,7 @@ final class NativeAdapterImpl extends AbstractNativeAdapter {
 
   @Override
   protected ServerLevel adapt(World world) {
-    var bukkitWorld = Objects.requireNonNull(Bukkit.getWorld(world.name()));
-    return ((CraftWorld) bukkitWorld).getHandle();
+    return ((CraftWorld) PlatformAdapter.toBukkitWorld(world)).getHandle();
   }
 
   @Override

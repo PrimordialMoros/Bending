@@ -28,14 +28,12 @@ import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.item.Inventory;
 import me.moros.bending.api.platform.potion.Potion;
 import me.moros.bending.api.platform.potion.PotionEffect;
-import me.moros.bending.api.platform.property.BooleanProperty;
 import me.moros.bending.api.user.User;
 import me.moros.bending.sponge.platform.AbilityDamageSource;
 import me.moros.bending.sponge.platform.PlatformAdapter;
 import me.moros.bending.sponge.platform.item.SpongeInventory;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
-import net.kyori.adventure.util.TriState;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.PickupRules;
@@ -54,49 +52,6 @@ public class SpongeLivingEntity extends SpongeEntity implements LivingEntity {
   @Override
   public Living handle() {
     return (Living) super.handle();
-  }
-
-  @Override
-  public double health() {
-    return handle().health().get();
-  }
-
-  @Override
-  public double maxHealth() {
-    return handle().maxHealth().get();
-  }
-
-  @Override
-  public boolean damage(double damage) {
-    return handle().damage(damage, DamageSources.GENERIC);
-  }
-
-  @Override
-  public boolean damage(double damage, Entity source) {
-    var ds = DamageSource.builder().type(DamageTypes.GENERIC).entity(PlatformAdapter.toSpongeEntity(source)).build();
-    return handle().damage(damage, ds);
-  }
-
-  @Override
-  public boolean damage(double damage, User source, AbilityDescription desc) {
-    BendingDamageEvent event = source.game().eventBus().postAbilityDamageEvent(source, desc, this, damage);
-    double dmg = event.damage();
-    if (event.cancelled() || dmg <= 0) {
-      return false;
-    }
-    var value = DamageTypes.registry().value(AbilityDamageSource.BENDING_DAMAGE);
-    var spongeDamageSource = DamageSource.builder().type(value).entity(PlatformAdapter.toSpongeEntity(source)).build();
-    return handle().damage(dmg, (DamageSource) AbilityDamageSource.wrap(spongeDamageSource, source, desc));
-  }
-
-  @Override
-  public boolean ai() {
-    return handle().get(Keys.IS_AI_ENABLED).orElse(false);
-  }
-
-  @Override
-  public void ai(boolean value) {
-    handle().offer(Keys.IS_AI_ENABLED, value);
   }
 
   @Override
@@ -155,18 +110,26 @@ public class SpongeLivingEntity extends SpongeEntity implements LivingEntity {
   }
 
   @Override
-  public int airCapacity() {
-    return handle().maxAir().get();
+  public boolean damage(double damage) {
+    return handle().damage(damage, DamageSources.GENERIC);
   }
 
   @Override
-  public int remainingAir() {
-    return handle().remainingAir().get();
+  public boolean damage(double damage, Entity source) {
+    var ds = DamageSource.builder().type(DamageTypes.GENERIC).entity(PlatformAdapter.toSpongeEntity(source)).build();
+    return handle().damage(damage, ds);
   }
 
   @Override
-  public void remainingAir(int amount) {
-    handle().offer(Keys.REMAINING_AIR, amount);
+  public boolean damage(double damage, User source, AbilityDescription desc) {
+    BendingDamageEvent event = source.game().eventBus().postAbilityDamageEvent(source, desc, this, damage);
+    double dmg = event.damage();
+    if (event.cancelled() || dmg <= 0) {
+      return false;
+    }
+    var value = DamageTypes.registry().value(AbilityDamageSource.BENDING_DAMAGE);
+    var spongeDamageSource = DamageSource.builder().type(value).entity(PlatformAdapter.toSpongeEntity(source)).build();
+    return handle().damage(dmg, (DamageSource) AbilityDamageSource.wrap(spongeDamageSource, source, desc));
   }
 
   @Override
@@ -181,22 +144,5 @@ public class SpongeLivingEntity extends SpongeEntity implements LivingEntity {
     arrow.offer(Keys.PICKUP_RULE, PickupRules.DISALLOWED.get());
     w.spawnEntity(arrow);
     return PlatformAdapter.fromSpongeEntity(arrow);
-  }
-
-  @Override
-  public TriState checkProperty(BooleanProperty property) {
-    var spongeProperty = PropertyMapper.PROPERTIES.get(property);
-    if (spongeProperty == null) {
-      return TriState.NOT_SET;
-    }
-    return TriState.byBoolean(handle().getOrNull(spongeProperty));
-  }
-
-  @Override
-  public void setProperty(BooleanProperty property, boolean value) {
-    var spongeProperty = PropertyMapper.PROPERTIES.get(property);
-    if (spongeProperty != null) {
-      handle().offer(spongeProperty, value);
-    }
   }
 }

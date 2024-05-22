@@ -42,7 +42,6 @@ import me.moros.bending.fabric.event.ServerItemEvents;
 import me.moros.bending.fabric.event.ServerPlayerEvents;
 import me.moros.bending.fabric.platform.FabricMetadata;
 import me.moros.bending.fabric.platform.PlatformAdapter;
-import me.moros.bending.fabric.platform.entity.FabricEntity;
 import me.moros.bending.fabric.platform.item.ItemUtil;
 import me.moros.math.Vector3d;
 import net.fabricmc.fabric.api.entity.event.v1.EntityElytraEvents;
@@ -110,7 +109,7 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
   private void onPlayerRespawn(Entity originalEntity, Entity newEntity, boolean alive) {
     User user = Registries.BENDERS.get(originalEntity.getUUID());
     if (user != null) {
-      ((FabricEntity) user.entity()).setHandle(newEntity);
+      PlatformAdapter.toFabricEntityWrapper(user).setHandle(newEntity);
     }
   }
 

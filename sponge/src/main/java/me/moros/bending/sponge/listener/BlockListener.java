@@ -101,7 +101,7 @@ public class BlockListener extends SpongeListener {
           var key = PlatformAdapter.fromSpongeBlock(blockEntity.block().type()).translationKey();
           name = Component.translatable(key);
         }
-        player.sendActionBar(Component.translatable("container.isLocked").args(name));
+        player.sendActionBar(Component.translatable("container.isLocked").arguments(name));
         Sound.BLOCK_CHEST_LOCKED.asEffect().play(block);
         return true;
       }

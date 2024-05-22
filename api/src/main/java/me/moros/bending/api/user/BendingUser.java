@@ -36,6 +36,7 @@ import me.moros.bending.api.config.attribute.AttributeHolder;
 import me.moros.bending.api.event.ElementChangeEvent.ElementAction;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.gui.Board;
+import me.moros.bending.api.platform.entity.DelegateLivingEntity;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.temporal.Cooldown;
 import me.moros.bending.api.user.profile.BenderProfile;
@@ -49,7 +50,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * Base {@link User} implementation for all living entities.
  */
-sealed class BendingUser implements User permits BendingPlayer {
+sealed class BendingUser implements User, DelegateLivingEntity permits BendingPlayer {
   private final Game game;
   private final LivingEntity entity;
   private final DataContainer container;

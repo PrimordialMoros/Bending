@@ -1,0 +1,36 @@
+{
+  "loader": {
+    "name": "java_plain",
+    "version": "1.0"
+  },
+  "license": "AGPL-3.0",
+  "global": {
+    "version": "${version}",
+    "links": {
+      "source": "https://github.com/PrimordialMoros/Bending",
+      "issues": "https://github.com/PrimordialMoros/Bending/issues"
+    },
+    "contributors": [
+      {
+        "name": "Moros",
+        "description": "Lead Developer"
+      }
+    ],
+    "dependencies": [
+      {
+        "id": "spongeapi",
+        "version": "${apiVersion}",
+        "load-order": "after",
+        "optional": false
+      }
+    ]
+  },
+  "plugins": [
+    {
+      "id": "bending",
+      "name": "Bending",
+      "entrypoint": "me.moros.bending.sponge.SpongeBending",
+      "description": "Bending plugin for Sponge."
+    }
+  ]
+}

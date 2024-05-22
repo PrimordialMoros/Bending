@@ -33,6 +33,7 @@ import me.moros.bending.api.platform.potion.Potion;
 import me.moros.bending.api.platform.potion.PotionEffect;
 import me.moros.bending.api.platform.potion.PotionEffectTag;
 import me.moros.bending.api.platform.world.World;
+import me.moros.bending.api.user.User;
 import me.moros.bending.fabric.platform.block.FabricBlockState;
 import me.moros.bending.fabric.platform.entity.FabricEntity;
 import me.moros.bending.fabric.platform.entity.FabricLivingEntity;
@@ -137,6 +138,10 @@ public final class PlatformAdapter {
 
   public static Player fromFabricEntity(ServerPlayer entity) {
     return new FabricPlayer(entity);
+  }
+
+  public static FabricLivingEntity toFabricEntityWrapper(User user) {
+    return (FabricLivingEntity) ((DelegateLivingEntity) user).entity();
   }
 
   public static Entity toFabricEntity(me.moros.bending.api.platform.entity.Entity entity) {

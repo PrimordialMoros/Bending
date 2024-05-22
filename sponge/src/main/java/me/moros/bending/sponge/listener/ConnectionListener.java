@@ -28,6 +28,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.filter.IsCancelled;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.util.Tristate;
 
 public final class ConnectionListener extends AbstractConnectionListener {
@@ -44,11 +45,11 @@ public final class ConnectionListener extends AbstractConnectionListener {
   @Listener(order = Order.EARLY)
   public void onPlayerJoin(ServerSideConnectionEvent.Join event) {
     ServerPlayer player = event.player();
-    syncJoin(player.uniqueId(), player.name(), () -> new SpongePlayer(player));
+    syncJoin(player.uniqueId(), () -> new SpongePlayer(player));
   }
 
   @Listener(order = Order.EARLY)
   public void onPlayerLogout(ServerSideConnectionEvent.Disconnect event) {
-    onQuit(event.player().uniqueId());
+    event.profile().map(GameProfile::uuid).ifPresent(this::onQuit);
   }
 }
