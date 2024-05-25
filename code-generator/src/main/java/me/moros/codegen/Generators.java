@@ -1,44 +1,71 @@
 package me.moros.codegen;
 
-import java.io.InputStream;
+import java.io.IOException;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
+import me.moros.codegen.vanilla.Generator;
+import net.minecraft.SharedConstants;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.Main;
+import net.minecraft.server.Bootstrap;
+
 public final class Generators {
-  private static final Logger LOGGER = System.getLogger("Code Gen Logger");
-  private static final String PKG = "me.moros.bending.api.platform.";
-  private static final String VERSION = "1_20_4";
+  private static final String BASE_PKG = "me.moros.bending.api.platform";
+
+  public static final Logger LOGGER = System.getLogger("Code Gen Logger");
+  public static final Path DATA_FOLDER;
+  public static final Path TAGS_FOLDER;
+
+  static {
+    SharedConstants.tryDetectVersion();
+    Bootstrap.bootStrap();
+
+    // Create a temp file and run vanilla data generator for tags
+    Path tempDir;
+    try {
+      tempDir = Files.createTempDirectory("mojang_gen_data");
+      Main.main(new String[]{"--server", "--output=" + tempDir});
+      DATA_FOLDER = tempDir.resolve("data").resolve("minecraft");
+      TAGS_FOLDER = DATA_FOLDER.resolve("tags");
+    } catch (IOException e) {
+      LOGGER.log(Level.ERROR, "Something went wrong while running Mojang's data generator.", e);
+      throw new RuntimeException("Couldn't run the generator");
+    }
+  }
 
   public static void main(String[] args) {
-    if (args.length != 1) {
-      LOGGER.log(Level.ERROR, "Usage: <target folder>");
+    if (args.length != 2) {
+      LOGGER.log(Level.ERROR, "Usage: <target folder> <version>");
       return;
     }
 
-    var generator = new CodeGenerator(LOGGER, Path.of(args[0]), "v" + VERSION.replace("_", "."));
-    generator.generate(resource("blocks"), pkg("block"), "BlockType");
-    generator.generate(resource("entities"), pkg("entity"), "EntityType");
-    generator.generate(resource("items"), pkg("item"), "Item");
-    generator.generate(resource("particles"), pkg("particle"), "Particle");
-    generator.generate(resource("potion_effects"), pkg("potion"), "PotionEffect");
-    generator.generate(resource("sounds"), pkg("sound"), "Sound");
+    final Path output = Path.of(args[0]);
+    final String version = "v" + args[1];
 
-    generator.generate(tagResource("block_tags"), pkg("block"), "BlockTag", "TagImpl", "Tags");
-    generator.generate(tagResource("item_tags"), pkg("item"), "ItemTag", "TagImpl", "Tags");
+    var generator = new ApiGenerator(BASE_PKG, output, version);
+
+    generator.generate(from(BuiltInRegistries.BLOCK), "block", "BlockType");
+    generator.generate(from(BuiltInRegistries.ENTITY_TYPE), "entity", "EntityType");
+    generator.generate(from(BuiltInRegistries.ITEM), "item", "Item");
+    generator.generate(from(BuiltInRegistries.PARTICLE_TYPE), "particle", "Particle");
+    generator.generate(from(BuiltInRegistries.MOB_EFFECT), "potion", "PotionEffect");
+    generator.generate(from(BuiltInRegistries.SOUND_EVENT), "sound", "Sound");
+
+    generator.generate(tagsFrom("blocks"), "block", "Tags", "BlockTag", "TagImpl");
+    generator.generate(tagsFrom("items"), "item", "Tags", "ItemTag", "TagImpl");
 
     LOGGER.log(Level.INFO, "Finished generating code");
   }
 
-  private static String pkg(String packageString) {
-    return PKG + packageString;
+  private static <T> Generator from(Registry<T> registry) {
+    return Generator.registry(registry);
   }
 
-  private static InputStream tagResource(String name) {
-    return resource("tags/" + VERSION + "_" + name);
-  }
-
-  private static InputStream resource(String name) {
-    return Generators.class.getResourceAsStream("/" + VERSION + "_" + name + ".json");
+  private static Generator tagsFrom(String path) {
+    return Generator.tag(TAGS_FOLDER.resolve(path));
   }
 }

@@ -27,8 +27,6 @@ tasker-sponge = { module = "me.moros:tasker-sponge", version.ref = "tasker" }
 tasker-fabric = { module = "me.moros:tasker-fabric", version.ref = "tasker" }
 
 javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
-gson = { module = "com.google.code.gson:gson", version = "2.10.1" }
-articdata = { module = "de.articdive:articdata", version = "1.20.4-cb27856f" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.8" }
 jdbi = { module = "org.jdbi:jdbi3-core", version = "3.45.1" }
 hikari = { module = "com.zaxxer:HikariCP", version = "5.1.0" }

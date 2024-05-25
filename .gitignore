@@ -14,3 +14,7 @@ gradle-app.setting
 
 .idea/
 *.iml
+
+# Log file
+*.log
+logs/

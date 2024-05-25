@@ -6,7 +6,6 @@
   "schedule": [
     "after 6pm on the 6th day of the month"
   ],
-  "ignoreDeps": ["de.articdive:articdata"],
   "packageRules": [
     {
       "description": "Correct version handling for dependencies with format major.minor.patch+mcver",
