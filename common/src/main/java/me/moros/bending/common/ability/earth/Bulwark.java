@@ -38,7 +38,6 @@ import me.moros.bending.api.util.functional.ExpireRemovalPolicy;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.material.EarthMaterials;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Bulwark extends AbilityInstance {
   private Config userConfig;
@@ -108,7 +107,6 @@ public class Bulwark extends AbilityInstance {
     }
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long wallCooldown = 3000;

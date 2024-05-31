@@ -41,6 +41,7 @@ import org.spongepowered.configurate.objectmapping.ObjectMapper;
 import org.spongepowered.configurate.reactive.Disposable;
 import org.spongepowered.configurate.reference.ConfigurationReference;
 import org.spongepowered.configurate.reference.WatchServiceListener;
+import org.spongepowered.configurate.util.MapFactories;
 
 public final class ConfigManager {
   private static ConfigManager INSTANCE;
@@ -74,8 +75,8 @@ public final class ConfigManager {
   }
 
   private UnaryOperator<ConfigurationOptions> withFactory() {
-    return options -> options.serializers(builder -> builder
-      .register(Configurable.class, ObjectMapper.factory().asTypeSerializer()));
+    return options -> options.mapFactory(MapFactories.sortedNatural())
+      .serializers(builder -> builder.register(Configurable.class, ObjectMapper.factory().asTypeSerializer()));
   }
 
   private void updateSubscribers() {

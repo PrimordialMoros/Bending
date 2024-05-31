@@ -61,7 +61,6 @@ import me.moros.bending.common.ability.water.Torrent;
 import me.moros.bending.common.ability.water.WaterRing;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class WaterGimbal extends AbilityInstance {
   private Config userConfig;
@@ -305,7 +304,6 @@ public class WaterGimbal extends AbilityInstance {
     }
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 10000;

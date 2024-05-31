@@ -53,7 +53,6 @@ import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.math.Vector3d;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 // TODO possible changes: add per glove cooldown
@@ -296,7 +295,6 @@ public class EarthGlove extends AbilityInstance {
     }, false, false);
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 750;

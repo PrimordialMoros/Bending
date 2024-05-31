@@ -73,7 +73,6 @@ import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class EarthSmash extends AbilityInstance {
   private Config userConfig;
@@ -557,7 +556,6 @@ public class EarthSmash extends AbilityInstance {
     }
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 7000;

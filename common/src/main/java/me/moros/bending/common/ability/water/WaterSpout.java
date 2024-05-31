@@ -51,7 +51,6 @@ import me.moros.bending.common.ability.SpoutAbility;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.util.TriState;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class WaterSpout extends AbilityInstance implements SpoutAbility {
   private Config userConfig;
@@ -165,7 +164,6 @@ public class WaterSpout extends AbilityInstance implements SpoutAbility {
     }
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 0;

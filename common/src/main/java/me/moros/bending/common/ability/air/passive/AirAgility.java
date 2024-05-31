@@ -32,7 +32,6 @@ import me.moros.bending.api.platform.potion.PotionEffect;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class AirAgility extends AbilityInstance {
   private Config userConfig;
@@ -72,7 +71,6 @@ public class AirAgility extends AbilityInstance {
     EntityUtil.tryRemovePotion(user, PotionEffect.SPEED, 100, userConfig.speedAmplifier - 1);
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.STRENGTH)
     private int speedAmplifier = 2;

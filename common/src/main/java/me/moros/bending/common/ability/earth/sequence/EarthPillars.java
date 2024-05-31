@@ -48,7 +48,6 @@ import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class EarthPillars extends AbilityInstance {
   private static AbilityDescription pillarsDesc;
@@ -150,7 +149,6 @@ public class EarthPillars extends AbilityInstance {
     }
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 6000;

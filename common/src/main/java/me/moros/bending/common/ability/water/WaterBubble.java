@@ -38,7 +38,6 @@ import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.math.Position;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class WaterBubble extends AbilityInstance {
   private Config userConfig;
@@ -152,7 +151,6 @@ public class WaterBubble extends AbilityInstance {
     user.addCooldown(description(), userConfig.cooldown);
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 3000;

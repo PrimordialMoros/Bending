@@ -44,7 +44,6 @@ import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.common.util.BatchQueue;
 import me.moros.math.Vector3d;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 public class PhaseChange extends AbilityInstance {
@@ -148,7 +147,6 @@ public class PhaseChange extends AbilityInstance {
     }
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.SELECTION)
     private double freezeRange = 7;

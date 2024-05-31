@@ -46,7 +46,6 @@ import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Catapult extends AbilityInstance {
   private static final double ANGLE = Math.toRadians(60);
@@ -177,7 +176,6 @@ public class Catapult extends AbilityInstance {
     }
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 3000;

@@ -59,7 +59,6 @@ import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Shockwave extends AbilityInstance {
   private static final Vector3d OFFSET = Vector3d.of(0.4, 0.85, 0.4);
@@ -238,7 +237,6 @@ public class Shockwave extends AbilityInstance {
     }
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 8000;

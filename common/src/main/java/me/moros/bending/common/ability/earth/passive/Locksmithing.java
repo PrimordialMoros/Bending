@@ -42,7 +42,6 @@ import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.api.util.metadata.Metadata;
 import net.kyori.adventure.text.Component;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Locksmithing extends AbilityInstance {
   private Config userConfig;
@@ -140,7 +139,6 @@ public class Locksmithing extends AbilityInstance {
     return item.get(Metadata.METAL_KEY).map(lock::equals).orElse(false);
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 500;

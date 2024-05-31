@@ -49,7 +49,6 @@ import me.moros.math.FastMath;
 import me.moros.math.Rotation;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 public class AirBlade extends AbilityInstance {
@@ -223,7 +222,6 @@ public class AirBlade extends AbilityInstance {
     }
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 4000;

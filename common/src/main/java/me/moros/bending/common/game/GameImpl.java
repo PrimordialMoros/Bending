@@ -50,6 +50,7 @@ import me.moros.bending.api.util.Tasker;
 import me.moros.bending.api.util.TextUtil;
 import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.common.Bending;
+import me.moros.bending.common.ability.AbilityInitializer;
 import me.moros.bending.common.event.EventBusImpl;
 import me.moros.bending.common.storage.StorageFactory;
 
@@ -75,6 +76,8 @@ public final class GameImpl implements Game {
 
     lockRegistries();
     this.storage = new StorageFactory(plugin).createInstance();
+
+    AbilityInitializer.initConfigs();
     plugin.configManager().save();
 
     Tasker.sync().repeat(this::update, 1);

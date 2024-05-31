@@ -43,7 +43,6 @@ import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
 import net.kyori.adventure.util.TriState;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class FireJet extends AbilityInstance {
   private static final SoundEffect LOUD_EXPLOSION = SoundEffect.EXPLOSION.with(10, 0);
@@ -153,7 +152,6 @@ public class FireJet extends AbilityInstance {
     user.setProperty(EntityProperties.GLIDING, wasGliding);
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.SPEED)
     private double speed = 0.85;

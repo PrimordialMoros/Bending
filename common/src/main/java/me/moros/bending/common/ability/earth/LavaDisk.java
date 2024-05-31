@@ -63,7 +63,6 @@ import me.moros.math.FastMath;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class LavaDisk extends AbilityInstance {
   private static final String[] colors = {"#2F1600", "#5E2C00", "#8C4200", "#B05300", "#C45D00", "#F05A00", "#F0A000", "#F0BE00"};
@@ -254,7 +253,6 @@ public class LavaDisk extends AbilityInstance {
     return MaterialUtil.isTransparent(block) || damageBlock(block);
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 9000;

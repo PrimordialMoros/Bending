@@ -49,7 +49,6 @@ import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class AirBurst extends AbilityInstance {
   private enum Mode {CONE, SPHERE, FALL}
@@ -214,7 +213,6 @@ public class AirBurst extends AbilityInstance {
     }
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 6000;

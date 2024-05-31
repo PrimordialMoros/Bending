@@ -38,7 +38,6 @@ import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.common.ability.air.sequence.AirWheel;
 import me.moros.math.Vector3d;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class AirScooter extends AbilityInstance {
   private Config userConfig;
@@ -142,7 +141,6 @@ public class AirScooter extends AbilityInstance {
     }
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.SPEED)
     private double speed = 0.7;

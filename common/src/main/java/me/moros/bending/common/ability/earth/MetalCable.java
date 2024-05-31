@@ -61,7 +61,6 @@ import me.moros.bending.common.ability.earth.util.Projectile;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class MetalCable extends AbilityInstance {
   public static final DataKey<MetalCable> CABLE_KEY = KeyUtil.data("metal-cable", MetalCable.class);
@@ -351,7 +350,6 @@ public class MetalCable extends AbilityInstance {
     }
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 4500;

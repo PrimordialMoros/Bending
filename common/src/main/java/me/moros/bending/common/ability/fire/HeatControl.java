@@ -57,7 +57,6 @@ import me.moros.bending.common.util.BatchQueue;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class HeatControl extends AbilityInstance {
   private enum Mode {COOLING, HEATING}
@@ -300,7 +299,6 @@ public class HeatControl extends AbilityInstance {
     }
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 2000;

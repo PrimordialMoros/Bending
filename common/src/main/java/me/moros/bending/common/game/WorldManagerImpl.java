@@ -36,7 +36,6 @@ import me.moros.bending.api.util.KeyUtil;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.bending.common.logging.Logger;
 import net.kyori.adventure.key.Key;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 public final class WorldManagerImpl implements WorldManager {
@@ -125,7 +124,6 @@ public final class WorldManagerImpl implements WorldManager {
     }
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Comment("Worlds are specified by their key, e.g. minecraft:overworld")
     private List<String> disabledWorlds = List.of("disabledbendingworld");

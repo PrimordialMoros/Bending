@@ -54,7 +54,6 @@ import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.math.Rotation;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.key.Key;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class FireShield extends AbilityInstance {
   private Config userConfig;
@@ -317,7 +316,6 @@ public class FireShield extends AbilityInstance {
     }
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.DAMAGE)
     private double damage = 0.5;

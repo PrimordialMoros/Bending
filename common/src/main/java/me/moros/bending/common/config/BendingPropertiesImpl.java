@@ -23,9 +23,7 @@ import java.util.List;
 
 import me.moros.bending.api.config.BendingProperties;
 import me.moros.bending.api.config.Configurable;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
-@ConfigSerializable
 public final class BendingPropertiesImpl implements BendingProperties, Configurable {
   private long earthRevertTime = Holder.DEFAULTS.earthRevertTime();
   private long fireRevertTime = Holder.DEFAULTS.fireRevertTime();

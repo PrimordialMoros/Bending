@@ -52,7 +52,6 @@ import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.common.ability.AbilityInitializer;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 public class AirSwipe extends AbilityInstance {
@@ -203,7 +202,6 @@ public class AirSwipe extends AbilityInstance {
     }
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 1500;

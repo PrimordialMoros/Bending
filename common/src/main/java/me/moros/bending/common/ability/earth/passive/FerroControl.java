@@ -39,7 +39,6 @@ import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.math.Vector3d;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class FerroControl extends AbilityInstance {
   private Config userConfig;
@@ -133,7 +132,6 @@ public class FerroControl extends AbilityInstance {
     return inv != null && inv.canPlaceBlock();
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 500;

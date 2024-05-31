@@ -50,7 +50,6 @@ import me.moros.bending.common.ability.water.IceCrawl;
 import me.moros.math.FastMath;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Iceberg extends AbilityInstance {
   private Config userConfig;
@@ -194,7 +193,6 @@ public class Iceberg extends AbilityInstance {
     }
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 15000;

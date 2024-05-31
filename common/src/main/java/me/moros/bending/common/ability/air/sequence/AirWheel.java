@@ -46,7 +46,6 @@ import me.moros.bending.api.util.ExpiringSet;
 import me.moros.bending.common.ability.air.AirScooter;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class AirWheel extends AbilityInstance {
   private static final AABB BOUNDS = AABB.of(Vector3d.of(-0.4, -2, -2), Vector3d.of(0.4, 2, 2));
@@ -141,7 +140,6 @@ public class AirWheel extends AbilityInstance {
     return List.of(collider);
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 8000;

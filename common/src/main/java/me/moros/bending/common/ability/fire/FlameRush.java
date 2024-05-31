@@ -55,7 +55,6 @@ import me.moros.bending.common.ability.AbilityInitializer;
 import me.moros.math.FastMath;
 import me.moros.math.Rotation;
 import me.moros.math.Vector3d;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 public class FlameRush extends AbilityInstance {
@@ -231,7 +230,6 @@ public class FlameRush extends AbilityInstance {
     }
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 10_000;

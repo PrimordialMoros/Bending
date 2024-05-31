@@ -62,7 +62,6 @@ import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
 import net.kyori.adventure.text.Component;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class EarthLine extends AbilityInstance {
   private enum Mode {NORMAL, PRISON}
@@ -288,7 +287,6 @@ public class EarthLine extends AbilityInstance {
     }
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 5000;

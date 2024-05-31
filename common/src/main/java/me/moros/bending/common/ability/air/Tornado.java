@@ -46,7 +46,6 @@ import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.text.Component;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Tornado extends AbilityInstance {
   private enum Mode {PUSH, PULL}
@@ -183,7 +182,6 @@ public class Tornado extends AbilityInstance {
     }
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 4000;

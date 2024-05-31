@@ -47,7 +47,6 @@ import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class EarthArmor extends AbilityInstance {
   private enum Mode {ROCK, IRON, GOLD}
@@ -177,7 +176,6 @@ public class EarthArmor extends AbilityInstance {
       .map(e -> e.formed).orElse(false);
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 20_000;

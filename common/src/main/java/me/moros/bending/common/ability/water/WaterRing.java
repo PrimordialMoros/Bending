@@ -65,7 +65,6 @@ import me.moros.math.FastMath;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class WaterRing extends AbilityInstance {
   private static final double RING_RADIUS = 2.8;
@@ -359,7 +358,6 @@ public class WaterRing extends AbilityInstance {
     }
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.DURATION)
     private long duration = 30000;

@@ -57,7 +57,6 @@ import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class FireWall extends AbilityInstance {
   private Config userConfig;
@@ -281,7 +280,6 @@ public class FireWall extends AbilityInstance {
     return List.of(collider);
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 20_000;

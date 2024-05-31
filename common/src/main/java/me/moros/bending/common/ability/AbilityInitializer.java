@@ -29,6 +29,7 @@ import java.util.stream.Stream;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.AbilityDescription.Sequence;
 import me.moros.bending.api.collision.CollisionPair;
+import me.moros.bending.api.config.Configurable;
 import me.moros.bending.api.registry.Container;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.util.FeaturePermissions;
@@ -85,7 +86,9 @@ import me.moros.bending.common.ability.water.passive.FastSwim;
 import me.moros.bending.common.ability.water.passive.HydroSink;
 import me.moros.bending.common.ability.water.sequence.Iceberg;
 import me.moros.bending.common.ability.water.sequence.WaterGimbal;
+import me.moros.bending.common.config.ConfigManager;
 import me.moros.bending.common.util.Initializer;
+import me.moros.bending.common.util.ReflectionUtil;
 import net.kyori.adventure.key.Key;
 
 import static me.moros.bending.api.ability.Activation.*;
@@ -125,8 +128,6 @@ public final class AbilityInitializer implements Initializer {
 
     Registries.ABILITIES.register(abilities);
     Registries.COLLISIONS.register(buildCollisions());
-    // Init configs
-    abilities.forEach(AbilityDescription::createAbility);
   }
 
   private Collection<CollisionPair> buildCollisions() {
@@ -422,5 +423,13 @@ public final class AbilityInitializer implements Initializer {
   private void initAvatar() {
     abilities.add(AbilityDescription.builder("AvatarState", AvatarState::new)
       .element(AIR, WATER, EARTH, FIRE).activation(ATTACK, SNEAK).build());
+  }
+
+  public static void initConfigs() {
+    // Init configs
+    Registries.ABILITIES.stream()
+      .map(AbilityDescription::createAbility)
+      .map(a -> ReflectionUtil.findInnerClass(a, Configurable.class)).filter(Objects::nonNull)
+      .forEach(ConfigManager::cache);
   }
 }

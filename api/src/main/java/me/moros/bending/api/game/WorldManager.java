@@ -39,6 +39,7 @@ public interface WorldManager extends Updatable {
   /**
    * Clear all per-world managers this instance is responsible for.
    */
+  @Deprecated(forRemoval = true)
   void clear();
 
   /**

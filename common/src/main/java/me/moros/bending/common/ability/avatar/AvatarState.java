@@ -59,7 +59,6 @@ import net.kyori.adventure.bossbar.BossBar.Overlay;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import static java.util.Map.entry;
 
@@ -266,7 +265,6 @@ public class AvatarState extends AbilityInstance {
     }
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 120_000;

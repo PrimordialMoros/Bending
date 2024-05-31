@@ -86,19 +86,17 @@ public record StorageFactory(Bending plugin) {
     return data == null ? null : new SqlStorage(plugin.logger(), data);
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Comment("""
       Available options:
-       - Remote:
-         > POSTGRESQL (preferred)
-         > MARIADB
-         > MYSQL
-       - Local:
-         > H2 (preferred)
-         > HSQL
-         > JSON
-      """)
+      - Remote:
+        > POSTGRESQL (preferred)
+        > MARIADB
+        > MYSQL
+      - Local:
+        > H2 (preferred)
+        > HSQL
+        > JSON""")
     private StorageEngine engine = StorageEngine.H2;
     private String host = "localhost";
     private int port = 5432;

@@ -43,7 +43,6 @@ import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class RaiseEarth extends AbilityInstance {
   private Config userConfig;
@@ -169,7 +168,6 @@ public class RaiseEarth extends AbilityInstance {
     return pillars.stream();
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.SELECTION)
     private double selectRange = 16;

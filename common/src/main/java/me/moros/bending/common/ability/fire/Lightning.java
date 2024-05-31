@@ -71,7 +71,6 @@ import me.moros.math.Rotation;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Lightning extends AbilityInstance {
   private static final double POINT_DISTANCE = 0.2;
@@ -437,7 +436,6 @@ public class Lightning extends AbilityInstance {
     }
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 6000;

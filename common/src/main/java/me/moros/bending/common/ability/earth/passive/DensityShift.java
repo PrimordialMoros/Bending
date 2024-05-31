@@ -35,7 +35,6 @@ import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.math.Vector3d;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class DensityShift extends AbilityInstance {
   private Config userConfig;
@@ -89,7 +88,6 @@ public class DensityShift extends AbilityInstance {
     }
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.DURATION)
     private long duration = 6000;

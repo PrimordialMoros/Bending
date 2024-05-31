@@ -40,7 +40,6 @@ import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.math.FastMath;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Collapse extends AbilityInstance {
   private Config userConfig;
@@ -137,7 +136,6 @@ public class Collapse extends AbilityInstance {
       .predicate(predicate).build(height);
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.SELECTION)
     private double selectRange = 18;

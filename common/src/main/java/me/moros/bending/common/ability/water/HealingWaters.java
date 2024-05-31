@@ -43,7 +43,6 @@ import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.math.FastMath;
 import net.kyori.adventure.text.Component;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class HealingWaters extends AbilityInstance {
   private enum Mode {SELF, OTHERS}
@@ -139,7 +138,6 @@ public class HealingWaters extends AbilityInstance {
     }
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 3000;

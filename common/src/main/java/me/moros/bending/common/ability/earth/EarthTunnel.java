@@ -42,7 +42,6 @@ import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 public class EarthTunnel extends AbilityInstance {
@@ -160,7 +159,6 @@ public class EarthTunnel extends AbilityInstance {
     user.addCooldown(description(), userConfig.cooldown);
   }
 
-  @ConfigSerializable
   private static final class Config implements Configurable {
     @Modifiable(Attribute.COOLDOWN)
     private long cooldown = 2000;
