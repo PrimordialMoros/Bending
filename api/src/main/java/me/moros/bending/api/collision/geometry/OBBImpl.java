@@ -21,7 +21,6 @@ package me.moros.bending.api.collision.geometry;
 
 import java.util.Arrays;
 
-import me.moros.math.FastMath;
 import me.moros.math.Position;
 import me.moros.math.Rotation;
 import me.moros.math.Vector3d;
@@ -45,7 +44,7 @@ record OBBImpl(Vector3d position, Vector3d extents, AABB outer, Vector3d[] axes)
     for (int i = 0; i < 3; i++) {
       Vector3d axis = axes[i];
       double r = extentArray[i];
-      double dist = FastMath.clamp(t.dot(axis), -r, r);
+      double dist = Math.clamp(t.dot(axis), -r, r);
       closest = closest.add(axis.multiply(dist));
     }
     return closest;

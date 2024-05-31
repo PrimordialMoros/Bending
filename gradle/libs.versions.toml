@@ -1,6 +1,7 @@
 [versions]
-math = "2.0.0"
-tasker = "1.1.0"
+storage = "3.3.0"
+math = "3.0.0"
+tasker = "1.2.0"
 adventure = "4.17.0"
 adventure-fabric = "5.13.0"
 configurate = "4.2.0-SNAPSHOT"
@@ -10,19 +11,19 @@ sponge-api = "11.0.0-SNAPSHOT"
 sponge-common = "1.20.6-11.0.0-SNAPSHOT"
 minecraft = "1.20.6"
 fabric-loom = "1.6.11"
-fabric-api = "0.98.0+1.20.6"
+fabric-api = "0.99.4+1.20.6"
 fabric-loader = "0.15.11"
 shadow = "8.1.1"
 flyway = "10.13.0"
 junit = "5.10.2"
 
 [libraries]
-storage = { module = "me.moros:storage", version = "3.2.0" }
+storage = { module = "me.moros:storage", version.ref = "storage" }
 
 math-core = { module = "me.moros:math-core", version.ref = "math" }
 
 tasker-core = { module = "me.moros:tasker-core", version.ref = "tasker" }
-tasker-bukkit = { module = "me.moros:tasker-paper", version.ref = "tasker" }
+tasker-paper = { module = "me.moros:tasker-paper", version.ref = "tasker" }
 tasker-sponge = { module = "me.moros:tasker-sponge", version.ref = "tasker" }
 tasker-fabric = { module = "me.moros:tasker-fabric", version.ref = "tasker" }
 
@@ -64,7 +65,7 @@ mysql = { module = "com.mysql:mysql-connector-j", version = "8.4.0" }
 mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.4.0" }
 postgresql = { module = "org.postgresql:postgresql", version = "42.7.3" }
 h2 = { module = "com.h2database:h2", version = "2.2.224" }
-hsql = { module = "org.hsqldb:hsqldb", version = "2.7.2" }
+hsql = { module = "org.hsqldb:hsqldb", version = "2.7.3" }
 
 # Fabric
 fabric-minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
@@ -77,10 +78,10 @@ fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.
 # Bukkit
 inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.14" }
 grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.3" }
-towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.100.2.9" }
+towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.100.2.11" }
 lwc = { module = "com.griefcraft:lwc", version = "2.4.0" }
 worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.10" }
-papi = { module = "me.clip:placeholderapi", version = "2.11.5" }
+papi = { module = "me.clip:placeholderapi", version = "2.11.6" }
 
 # Sponge
 sponge-api = { module = "org.spongepowered:spongeapi", version.ref = "sponge-api" }

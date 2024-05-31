@@ -26,7 +26,6 @@ import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.material.MaterialUtil;
-import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 
 public abstract class AbstractRide extends AbstractFlight implements Updatable {
@@ -66,7 +65,7 @@ public abstract class AbstractRide extends AbstractFlight implements Updatable {
       return UpdateResult.REMOVE;
     }
     double delta = getPrediction() - height;
-    double force = FastMath.clamp(0.3 * delta, -1, 0.5);
+    double force = Math.clamp(0.3 * delta, -1, 0.5);
     Vector3d velocity = user.direction().withY(0).normalize().multiply(speed).withY(force);
     affect(velocity);
     render(check.state());

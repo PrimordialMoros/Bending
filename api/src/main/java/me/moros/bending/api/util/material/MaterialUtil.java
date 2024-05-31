@@ -28,7 +28,6 @@ import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemTag;
 import me.moros.bending.api.util.KeyUtil;
-import me.moros.math.FastMath;
 import net.kyori.adventure.key.Key;
 
 /**
@@ -249,10 +248,10 @@ public final class MaterialUtil {
   }
 
   public static BlockState lavaData(int level) {
-    return BlockType.LAVA.defaultState().withProperty(BlockStateProperties.LEVEL, FastMath.clamp(level, 0, 15));
+    return BlockType.LAVA.defaultState().withProperty(BlockStateProperties.LEVEL, Math.clamp(level, 0, 15));
   }
 
   public static BlockState waterData(int level) {
-    return BlockType.WATER.defaultState().withProperty(BlockStateProperties.LEVEL, FastMath.clamp(level, 0, 15));
+    return BlockType.WATER.defaultState().withProperty(BlockStateProperties.LEVEL, Math.clamp(level, 0, 15));
   }
 }

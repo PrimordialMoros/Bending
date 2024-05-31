@@ -96,7 +96,7 @@ public class ChakraFocus implements Updatable {
     if (!user.sneaking() || ticks >= duration) {
       return UpdateResult.REMOVE;
     }
-    float factor = FastMath.clamp(ticks / (float) duration, 0, 1);
+    float factor = Math.clamp(ticks / (float) duration, 0, 1);
     bar.name(buildName()).progress(factor);
     if (ticks++ == 0) {
       user.showBossBar(bar);

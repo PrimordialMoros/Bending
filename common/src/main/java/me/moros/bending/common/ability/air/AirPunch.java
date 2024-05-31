@@ -42,7 +42,6 @@ import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.material.MaterialUtil;
-import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
 
@@ -70,7 +69,7 @@ public class AirPunch extends AbilityInstance {
 
     user.addCooldown(description(), userConfig.cooldown);
     double length = user.velocity().subtract(user.direction()).length();
-    double factor = (length == 0) ? 1 : FastMath.clamp(1 / length, 0.5, 1.5);
+    double factor = (length == 0) ? 1 : Math.clamp(1 / length, 0.5, 1.5);
     Sound.ENTITY_BREEZE_SHOOT.asEffect(1, (float) factor).play(user.world(), origin);
     stream = new AirStream(Ray.of(origin, lookingDir), 1.2, factor);
     removalPolicy = Policies.defaults();

@@ -19,7 +19,6 @@
 
 package me.moros.bending.common.collision;
 
-import me.moros.math.FastMath;
 import me.moros.math.Position;
 
 public interface MortonEncoded {
@@ -30,9 +29,9 @@ public interface MortonEncoded {
   }
 
   static int calculateMorton(double x, double y, double z) {
-    int normalizedX = (int) FastMath.clamp((x + 30_000_000) * 10, 0, 600_000_000);
-    int normalizedY = (int) FastMath.clamp((y + 30_000_000) * 10, 0, 600_000_000);
-    int normalizedZ = (int) FastMath.clamp((z + 30_000_000) * 10, 0, 600_000_000);
+    int normalizedX = (int) Math.clamp((x + 30_000_000) * 10, 0, 600_000_000);
+    int normalizedY = (int) Math.clamp((y + 30_000_000) * 10, 0, 600_000_000);
+    int normalizedZ = (int) Math.clamp((z + 30_000_000) * 10, 0, 600_000_000);
     int xx = expandBits(normalizedX);
     int yy = expandBits(normalizedY);
     int zz = expandBits(normalizedZ);

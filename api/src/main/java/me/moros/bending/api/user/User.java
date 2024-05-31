@@ -239,7 +239,7 @@ public sealed interface User extends LivingEntity, ElementUser, AttributeUser, P
    * @return the source block if one was found, null otherwise
    */
   default @Nullable Block find(double range, Predicate<Block> predicate) {
-    GridIterator it = GridIterator.create(eyeLocation(), direction(), FastMath.clamp(1, 100, FastMath.ceil(range)));
+    GridIterator it = GridIterator.create(eyeLocation(), direction(), Math.clamp(FastMath.ceil(range), 1, 100));
     while (it.hasNext()) {
       Block block = world().blockAt(it.next());
       if (block.type().isAir()) {

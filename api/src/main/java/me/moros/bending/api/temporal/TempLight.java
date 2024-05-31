@@ -28,7 +28,6 @@ import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockStateProperties;
 import me.moros.bending.api.platform.block.BlockType;
-import me.moros.math.FastMath;
 
 public final class TempLight extends Temporary {
   public static final TemporalManager<Block, TempLight> MANAGER = new TemporalManager<>(600) {
@@ -133,7 +132,7 @@ public final class TempLight extends Temporary {
   }
 
   public static Builder builder(int level) {
-    return new Builder(FastMath.clamp(level, 1, BlockStateProperties.LEVEL.max()));
+    return new Builder(Math.clamp(level, 1, BlockStateProperties.LEVEL.max()));
   }
 
   private enum Type {NORMAL, WATER, INVALID}

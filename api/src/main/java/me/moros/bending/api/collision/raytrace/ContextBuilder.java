@@ -30,7 +30,6 @@ import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.platform.world.World;
-import me.moros.math.FastMath;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import me.moros.math.Vector3i;
@@ -88,7 +87,7 @@ public final class ContextBuilder {
    * @return the modified builder
    */
   public ContextBuilder range(double range) {
-    this.range = FastMath.clamp(range, MIN_RANGE, MAX_RANGE);
+    this.range = Math.clamp(range, MIN_RANGE, MAX_RANGE);
     return this;
   }
 

@@ -47,7 +47,6 @@ import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.bending.api.util.material.MaterialUtil;
-import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 
 public class AirBurst extends AbilityInstance {
@@ -184,7 +183,7 @@ public class AirBurst extends AbilityInstance {
 
       Vector3d push = ray.direction().normalize();
       // Cap vertical push
-      push = push.withY(FastMath.clamp(push.y(), -0.3, 0.3));
+      push = push.withY(Math.clamp(push.y(), -0.3, 0.3));
 
       factor *= 1 - (distanceTravelled / (2 * maxRange));
       Vector3d velocity = entity.velocity();

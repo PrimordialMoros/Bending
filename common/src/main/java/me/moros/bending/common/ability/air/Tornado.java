@@ -43,7 +43,6 @@ import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.bending.api.util.material.MaterialUtil;
-import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.text.Component;
 
@@ -143,7 +142,7 @@ public class Tornado extends AbilityInstance {
   }
 
   private void render(Vector3d base, double factor, double height, double radius) {
-    double amount = FastMath.clamp(factor * 30, 4, 30);
+    double amount = Math.clamp(factor * 30, 4, 30);
     yOffset += 0.1;
     if (yOffset >= 1) {
       yOffset = 0;

@@ -19,7 +19,6 @@
 
 package me.moros.bending.api.platform.entity.display;
 
-import me.moros.math.FastMath;
 import net.kyori.adventure.util.RGBLike;
 
 public sealed interface DisplayBuilder<V, T extends DisplayBuilder<V, T>> permits AbstractDisplayBuilder {
@@ -62,7 +61,7 @@ public sealed interface DisplayBuilder<V, T extends DisplayBuilder<V, T>> permit
   int brightness();
 
   default T brightness(int blockLight, int skyLight) {
-    return brightness(FastMath.clamp(blockLight, 0, 15) << 4 | FastMath.clamp(skyLight, 0, 15) << 20);
+    return brightness(Math.clamp(blockLight, 0, 15) << 4 | Math.clamp(skyLight, 0, 15) << 20);
   }
 
   T brightness(int brightness);

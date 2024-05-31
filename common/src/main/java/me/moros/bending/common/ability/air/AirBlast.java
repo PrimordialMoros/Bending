@@ -48,7 +48,6 @@ import me.moros.bending.api.util.functional.OutOfRangeRemovalPolicy;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.material.MaterialUtil;
-import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.text.Component;
 
@@ -198,7 +197,7 @@ public class AirBlast extends AbilityInstance {
       Vector3d push = ray.direction().normalize();
       if (!isUser) {
         // Cap vertical push
-        push = push.withY(FastMath.clamp(push.y(), -0.3, 0.3));
+        push = push.withY(Math.clamp(push.y(), -0.3, 0.3));
       }
 
       factor *= 1 - (distanceTravelled / (2 * maxRange));

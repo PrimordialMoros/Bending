@@ -17,7 +17,7 @@ repositories {
 dependencies {
     bendingImplementation(projects.bendingCommon)
     bendingImplementation(projects.bendingNms)
-    bendingImplementation(libs.tasker.bukkit)
+    bendingImplementation(libs.tasker.paper)
     bendingImplementation(libs.bstats.bukkit)
     bendingImplementation(libs.cloud.minecraft)
     bendingImplementation(libs.cloud.paper)

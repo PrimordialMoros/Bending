@@ -23,7 +23,6 @@ import java.util.function.BiPredicate;
 
 import me.moros.bending.api.collision.geometry.Collider.Type;
 import me.moros.bending.api.util.Constants;
-import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 
 import static java.lang.Math.abs;
@@ -87,9 +86,9 @@ final class ColliderUtil {
     Vector3d min = aabb.min();
     Vector3d max = aabb.max();
     // Get the point closest to sphere center on the aabb.
-    double x = FastMath.clamp(sphere.position().x(), min.x(), max.x());
-    double y = FastMath.clamp(sphere.position().y(), min.y(), max.y());
-    double z = FastMath.clamp(sphere.position().z(), min.z(), max.z());
+    double x = Math.clamp(sphere.position().x(), min.x(), max.x());
+    double y = Math.clamp(sphere.position().y(), min.y(), max.y());
+    double z = Math.clamp(sphere.position().z(), min.z(), max.z());
     // Check if that point is inside the sphere.
     return sphere.contains(Vector3d.of(x, y, z));
   }

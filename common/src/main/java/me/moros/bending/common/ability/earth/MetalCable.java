@@ -248,7 +248,7 @@ public class MetalCable extends AbilityInstance {
       remove();
       return;
     }
-    double offset = FastMath.clamp(cable.location().y() - entity.location().y(), 0, entity.height());
+    double offset = Math.clamp(cable.location().y() - entity.location().y(), 0, entity.height());
     attached = new AttachedEntity(entity, offset);
     entity.setProperty(EntityProperties.FALL_DISTANCE, 0F);
     hasHit = true;
