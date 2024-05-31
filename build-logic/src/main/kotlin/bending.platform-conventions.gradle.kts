@@ -24,7 +24,7 @@ tasks {
         archiveClassifier = ""
         archiveBaseName = project.name
         from(rootDir.resolve("LICENSE")) {
-            rename { "${it}_${rootProject.name.uppercase()}" }
+            rename { "META-INF/${it}_${rootProject.name.uppercase()}" }
         }
         val excluded = setOf("checker-qual", "error_prone_annotations", "geantyref", "slf4j-api")
         dependencies {
