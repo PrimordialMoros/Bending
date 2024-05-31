@@ -52,7 +52,6 @@ import me.moros.bending.api.util.functional.OutOfRangeRemovalPolicy;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
-import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
@@ -64,9 +63,6 @@ public class EarthGlove extends AbilityInstance {
   private enum Side {RIGHT, LEFT}
 
   private static final DataKey<Side> KEY = KeyUtil.data("glove-side", Side.class);
-
-  private static final Config config = ConfigManager.load(Config::new);
-
   private static final double GLOVE_SPEED = 1.2;
   private static final double GLOVE_GRABBED_SPEED = 0.6;
 
@@ -116,7 +112,7 @@ public class EarthGlove extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = user.game().configProcessor().calculate(this, config);
+    userConfig = user.game().configProcessor().calculate(this, Config.class);
   }
 
   @Override

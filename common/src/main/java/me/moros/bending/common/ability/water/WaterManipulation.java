@@ -53,15 +53,12 @@ import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.api.util.material.WaterMaterials;
-import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 public class WaterManipulation extends AbilityInstance {
-  private static final Config config = ConfigManager.load(Config::new);
-
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -77,10 +74,13 @@ public class WaterManipulation extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
+    this.user = user;
+    loadConfig();
+
     if (method == Activation.ATTACK) {
       Collection<WaterManipulation> manips = user.game().abilityManager(user.worldKey()).userInstances(user, WaterManipulation.class)
         .toList();
-      redirectAny(user);
+      redirectAny(user, userConfig);
       for (WaterManipulation manip : manips) {
         if (manip.manip == null) {
           manip.launch();
@@ -90,9 +90,6 @@ public class WaterManipulation extends AbilityInstance {
       }
       return false;
     }
-
-    this.user = user;
-    loadConfig();
 
     Block source = user.find(userConfig.selectRange, WaterMaterials::isWaterBendable);
     if (source == null) {
@@ -118,7 +115,7 @@ public class WaterManipulation extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = user.game().configProcessor().calculate(this, config);
+    userConfig = user.game().configProcessor().calculate(this, Config.class);
   }
 
   @Override
@@ -162,7 +159,7 @@ public class WaterManipulation extends AbilityInstance {
     }
   }
 
-  private static void redirectAny(User user) {
+  private static void redirectAny(User user, Config config) {
     Collection<WaterManipulation> manips = user.game().abilityManager(user.worldKey()).instances(WaterManipulation.class)
       .filter(m -> m.manip != null && !user.equals(m.user)).toList();
     Ray ray = user.ray(config.maxRedirectRange + 2);

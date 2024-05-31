@@ -41,7 +41,6 @@ import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
-import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.FastMath;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
@@ -50,8 +49,6 @@ public class HealingWaters extends AbilityInstance {
   private enum Mode {SELF, OTHERS}
 
   private static final DataKey<Mode> KEY = KeyUtil.data("healingwaters-mode", Mode.class);
-
-  private static final Config config = ConfigManager.load(Config::new);
 
   private Config userConfig;
   private RemovalPolicy removalPolicy;
@@ -80,7 +77,7 @@ public class HealingWaters extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = user.game().configProcessor().calculate(this, config);
+    userConfig = user.game().configProcessor().calculate(this, Config.class);
   }
 
   @Override

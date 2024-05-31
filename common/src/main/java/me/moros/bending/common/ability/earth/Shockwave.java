@@ -56,14 +56,12 @@ import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.bending.api.util.material.MaterialUtil;
-import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Shockwave extends AbilityInstance {
-  private static final Config config = ConfigManager.load(Config::new);
   private static final Vector3d OFFSET = Vector3d.of(0.4, 0.85, 0.4);
 
   private Config userConfig;
@@ -116,7 +114,7 @@ public class Shockwave extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = user.game().configProcessor().calculate(this, config);
+    userConfig = user.game().configProcessor().calculate(this, Config.class);
   }
 
   @Override

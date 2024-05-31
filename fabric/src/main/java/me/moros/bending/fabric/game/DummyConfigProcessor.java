@@ -27,6 +27,7 @@ import me.moros.bending.api.config.ConfigProcessor;
 import me.moros.bending.api.config.Configurable;
 import me.moros.bending.api.config.attribute.AttributeValue;
 import me.moros.bending.api.user.AttributeUser;
+import me.moros.bending.common.util.ReflectionUtil;
 
 final class DummyConfigProcessor implements ConfigProcessor {
   static final ConfigProcessor INSTANCE = new DummyConfigProcessor();
@@ -35,12 +36,12 @@ final class DummyConfigProcessor implements ConfigProcessor {
   }
 
   @Override
-  public <T extends Configurable> T calculate(AttributeUser user, AbilityDescription desc, T config) {
-    return config;
+  public <T extends Configurable> T calculate(AttributeUser user, AbilityDescription desc, Class<T> config) {
+    return ReflectionUtil.tryCreateInstance(config); // TODO throw UOE?
   }
 
   @Override
-  public Collection<AttributeValue> listAttributes(AttributeUser user, AbilityDescription desc, Configurable config) {
+  public Collection<AttributeValue> listAttributes(AttributeUser user, AbilityDescription desc, Class<? extends Configurable> config) {
     return List.of();
   }
 }

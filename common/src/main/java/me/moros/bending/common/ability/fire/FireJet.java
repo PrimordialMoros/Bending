@@ -40,14 +40,12 @@ import me.moros.bending.api.util.functional.ExpireRemovalPolicy;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.material.MaterialUtil;
-import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
 import net.kyori.adventure.util.TriState;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class FireJet extends AbilityInstance {
-  private static final Config config = ConfigManager.load(Config::new);
   private static final SoundEffect LOUD_EXPLOSION = SoundEffect.EXPLOSION.with(10, 0);
 
   private Config userConfig;
@@ -110,7 +108,7 @@ public class FireJet extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = user.game().configProcessor().calculate(this, config);
+    userConfig = user.game().configProcessor().calculate(this, Config.class);
   }
 
   private void jetBlastAnimation() {

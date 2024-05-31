@@ -30,12 +30,12 @@ import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 
 record SimpleConfigEntry(String name, Class<?> type) implements ConfigEntry {
-  private ConfigurationNode node(Object parent) {
-    return ((ConfigurationNode) parent).node(name);
+  private ConfigurationNode node(ConfigurationNode parent) {
+    return parent.node(name);
   }
 
   @Override
-  public void modify(Object parent, DoubleUnaryOperator operator, Consumer<Throwable> consumer) {
+  public void modify(ConfigurationNode parent, DoubleUnaryOperator operator, Consumer<Throwable> consumer) {
     ConfigurationNode node = node(parent);
     double baseValue = node.getDouble();
     try {
@@ -46,7 +46,7 @@ record SimpleConfigEntry(String name, Class<?> type) implements ConfigEntry {
   }
 
   @Override
-  public AttributeValue asAttributeValue(Object parent, Attribute attribute, @Nullable DoubleUnaryOperator modifier) {
+  public AttributeValue asAttributeValue(ConfigurationNode parent, Attribute attribute, @Nullable DoubleUnaryOperator modifier) {
     double base = node(parent).getDouble();
     Number modifiedNumber = base;
     if (modifier != null) {

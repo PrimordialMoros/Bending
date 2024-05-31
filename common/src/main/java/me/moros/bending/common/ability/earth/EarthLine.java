@@ -59,7 +59,6 @@ import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.bending.api.util.material.MaterialUtil;
-import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
 import net.kyori.adventure.text.Component;
@@ -69,8 +68,6 @@ public class EarthLine extends AbilityInstance {
   private enum Mode {NORMAL, PRISON}
 
   private static final DataKey<Mode> KEY = KeyUtil.data("earthline-mode", Mode.class);
-
-  private static final Config config = ConfigManager.load(Config::new);
 
   private Config userConfig;
   private RemovalPolicy removalPolicy;
@@ -118,7 +115,7 @@ public class EarthLine extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = user.game().configProcessor().calculate(this, config);
+    userConfig = user.game().configProcessor().calculate(this, Config.class);
   }
 
   @Override

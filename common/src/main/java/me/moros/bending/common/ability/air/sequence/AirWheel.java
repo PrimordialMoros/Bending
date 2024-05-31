@@ -44,14 +44,12 @@ import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.ExpiringSet;
 import me.moros.bending.common.ability.air.AirScooter;
-import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class AirWheel extends AbilityInstance {
   private static final AABB BOUNDS = AABB.of(Vector3d.of(-0.4, -2, -2), Vector3d.of(0.4, 2, 2));
-  private static final Config config = ConfigManager.load(Config::new);
   private static AbilityDescription scooterDesc;
 
   private Config userConfig;
@@ -91,7 +89,7 @@ public class AirWheel extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = user.game().configProcessor().calculate(this, config);
+    userConfig = user.game().configProcessor().calculate(this, Config.class);
   }
 
   @Override

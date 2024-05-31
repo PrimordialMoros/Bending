@@ -69,7 +69,6 @@ import me.moros.bending.api.util.material.WaterMaterials;
 import me.moros.bending.common.ability.earth.util.Boulder;
 import me.moros.bending.common.ability.fire.FlameRush;
 import me.moros.bending.common.ability.water.FrostBreath;
-import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
@@ -77,8 +76,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class EarthSmash extends AbilityInstance {
-  private static final Config config = ConfigManager.load(Config::new);
-
   private Config userConfig;
   private RemovalPolicy removalPolicy;
   private RemovalPolicy swappedSlotsPolicy;
@@ -92,11 +89,14 @@ public class EarthSmash extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
+    this.user = user;
+    loadConfig();
+
     Optional<EarthSmash> grabbed = user.game().abilityManager(user.worldKey()).userInstances(user, EarthSmash.class)
       .filter(s -> s.state instanceof GrabState).findAny();
 
     if (method == Activation.SNEAK) {
-      if (grabbed.isPresent() || tryGrab(user)) {
+      if (grabbed.isPresent() || tryGrab(user, userConfig)) {
         return false;
       }
     } else if (method == Activation.ATTACK) {
@@ -108,9 +108,6 @@ public class EarthSmash extends AbilityInstance {
       return false;
     }
 
-    this.user = user;
-    loadConfig();
-
     state = new ChargeState();
     removalPolicy = Policies.defaults();
     swappedSlotsPolicy = SwappedSlotsRemovalPolicy.of(description());
@@ -120,7 +117,7 @@ public class EarthSmash extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = user.game().configProcessor().calculate(this, config);
+    userConfig = user.game().configProcessor().calculate(this, Config.class);
   }
 
   @Override
@@ -175,7 +172,7 @@ public class EarthSmash extends AbilityInstance {
     state = new GrabState();
   }
 
-  private static boolean tryGrab(User user) {
+  private static boolean tryGrab(User user, Config config) {
     Block target = user.rayTrace(config.grabRange).blocks(user.world()).block();
     EarthSmash earthSmash = getInstance(user, target, s -> s.state.canGrab());
     if (earthSmash == null) {

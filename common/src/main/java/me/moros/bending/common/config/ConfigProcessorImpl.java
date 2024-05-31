@@ -20,9 +20,7 @@
 package me.moros.bending.common.config;
 
 import java.io.UncheckedIOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -36,24 +34,25 @@ import me.moros.bending.api.config.attribute.AttributeValue;
 import me.moros.bending.api.config.attribute.Modifier;
 import me.moros.bending.api.user.AttributeUser;
 import me.moros.bending.common.config.processor.CachedConfig;
+import me.moros.bending.common.config.processor.CachedConfig.ConfigException;
 import me.moros.bending.common.logging.Logger;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.reference.ConfigurationReference;
 import org.spongepowered.configurate.serialize.SerializationException;
 
+@SuppressWarnings("unchecked")
 record ConfigProcessorImpl(Logger logger, ConfigurationReference<? extends ConfigurationNode> root,
-                           Map<Class<? extends Configurable>, CachedConfig> cache) implements ConfigProcessor {
+                           Map<Class<? extends Configurable>, CachedConfig<?>> cache) implements ConfigProcessor {
   ConfigProcessorImpl(Logger logger, ConfigurationReference<? extends ConfigurationNode> root) {
     this(logger, root, new ConcurrentHashMap<>());
   }
 
-  <T extends Configurable> T get(T def) {
-    return def.external() ? def : deserialize(root.node().node(def.path()), def);
+  void cache(Class<? extends Configurable> configType) {
+    getCachedConfig(configType);
   }
 
-  @SuppressWarnings("unchecked")
-  private <T extends Configurable> T deserialize(ConfigurationNode node, T def) {
+  <T extends Configurable> T get(T def) {
+    ConfigurationNode node = root.node().node(def.path());
     try {
       return (T) node.get(def.getClass(), def);
     } catch (SerializationException e) {
@@ -62,13 +61,14 @@ record ConfigProcessorImpl(Logger logger, ConfigurationReference<? extends Confi
   }
 
   @Override
-  public <T extends Configurable> T calculate(AttributeUser user, AbilityDescription desc, T config) {
-    return modifyAttributes(collectActiveModifiers(user, desc), config);
+  public <T extends Configurable> T calculate(AttributeUser user, AbilityDescription desc, Class<T> configType) {
+    return getCachedConfig(configType)
+      .withAttributes(collectActiveModifiers(user, desc), t -> logger.warn(t.getMessage(), t));
   }
 
   @Override
-  public Collection<AttributeValue> listAttributes(AttributeUser user, AbilityDescription desc, Configurable config) {
-    return readAttributes(collectActiveModifiers(user, desc), config);
+  public Collection<AttributeValue> listAttributes(AttributeUser user, AbilityDescription desc, Class<? extends Configurable> configType) {
+    return getCachedConfig(configType).readAttributes(collectActiveModifiers(user, desc));
   }
 
   private Map<Attribute, Modifier> collectActiveModifiers(AttributeUser user, AbilityDescription desc) {
@@ -76,58 +76,11 @@ record ConfigProcessorImpl(Logger logger, ConfigurationReference<? extends Confi
       .collect(Collectors.toMap(AttributeModifier::attribute, AttributeModifier::modifier, Modifier::merge));
   }
 
-  private <T extends Configurable> T modifyAttributes(Map<Attribute, Modifier> activeModifiers, T config) {
-    if (!activeModifiers.isEmpty()) {
-      var cachedConfig = getCachedConfig(config);
-      if (cachedConfig != null) {
-        if (config.external()) {
-          return modifyAttributes(cachedConfig, activeModifiers, config);
-        } else {
-          return deserialize(modifyAttributes(cachedConfig, activeModifiers, nodeFor(config).copy()), config);
-        }
-      }
-    }
-    return config;
-  }
-
-  private <T> T modifyAttributes(CachedConfig cachedConfig, Map<Attribute, Modifier> activeModifiers, T parent) {
-    for (var entry : activeModifiers.entrySet()) {
-      Attribute attribute = entry.getKey();
-      var modifier = entry.getValue();
-      for (var handle : cachedConfig.getKeysFor(attribute)) {
-        handle.modify(parent, modifier, t -> logger.warn(t.getMessage(), t));
-      }
-    }
-    return parent;
-  }
-
-  private Collection<AttributeValue> readAttributes(Map<Attribute, Modifier> activeModifiers, Configurable config) {
-    var cachedConfig = getCachedConfig(config);
-    if (cachedConfig == null) {
-      return List.of();
-    }
-    Collection<AttributeValue> attributes = new ArrayList<>();
-    Object parent = config.external() ? config : nodeFor(config);
-    for (var entry : cachedConfig) {
-      Attribute attribute = entry.getKey();
-      var modifier = activeModifiers.get(attribute);
-      attributes.add(entry.getValue().asAttributeValue(parent, attribute, modifier));
-    }
-    return attributes;
-  }
-
-  private ConfigurationNode nodeFor(Configurable instance) {
-    if (instance.external()) {
-      throw new IllegalArgumentException("No node for external config!");
-    }
-    return root.node().node(instance.path());
-  }
-
-  private @Nullable CachedConfig getCachedConfig(Configurable instance) {
-    return cache.computeIfAbsent(instance.getClass(), s -> {
+  private <T extends Configurable> CachedConfig<T> getCachedConfig(Class<T> configType) {
+    return (CachedConfig<T>) cache.computeIfAbsent(configType, s -> {
       try {
-        return CachedConfig.createFrom(instance);
-      } catch (IllegalAccessException e) {
+        return CachedConfig.createFrom(root, configType);
+      } catch (ConfigException e) {
         logger.warn(e.getMessage(), e);
         return null;
       }

@@ -69,12 +69,12 @@ public record AttributeCommand<C extends Audience>(Commander<C> commander) imple
   }
 
   private List<Component> collectAttributes(User user, AbilityDescription desc) {
-    Configurable config = ReflectionUtil.findAndCreateInnerClass(desc.createAbility(), Configurable.class);
-    if (config == null) {
+    Class<Configurable> configType = ReflectionUtil.findInnerClass(desc.createAbility(), Configurable.class);
+    if (configType == null) {
       return List.of();
     }
     List<Component> result = new ArrayList<>();
-    var attributeValues = user.game().configProcessor().listAttributes(user, desc, config);
+    var attributeValues = user.game().configProcessor().listAttributes(user, desc, configType);
     for (AttributeValue av : attributeValues) {
       Component valueComponent = Component.text(String.valueOf(av.finalValue()), ColorPalette.ACCENT);
       if (av.modified()) {

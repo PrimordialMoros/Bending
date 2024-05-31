@@ -31,18 +31,22 @@ public final class ReflectionUtil {
   private ReflectionUtil() {
   }
 
-  public static <T> @Nullable T findAndCreateInnerClass(Object parent, Class<T> clazz) {
+  public static <T> @Nullable Class<T> findInnerClass(Object parent, Class<T> clazz) {
     for (var innerClass : parent.getClass().getDeclaredClasses()) {
       if (clazz.isAssignableFrom(innerClass)) {
-        try {
-          Constructor<?> constructor = innerClass.getDeclaredConstructor();
-          constructor.setAccessible(true);
-          return (T) constructor.newInstance();
-        } catch (Exception e) {
-          e.printStackTrace();
-          break;
-        }
+        return (Class<T>) innerClass;
       }
+    }
+    return null;
+  }
+
+  public static <T> @Nullable T tryCreateInstance(Class<T> type) {
+    try {
+      Constructor<T> constructor = type.getDeclaredConstructor();
+      constructor.setAccessible(true);
+      return constructor.newInstance();
+    } catch (Exception e) {
+      e.printStackTrace();
     }
     return null;
   }

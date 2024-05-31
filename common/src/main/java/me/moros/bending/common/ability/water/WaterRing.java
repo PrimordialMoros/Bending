@@ -61,7 +61,6 @@ import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.api.util.material.WaterMaterials;
 import me.moros.bending.common.ability.water.sequence.WaterGimbal;
-import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.FastMath;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
@@ -71,7 +70,6 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 public class WaterRing extends AbilityInstance {
   private static final double RING_RADIUS = 2.8;
 
-  private static final Config config = ConfigManager.load(Config::new);
   private static AbilityDescription ringDesc;
   private static AbilityDescription waveDesc;
 
@@ -138,7 +136,7 @@ public class WaterRing extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = user.game().configProcessor().calculate(this, config);
+    userConfig = user.game().configProcessor().calculate(this, Config.class);
   }
 
   public List<Block> complete() {

@@ -19,27 +19,41 @@
 
 package me.moros.bending.common.config.processor;
 
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 
 import me.moros.bending.api.config.Configurable;
 import me.moros.bending.api.config.attribute.Attribute;
+import me.moros.bending.api.config.attribute.AttributeValue;
 import me.moros.bending.api.config.attribute.Modifiable;
-import org.spongepowered.configurate.util.NamingSchemes;
+import me.moros.bending.api.config.attribute.Modifier;
+import me.moros.bending.common.util.ReflectionUtil;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.NodePath;
+import org.spongepowered.configurate.reference.ConfigurationReference;
+import org.spongepowered.configurate.reference.ValueReference;
+import org.spongepowered.configurate.serialize.SerializationException;
 
-public final class CachedConfig implements Iterable<Entry<Attribute, ConfigEntry>> {
+public final class CachedConfig<T extends Configurable> {
+  private final Class<T> configType;
+  private final T fallback;
+  private final ValueReference<T, ? extends ConfigurationNode> configRef;
+
   private final Collection<Entry<Attribute, ConfigEntry>> entries;
   private final Map<Attribute, Collection<ConfigEntry>> map;
 
-  private CachedConfig(Collection<Entry<Attribute, ConfigEntry>> entries) {
+  private CachedConfig(Class<T> configType, T fallback, ValueReference<T, ? extends ConfigurationNode> configRef,
+                       Collection<Entry<Attribute, ConfigEntry>> entries) {
+    this.configType = configType;
+    this.fallback = fallback;
+    this.configRef = configRef;
+
     this.entries = List.copyOf(entries);
     this.map = new EnumMap<>(Attribute.class);
     for (var entry : this.entries) {
@@ -47,39 +61,64 @@ public final class CachedConfig implements Iterable<Entry<Attribute, ConfigEntry
     }
   }
 
-  public Iterable<ConfigEntry> getKeysFor(Attribute attribute) {
-    return map.getOrDefault(attribute, List.of());
-  }
-
-  @Override
-  public Iterator<Entry<Attribute, ConfigEntry>> iterator() {
-    return entries.iterator();
-  }
-
-  public static CachedConfig createFrom(Configurable instance) throws IllegalAccessException {
-    ConfigEntryFactory factory = instance.external() ? varHandleFactory(instance.getClass()) : nodeFactory();
-    List<Entry<Attribute, ConfigEntry>> handles = new ArrayList<>();
-    for (Field field : instance.getClass().getDeclaredFields()) {
-      Modifiable annotation = field.getAnnotation(Modifiable.class);
-      if (annotation != null) {
-        Attribute attribute = annotation.value();
-        handles.add(Map.entry(attribute, factory.create(field)));
+  public T withAttributes(Map<Attribute, Modifier> activeModifiers, Consumer<Throwable> consumer) {
+    if (activeModifiers.isEmpty()) {
+      return configRef.get();
+    }
+    ConfigurationNode parentCopy = configRef.node().copy();
+    for (var entry : activeModifiers.entrySet()) {
+      Attribute attribute = entry.getKey();
+      var modifier = entry.getValue();
+      for (var handle : map.getOrDefault(attribute, List.of())) {
+        handle.modify(parentCopy, modifier, consumer);
       }
     }
-    return new CachedConfig(handles);
+    try {
+      return parentCopy.get(configType, fallback);
+    } catch (SerializationException e) {
+      return fallback;
+    }
   }
 
-  private static ConfigEntryFactory varHandleFactory(Class<? extends Configurable> configClass) throws IllegalAccessException {
-    Lookup lookup = MethodHandles.privateLookupIn(configClass, MethodHandles.lookup());
-    return field -> ConfigEntry.fromVarHandle(field.getName(), field.getType(), lookup.unreflectVarHandle(field));
+  public Collection<AttributeValue> readAttributes(Map<Attribute, Modifier> activeModifiers) {
+    Collection<AttributeValue> attributes = new ArrayList<>();
+    ConfigurationNode parent = configRef.node();
+    for (var entry : entries) {
+      Attribute attribute = entry.getKey();
+      var modifier = activeModifiers.get(attribute);
+      attributes.add(entry.getValue().asAttributeValue(parent, attribute, modifier));
+    }
+    return attributes;
   }
 
-  private static ConfigEntryFactory nodeFactory() {
-    return field -> ConfigEntry.fromNode(NamingSchemes.LOWER_CASE_DASHED.coerce(field.getName()), field.getType());
+  public static <T extends Configurable> CachedConfig<?> createFrom(ConfigurationReference<? extends ConfigurationNode> ref, Class<T> configType) throws ConfigException {
+    T instance = ReflectionUtil.tryCreateInstance(configType);
+    if (instance == null) {
+      throw new ConfigException("Could not create %s instance.".formatted(configType.getName()));
+    }
+    try {
+      var valueRef = ref.referenceTo(configType, NodePath.path(instance.path().toArray()), instance);
+      List<Entry<Attribute, ConfigEntry>> handles = new ArrayList<>();
+      for (Field field : configType.getDeclaredFields()) {
+        Modifiable annotation = field.getAnnotation(Modifiable.class);
+        if (annotation != null) {
+          Attribute attribute = annotation.value();
+          handles.add(Map.entry(attribute, ConfigEntry.fromNode(field.getName(), field.getType())));
+        }
+      }
+      return new CachedConfig<>(configType, instance, valueRef, handles);
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
   }
 
-  @FunctionalInterface
-  private interface ConfigEntryFactory {
-    ConfigEntry create(Field field) throws IllegalAccessException;
+  public static final class ConfigException extends Exception {
+    private ConfigException(Exception e) {
+      super(e.getMessage(), e);
+    }
+
+    private ConfigException(String message) {
+      super(message);
+    }
   }
 }

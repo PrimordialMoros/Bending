@@ -41,13 +41,10 @@ import me.moros.bending.api.util.FeaturePermissions;
 import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.api.util.metadata.Metadata;
-import me.moros.bending.common.config.ConfigManager;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class Locksmithing extends AbilityInstance {
-  private static final Config config = ConfigManager.load(Config::new);
-
   private Config userConfig;
 
   private long nextInteractTime;
@@ -65,7 +62,7 @@ public class Locksmithing extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = user.game().configProcessor().calculate(this, config);
+    userConfig = user.game().configProcessor().calculate(this, Config.class);
   }
 
   @Override

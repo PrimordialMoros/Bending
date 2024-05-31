@@ -48,13 +48,11 @@ import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.bending.api.util.material.MaterialUtil;
-import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 // TODO make tentacle extension animation
 public class OctopusForm extends AbilityInstance {
-  private static final Config config = ConfigManager.load(Config::new);
   private static final double RADIUS = 3.0;
   private static final AABB TENTACLE_BOX = AABB.of(Vector3d.of(-1, 0.0, -1), Vector3d.of(1, 2.5, 1));
 
@@ -94,7 +92,7 @@ public class OctopusForm extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = user.game().configProcessor().calculate(this, config);
+    userConfig = user.game().configProcessor().calculate(this, Config.class);
   }
 
   @Override

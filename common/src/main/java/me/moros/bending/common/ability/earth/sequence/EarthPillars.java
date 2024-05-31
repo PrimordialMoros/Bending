@@ -46,14 +46,11 @@ import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.material.EarthMaterials;
-import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class EarthPillars extends AbilityInstance {
-  private static final Config config = ConfigManager.load(Config::new);
-
   private static AbilityDescription pillarsDesc;
 
   private Config userConfig;
@@ -103,7 +100,7 @@ public class EarthPillars extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = user.game().configProcessor().calculate(this, config);
+    userConfig = user.game().configProcessor().calculate(this, Config.class);
   }
 
   @Override

@@ -37,13 +37,10 @@ import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.common.ability.SpoutAbility;
-import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class AirSpout extends AbilityInstance implements SpoutAbility {
-  private static final Config config = ConfigManager.load(Config::new);
-
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -76,7 +73,7 @@ public class AirSpout extends AbilityInstance implements SpoutAbility {
 
   @Override
   public void loadConfig() {
-    userConfig = user.game().configProcessor().calculate(this, config);
+    userConfig = user.game().configProcessor().calculate(this, Config.class);
   }
 
   @Override

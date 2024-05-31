@@ -53,14 +53,11 @@ import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.common.ability.fire.Lightning;
-import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class EarthBlast extends AbilityInstance {
-  private static final Config config = ConfigManager.load(Config::new);
-
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
@@ -73,7 +70,10 @@ public class EarthBlast extends AbilityInstance {
 
   @Override
   public boolean activate(User user, Activation method) {
-    if (method == Activation.SNEAK && tryDestroy(user)) {
+    this.user = user;
+    loadConfig();
+
+    if (method == Activation.SNEAK && tryDestroy(user, userConfig)) {
       return false;
     } else if (method == Activation.ATTACK) {
       Collection<EarthBlast> eblasts = user.game().abilityManager(user.worldKey()).userInstances(user, EarthBlast.class)
@@ -87,9 +87,6 @@ public class EarthBlast extends AbilityInstance {
       }
       return false;
     }
-
-    this.user = user;
-    loadConfig();
 
     Predicate<Block> predicate = b -> EarthMaterials.isEarthbendable(user, b) && !b.type().isLiquid();
     Block source = user.find(userConfig.selectRange, predicate);
@@ -117,7 +114,7 @@ public class EarthBlast extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = user.game().configProcessor().calculate(this, config);
+    userConfig = user.game().configProcessor().calculate(this, Config.class);
   }
 
   @Override
@@ -149,7 +146,7 @@ public class EarthBlast extends AbilityInstance {
     }
   }
 
-  private static boolean tryDestroy(User user) {
+  private static boolean tryDestroy(User user, Config config) {
     Collection<EarthBlast> blasts = user.game().abilityManager(user.worldKey()).instances(EarthBlast.class)
       .filter(eb -> eb.blast != null && !user.equals(eb.user) && eb.blast.blastType.canBend(user)).toList();
     Ray ray = user.ray(config.shatterRange + 2);

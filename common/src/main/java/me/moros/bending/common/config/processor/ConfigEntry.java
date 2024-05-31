@@ -19,7 +19,6 @@
 
 package me.moros.bending.common.config.processor;
 
-import java.lang.invoke.VarHandle;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.DoubleFunction;
@@ -28,8 +27,10 @@ import java.util.function.DoubleUnaryOperator;
 import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.AttributeValue;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.util.NamingSchemes;
 
-public interface ConfigEntry {
+interface ConfigEntry {
   Map<Class<? extends Number>, DoubleFunction<Number>> CONVERTERS = Map.of(
     Double.class, x -> x,
     Integer.class, x -> (int) x,
@@ -43,19 +44,15 @@ public interface ConfigEntry {
 
   Class<?> type();
 
-  void modify(Object parent, DoubleUnaryOperator operator, Consumer<Throwable> consumer);
+  void modify(ConfigurationNode parent, DoubleUnaryOperator operator, Consumer<Throwable> consumer);
 
-  AttributeValue asAttributeValue(Object parent, Attribute attribute, @Nullable DoubleUnaryOperator modifier);
+  AttributeValue asAttributeValue(ConfigurationNode parent, Attribute attribute, @Nullable DoubleUnaryOperator modifier);
 
   default Number toNative(double value) {
     return CONVERTERS.getOrDefault(type(), x -> x).apply(value);
   }
 
   static ConfigEntry fromNode(String name, Class<?> type) {
-    return new SimpleConfigEntry(name, type);
-  }
-
-  static ConfigEntry fromVarHandle(String name, Class<?> type, VarHandle handle) {
-    return new VarHandleConfigEntry(name, type, handle);
+    return new SimpleConfigEntry(NamingSchemes.LOWER_CASE_DASHED.coerce(name), type);
   }
 }

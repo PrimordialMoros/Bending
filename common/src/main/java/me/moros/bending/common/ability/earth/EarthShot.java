@@ -59,14 +59,12 @@ import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.bending.api.util.material.MaterialUtil;
-import me.moros.bending.common.config.ConfigManager;
 import me.moros.math.Vector3d;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 public class EarthShot extends AbilityInstance implements Explosive {
   private static final AABB BOX = AABB.BLOCK_BOUNDS.grow(Vector3d.of(0.25, 0.25, 0.25));
-  private static final Config config = ConfigManager.load(Config::new);
 
   private enum Mode {ROCK, METAL, MAGMA}
 
@@ -116,7 +114,7 @@ public class EarthShot extends AbilityInstance implements Explosive {
 
   @Override
   public void loadConfig() {
-    userConfig = user.game().configProcessor().calculate(this, config);
+    userConfig = user.game().configProcessor().calculate(this, Config.class);
   }
 
   private boolean prepare() {

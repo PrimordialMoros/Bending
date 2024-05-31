@@ -28,13 +28,16 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 import me.moros.bending.api.config.ConfigProcessor;
 import me.moros.bending.api.config.Configurable;
 import me.moros.bending.common.logging.Logger;
 import me.moros.bending.common.util.Debounced;
 import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
+import org.spongepowered.configurate.objectmapping.ObjectMapper;
 import org.spongepowered.configurate.reactive.Disposable;
 import org.spongepowered.configurate.reference.ConfigurationReference;
 import org.spongepowered.configurate.reference.WatchServiceListener;
@@ -54,25 +57,32 @@ public final class ConfigManager {
     this.subscribers = new CopyOnWriteArrayList<>();
     Path path = directory.resolve("bending.conf");
     Files.createDirectories(path.getParent());
-    reference = listener.listenToConfiguration(f -> HoconConfigurationLoader.builder().path(f).build(), path);
+    reference = listener.listenToConfiguration(this::createLoader, path);
     reference.errors().subscribe(e -> logger.warn(e.getValue().getMessage(), e.getValue()));
     processor = new ConfigProcessorImpl(logger, reference);
 
     buffer = Debounced.create(this::updateSubscribers, 1, TimeUnit.SECONDS);
-    rootSubscriber = reference.updates().subscribe(e -> {
-      if (!subscribers.isEmpty()) {
-        buffer.request();
-      }
-    });
+    rootSubscriber = reference.updates().subscribe(e -> buffer.request());
 
     if (INSTANCE == null) {
       INSTANCE = this;
     }
   }
 
+  private HoconConfigurationLoader createLoader(Path path) {
+    return HoconConfigurationLoader.builder().defaultOptions(withFactory()).path(path).build();
+  }
+
+  private UnaryOperator<ConfigurationOptions> withFactory() {
+    return options -> options.serializers(builder -> builder
+      .register(Configurable.class, ObjectMapper.factory().asTypeSerializer()));
+  }
+
   private void updateSubscribers() {
-    var root = config();
-    subscribers.forEach(s -> s.accept(root));
+    if (!subscribers.isEmpty()) {
+      var root = config();
+      subscribers.forEach(s -> s.accept(root));
+    }
   }
 
   public void save() {
@@ -107,5 +117,9 @@ public final class ConfigManager {
 
   public static <T extends Configurable> T load(Supplier<T> supplier) {
     return INSTANCE.processor.get(supplier.get());
+  }
+
+  public static void cache(Class<? extends Configurable> configType) {
+    INSTANCE.processor.cache(configType);
   }
 }

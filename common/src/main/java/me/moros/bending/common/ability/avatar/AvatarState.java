@@ -53,7 +53,6 @@ import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.bending.common.ability.avatar.ChakraFocus.FocusResult;
-import me.moros.bending.common.config.ConfigManager;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.bossbar.BossBar.Color;
 import net.kyori.adventure.bossbar.BossBar.Overlay;
@@ -65,8 +64,6 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import static java.util.Map.entry;
 
 public class AvatarState extends AbilityInstance {
-  private static final Config config = ConfigManager.load(Config::new);
-
   private static final Key AVATAR_MODIFIER_KEY = KeyUtil.simple("avatar-modifier");
   private static final Map<Attribute, Modifier> AVATAR_MODIFIERS = Map.ofEntries(
     entry(Attribute.RANGE, Modifier.of(ModifierOperation.SUMMED_MULTIPLICATIVE, 0.25)),
@@ -119,7 +116,7 @@ public class AvatarState extends AbilityInstance {
 
   @Override
   public void loadConfig() {
-    userConfig = user.game().configProcessor().calculate(this, config);
+    userConfig = user.game().configProcessor().calculate(this, Config.class);
   }
 
   @Override
