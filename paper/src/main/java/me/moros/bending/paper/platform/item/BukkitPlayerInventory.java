@@ -59,6 +59,9 @@ public class BukkitPlayerInventory extends BukkitInventory implements PlayerInve
 
   @Override
   public boolean remove(Item type, int amount) {
+    if (!has(type, amount)) {
+      return false;
+    }
     ItemStack bukkitItem = PlatformAdapter.toBukkitItem(type);
     bukkitItem.setAmount(amount);
     var toReturn = handle.removeItemAnySlot(bukkitItem).values().stream().findAny().orElse(null);
