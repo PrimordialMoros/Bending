@@ -84,7 +84,8 @@ public final class MaterialUtil {
       .add(BlockTag.CORAL_BLOCKS)
       .add(BlockType.SHORT_GRASS, BlockType.TALL_GRASS, BlockType.LARGE_FERN, BlockType.GLOW_LICHEN,
         BlockType.WEEPING_VINES, BlockType.WEEPING_VINES_PLANT, BlockType.TWISTING_VINES, BlockType.TWISTING_VINES_PLANT,
-        BlockType.VINE, BlockType.FERN, BlockType.SUGAR_CANE, BlockType.DEAD_BUSH)
+        BlockType.VINE, BlockType.FERN, BlockType.SUGAR_CANE, BlockType.DEAD_BUSH,
+        BlockType.SMALL_DRIPLEAF, BlockType.BIG_DRIPLEAF, BlockType.BIG_DRIPLEAF_STEM)
       .buildAndRegister();
     BlockTag.builder(TRANSPARENT.key())
       .add(BlockTag.reference(KeyUtil.simple("extra_transparent")))
