@@ -10,11 +10,11 @@ bstats = "3.0.2"
 sponge-api = "11.0.0-SNAPSHOT"
 sponge-common = "1.20.6-11.0.0-SNAPSHOT"
 minecraft = "1.20.6"
-fabric-loom = "1.6.11"
+fabric-loom = "1.6.12"
 fabric-api = "0.99.4+1.20.6"
 fabric-loader = "0.15.11"
 shadow = "8.1.1"
-flyway = "10.13.0"
+flyway = "10.14.0"
 junit = "5.10.2"
 
 [libraries]
@@ -92,7 +92,7 @@ sponge-mixin = { module = "org.spongepowered:mixin", version = "0.8.6" }
 shadow = { module = "com.github.johnrengelman:shadow", version.ref = "shadow" }
 sponge-vanilla = { module = "org.spongepowered:vanillagradle", version = "0.2.1-SNAPSHOT" }
 minotaur = { module = "com.modrinth.minotaur:Minotaur", version = "2.8.7" }
-checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.39" }
+checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.40" }
 
 [bundles]
 cloud = ["cloud-core", "cloud-minecraft"]
