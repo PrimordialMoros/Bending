@@ -10,9 +10,28 @@
     {
       "description": "Correct version handling for dependencies with format major.minor.patch+mcver",
       "matchPackageNames": [
-        "net.fabricmc.fabric-api:fabric-api"
+        "net.fabricmc.fabric-api:fabric-api",
+        "eu.pb4:sgui"
       ],
       "versioning": "regex:^(?<major>\\d+)(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?(?:\\+(?<compatibility>.*))?$"
+    },
+    {
+      "description": "Correct version handling for dependencies with format major.minor.patch.prerelease+mcver",
+      "matchPackageNames": [
+        "eu.pb4:placeholder-api"
+      ],
+      "versioning": "regex:^(?<major>\\d+)(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?(?<prerelease>[^.-]+)?(?:\\+(?<compatibility>.*))?$"
+    },
+    {
+      "description": "Towny version handling",
+      "matchPackageNames": ["com.palmergames.bukkit.towny:towny"],
+      "versioning": "regex:^0\\.(?<major>\\d+)(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?$"
+    },
+    {
+      "description": "Ignore Towny patch updates",
+      "matchPackageNames": ["com.palmergames.bukkit.towny:towny"],
+      "matchUpdateTypes": "patch",
+      "enabled": false
     },
     {
       "groupName": "all non-major dependencies",
