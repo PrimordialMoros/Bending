@@ -19,6 +19,7 @@
 
 package me.moros.bending.common.config.processor;
 
+import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.DoubleFunction;
@@ -26,12 +27,14 @@ import java.util.function.DoubleUnaryOperator;
 
 import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.AttributeValue;
+import me.moros.bending.api.util.Constants;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.util.NamingSchemes;
 
-interface ConfigEntry {
-  Map<Class<? extends Number>, DoubleFunction<Number>> CONVERTERS = Map.of(
+record ConfigEntry(String name, Class<?> type) {
+  private static final Map<Class<? extends Number>, DoubleFunction<Number>> CONVERTERS = Map.of(
     Double.class, x -> x,
     Integer.class, x -> (int) x,
     Long.class, x -> (long) x,
@@ -40,19 +43,37 @@ interface ConfigEntry {
     long.class, x -> (long) x
   );
 
-  String name();
-
-  Class<?> type();
-
-  void modify(ConfigurationNode parent, DoubleUnaryOperator operator, Consumer<Throwable> consumer);
-
-  AttributeValue asAttributeValue(ConfigurationNode parent, Attribute attribute, @Nullable DoubleUnaryOperator modifier);
-
-  default Number toNative(double value) {
-    return CONVERTERS.getOrDefault(type(), x -> x).apply(value);
+  ConfigEntry(Field field) {
+    this(NamingSchemes.LOWER_CASE_DASHED.coerce(field.getName()), field.getType());
   }
 
-  static ConfigEntry fromNode(String name, Class<?> type) {
-    return new SimpleConfigEntry(NamingSchemes.LOWER_CASE_DASHED.coerce(name), type);
+  private ConfigurationNode node(ConfigurationNode parent) {
+    return parent.node(name);
+  }
+
+  void modify(ConfigurationNode parent, DoubleUnaryOperator operator, Consumer<Throwable> consumer) {
+    ConfigurationNode node = node(parent);
+    double baseValue = node.getDouble();
+    try {
+      node.set(toNative(operator.applyAsDouble(baseValue)));
+    } catch (SerializationException e) {
+      consumer.accept(e);
+    }
+  }
+
+  AttributeValue asAttributeValue(ConfigurationNode parent, Attribute attribute, @Nullable DoubleUnaryOperator modifier) {
+    double base = node(parent).getDouble();
+    Number modifiedNumber = base;
+    if (modifier != null) {
+      double modified = modifier.applyAsDouble(base);
+      if (Math.abs(modified - base) > Constants.EPSILON) {
+        modifiedNumber = toNative(modified);
+      }
+    }
+    return AttributeValue.of(attribute, name, base, modifiedNumber);
+  }
+
+  private Number toNative(double value) {
+    return CONVERTERS.getOrDefault(type(), x -> x).apply(value);
   }
 }

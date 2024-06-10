@@ -103,7 +103,7 @@ public final class CachedConfig<T extends Configurable> {
         Modifiable annotation = field.getAnnotation(Modifiable.class);
         if (annotation != null) {
           Attribute attribute = annotation.value();
-          handles.add(Map.entry(attribute, ConfigEntry.fromNode(field.getName(), field.getType())));
+          handles.add(Map.entry(attribute, new ConfigEntry(field)));
         }
       }
       return new CachedConfig<>(configType, instance, valueRef, handles);
