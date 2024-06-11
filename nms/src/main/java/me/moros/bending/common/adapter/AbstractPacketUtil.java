@@ -137,9 +137,9 @@ public abstract class AbstractPacketUtil implements PacketUtil {
     playerList().getPlayers().forEach(p -> p.connection.send(packet));
   }
 
+  private static final ResourceLocation ADVANCEMENT_KEY = ResourceLocation.fromNamespaceAndPath("bending", "notification");
+
   protected ClientboundUpdateAdvancementsPacket createNotificationPacket(Item item, Component title) {
-    String identifier = "bending:notification";
-    ResourceLocation id = new ResourceLocation(identifier);
     String criteriaId = "bending:criteria_progress";
     ItemStack icon = adapt(item);
     net.minecraft.network.chat.Component nmsTitle = adapt(title);
@@ -148,18 +148,16 @@ public abstract class AbstractPacketUtil implements PacketUtil {
     var criterion = CriteriaTriggers.IMPOSSIBLE.createCriterion(new ImpossibleTrigger.TriggerInstance());
     var advancement = new Advancement.Builder()
       .display(icon, nmsTitle, nmsDesc, null, type, true, false, true)
-      .addCriterion(criteriaId, criterion).build(id);
+      .addCriterion(criteriaId, criterion).build(ADVANCEMENT_KEY);
     AdvancementProgress progress = new AdvancementProgress();
     progress.update(AdvancementRequirements.allOf(List.of(criteriaId)));
     progress.grantProgress(criteriaId);
-    var progressMap = Map.of(id, progress);
+    var progressMap = Map.of(ADVANCEMENT_KEY, progress);
     return new ClientboundUpdateAdvancementsPacket(false, List.of(advancement), Set.of(), progressMap);
   }
 
   protected ClientboundUpdateAdvancementsPacket clearNotification() {
-    String identifier = "bending:notification";
-    ResourceLocation id = new ResourceLocation(identifier);
-    return new ClientboundUpdateAdvancementsPacket(false, List.of(), Set.of(id), Map.of());
+    return new ClientboundUpdateAdvancementsPacket(false, List.of(), Set.of(ADVANCEMENT_KEY), Map.of());
   }
 
   protected ClientboundAddEntityPacket createEntity(int id, Position center, EntityType<?> type, int data) {

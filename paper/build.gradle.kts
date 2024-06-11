@@ -33,7 +33,7 @@ dependencies {
     compileOnly(libs.lwc)
     compileOnly(libs.worldguard)
     compileOnly(libs.papi)
-    paperweight.paperDevBundle("${libs.versions.minecraft.get()}-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle(libs.versions.paper.api)
 }
 
 tasks {

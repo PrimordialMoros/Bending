@@ -46,6 +46,7 @@ import me.moros.bending.fabric.platform.item.FabricItemBuilder;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags;
 import net.fabricmc.fabric.api.tag.convention.v2.TagUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -126,7 +127,10 @@ public class FabricPlatform implements Platform, PlatformFactory {
     var state = level.getBlockState(pos);
     if (TagUtil.isIn(server.registryAccess(), ConventionalBlockTags.ORES, state.getBlock())) {
       var item = new ItemStack(Items.DIAMOND_PICKAXE);
-      item.enchant(Enchantments.FORTUNE, 2);
+      var fortune = server.registryAccess()
+        .registryOrThrow(Registries.ENCHANTMENT)
+        .getHolderOrThrow(Enchantments.FORTUNE);
+      item.enchant(fortune, 2);
       return net.minecraft.world.level.block.Block.getDrops(state, level, pos, level.getBlockEntity(pos), null, item)
         .stream().map(PlatformAdapter::fromFabricItem).toList();
     }

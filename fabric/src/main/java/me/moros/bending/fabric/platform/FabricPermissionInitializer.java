@@ -36,7 +36,7 @@ public class FabricPermissionInitializer extends PermissionInitializer {
   private final Map<String, TriState> defaultPermissions = new ConcurrentHashMap<>();
 
   public FabricPermissionInitializer() {
-    var fallback = new ResourceLocation("bending", "fallback");
+    var fallback = ResourceLocation.fromNamespaceAndPath("bending", "fallback");
     PermissionCheckEvent.EVENT.register(fallback, this::onPermissionCheck);
     PermissionCheckEvent.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, fallback);
   }

@@ -40,7 +40,7 @@ import net.minecraft.world.entity.Entity;
 public record WorldListener(Supplier<Game> gameSupplier) implements FabricListener, Initializer {
   @Override
   public void init() {
-    var early = new ResourceLocation("bending", "early");
+    var early = ResourceLocation.fromNamespaceAndPath("bending", "early");
     ServerWorldEvents.UNLOAD.register(this::onWorldUnload);
     ServerEntityWorldChangeEvents.AFTER_ENTITY_CHANGE_WORLD.register(early, this::onChangeWorld);
     ServerEntityWorldChangeEvents.AFTER_ENTITY_CHANGE_WORLD.addPhaseOrdering(early, Event.DEFAULT_PHASE);
