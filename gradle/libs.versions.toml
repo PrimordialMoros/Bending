@@ -15,7 +15,7 @@ fabric-loom = "1.6.12"
 fabric-api = "0.100.1+1.21"
 fabric-loader = "0.15.11"
 shadow = "8.1.1"
-flyway = "10.14.0"
+flyway = "10.15.0"
 junit = "5.10.2"
 
 [libraries]
@@ -72,14 +72,14 @@ hsql = { module = "org.hsqldb:hsqldb", version = "2.7.3" }
 fabric-minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
 fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
 fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
-fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "2.4.0-pre.1+1.20.5" }
-sgui = { module = "eu.pb4:sgui", version = "1.5.1+1.20.5" }
+fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "2.4.0-pre.2+1.21" }
+sgui = { module = "eu.pb4:sgui", version = "1.6.0+1.21" }
 fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.3.1" }
 
 # Bukkit
 inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.14" }
 grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.3" }
-towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.100.2.11" }
+towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.100.3.0" }
 lwc = { module = "com.griefcraft:lwc", version = "2.4.0" }
 worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.10" }
 papi = { module = "me.clip:placeholderapi", version = "2.11.6" }
