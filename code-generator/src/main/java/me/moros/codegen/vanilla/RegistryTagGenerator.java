@@ -45,6 +45,6 @@ record RegistryTagGenerator(Path directory) implements Generator {
     final String fileName = directory.relativize(path).toString();
     final String name = (File.separatorChar == '\\' ? fileName.replace('\\', '/') : fileName)
       .replace(".json", "");
-    return new ResourceLocation(name);
+    return ResourceLocation.parse(name);
   }
 }

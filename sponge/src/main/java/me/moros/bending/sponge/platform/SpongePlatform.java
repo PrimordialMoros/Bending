@@ -47,6 +47,7 @@ import me.moros.bending.sponge.gui.BoardImpl;
 import me.moros.bending.sponge.gui.ElementMenu;
 import me.moros.bending.sponge.platform.item.SpongeItemBuilder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -132,7 +133,10 @@ public class SpongePlatform implements Platform, PlatformFactory {
       var level = (ServerLevel) PlatformAdapter.toSpongeWorld(block.world());
       var pos = new BlockPos(block.blockX(), block.blockY(), block.blockZ());
       var item = new net.minecraft.world.item.ItemStack(Items.DIAMOND_PICKAXE);
-      item.enchant(Enchantments.FORTUNE, 2);
+      var fortune = level.registryAccess()
+        .registryOrThrow(Registries.ENCHANTMENT)
+        .getHolderOrThrow(Enchantments.FORTUNE);
+      item.enchant(fortune, 2);
       return net.minecraft.world.level.block.Block.getDrops(nmsState, level, pos, level.getBlockEntity(pos), null, item)
         .stream().map(i -> PlatformAdapter.fromSpongeItem((ItemStack) (Object) i)).toList();
     }

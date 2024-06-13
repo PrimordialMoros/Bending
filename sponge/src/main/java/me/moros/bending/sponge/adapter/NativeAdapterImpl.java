@@ -57,7 +57,8 @@ public final class NativeAdapterImpl extends AbstractNativeAdapter {
 
   @Override
   protected ItemStack adapt(Item item) {
-    return BuiltInRegistries.ITEM.get(new ResourceLocation(item.key().namespace(), item.key().value())).getDefaultInstance();
+    var rsl = ResourceLocation.fromNamespaceAndPath(item.key().namespace(), item.key().value());
+    return BuiltInRegistries.ITEM.get(rsl).getDefaultInstance();
   }
 
   @Override

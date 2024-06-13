@@ -55,8 +55,8 @@ public final class Generators {
     generator.generate(from(BuiltInRegistries.MOB_EFFECT), "potion", "PotionEffect");
     generator.generate(from(BuiltInRegistries.SOUND_EVENT), "sound", "Sound");
 
-    generator.generate(tagsFrom("blocks"), "block", "Tags", "BlockTag", "TagImpl");
-    generator.generate(tagsFrom("items"), "item", "Tags", "ItemTag", "TagImpl");
+    generator.generate(tagsFrom("block"), "block", "Tags", "BlockTag", "TagImpl");
+    generator.generate(tagsFrom("item"), "item", "Tags", "ItemTag", "TagImpl");
 
     LOGGER.log(Level.INFO, "Finished generating code");
   }
