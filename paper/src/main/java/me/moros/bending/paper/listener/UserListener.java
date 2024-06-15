@@ -153,9 +153,9 @@ public record UserListener(Game game) implements Listener, BukkitListener {
     }
     TempBlock tb = TempBlock.MANAGER.get(PlatformAdapter.fromBukkitBlock(block)).orElse(null);
     if (tb != null) {
-      int ticks = event.getDuration() * 20;
+      int ticks = FastMath.ceil(event.getDuration() * 20);
       if (ticks > BendingEffect.MAX_BLOCK_FIRE_TICKS) {
-        event.setDuration(FastMath.ceil(BendingEffect.MAX_BLOCK_FIRE_TICKS / 20.0));
+        event.setDuration(BendingEffect.MAX_BLOCK_FIRE_TICKS / 20F);
       }
       DamageSource source = tb.damageSource();
       if (source != null) {

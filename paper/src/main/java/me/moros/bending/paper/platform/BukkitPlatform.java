@@ -58,9 +58,9 @@ public class BukkitPlatform implements Platform, PlatformFactory {
   private final boolean hasNativeSupport;
   private final LoadingCache<Item, ItemSnapshot> campfireRecipesCache;
 
-  public BukkitPlatform(Logger logger) {
+  public BukkitPlatform(Logger logger, String version) {
     new BukkitRegistryInitializer().init();
-    this.adapter = AdapterLoader.loadAdapter(logger);
+    this.adapter = AdapterLoader.loadAdapter(logger, version);
     this.hasNativeSupport = adapter != AdapterLoader.DUMMY;
     this.campfireRecipesCache = Caffeine.newBuilder()
       .expireAfterAccess(10, TimeUnit.MINUTES)

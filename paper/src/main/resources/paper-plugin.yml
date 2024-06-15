@@ -5,7 +5,7 @@ main: me.moros.bending.paper.BendingBootstrap
 author: Moros
 description: Bending plugin for PaperMC.
 website: https://github.com/PrimordialMoros/Bending
-api-version: '1.20'
+api-version: '${mcVersion}'
 dependencies:
   server:
     LuckPerms:

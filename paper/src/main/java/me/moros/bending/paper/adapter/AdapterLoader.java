@@ -24,17 +24,15 @@ import me.moros.bending.common.logging.Logger;
 import org.bukkit.Bukkit;
 
 public final class AdapterLoader {
-  private static final String NATIVE_VERSION = "1.20.6";
-
   public static final NativeAdapter DUMMY = new NativeAdapter() {
   };
 
   private AdapterLoader() {
   }
 
-  public static NativeAdapter loadAdapter(Logger logger) {
+  public static NativeAdapter loadAdapter(Logger logger, String version) {
     String mcVersion = Bukkit.getServer().getMinecraftVersion();
-    if (mcVersion.equals(NATIVE_VERSION)) {
+    if (mcVersion.equals(version)) {
       logger.info("Successfully loaded native adapter for version " + mcVersion);
       return new NativeAdapterImpl();
     } else {
