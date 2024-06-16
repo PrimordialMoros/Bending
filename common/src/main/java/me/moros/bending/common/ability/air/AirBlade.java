@@ -134,7 +134,7 @@ public class AirBlade extends AbilityInstance {
           rotation.applyTo(offset, offset);
           ParticleBuilder.air(origin.add(Vector3d.from(offset).multiply(d))).spawn(user.world());
         }
-        if (ThreadLocalRandom.current().nextInt(6) == 0) {
+        if (ThreadLocalRandom.current().nextInt(8) == 0) {
           SoundEffect.AIR.play(user.world(), origin);
         }
       } else if (!user.sneaking()) {
@@ -202,7 +202,7 @@ public class AirBlade extends AbilityInstance {
 
     @Override
     public void postRender() {
-      if (ThreadLocalRandom.current().nextInt(6) == 0) {
+      if (ThreadLocalRandom.current().nextInt(8) == 0) {
         SoundEffect.AIR.play(user.world(), location);
       }
     }

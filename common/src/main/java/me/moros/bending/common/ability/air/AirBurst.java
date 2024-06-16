@@ -168,8 +168,8 @@ public class AirBurst extends AbilityInstance {
 
     @Override
     public void postRender() {
-      if (ThreadLocalRandom.current().nextInt(12) == 0) {
-        SoundEffect.AIR.play(user.world(), location);
+      if (ThreadLocalRandom.current().nextInt(18) == 0) {
+        SoundEffect.AIR_FAST.play(user.world(), location);
       }
     }
 

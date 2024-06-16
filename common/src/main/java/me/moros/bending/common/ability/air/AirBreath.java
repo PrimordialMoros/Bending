@@ -127,7 +127,7 @@ public class AirBreath extends AbilityInstance {
 
     @Override
     public void postRender() {
-      if (ThreadLocalRandom.current().nextInt(3) == 0) {
+      if (ThreadLocalRandom.current().nextInt(4) == 0) {
         SoundEffect.AIR.play(user.world(), location);
       }
     }

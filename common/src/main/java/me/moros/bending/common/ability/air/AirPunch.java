@@ -113,7 +113,7 @@ public class AirPunch extends AbilityInstance {
     @Override
     public void postRender() {
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
-        SoundEffect.AIR.play(user.world(), location);
+        SoundEffect.AIR_FAST.play(user.world(), location);
       }
     }
 

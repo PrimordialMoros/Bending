@@ -176,8 +176,8 @@ public class AirBlast extends AbilityInstance {
 
     @Override
     public void postRender() {
-      if (ThreadLocalRandom.current().nextInt(6) == 0) {
-        SoundEffect.AIR.play(user.world(), location);
+      if (ThreadLocalRandom.current().nextInt(4) == 0) {
+        SoundEffect.AIR_FAST.play(user.world(), location);
       }
       // Handle user separately from the general entity collision.
       if (selectedOrigin && user.bounds().intersects(Sphere.of(location, 2))) {

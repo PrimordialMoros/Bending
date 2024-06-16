@@ -159,7 +159,7 @@ public class Tornado extends AbilityInstance {
         double z = r * Math.sin(y + offset);
         Vector3d loc = base.add(x, y, z);
         ParticleBuilder.air(loc).spawn(user.world());
-        if (ThreadLocalRandom.current().nextInt(20) == 0) {
+        if (ThreadLocalRandom.current().nextInt(28) == 0) {
           SoundEffect.AIR.play(user.world(), loc);
         }
       }

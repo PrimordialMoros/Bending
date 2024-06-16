@@ -29,7 +29,8 @@ import net.kyori.adventure.sound.Sound.Source;
 import static me.moros.bending.api.platform.sound.Sounds.*;
 
 public interface SoundEffect extends Keyed {
-  SoundEffect AIR = ENTITY_CREEPER_HURT.asEffect(1, 2);
+  SoundEffect AIR = ENTITY_BREEZE_SLIDE.asEffect(1, 0.8F);
+  SoundEffect AIR_FAST = SoundEffect.AIR.with(1, 1.4F);
 
   SoundEffect WATER = BLOCK_WATER_AMBIENT.asEffect();
   SoundEffect ICE = ITEM_FLINTANDSTEEL_USE.asEffect();
