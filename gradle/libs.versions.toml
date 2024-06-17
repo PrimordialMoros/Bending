@@ -3,7 +3,7 @@ storage = "3.3.0"
 math = "3.0.0"
 tasker = "1.2.0"
 adventure = "4.17.0"
-adventure-fabric = "5.13.0"
+adventure-fabric = "5.14.0-SNAPSHOT"
 configurate = "4.2.0-SNAPSHOT"
 cloud = "2.0.0-SNAPSHOT"
 bstats = "3.0.2"
@@ -91,7 +91,7 @@ sponge-mixin = { module = "org.spongepowered:mixin", version = "0.8.6" }
 
 # Plugins for build-logic
 shadow = { module = "com.github.johnrengelman:shadow", version.ref = "shadow" }
-sponge-vanilla = { module = "org.spongepowered:vanillagradle", version = "0.2.1-SNAPSHOT" }
+sponge-vanilla = { module = "org.spongepowered:vanillagradle", version = "0.2.1-20240507.024226-82" }
 minotaur = { module = "com.modrinth.minotaur:Minotaur", version = "2.8.7" }
 checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.40" }
 
