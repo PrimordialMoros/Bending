@@ -20,7 +20,6 @@
 package me.moros.bending.common.storage;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import me.moros.bending.common.storage.file.loader.JsonLoader;
 import me.moros.bending.common.storage.file.loader.Loader;
@@ -36,24 +35,24 @@ public enum StorageEngine {
   H2(StorageType.H2),
   HSQL(StorageType.HSQL),
   // Flat file
-  JSON("JSON", JsonLoader::new);
+  JSON("JSON", new JsonLoader());
 
   private final String name;
   private final StorageType type;
-  private final Supplier<Loader<?>> loaderSupplier;
+  private final Loader<?> loader;
 
   StorageEngine(StorageType type) {
-    this(type.toString(), type, () -> null);
+    this(type.toString(), type, null);
   }
 
-  StorageEngine(String name, Supplier<Loader<?>> loaderSupplier) {
+  StorageEngine(String name, Loader<?> loaderSupplier) {
     this(name, null, loaderSupplier);
   }
 
-  StorageEngine(String name, @Nullable StorageType type, Supplier<@Nullable Loader<?>> loaderSupplier) {
+  StorageEngine(String name, @Nullable StorageType type, @Nullable Loader<?> loader) {
     this.name = name;
     this.type = type;
-    this.loaderSupplier = loaderSupplier;
+    this.loader = loader;
   }
 
   @Override
@@ -66,6 +65,6 @@ public enum StorageEngine {
   }
 
   public Optional<Loader<?>> loader() {
-    return Optional.ofNullable(loaderSupplier.get());
+    return Optional.ofNullable(loader);
   }
 }
