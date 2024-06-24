@@ -19,9 +19,9 @@
 
 package me.moros.bending.paper.adapter;
 
+import io.papermc.paper.ServerBuildInfo;
 import me.moros.bending.api.adapter.NativeAdapter;
 import me.moros.bending.common.logging.Logger;
-import org.bukkit.Bukkit;
 
 public final class AdapterLoader {
   public static final NativeAdapter DUMMY = new NativeAdapter() {
@@ -31,7 +31,10 @@ public final class AdapterLoader {
   }
 
   public static NativeAdapter loadAdapter(Logger logger, String version) {
-    String mcVersion = Bukkit.getServer().getMinecraftVersion();
+    String mcVersion = ServerBuildInfo.buildInfo().minecraftVersionId();
+    if (version.endsWith(".0")) {
+      version = version.substring(0, version.length() - 2);
+    }
     if (mcVersion.equals(version)) {
       logger.info("Successfully loaded native adapter for version " + mcVersion);
       return new NativeAdapterImpl();
@@ -42,10 +45,9 @@ public final class AdapterLoader {
         * Unable to find native adapter for version %s.
         * Some features may be unsupported (for example toast notifications) or induce significant overhead.
         * Packet based abilities will utilize real entities instead which can be slower when spawned in large amounts.
-        * It is recommended you find a supported version.
+        * It is recommended you use a supported version (%s).
         ****************************************************************
-        
-        """.formatted(mcVersion);
+        """.formatted(mcVersion, version);
       logger.warn(s);
     }
     return DUMMY;
