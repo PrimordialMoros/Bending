@@ -80,12 +80,11 @@ public class FabricItemBuilder implements ItemBuilder {
       throw new IllegalStateException("Non positive amount: " + amount);
     }
     stack.setCount(amount);
-    var fabricItem = new FabricItem(stack);
     var store = FabricPersistentDataHolder.create(stack);
     for (var entry : meta.entrySet()) {
       addMeta(store, entry.getKey(), entry.getValue()); // Get around type erasure
     }
-    return fabricItem;
+    return new FabricItem(stack);
   }
 
   @SuppressWarnings("unchecked")
