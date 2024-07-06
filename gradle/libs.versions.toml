@@ -11,12 +11,12 @@ sponge-api = "12.0.0-SNAPSHOT"
 sponge-common = "1.21-12.0.0-SNAPSHOT"
 paper-api = "1.21-R0.1-SNAPSHOT"
 minecraft = "1.21"
-fabric-loom = "1.7.1"
-fabric-api = "0.100.3+1.21"
+fabric-loom = "1.7.2"
+fabric-api = "0.100.4+1.21"
 fabric-loader = "0.15.11"
 shadow = "8.1.1"
-flyway = "10.15.0"
-junit = "5.10.2"
+flyway = "10.15.2"
+junit = "5.10.3"
 
 [libraries]
 storage = { module = "me.moros:storage", version.ref = "storage" }
@@ -30,7 +30,7 @@ tasker-fabric = { module = "me.moros:tasker-fabric", version.ref = "tasker" }
 
 javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.8" }
-jdbi = { module = "org.jdbi:jdbi3-core", version = "3.45.1" }
+jdbi = { module = "org.jdbi:jdbi3-core", version = "3.45.2" }
 hikari = { module = "com.zaxxer:HikariCP", version = "5.1.0" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-mysql = { module = "org.flywaydb:flyway-mysql", version.ref = "flyway" }
@@ -77,8 +77,8 @@ sgui = { module = "eu.pb4:sgui", version = "1.6.0+1.21" }
 fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.3.1" }
 
 # Bukkit
-inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.14" }
-grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.3" }
+inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.15" }
+grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.4" }
 towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.100.3.0" }
 lwc = { module = "com.griefcraft:lwc", version = "2.4.0" }
 worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.10" }
@@ -93,7 +93,7 @@ sponge-mixin = { module = "org.spongepowered:mixin", version = "0.8.6" }
 shadow = { module = "com.github.johnrengelman:shadow", version.ref = "shadow" }
 sponge-vanilla = { module = "org.spongepowered:vanillagradle", version = "0.2.1-20240507.024226-82" }
 minotaur = { module = "com.modrinth.minotaur:Minotaur", version = "2.8.7" }
-checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.40" }
+checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.42" }
 
 [bundles]
 cloud = ["cloud-core", "cloud-minecraft"]
