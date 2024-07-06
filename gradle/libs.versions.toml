@@ -62,7 +62,7 @@ cloud-fabric = { module = "org.incendo:cloud-fabric", version.ref = "cloud" }
 cloud-sponge = { module = "org.incendo:cloud-sponge", version.ref = "cloud" }
 
 # Databases
-mysql = { module = "com.mysql:mysql-connector-j", version = "8.4.0" }
+mysql = { module = "com.mysql:mysql-connector-j", version = "9.0.0" }
 mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.4.0" }
 postgresql = { module = "org.postgresql:postgresql", version = "42.7.3" }
 h2 = { module = "com.h2database:h2", version = "2.2.224" }
