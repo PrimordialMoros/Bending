@@ -258,7 +258,10 @@ public class MetalCable extends AbilityInstance {
     if (InventoryUtil.hasMetalArmor(user)) {
       return true;
     }
-    return user.inventory() instanceof PlayerInventory inv && inv.has(Item.IRON_INGOT);
+    if (user.inventory() instanceof PlayerInventory inv) {
+      return inv.has(Item.IRON_INGOT) || inv.has(Item.RAW_IRON);
+    }
+    return false;
   }
 
   private void remove() {
