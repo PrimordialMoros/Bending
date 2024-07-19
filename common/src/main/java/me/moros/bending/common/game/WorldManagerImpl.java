@@ -81,11 +81,6 @@ public final class WorldManagerImpl implements WorldManager {
   }
 
   @Override
-  public void clear() {
-    worlds.clear();
-  }
-
-  @Override
   public boolean isEnabled(Key world) {
     return !disabled.contains(world);
   }

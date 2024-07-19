@@ -51,8 +51,8 @@ public class SpongeInventory implements Inventory {
 
   @Override
   public boolean canPlaceBlock() {
-    return getOrAir(EquipmentTypes.MAIN_HAND).type().block().isPresent()
-      || getOrAir(EquipmentTypes.OFF_HAND).type().block().isPresent();
+    return getOrAir(EquipmentTypes.MAINHAND).type().block().isPresent()
+      || getOrAir(EquipmentTypes.OFFHAND).type().block().isPresent();
   }
 
   @Override
@@ -67,8 +67,8 @@ public class SpongeInventory implements Inventory {
 
   private static Supplier<? extends EquipmentType> toSponge(EquipmentSlot slot) {
     return switch (slot) {
-      case MAINHAND -> EquipmentTypes.MAIN_HAND;
-      case OFFHAND -> EquipmentTypes.OFF_HAND;
+      case MAINHAND -> EquipmentTypes.MAINHAND;
+      case OFFHAND -> EquipmentTypes.OFFHAND;
       case FEET -> EquipmentTypes.FEET;
       case LEGS -> EquipmentTypes.LEGS;
       case CHEST -> EquipmentTypes.CHEST;

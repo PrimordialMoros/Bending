@@ -38,51 +38,6 @@ public interface ConfigProcessor {
    * {@link Configurable#external()} to return true. In that case, the method will operate on the same object
    * that is supplied, so you should make sure to always pass a fresh copy yourself.
    * @param ability the ability the config belongs to
-   * @param config the config to process
-   * @param <T> the type of config
-   * @return the modified config
-   */
-  @Deprecated(forRemoval = true)
-  default <T extends Configurable> T calculate(Ability ability, T config) {
-    return calculate(ability.user(), ability.description(), config);
-  }
-
-  /**
-   * Calculates new values for the given config after applying {@link AttributeModifier}s.
-   * <p>Note: By default, this method will return a copy of the supplied object, that is loaded from the
-   * main configuration file. For abilities with external configs, they must override
-   * {@link Configurable#external()} to return true. In that case, the method will operate on the same object
-   * that is supplied, so you should make sure to always pass a fresh copy yourself.
-   * @param user the attribute user
-   * @param desc the ability description
-   * @param config the config to process
-   * @param <T> the type of config
-   * @return the modified config
-   */
-  @Deprecated(forRemoval = true)
-  default <T extends Configurable> T calculate(AttributeUser user, AbilityDescription desc, T config) {
-    return calculate(user, desc, (Class<T>) config.getClass());
-  }
-
-  /**
-   * Utility method that calculates all attributes in a given config.
-   * @param user the attribute user
-   * @param desc the ability description
-   * @param config the config to process
-   * @return a collection of all attributes found
-   */
-  @Deprecated(forRemoval = true)
-  default Collection<AttributeValue> listAttributes(AttributeUser user, AbilityDescription desc, Configurable config) {
-    return listAttributes(user, desc, config.getClass());
-  }
-
-  /**
-   * Calculates new values for the given config after applying {@link AttributeModifier}s.
-   * <p>Note: By default, this method will return a copy of the supplied object, that is loaded from the
-   * main configuration file. For abilities with external configs, they must override
-   * {@link Configurable#external()} to return true. In that case, the method will operate on the same object
-   * that is supplied, so you should make sure to always pass a fresh copy yourself.
-   * @param ability the ability the config belongs to
    * @param configType the type of config to process
    * @param <T> the type of config
    * @return the modified config

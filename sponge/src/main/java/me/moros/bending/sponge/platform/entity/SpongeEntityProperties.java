@@ -66,8 +66,6 @@ final class SpongeEntityProperties {
         .get(e -> ((net.minecraft.world.entity.Entity) e).isInWaterOrBubble()))
       .create(EntityProperties.IN_LAVA, Entity.class, b -> b
         .get(e -> ((net.minecraft.world.entity.Entity) e).isInLava()))
-      .create(EntityProperties.VISIBLE, Entity.class, b -> b
-        .get(e -> !e.invisible().get()))
       .create(EntityProperties.INVISIBLE, Entity.class, b -> property(b, Keys.IS_INVISIBLE))
       .create(EntityProperties.DEAD, Entity.class, b -> b
         .get(e -> !((net.minecraft.world.entity.Entity) e).isAlive()))

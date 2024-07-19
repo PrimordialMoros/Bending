@@ -103,11 +103,6 @@ public interface LivingEntity extends Entity {
     };
   }
 
-  @Deprecated(forRemoval = true)
-  default TriState isRightHanded() {
-    return TriState.byBoolean(property(EntityProperties.RIGHT_HAND));
-  }
-
   /**
    * Gets the user's specified hand position.
    * @param right whether to get the right hand

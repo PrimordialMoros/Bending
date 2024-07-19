@@ -37,12 +37,6 @@ public interface WorldManager extends Updatable {
   AbilityManager instance(Key world);
 
   /**
-   * Clear all per-world managers this instance is responsible for.
-   */
-  @Deprecated(forRemoval = true)
-  void clear();
-
-  /**
    * Check if bending is enabled for the specified world.
    * @param world the world uuid to check
    * @return true if bending is enabled for the given world, false otherwise

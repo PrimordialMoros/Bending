@@ -44,10 +44,6 @@ final class DummyWorldManager implements WorldManager {
   }
 
   @Override
-  public void clear() {
-  }
-
-  @Override
   public boolean isEnabled(Key world) {
     return false;
   }

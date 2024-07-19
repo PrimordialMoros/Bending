@@ -103,8 +103,6 @@ final class FabricEntityProperties {
         .get(Entity::isInWaterOrBubble))
       .create(EntityProperties.IN_LAVA, Entity.class, b -> b
         .get(Entity::isInLava))
-      .create(EntityProperties.VISIBLE, Entity.class, b -> b
-        .get(e -> !e.isInvisible()))
       .create(EntityProperties.INVISIBLE, Entity.class, b -> b
         .get(Entity::isInvisible)
         .set(Entity::setInvisible))

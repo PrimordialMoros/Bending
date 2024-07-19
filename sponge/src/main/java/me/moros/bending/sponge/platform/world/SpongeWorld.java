@@ -154,7 +154,7 @@ public record SpongeWorld(ServerWorld handle) implements World {
     var effect = ParticleMapper.mapParticleEffect(context);
     if (effect != null) {
       var vec = org.spongepowered.math.vector.Vector3d.from(context.position().x(), context.position().y(), context.position().z());
-      handle().spawnParticles(effect, vec, 128);
+      handle().spawnParticles(effect, vec);
     }
   }
 
