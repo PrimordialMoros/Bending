@@ -20,7 +20,7 @@ body:
     attributes:
       label: Platform Details
       description: The type and version of the platform you are on.
-      placeholder: "git-Paper-404 (MC: 1.20.4)"
+      placeholder: "Paper version 1.21-107-master@aa36ae6 (2024-07-21T10:39:28Z) (Implementing API version 1.21-R0.1-SNAPSHOT)"
     validations:
       required: true
 

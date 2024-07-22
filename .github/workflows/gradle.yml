@@ -1,56 +1,108 @@
 name: Build
+
 on:
   push:
-    branches: [ "**" ]
-    tags-ignore: [ "**" ]
+    branches: [ '**' ]
+    tags-ignore: [ '**' ]
   pull_request:
   release:
     types: [ published ]
 
+permissions:
+  contents: write
+
 jobs:
   build:
-    if: "${{ github.event_name != 'pull_request' || github.repository != github.event.pull_request.head.repo.full_name }}"
+    if: ${{ github.event_name != 'pull_request' || github.repository != github.event.pull_request.head.repo.full_name }}
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        java: [ 21 ]
-      fail-fast: true
     steps:
-      - uses: actions/checkout@v4
-      - name: JDK ${{ matrix.java }}
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup java
         uses: actions/setup-java@v4
         with:
-          java-version: ${{ matrix.java }}
+          java-version: '21'
           distribution: 'temurin'
-      - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@v3
       - name: Setup gradle
         uses: gradle/actions/setup-gradle@v3
-      - name: Setup gradle cache
+        with:
+          validate-wrappers: true
+      - name: Setup additional gradle cache
         uses: actions/cache@v4
-        env:
-          cache-name: project-gradle-cache
         with:
           path: |
             .gradle/caches/VanillaGradle
             .gradle/loom-cache
-            **/.gradle/caches/paperweight
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/libs.versions.toml', '**/*.gradle*', '**/gradle-wrapper.properties') }}
+            paper/.gradle/caches/paperweight
+          key: ${{ runner.os }}-build-cache-${{ hashFiles('**/libs.versions.toml', '**/*.gradle.kts', '**/gradle-wrapper.properties') }}
           restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-cache-
       - name: Execute gradle build
         run: ./gradlew build
-      - name: Determine status
+      - name: Calculate checksums
+        run: |
+          build_dir="build"
+          summary_table="| File | SHA-256 Checksum |\n"
+          summary_table+="|------|------------------|\n"
+          for file in build/*.jar; do
+            if [[ -f "$file" ]]; then
+              filename=$(basename $file .jar)
+              checksum=$(sha256sum "$file" | awk '{ print $1 }')
+              summary_table+="| $filename | `$checksum` |\n"
+              echo "$checksum" > $build_dir/$filename.sha256
+            fi
+          done
+          echo -e summary_table >> $GITHUB_STEP_SUMMARY
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts
+          path: |
+            build/*.jar
+            build/*.sha256
+          retention-days: 14
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ github.event_name == 'release' && github.event.action == 'published' }}
+    steps:
+      - name: Download stored artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts
+      - name: Update release artifacts
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**
+  publish:
+    runs-on: ubuntu-latest
+    needs: release
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: Setup gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          validate-wrappers: true
+          cache-read-only: true
+          add-job-summary: 'on-failure'
+      - id: status
+        name: Determine status
         run: ./gradlew printVersionStatus --quiet >> $GITHUB_ENV
       - name: Publish release to modrinth
-        if: "${{ env.STATUS == 'release' && github.event_name == 'release' }}"
+        if: ${{ steps.status.outcome == 'success' && env.STATUS == 'release' }}
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          RELEASE_NOTES: ${{ github.event.release.body }}
         run: ./gradlew modrinth
-        env:
-          MODRINTH_TOKEN: "${{ secrets.MODRINTH_TOKEN }}"
-          RELEASE_NOTES: "${{ github.event.release.body }}"
       - name: Publish release to hangar
-        if: "${{ env.STATUS == 'release' && github.event_name == 'release' }}"
-        run: ./gradlew publishAllPublicationsToHangar
+        if: ${{ steps.status.outcome == 'success' && env.STATUS == 'release' }}
         env:
-          HANGAR_TOKEN: "${{ secrets.HANGAR_TOKEN }}"
-          RELEASE_NOTES: "${{ github.event.release.body }}"
+          HANGAR_TOKEN: ${{ secrets.HANGAR_TOKEN }}
+          RELEASE_NOTES: ${{ github.event.release.body }}
+        run: ./gradlew publishAllPublicationsToHangar
