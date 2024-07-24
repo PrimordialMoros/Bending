@@ -40,19 +40,20 @@ jobs:
       - name: Execute gradle build
         run: ./gradlew build
       - name: Calculate checksums
+        shell: bash
         run: |
           build_dir="build"
           summary_table="| File | SHA-256 Checksum |\n"
           summary_table+="|------|------------------|\n"
-          for file in build/*.jar; do
+          for file in $build_dir/*.jar; do
             if [[ -f "$file" ]]; then
               filename=$(basename $file .jar)
-              checksum=$(sha256sum "$file" | awk '{ print $1 }')
-              summary_table+="| $filename | `$checksum` |\n"
+              checksum=$(sha256sum "$file" | cut -c 1-64)
+              summary_table+="| $filename | \`$checksum\` |\n"
               echo "$checksum" > $build_dir/$filename.sha256
             fi
           done
-          echo -e summary_table >> $GITHUB_STEP_SUMMARY
+          echo -e $summary_table >> $GITHUB_STEP_SUMMARY
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -91,6 +92,8 @@ jobs:
           validate-wrappers: true
           cache-read-only: true
           add-job-summary: 'on-failure'
+      - name: Generate and submit dependency graph
+        uses: gradle/actions/dependency-submission@v3
       - id: status
         name: Determine status
         run: ./gradlew printVersionStatus --quiet >> $GITHUB_ENV
