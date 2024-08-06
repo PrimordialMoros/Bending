@@ -24,7 +24,7 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
       - name: Setup gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
         with:
           validate-wrappers: true
       - name: Setup additional gradle cache
@@ -87,13 +87,13 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
       - name: Setup gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
         with:
           validate-wrappers: true
           cache-read-only: true
           add-job-summary: 'on-failure'
       - name: Generate and submit dependency graph
-        uses: gradle/actions/dependency-submission@v3
+        uses: gradle/actions/dependency-submission@v4
       - id: status
         name: Determine status
         run: ./gradlew printVersionStatus --quiet >> $GITHUB_ENV
