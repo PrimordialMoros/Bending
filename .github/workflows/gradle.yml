@@ -25,8 +25,6 @@ jobs:
           distribution: 'temurin'
       - name: Setup gradle
         uses: gradle/actions/setup-gradle@v4
-        with:
-          validate-wrappers: true
       - name: Setup additional gradle cache
         uses: actions/cache@v4
         with:
@@ -89,7 +87,6 @@ jobs:
       - name: Setup gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          validate-wrappers: true
           cache-read-only: true
           add-job-summary: 'on-failure'
       - name: Generate and submit dependency graph

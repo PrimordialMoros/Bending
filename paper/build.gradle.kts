@@ -11,7 +11,6 @@ repositories {
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/") // PAPI
     maven("https://repo.codemc.io/repository/maven-public/") // LWC
     maven("https://repo.glaremasters.me/repository/towny/") // Towny
-    maven("https://repo.moros.me/snapshots/")
     maven("https://jitpack.io/") // GriefPrevention
 }
 
@@ -42,10 +41,12 @@ tasks {
         minecraftVersion(libs.versions.minecraft.get())
     }
     shadowJar {
+        exclude("fonts/") // We aren't using any fonts from IF
         dependencies {
             reloc("org.incendo.cloud", "cloud")
             reloc("com.typesafe", "typesafe")
             reloc("org.spongepowered.configurate", "configurate")
+            reloc("com.github.stefvanschie.inventoryframework", "inventoryframework")
         }
     }
     named<Copy>("processResources") {
