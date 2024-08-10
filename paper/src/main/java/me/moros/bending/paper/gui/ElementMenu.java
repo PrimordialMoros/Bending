@@ -21,7 +21,6 @@ package me.moros.bending.paper.gui;
 
 import java.util.Map;
 
-import com.github.stefvanschie.inventoryframework.adventuresupport.ComponentHolder;
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
@@ -46,7 +45,7 @@ public final class ElementMenu extends AbstractGui<ItemStack, ChestGui> {
 
   @Override
   protected ChestGui construct(Map<Element, ItemStack> elementMap) {
-    ChestGui gui = new ChestGui(3, ComponentHolder.of(Message.ELEMENTS_GUI_TITLE.build()));
+    ChestGui gui = new ChestGui(3, Message.ELEMENTS_GUI_TITLE.build());
     gui.setOnGlobalClick(event -> event.setCancelled(true));
     OutlinePane background = new OutlinePane(0, 0, 9, 3, Priority.LOWEST);
     background.addItem(new GuiItem(backgroundItem()));

@@ -37,7 +37,7 @@ public interface Configurable extends Serializable {
   /**
    * Controls if this configuration external and cannot be loaded from the main configuration file.
    * @return whether this configuration is external
-   * @see ConfigProcessor#calculate(Ability, Configurable)
+   * @see ConfigProcessor#calculate(Ability, Class)
    */
   default boolean external() {
     return false;
