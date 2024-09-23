@@ -46,7 +46,6 @@ import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.TranslationRegistry;
 import net.kyori.adventure.translation.Translator;
-import net.kyori.adventure.util.UTF8ResourceBundleControl;
 import org.spongepowered.configurate.reference.WatchServiceListener;
 
 /**
@@ -96,7 +95,7 @@ public final class TranslationManager implements Iterable<Locale> {
   }
 
   private void loadDefaults(TranslationRegistry registry) {
-    ResourceBundle bundle = ResourceBundle.getBundle(PATH, Translation.DEFAULT_LOCALE, UTF8ResourceBundleControl.get());
+    ResourceBundle bundle = ResourceBundle.getBundle(PATH, Translation.DEFAULT_LOCALE);
     registerBundle(registry, Translation.DEFAULT_LOCALE, bundle);
   }
 
