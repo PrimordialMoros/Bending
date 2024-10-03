@@ -45,7 +45,27 @@ public class FabricPlayerInventory extends FabricInventory implements PlayerInve
 
   @Override
   public boolean has(Item type, int amount) {
-    return handle.contains(new ItemStack(PlatformAdapter.toFabricItemType(type), amount));
+    if (amount <= 0) {
+      return false;
+    }
+    ItemStack toMatch = new ItemStack(PlatformAdapter.toFabricItemType(type), amount);
+    return hasItemInSubContainer(handle.items, toMatch)
+      || hasItemInSubContainer(handle.armor, toMatch)
+      || hasItemInSubContainer(handle.offhand, toMatch);
+  }
+
+  private boolean hasItemInSubContainer(Iterable<ItemStack> container, ItemStack neededItem) {
+    for (ItemStack item : container) {
+      if (!item.isEmpty() && ItemStack.isSameItem(item, neededItem)) {
+        int count = item.getCount();
+        if (count >= neededItem.getCount()) {
+          return true;
+        } else {
+          neededItem.shrink(count);
+        }
+      }
+    }
+    return false;
   }
 
   @Override
