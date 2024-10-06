@@ -32,7 +32,7 @@ tasker-fabric = { module = "me.moros:tasker-fabric", version.ref = "tasker" }
 javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.8" }
 jdbi = { module = "org.jdbi:jdbi3-core", version = "3.45.4" }
-hikari = { module = "com.zaxxer:HikariCP", version = "5.1.0" }
+hikari = { module = "com.zaxxer:HikariCP", version = "6.0.0" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-mysql = { module = "org.flywaydb:flyway-mysql", version.ref = "flyway" }
 flyway-pgsql = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
