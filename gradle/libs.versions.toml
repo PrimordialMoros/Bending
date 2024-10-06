@@ -7,17 +7,17 @@ adventure-fabric = "5.14.1"
 configurate = "4.2.0-SNAPSHOT"
 cloud = "2.0.0"
 cloud-platform = "2.0.0-SNAPSHOT"
-bstats = "3.0.3"
+bstats = "3.1.0"
 sponge-api = "12.0.0-SNAPSHOT"
 sponge-common = "1.21-12.0.0-SNAPSHOT"
 paper-api = "1.21.1-R0.1-SNAPSHOT"
 minecraft = "1.21.1"
-fabric-loom = "1.7.4"
-fabric-api = "0.103.0+1.21.1"
+fabric-loom = "1.8.6"
+fabric-api = "0.105.0+1.21.1"
 fabric-loader = "0.16.5"
-shadow = "8.3.0"
-flyway = "10.17.3"
-junit = "5.11.0"
+shadow = "8.3.3"
+flyway = "10.19.0"
+junit = "5.11.2"
 
 [libraries]
 storage = { module = "me.moros:storage", version.ref = "storage" }
@@ -78,11 +78,11 @@ sgui = { module = "eu.pb4:sgui", version = "1.6.0+1.21" }
 fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.3.1" }
 
 # Bukkit
-inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.16-dev-SNAPSHOT" }
+inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.17" }
 grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.4" }
-towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.100.3.0" }
+towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.100.4.4" }
 lwc = { module = "com.griefcraft:lwc", version = "2.4.0" }
-worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.10" }
+worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.12" }
 papi = { module = "me.clip:placeholderapi", version = "2.11.6" }
 
 # Sponge
@@ -94,7 +94,7 @@ sponge-mixin = { module = "org.spongepowered:mixin", version = "0.8.7" }
 shadow = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "shadow" }
 sponge-vanilla = { module = "org.spongepowered:vanillagradle", version = "0.2.1-20240507.024226-82" }
 minotaur = { module = "com.modrinth.minotaur:Minotaur", version = "2.8.7" }
-checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.44" }
+checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.45" }
 
 [bundles]
 cloud = ["cloud-core", "cloud-minecraft"]
@@ -108,6 +108,6 @@ junit = ["junit-api", "junit-engine"]
 [plugins]
 jmh = { id = "me.champeau.jmh", version = "0.7.2" }
 fabric-loom = { id = "fabric-loom", version.ref = "fabric-loom" }
-paperweight-userdev = { id = "io.papermc.paperweight.userdev", version = "1.7.2" }
+paperweight-userdev = { id = "io.papermc.paperweight.userdev", version = "1.7.3" }
 hangar = { id = "io.papermc.hangar-publish-plugin", version = "0.1.2" }
 run-paper = { id = "xyz.jpenilla.run-paper", version = "2.3.1" }
