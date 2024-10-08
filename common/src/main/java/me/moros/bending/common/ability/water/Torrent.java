@@ -72,7 +72,7 @@ public class Torrent extends AbilityInstance {
 
     Optional<Torrent> torrent = user.game().abilityManager(user.worldKey()).firstInstance(user, Torrent.class);
     if (torrent.isPresent()) {
-      torrent.get().launch();
+      torrent.get().onClick();
       return false;
     }
 
@@ -84,29 +84,27 @@ public class Torrent extends AbilityInstance {
       return false;
     }
 
-    if (ring.isReady()) {
-      List<Block> sources = ring.complete();
-      if (sources.isEmpty()) {
-        return false;
-      }
-      states = new StateChain(sources).addState(new TorrentStream()).start();
-    }
+    tryLaunch(); // Try launching if using a preformed ring
 
     removalPolicy = Policies.builder().add(SwappedSlotsRemovalPolicy.of(description())).build();
     return true;
   }
 
-  private void launch() {
+  private void onClick() {
     if (states == null) {
-      if (ring.isReady() && !user.onCooldown(description())) {
-        List<Block> sources = ring.complete();
-        if (!sources.isEmpty()) {
-          states = new StateChain(sources).addState(new TorrentStream()).start();
-          user.addCooldown(description(), userConfig.cooldown);
-        }
-      }
+      tryLaunch();
     } else if (states.current() instanceof TorrentStream torrentStream) {
       torrentStream.clicked = true;
+    }
+  }
+
+  private void tryLaunch() {
+    if (ring.isReady() && !user.onCooldown(description())) {
+      List<Block> sources = ring.complete();
+      if (!sources.isEmpty()) {
+        states = new StateChain(sources).addState(new TorrentStream()).start();
+        user.addCooldown(description(), userConfig.cooldown);
+      }
     }
   }
 
