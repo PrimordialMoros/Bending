@@ -78,8 +78,12 @@ public class AirScooter extends AbilityInstance {
       .add(Policies.UNDER_LAVA)
       .add(ExpireRemovalPolicy.of(userConfig.duration))
       .build();
+
+    if (removalPolicy.test(user, description())) {
+      return false;
+    }
     scooter = new Scooter();
-    return !removalPolicy.test(user, description());
+    return true;
   }
 
   @Override
