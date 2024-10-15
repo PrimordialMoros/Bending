@@ -69,10 +69,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: artifacts
+          path: publish
       - name: Update release artifacts
         uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/**
+          files: publish/*
   publish:
     runs-on: ubuntu-latest
     needs: release
