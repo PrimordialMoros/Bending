@@ -99,18 +99,20 @@ public class Locksmithing extends AbilityInstance {
 
   private void lockContainer(Inventory inventory, Lockable container, ItemSnapshot key, Block block) {
     String code = key.get(Metadata.METAL_KEY).orElse("");
+    ItemSnapshot lockKeyForPredicate = key;
     if (code.isBlank()) {
       code = UUID.randomUUID().toString();
       var builder = Platform.instance().factory().itemBuilder(key).meta(Metadata.METAL_KEY, code);
-      inventory.setItemInMainHand(builder.build(key.amount()));
+      lockKeyForPredicate = builder.build(key.amount());
+      inventory.setItemInMainHand(lockKeyForPredicate);
     }
-    container.lock(code);
+    container.lock(lockKeyForPredicate);
     Sound.BLOCK_CHEST_LOCKED.asEffect().play(block);
     user.sendActionBar(Component.text("Locked", ColorPalette.EARTH));
   }
 
   private void unlockContainer(Lockable container, Block block) {
-    container.lock("");
+    container.unlock();
     Sound.BLOCK_CHEST_LOCKED.asEffect(1, 2).play(block);
     user.sendActionBar(Component.text("Unlocked", ColorPalette.EARTH));
   }

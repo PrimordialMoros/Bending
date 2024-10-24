@@ -36,14 +36,14 @@ import net.minecraft.core.particles.SculkChargeParticleOptions;
 import net.minecraft.core.particles.ShriekParticleOption;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.util.ARGB;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.joml.Vector3f;
 
 public final class ParticleMapper {
   @SuppressWarnings("unchecked")
   public static @Nullable ParticleOptions mapParticleOptions(ParticleContext<?> context) {
     var p = context.particle();
-    var fabricParticle = BuiltInRegistries.PARTICLE_TYPE.get(PlatformAdapter.rsl(p.key()));
+    var fabricParticle = BuiltInRegistries.PARTICLE_TYPE.getValue(PlatformAdapter.rsl(p.key()));
     if (fabricParticle != null) {
       var data = context.data();
       if ((p == Particle.BLOCK || p == Particle.FALLING_DUST || p == Particle.BLOCK_MARKER) && data instanceof BlockState state) {
@@ -67,7 +67,7 @@ public final class ParticleMapper {
     return null;
   }
 
-  private static Vector3f fromColor(int red, int green, int blue) {
-    return new Vector3f(red / 255.0f, green / 255.0f, blue / 255.0f);
+  private static int fromColor(int red, int green, int blue) {
+    return ARGB.color(red, green, blue);
   }
 }

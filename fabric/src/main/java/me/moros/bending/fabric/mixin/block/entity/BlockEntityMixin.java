@@ -17,25 +17,15 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.paper.platform.block;
+package me.moros.bending.fabric.mixin.block.entity;
 
-import me.moros.bending.api.platform.block.Lockable;
-import me.moros.bending.api.platform.item.ItemSnapshot;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-public record LockableImpl(org.bukkit.block.Lockable handle) implements Lockable {
-  // TODO implement
-  @Override
-  public boolean hasLock() {
-    return false;
-  }
-
-  @Override
-  public void unlock() {
-
-  }
-
-  @Override
-  public void lock(ItemSnapshot item) {
-
-  }
+@Mixin(BlockEntity.class)
+public abstract class BlockEntityMixin {
+  @Shadow
+  public abstract Level getLevel();
 }

@@ -61,7 +61,7 @@ public final class PlatformAdapter {
   }
 
   public static Holder<MobEffect> toFabricPotion(PotionEffect effect) {
-    return BuiltInRegistries.MOB_EFFECT.getHolder(rsl(effect.key())).orElseThrow();
+    return BuiltInRegistries.MOB_EFFECT.get(rsl(effect.key())).orElseThrow();
   }
 
   public static MobEffectInstance toFabricPotion(Potion p) {
@@ -91,7 +91,7 @@ public final class PlatformAdapter {
   }
 
   public static net.minecraft.world.item.Item toFabricItemType(Item item) {
-    return BuiltInRegistries.ITEM.get(rsl(item.key()));
+    return BuiltInRegistries.ITEM.getValue(rsl(item.key()));
   }
 
   public static ItemStack toFabricItem(Item item) {

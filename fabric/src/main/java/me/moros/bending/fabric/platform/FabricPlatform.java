@@ -50,8 +50,10 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.CampfireCookingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.item.enchantment.Enchantments;
 
 public class FabricPlatform implements Platform, PlatformFactory {
@@ -128,8 +130,8 @@ public class FabricPlatform implements Platform, PlatformFactory {
     if (TagUtil.isIn(server.registryAccess(), ConventionalBlockTags.ORES, state.getBlock())) {
       var item = new ItemStack(Items.DIAMOND_PICKAXE);
       var fortune = server.registryAccess()
-        .registryOrThrow(Registries.ENCHANTMENT)
-        .getHolderOrThrow(Enchantments.FORTUNE);
+        .lookupOrThrow(Registries.ENCHANTMENT)
+        .getOrThrow(Enchantments.FORTUNE);
       item.enchant(fortune, 2);
       return net.minecraft.world.level.block.Block.getDrops(state, level, pos, level.getBlockEntity(pos), null, item)
         .stream().map(PlatformAdapter::fromFabricItem).toList();
@@ -139,21 +141,12 @@ public class FabricPlatform implements Platform, PlatformFactory {
 
   private ItemSnapshot findCampfireRecipe(Item item) {
     var fabricItem = PlatformAdapter.toFabricItem(item);
-    for (var recipeHolder : server.getRecipeManager().getAllRecipesFor(RecipeType.CAMPFIRE_COOKING)) {
-      var recipe = recipeHolder.value();
-      if (matchesRecipe(recipe, fabricItem)) {
-        return PlatformAdapter.fromFabricItem(recipe.getResultItem(server.registryAccess()));
-      }
+    var recipe = RecipeManager.createCheck(RecipeType.CAMPFIRE_COOKING)
+      .getRecipeFor(new SingleRecipeInput(fabricItem), server.overworld())
+      .map(RecipeHolder::value).orElse(null);
+    if (recipe != null) {
+      return PlatformAdapter.fromFabricItem(recipe.assemble(new SingleRecipeInput(fabricItem), server.registryAccess()));
     }
     return ItemSnapshot.AIR.get();
-  }
-
-  private boolean matchesRecipe(CampfireCookingRecipe recipe, ItemStack itemStack) {
-    for (var ingredient : recipe.getIngredients()) {
-      if (ingredient.test(itemStack)) {
-        return true;
-      }
-    }
-    return false;
   }
 }

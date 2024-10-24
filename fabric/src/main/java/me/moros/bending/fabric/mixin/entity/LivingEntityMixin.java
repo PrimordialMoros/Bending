@@ -28,7 +28,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Mixin(value = LivingEntity.class, priority = 900)
 public abstract class LivingEntityMixin extends EntityMixin {
-  @ModifyVariable(method = "hurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isSleeping()Z"), ordinal = 0, argsOnly = true)
+  @ModifyVariable(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isSleeping()Z"), ordinal = 0, argsOnly = true)
   private float bending$onHurt(float originalValue, DamageSource source, float amount) {
     return (float) ServerEntityEvents.DAMAGE.invoker().onDamage((LivingEntity) (Object) this, source, originalValue);
   }

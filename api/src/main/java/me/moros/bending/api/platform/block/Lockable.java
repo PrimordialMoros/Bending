@@ -21,8 +21,22 @@ package me.moros.bending.api.platform.block;
 
 import java.util.Optional;
 
-public interface Lockable {
-  Optional<String> lock();
+import me.moros.bending.api.platform.item.ItemSnapshot;
 
-  void lock(String lock);
+public interface Lockable {
+  boolean hasLock();
+
+  void unlock();
+
+  void lock(ItemSnapshot item);
+
+  @Deprecated(forRemoval = true)
+  default Optional<String> lock() {
+    return Optional.empty();
+  }
+
+  @Deprecated(forRemoval = true)
+  default void lock(String lock) {
+
+  }
 }

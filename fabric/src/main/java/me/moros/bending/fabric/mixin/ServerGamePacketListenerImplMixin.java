@@ -33,7 +33,9 @@ import net.minecraft.network.protocol.game.ServerboundSwingPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.RelativeMovement;
+import net.minecraft.world.entity.PositionMoveRotation;
+import net.minecraft.world.entity.Relative;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -47,7 +49,7 @@ public abstract class ServerGamePacketListenerImplMixin {
   public ServerPlayer player;
 
   @Shadow
-  public abstract void teleport(double x, double y, double z, float yaw, float pitch, Set<RelativeMovement> relativeArguments);
+  public abstract void teleport(PositionMoveRotation positionMoveRotation, Set<Relative> relativeArguments);
 
   @Inject(method = "handleAnimate", at = @At(value = "INVOKE",
     target = "Lnet/minecraft/server/level/ServerPlayer;resetLastActionTime()V"), cancellable = true)
@@ -104,7 +106,8 @@ public abstract class ServerGamePacketListenerImplMixin {
       double y = from.y();
       double z = from.z();
       this.player.absMoveTo(x, y, z, xRot, yRot);
-      this.teleport(x, y, z, xRot, yRot, EnumSet.of(RelativeMovement.X_ROT, RelativeMovement.Y_ROT));
+      PositionMoveRotation positionMoveRotation = new PositionMoveRotation(new Vec3(x, y, z), Vec3.ZERO, xRot, yRot);
+      this.teleport(positionMoveRotation, EnumSet.of(Relative.X_ROT, Relative.Y_ROT));
       ci.cancel();
     }
   }

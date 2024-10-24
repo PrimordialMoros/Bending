@@ -19,11 +19,15 @@
 
 package me.moros.bending.fabric.mixin.block.entity;
 
-import java.util.Optional;
-
 import me.moros.bending.api.platform.block.Lockable;
+import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.fabric.event.ServerItemEvents;
+import me.moros.bending.fabric.platform.PlatformAdapter;
 import net.fabricmc.fabric.api.util.TriState;
+import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.critereon.MinMaxBounds.Ints;
+import net.minecraft.core.component.DataComponentPredicate;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.LockCode;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
@@ -34,28 +38,35 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(BaseContainerBlockEntity.class)
-public abstract class BaseContainerBlockEntityMixin implements Lockable {
+public abstract class BaseContainerBlockEntityMixin extends BlockEntityMixin implements Lockable {
   @Shadow
   private LockCode lockKey;
 
   @Override
-  public Optional<String> lock() {
-    return Optional.of(lockKey.key()).filter(s -> !s.isBlank());
+  public boolean hasLock() {
+    return lockKey == LockCode.NO_LOCK;
   }
 
   @Override
-  public void lock(String lock) {
-    if (lock.isBlank()) {
-      lockKey = LockCode.NO_LOCK;
-    } else {
-      lockKey = new LockCode(lock);
-    }
+  public void unlock() {
+    lockKey = LockCode.NO_LOCK;
+  }
+
+  @Override
+  public void lock(ItemSnapshot item) {
+    var fabricItem = PlatformAdapter.toFabricItem(item);
+    ItemPredicate itemPredicate = ItemPredicate.Builder.item()
+      .of(getLevel().registryAccess().lookupOrThrow(Registries.ITEM), fabricItem.getItem())
+      .withCount(Ints.atLeast(item.amount()))
+      .hasComponents(DataComponentPredicate.allOf(fabricItem.getComponents()))
+      .build();
+    lockKey = new LockCode(itemPredicate);
   }
 
   @Inject(method = "canUnlock", at = @At(value = "HEAD"), cancellable = true)
   private static void bending$canUnlock(Player player, LockCode lock, net.minecraft.network.chat.Component name, CallbackInfoReturnable<Boolean> cir) {
     if (!player.isSpectator()) {
-      var result = ServerItemEvents.ACCESS_LOCK.invoker().onAccess(player, lock.key(), player.getMainHandItem());
+      var result = ServerItemEvents.ACCESS_LOCK.invoker().onAccess(player, lock.predicate(), player.getMainHandItem());
       if (result == TriState.TRUE) {
         cir.setReturnValue(true);
       } else if (result == TriState.FALSE) {

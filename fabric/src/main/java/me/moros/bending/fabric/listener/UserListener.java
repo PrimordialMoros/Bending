@@ -41,6 +41,7 @@ import me.moros.bending.fabric.event.ServerInventoryEvents;
 import me.moros.bending.fabric.event.ServerItemEvents;
 import me.moros.bending.fabric.event.ServerPlayerEvents;
 import me.moros.bending.fabric.platform.FabricMetadata;
+import me.moros.bending.fabric.platform.NBTUtil;
 import me.moros.bending.fabric.platform.PlatformAdapter;
 import me.moros.bending.fabric.platform.item.ItemUtil;
 import me.moros.math.Vector3d;
@@ -51,14 +52,17 @@ import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.fabric.api.util.TriState;
+import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -68,6 +72,7 @@ import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
@@ -178,12 +183,11 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
     return InteractionResult.PASS;
   }
 
-  private InteractionResultHolder<ItemStack> onRightClickAir(Player playerEntity, Level world, InteractionHand hand) {
-    ItemStack stackInHand = playerEntity.getItemInHand(hand);
+  private InteractionResult onRightClickAir(Player playerEntity, Level world, InteractionHand hand) {
     if (!world.isClientSide && playerEntity instanceof ServerPlayer player) {
       onUserInteract(player, null, null);
     }
-    return InteractionResultHolder.pass(stackInHand);
+    return InteractionResult.PASS;
   }
 
   private InteractionResult onRightClickEntity(Player playerEntity, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
@@ -313,11 +317,14 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
     return true;
   }
 
-  private TriState onAccessLock(Player player, String lock, ItemStack item) {
+  private TriState onAccessLock(Player player, ItemPredicate itemPredicate, ItemStack item) {
     if (!disabledWorld(player)) {
       var key = ItemUtil.getKey(item, Metadata.METAL_KEY);
       if (key != null) {
-        return TriState.of(lock.equals(key));
+        var nbt = new CompoundTag();
+        NBTUtil.write(nbt, Metadata.METAL_KEY, key);
+        var dataMap = DataComponentMap.builder().set(DataComponents.CUSTOM_DATA, CustomData.of(nbt)).build();
+        return TriState.of(itemPredicate.components().test(dataMap));
       }
     }
     return TriState.DEFAULT;

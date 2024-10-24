@@ -122,10 +122,10 @@ final class FabricRegistryInitializer implements RegistryInitializer {
   ) {
     var tags = defaultedRegistry.getTags().toList();
     for (var entry : tags) {
-      var data = entry.getSecond().stream().map(Holder::value).map(defaultedRegistry::getKey).map(registry::get)
+      var data = entry.stream().map(Holder::value).map(defaultedRegistry::getKey).map(registry::get)
         .filter(Objects::nonNull).toList();
       if (!data.isEmpty()) {
-        var tagKey = entry.getFirst().location();
+        var tagKey = entry.key().location();
         registry.getTagOrCreate(tagKey, k -> builder.apply(k).add(data).build());
       }
     }
@@ -155,6 +155,6 @@ final class FabricRegistryInitializer implements RegistryInitializer {
   }
 
   private Sound mapSound(SoundEvent sound) {
-    return Sound.registry().getOrThrow(sound.getLocation());
+    return Sound.registry().getOrThrow(sound.location());
   }
 }

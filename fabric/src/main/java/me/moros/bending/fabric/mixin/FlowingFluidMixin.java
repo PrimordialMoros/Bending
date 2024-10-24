@@ -26,7 +26,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FlowingFluid;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -35,8 +34,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(FlowingFluid.class)
 public class FlowingFluidMixin {
-  @Inject(method = "canSpreadTo", at = @At("RETURN"), cancellable = true)
-  private void applyFluidFlowEvent(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, Direction direction, BlockPos blockPos2, BlockState blockState2, FluidState fluidState, Fluid fluid, CallbackInfoReturnable<Boolean> cir) {
+  @Inject(method = "canMaybePassThrough", at = @At("RETURN"), cancellable = true)
+  private void applyFluidFlowEvent(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, Direction direction, BlockPos blockPos2, BlockState blockState2, FluidState fluidState, CallbackInfoReturnable<Boolean> cir) {
     if (blockGetter instanceof ServerLevel level) {
       if (!ServerBlockEvents.SPREAD.invoker().onSpread(level, blockPos, blockPos2)) {
         cir.setReturnValue(false);

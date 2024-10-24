@@ -51,6 +51,7 @@ import net.kyori.adventure.key.Key;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -143,12 +144,12 @@ public record FabricWorld(ServerLevel handle) implements World {
 
   @Override
   public int minHeight() {
-    return handle().getMinBuildHeight();
+    return handle().getMinY();
   }
 
   @Override
   public int maxHeight() {
-    return handle().getMaxBuildHeight();
+    return handle().getMaxY();
   }
 
   @Override
@@ -218,8 +219,8 @@ public record FabricWorld(ServerLevel handle) implements World {
       entity = new ItemEntity(handle(), x, y, z, Items.STONE.getDefaultInstance());
     }
     if (entity == null) {
-      var entityType = BuiltInRegistries.ENTITY_TYPE.get(PlatformAdapter.rsl(type.key()));
-      entity = Objects.requireNonNull(entityType.create(handle()));
+      var entityType = BuiltInRegistries.ENTITY_TYPE.getValue(PlatformAdapter.rsl(type.key()));
+      entity = Objects.requireNonNull(entityType.create(handle(), EntitySpawnReason.TRIGGERED)); // TODO use different reason?
       entity.moveTo(x, y, z);
     }
     return PlatformAdapter.fromFabricEntity(entity);

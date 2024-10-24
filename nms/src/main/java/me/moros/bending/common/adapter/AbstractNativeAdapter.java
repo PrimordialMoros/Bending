@@ -78,7 +78,7 @@ public abstract class AbstractNativeAdapter extends AbstractPacketUtil implement
       .arguments(event.target().name(), event.user().name(), event.ability().displayName());
     var bendingSource = DamageSource.of(event.user().name(), event.ability());
     var damageSource = new AbilityDamageSource(adapt(event.user()), adapt(deathMsg), bendingSource);
-    boolean result = target.hurt(damageSource, (float) event.damage());
+    boolean result = target.hurtServer((ServerLevel) target.level(), damageSource, (float) event.damage());
     target.invulnerableTime = capturedInvulnerableTime;
     return result;
   }

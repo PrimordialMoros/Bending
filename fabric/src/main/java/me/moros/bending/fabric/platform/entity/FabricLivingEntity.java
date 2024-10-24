@@ -34,6 +34,7 @@ import me.moros.bending.fabric.platform.PlatformAdapter;
 import me.moros.bending.fabric.platform.item.FabricInventory;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.projectile.AbstractArrow.Pickup;
@@ -53,7 +54,7 @@ public class FabricLivingEntity extends FabricEntity implements LivingEntity {
 
   @Override
   public boolean damage(double damage) {
-    return handle().hurt(handle().damageSources().generic(), (float) damage);
+    return handle().hurtServer((ServerLevel) handle().level(), handle().damageSources().generic(), (float) damage);
   }
 
   @Override
@@ -68,7 +69,7 @@ public class FabricLivingEntity extends FabricEntity implements LivingEntity {
     } else {
       damageSource = sources.mobProjectile(entity, null);
     }
-    return handle().hurt(damageSource, (float) damage);
+    return handle().hurtServer((ServerLevel) handle().level(), damageSource, (float) damage);
   }
 
   @Override

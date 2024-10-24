@@ -3,21 +3,21 @@ storage = "3.3.0"
 math = "3.0.0"
 tasker = "1.2.0"
 adventure = "4.17.0"
-adventure-fabric = "5.14.1"
+adventure-fabric = "5.14.2"
 configurate = "4.2.0-SNAPSHOT"
 cloud = "2.0.0"
 cloud-platform = "2.0.0-SNAPSHOT"
 bstats = "3.1.0"
-sponge-api = "12.0.0-SNAPSHOT"
-sponge-common = "1.21-12.0.0-SNAPSHOT"
+sponge-api = "13.0.0-SNAPSHOT"
+sponge-common = "1.21.3-13.0.0-SNAPSHOT"
 paper-api = "1.21.1-R0.1-SNAPSHOT"
-minecraft = "1.21.1"
-fabric-loom = "1.8.9"
-fabric-api = "0.105.0+1.21.1"
+minecraft = "1.21.3"
+fabric-loom = "1.8.10"
+fabric-api = "0.106.1+1.21.3"
 fabric-loader = "0.16.7"
 shadow = "8.3.3"
-flyway = "10.19.0"
-junit = "5.11.2"
+flyway = "10.20.1"
+junit = "5.11.3"
 
 [libraries]
 storage = { module = "me.moros:storage", version.ref = "storage" }
@@ -31,7 +31,7 @@ tasker-fabric = { module = "me.moros:tasker-fabric", version.ref = "tasker" }
 
 javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.8" }
-jdbi = { module = "org.jdbi:jdbi3-core", version = "3.45.4" }
+jdbi = { module = "org.jdbi:jdbi3-core", version = "3.46.0" }
 hikari = { module = "com.zaxxer:HikariCP", version = "6.0.0" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-mysql = { module = "org.flywaydb:flyway-mysql", version.ref = "flyway" }
@@ -63,7 +63,7 @@ cloud-fabric = { module = "org.incendo:cloud-fabric", version.ref = "cloud-platf
 cloud-sponge = { module = "org.incendo:cloud-sponge", version.ref = "cloud-platform" }
 
 # Databases
-mysql = { module = "com.mysql:mysql-connector-j", version = "9.0.0" }
+mysql = { module = "com.mysql:mysql-connector-j", version = "9.1.0" }
 mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.4.1" }
 postgresql = { module = "org.postgresql:postgresql", version = "42.7.4" }
 h2 = { module = "com.h2database:h2", version = "2.3.232" }
@@ -75,7 +75,7 @@ fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fab
 fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
 fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "2.4.0-pre.2+1.21" }
 sgui = { module = "eu.pb4:sgui", version = "1.6.0+1.21" }
-fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.3.1" }
+fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.3.2" }
 
 # Bukkit
 inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.16-dev-SNAPSHOT" }

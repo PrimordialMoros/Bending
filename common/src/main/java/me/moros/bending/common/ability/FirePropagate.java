@@ -162,5 +162,5 @@ public class FirePropagate implements Updatable {
     }
   }
 
-  private enum State { DAMAGE_SELF, SPREAD_TO_NEIGHBOURS, BURN, REMOVE }
+  private enum State {DAMAGE_SELF, SPREAD_TO_NEIGHBOURS, BURN, REMOVE}
 }
