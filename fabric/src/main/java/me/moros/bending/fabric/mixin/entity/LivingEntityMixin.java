@@ -20,6 +20,7 @@
 package me.moros.bending.fabric.mixin.entity;
 
 import me.moros.bending.fabric.event.ServerEntityEvents;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -29,7 +30,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 @Mixin(value = LivingEntity.class, priority = 900)
 public abstract class LivingEntityMixin extends EntityMixin {
   @ModifyVariable(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isSleeping()Z"), ordinal = 0, argsOnly = true)
-  private float bending$onHurt(float originalValue, DamageSource source, float amount) {
+  private float bending$onHurt(float originalValue, ServerLevel serverLevel, DamageSource source, float amount) {
     return (float) ServerEntityEvents.DAMAGE.invoker().onDamage((LivingEntity) (Object) this, source, originalValue);
   }
 }

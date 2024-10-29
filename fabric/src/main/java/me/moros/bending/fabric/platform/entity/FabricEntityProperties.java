@@ -19,6 +19,8 @@
 
 package me.moros.bending.fabric.platform.entity;
 
+import java.util.Objects;
+
 import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.platform.entity.EntityType;
 import me.moros.bending.common.data.DataProviderRegistry;
@@ -27,6 +29,7 @@ import me.moros.bending.fabric.mixin.accessor.EntityAccess;
 import me.moros.bending.fabric.platform.PlatformAdapter;
 import me.moros.bending.fabric.platform.world.FabricWorld;
 import me.moros.math.Vector3d;
+import net.kyori.adventure.platform.modcommon.MinecraftServerAudiences;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -145,7 +148,7 @@ final class FabricEntityProperties {
         .get(LivingEntity::getHealth))
       // misc
       .create(EntityProperties.NAME, Entity.class, b -> b
-        .get(e -> e.getName().asComponent()))
+        .get(e -> MinecraftServerAudiences.of(Objects.requireNonNull(e.getServer())).asAdventure(e.getName())))
       .create(EntityProperties.POSITION, Entity.class, b -> b
         .get(e -> Vector3d.of(e.getX(), e.getY(), e.getZ()))
         .set((e, v) -> e.moveTo(v.x(), v.y(), v.z())))

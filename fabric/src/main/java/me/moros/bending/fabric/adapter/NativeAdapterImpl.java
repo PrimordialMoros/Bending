@@ -25,7 +25,7 @@ import me.moros.bending.api.platform.world.World;
 import me.moros.bending.common.adapter.AbstractNativeAdapter;
 import me.moros.bending.fabric.mixin.accessor.EntityAccess;
 import me.moros.bending.fabric.platform.PlatformAdapter;
-import net.kyori.adventure.platform.fabric.FabricServerAudiences;
+import net.kyori.adventure.platform.modcommon.MinecraftServerAudiences;
 import net.kyori.adventure.text.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -33,11 +33,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 
 public final class NativeAdapterImpl extends AbstractNativeAdapter {
-  private final FabricServerAudiences audiences;
+  private final MinecraftServerAudiences audiences;
 
   public NativeAdapterImpl(MinecraftServer server) {
     super(server.getPlayerList());
-    this.audiences = FabricServerAudiences.of(server);
+    this.audiences = MinecraftServerAudiences.of(server);
   }
 
   @Override
@@ -62,7 +62,7 @@ public final class NativeAdapterImpl extends AbstractNativeAdapter {
 
   @Override
   protected net.minecraft.network.chat.Component adapt(Component component) {
-    return audiences.toNative(component);
+    return audiences.asNative(component);
   }
 
   @Override

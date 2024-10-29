@@ -28,7 +28,7 @@ import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.util.data.DataHolder;
 import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.fabric.platform.FabricPersistentDataHolder;
-import net.kyori.adventure.platform.fabric.FabricServerAudiences;
+import net.kyori.adventure.platform.modcommon.MinecraftServerAudiences;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.MinecraftServer;
@@ -39,22 +39,22 @@ import net.minecraft.world.item.component.Unbreakable;
 public class FabricItemBuilder implements ItemBuilder {
   private final Map<DataKey<?>, Object> meta = new HashMap<>();
   private final ItemStack stack;
-  private final FabricServerAudiences adapter;
+  private final MinecraftServerAudiences adapter;
 
   public FabricItemBuilder(ItemStack stack, MinecraftServer server) {
     this.stack = stack;
-    this.adapter = FabricServerAudiences.of(server);
+    this.adapter = MinecraftServerAudiences.of(server);
   }
 
   @Override
   public ItemBuilder name(Component name) {
-    stack.set(DataComponents.CUSTOM_NAME, adapter.toNative(name));
+    stack.set(DataComponents.CUSTOM_NAME, adapter.asNative(name));
     return this;
   }
 
   @Override
   public ItemBuilder lore(List<Component> lore) {
-    stack.set(DataComponents.LORE, new ItemLore(lore.stream().map(adapter::toNative).toList()));
+    stack.set(DataComponents.LORE, new ItemLore(lore.stream().map(adapter::asNative).toList()));
     return this;
   }
 

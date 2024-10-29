@@ -31,7 +31,7 @@ import me.moros.bending.api.user.User;
 import me.moros.bending.common.gui.AbstractGui;
 import me.moros.bending.common.locale.Message;
 import me.moros.bending.fabric.platform.PlatformAdapter;
-import net.kyori.adventure.platform.fabric.FabricServerAudiences;
+import net.kyori.adventure.platform.modcommon.MinecraftServerAudiences;
 import net.kyori.adventure.util.TriState;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.Unit;
@@ -47,7 +47,7 @@ public final class ElementMenu extends AbstractGui<ItemStack, SimpleGui> {
   protected SimpleGui construct(Map<Element, ItemStack> elementMap) {
     var player = PlatformAdapter.toFabricEntity(player());
     SimpleGui gui = new SimpleGui(MenuType.GENERIC_9x3, player, false);
-    gui.setTitle(FabricServerAudiences.of(player.server).toNative(Message.ELEMENTS_GUI_TITLE.build()));
+    gui.setTitle(MinecraftServerAudiences.of(player.server).asNative(Message.ELEMENTS_GUI_TITLE.build()));
     var fill = PlatformAdapter.toFabricItem(BACKGROUND.get());
     fill.set(DataComponents.HIDE_TOOLTIP, Unit.INSTANCE);
     for (int i = 0; i < gui.getSize(); i++) {

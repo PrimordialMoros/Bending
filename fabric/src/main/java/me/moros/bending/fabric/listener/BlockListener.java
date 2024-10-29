@@ -24,9 +24,7 @@ import java.util.function.Supplier;
 
 import me.moros.bending.api.ability.ActionType;
 import me.moros.bending.api.game.Game;
-import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.Lockable;
-import me.moros.bending.api.platform.sound.Sound;
 import me.moros.bending.api.temporal.ActionLimiter;
 import me.moros.bending.api.temporal.TempBlock;
 import me.moros.bending.common.ability.earth.passive.Locksmithing;
@@ -35,10 +33,11 @@ import me.moros.bending.fabric.event.ServerBlockEvents;
 import me.moros.bending.fabric.event.ServerPlayerEvents;
 import me.moros.bending.fabric.platform.PlatformAdapter;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
-import net.kyori.adventure.text.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -74,17 +73,16 @@ public record BlockListener(Supplier<Game> gameSupplier) implements FabricListen
       return true;
     }
     if (blockEntity instanceof Lockable lockable) {
-      var block = PlatformAdapter.fromFabricWorld((ServerLevel) level).blockAt(pos.getX(), pos.getY(), pos.getZ());
-      return canBreakLockedContainer((ServerPlayer) player, block, lockable);
+      return canBreakLockedContainer((ServerPlayer) player, lockable);
     }
     return true;
   }
 
-  private boolean canBreakLockedContainer(ServerPlayer player, Block block, Lockable lockable) {
+  private boolean canBreakLockedContainer(ServerPlayer player, Lockable lockable) {
     if (!Locksmithing.canBreak(PlatformAdapter.fromFabricEntity(player), lockable)) {
-      player.sendActionBar(Component.translatable("container.isLocked")
-        .arguments(((Nameable) lockable).getName().asComponent()));
-      Sound.BLOCK_CHEST_LOCKED.asEffect().play(block);
+      var displayName = ((Nameable) lockable).getDisplayName();
+      player.displayClientMessage(net.minecraft.network.chat.Component.translatable("container.isLocked", displayName), true);
+      player.playNotifySound(SoundEvents.CHEST_LOCKED, SoundSource.BLOCKS, 1, 1);
       return false;
     }
     return true;

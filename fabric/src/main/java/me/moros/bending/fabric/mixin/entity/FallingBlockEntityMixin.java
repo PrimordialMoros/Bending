@@ -19,6 +19,7 @@
 
 package me.moros.bending.fabric.mixin.entity;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import me.moros.bending.fabric.event.ServerBlockEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -29,17 +30,15 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(FallingBlockEntity.class)
 public abstract class FallingBlockEntityMixin {
   @Inject(method = "fall",
     at = @At(value = "INVOKE",
       target = "Lnet/minecraft/world/level/Level;setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;I)Z"),
-    cancellable = true,
-    locals = LocalCapture.CAPTURE_FAILHARD
+    cancellable = true
   )
-  private static void bending$onFall(Level level, BlockPos pos, BlockState state, CallbackInfoReturnable<FallingBlockEntity> cir, FallingBlockEntity entity) {
+  private static void bending$onFall(Level level, BlockPos pos, BlockState state, CallbackInfoReturnable<FallingBlockEntity> cir, @Local FallingBlockEntity entity) {
     if (level.isClientSide) {
       return;
     }

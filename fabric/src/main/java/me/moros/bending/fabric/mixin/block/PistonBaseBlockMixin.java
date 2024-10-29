@@ -21,6 +21,7 @@ package me.moros.bending.fabric.mixin.block;
 
 import java.util.List;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import me.moros.bending.fabric.event.ServerBlockEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -39,10 +40,10 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 public abstract class PistonBaseBlockMixin {
   @Inject(method = "moveBlocks", at = @At(value = "INVOKE_ASSIGN",
     target = "Lnet/minecraft/world/level/block/piston/PistonStructureResolver;getToDestroy()Ljava/util/List;"),
-    cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD
+    cancellable = true
   )
   private void bending$onMoveBlocks(Level level, BlockPos blockPos, Direction direction, boolean extending,
-                                    CallbackInfoReturnable<Boolean> cir, BlockPos pos, PistonStructureResolver helper) {
+                                    CallbackInfoReturnable<Boolean> cir, @Local PistonStructureResolver helper) {
     if (level.isClientSide) {
       return;
     }

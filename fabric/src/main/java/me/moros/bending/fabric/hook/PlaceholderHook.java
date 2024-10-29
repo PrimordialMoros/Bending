@@ -33,7 +33,7 @@ import me.moros.bending.common.placeholder.PlaceholderProvider;
 import me.moros.bending.common.placeholder.StaticPlaceholder;
 import me.moros.bending.common.util.Initializer;
 import me.moros.bending.fabric.platform.PlatformAdapter;
-import net.kyori.adventure.platform.fabric.FabricServerAudiences;
+import net.kyori.adventure.platform.modcommon.MinecraftServerAudiences;
 import net.kyori.adventure.text.Component;
 import net.minecraft.server.MinecraftServer;
 
@@ -67,13 +67,13 @@ public record PlaceholderHook(PlaceholderProvider provider) implements Initializ
     if (user != null) {
       Component result = placeholder.apply(user);
       if (result != Component.empty()) {
-        return PlaceholderResult.value(toNative(Objects.requireNonNull(entity.getServer()), result));
+        return PlaceholderResult.value(asNative(Objects.requireNonNull(entity.getServer()), result));
       }
     }
     return PlaceholderResult.invalid();
   }
 
-  private static net.minecraft.network.chat.Component toNative(MinecraftServer server, Component component) {
-    return FabricServerAudiences.of(server).toNative(component);
+  private static net.minecraft.network.chat.Component asNative(MinecraftServer server, Component component) {
+    return MinecraftServerAudiences.of(server).asNative(component);
   }
 }
