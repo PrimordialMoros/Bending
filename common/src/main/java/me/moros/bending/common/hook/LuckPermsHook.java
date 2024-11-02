@@ -22,16 +22,17 @@ package me.moros.bending.common.hook;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.stream.IntStream;
 
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.addon.Addon;
 import me.moros.bending.api.config.BendingProperties;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
+import me.moros.bending.api.util.KeyUtil;
+import net.kyori.adventure.key.Key;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.context.ContextCalculator;
@@ -53,14 +54,22 @@ public final class LuckPermsHook<T> {
   }
 
   private void setupContexts(ContextManager manager) {
-    manager.registerCalculator(new Builder("element")
+    builder("element")
       .suggestions(Element.NAMES)
       .build(u -> u.elements().stream().map(Element::toString).toList())
-    );
-    manager.registerCalculator(new Builder("avatar")
+      .register(manager);
+    builder("avatar")
       .suggestions(List.of("true", "false"))
-      .buildWithPredicate(u -> u.elements().size() >= Element.VALUES.size())
-    );
+      .build(fromSingleValue(u -> String.valueOf(u.elements().size() >= Element.VALUES.size())))
+      .register(manager);
+    builder("elements-count")
+      .suggestions(IntStream.rangeClosed(0, Element.VALUES.size()).mapToObj(String::valueOf).toList())
+      .build(fromSingleValue(u -> String.valueOf(u.elements().size())))
+      .register(manager);
+  }
+
+  private Function<User, Iterable<String>> fromSingleValue(Function<User, String> valueMapper) {
+   return u -> List.of(valueMapper.apply(u));
   }
 
   private @Nullable User adapt(T user) {
@@ -78,62 +87,56 @@ public final class LuckPermsHook<T> {
     return new PresetLimits(this::limits);
   }
 
-  private final class Builder {
-    private final String key;
-    private Collection<String> suggestions;
+  private Builder<T> builder(String key) {
+    return new Builder<>(key, this::adapt);
+  }
 
-    private Builder(String key) {
-      this.key = key.toLowerCase(Locale.ROOT);
+  private static final class Builder<T> {
+    private final Key key;
+    private final Function<T, User> userAdapter;
+    private ContextSet suggestions;
+
+    private Builder(String key, Function<T, User> userAdapter) {
+      this.key = KeyUtil.simple(key.toLowerCase(Locale.ROOT));
+      this.userAdapter = userAdapter;
     }
 
-    private Builder suggestions(Collection<String> suggestions) {
-      this.suggestions = Objects.requireNonNull(suggestions);
+    private Builder<T> suggestions(Collection<String> suggestions) {
+      this.suggestions = createContextSet(key.asString(), suggestions);
       return this;
     }
 
-    private ContextCalculator<T> build(Function<User, Iterable<String>> mapper) {
-      return new ContextCalculator<>() {
-        @Override
-        public void calculate(T target, ContextConsumer consumer) {
-          User user = adapt(target);
-          if (user != null) {
-            consumer.accept(createContextSet(mapper.apply(user)));
-          }
-        }
+    private BendingContextCalculator<T> build(Function<User, Iterable<String>> mapper) {
+      return new MappingContextCalculator<>(key.asString(), suggestions, userAdapter, mapper);
+    }
+  }
 
-        @Override
-        public ContextSet estimatePotentialContexts() {
-          return suggestions == null ? ImmutableContextSet.empty() : createContextSet(suggestions);
-        }
-      };
+  private interface BendingContextCalculator<T> extends ContextCalculator<T> {
+    String key();
+
+    default void calculate(T target, ContextConsumer consumer) {
+      User user = userAdapter().apply(target);
+      if (user != null) {
+        consumer.accept(createContextSet(key(), mapper().apply(user)));
+      }
     }
 
-    private ContextCalculator<T> buildWithPredicate(Predicate<User> predicate) {
-      return new ContextCalculator<>() {
-        @Override
-        public void calculate(T target, ContextConsumer consumer) {
-          User user = adapt(target);
-          if (user != null) {
-            consumer.accept(createContextSet(predicate.test(user)));
-          }
-        }
+    Function<T, @Nullable User> userAdapter();
 
-        @Override
-        public ContextSet estimatePotentialContexts() {
-          return suggestions == null ? ImmutableContextSet.empty() : createContextSet(suggestions);
-        }
-      };
-    }
+    Function<User, Iterable<String>> mapper();
 
-    private ContextSet createContextSet(Iterable<String> values) {
-      ImmutableContextSet.Builder builder = ImmutableContextSet.builder();
-      values.forEach(value -> builder.add("bending:" + key, value.toLowerCase(Locale.ROOT)));
-      return builder.build();
+    default void register(ContextManager contextManager) {
+      contextManager.registerCalculator(this);
     }
+  }
 
-    private ContextSet createContextSet(boolean value) {
-      return ImmutableContextSet.of("bending:" + key, String.valueOf(value));
-    }
+  private record MappingContextCalculator<T>(String key, ContextSet estimatePotentialContexts, Function<T, User> userAdapter, Function<User, Iterable<String>> mapper) implements BendingContextCalculator<T> {
+  }
+
+  private static ContextSet createContextSet(String key, Iterable<String> values) {
+    ImmutableContextSet.Builder builder = ImmutableContextSet.builder();
+    values.forEach(value -> builder.add(key, value.toLowerCase(Locale.ROOT)));
+    return builder.build();
   }
 
   public static <T> LuckPermsHook<T> register(Function<T, UUID> uuidExtractor) throws IllegalStateException {

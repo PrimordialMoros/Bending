@@ -117,7 +117,7 @@ final class BukkitEntityProperties {
         .get(Entity::getFallDistance)
         .set(Entity::setFallDistance))
       .create(EntityProperties.MAX_HEALTH, LivingEntity.class, b -> b
-        .get(e -> (float) Objects.requireNonNull(e.getAttribute(Attribute.GENERIC_MAX_HEALTH)).getValue()))
+        .get(e -> (float) Objects.requireNonNull(e.getAttribute(Attribute.MAX_HEALTH)).getValue()))
       .create(EntityProperties.HEALTH, LivingEntity.class, b -> b
         .get(e -> (float) e.getHealth()))
       // misc

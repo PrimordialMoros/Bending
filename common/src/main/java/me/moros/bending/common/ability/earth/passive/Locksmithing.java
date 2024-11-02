@@ -83,10 +83,9 @@ public class Locksmithing extends AbilityInstance {
     }
     Lockable container = block.world().containerLock(block);
     if (container != null) {
-      String containerLock = container.lock().orElse("");
-      boolean locked = !containerLock.isBlank();
+      boolean locked = container.hasLock();
       if (user.sneaking()) {
-        if (locked && (user.hasPermission(FeaturePermissions.OVERRIDE_LOCK) || validKey(key, containerLock))) {
+        if (locked && (user.hasPermission(FeaturePermissions.OVERRIDE_LOCK) || container.canUnlock(key))) {
           unlockContainer(container, block);
         }
       } else {
@@ -129,16 +128,11 @@ public class Locksmithing extends AbilityInstance {
   }
 
   public static boolean canBreak(Player player, Lockable container) {
-    String lock = container.lock().orElse("");
-    if (lock.isBlank() || player.hasPermission(FeaturePermissions.OVERRIDE_LOCK)) {
+    if (!container.hasLock() || player.hasPermission(FeaturePermissions.OVERRIDE_LOCK)) {
       return true;
     }
     Inventory inv = player.inventory();
-    return validKey(inv.itemInMainHand(), lock) || validKey(inv.itemInOffHand(), lock);
-  }
-
-  private static boolean validKey(ItemSnapshot item, String lock) {
-    return item.get(Metadata.METAL_KEY).map(lock::equals).orElse(false);
+    return container.canUnlock(inv.itemInMainHand()) || container.canUnlock(inv.itemInOffHand());
   }
 
   private static final class Config implements Configurable {

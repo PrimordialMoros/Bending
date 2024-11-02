@@ -30,12 +30,18 @@ public record LockableImpl(org.bukkit.block.Lockable handle) implements Lockable
   }
 
   @Override
-  public void unlock() {
-    handle().setLockItem(null);
+  public boolean canUnlock(ItemSnapshot item) {
+    // TODO change
+    return false;
   }
 
   @Override
   public void lock(ItemSnapshot item) {
     handle().setLockItem(PlatformAdapter.toBukkitItem(item));
+  }
+
+  @Override
+  public void unlock() {
+    handle().setLockItem(null);
   }
 }

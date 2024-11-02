@@ -133,7 +133,6 @@ final class FabricRegistryInitializer implements RegistryInitializer {
 
   private BlockProperties mapProperties(BlockType type, net.minecraft.world.level.block.state.BlockState data) {
     var block = data.getBlock();
-    // TODO check deprecated
     return BlockProperties.builder(type, block.getDescriptionId())
       .isAir(data.isAir())
       .isSolid(data.isSolid())
