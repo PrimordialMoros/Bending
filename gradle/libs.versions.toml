@@ -73,12 +73,12 @@ hsql = { module = "org.hsqldb:hsqldb", version = "2.7.4" }
 fabric-minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
 fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
 fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
-fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "2.4.0-pre.2+1.21" }
-sgui = { module = "eu.pb4:sgui", version = "1.6.0+1.21" }
+fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "2.5.0+1.21.2" }
+sgui = { module = "eu.pb4:sgui", version = "1.7.2+1.21.2" }
 fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.3.3" }
 
 # Bukkit
-inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.18" }
+inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.18-dev" }
 grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.4" }
 towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.100.4.4" }
 lwc = { module = "com.griefcraft:lwc", version = "2.4.0" }
