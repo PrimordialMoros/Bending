@@ -19,20 +19,22 @@
 
 package me.moros.bending.fabric.mixin.block;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import me.moros.bending.fabric.event.ServerBlockEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(BlockBehaviour.class)
 public abstract class BlockBehaviourMixin {
-  @WrapOperation(method = "onExplosionHit", constant = @Constant(classValue = ServerLevel.class, ordinal = 0))
-  private boolean bending$canDropFromExplosion(Object level, Operation<Boolean> original, @Local(argsOnly = true) BlockPos pos) {
-    return original.call(level) && ServerBlockEvents.BLOCK_DROP_LOOT.invoker().onDropLoot((ServerLevel) level, pos);
+  @ModifyExpressionValue(
+    method = "onExplosionHit",
+    at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;dropFromExplosion(Lnet/minecraft/world/level/Explosion;)Z")
+  )
+  private boolean bending$canDropFromExplosion(boolean original, @Local(argsOnly = true) ServerLevel serverLevel, @Local(argsOnly = true) BlockPos pos) {
+    return original && ServerBlockEvents.BLOCK_DROP_LOOT.invoker().onDropLoot(serverLevel, pos);
   }
 }

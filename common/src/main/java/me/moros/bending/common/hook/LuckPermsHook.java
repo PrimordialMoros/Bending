@@ -69,7 +69,7 @@ public final class LuckPermsHook<T> {
   }
 
   private Function<User, Iterable<String>> fromSingleValue(Function<User, String> valueMapper) {
-   return u -> List.of(valueMapper.apply(u));
+    return u -> List.of(valueMapper.apply(u));
   }
 
   private @Nullable User adapt(T user) {
@@ -130,7 +130,9 @@ public final class LuckPermsHook<T> {
     }
   }
 
-  private record MappingContextCalculator<T>(String key, ContextSet estimatePotentialContexts, Function<T, User> userAdapter, Function<User, Iterable<String>> mapper) implements BendingContextCalculator<T> {
+  private record MappingContextCalculator<T>(String key, ContextSet estimatePotentialContexts,
+                                             Function<T, User> userAdapter,
+                                             Function<User, Iterable<String>> mapper) implements BendingContextCalculator<T> {
   }
 
   private static ContextSet createContextSet(String key, Iterable<String> values) {

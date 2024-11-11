@@ -28,7 +28,6 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 
-import io.netty.buffer.Unpooled;
 import me.moros.bending.api.adapter.PacketUtil;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.display.Display;
@@ -44,7 +43,6 @@ import net.minecraft.advancements.AdvancementType;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.critereon.ImpossibleTrigger;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -61,6 +59,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.PositionMoveRotation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -181,15 +180,9 @@ public abstract class AbstractPacketUtil implements PacketUtil {
   }
 
   protected ClientboundTeleportEntityPacket teleportEntity(int id, Position position) {
-    var buf = new FriendlyByteBuf(Unpooled.buffer());
-    buf.writeVarInt(id);
-    buf.writeDouble(position.x());
-    buf.writeDouble(position.y());
-    buf.writeDouble(position.z());
-    buf.writeByte(0);
-    buf.writeByte(0);
-    buf.writeBoolean(false);
-    return ClientboundTeleportEntityPacket.STREAM_CODEC.decode(buf);
+    Vec3 vec3 = new Vec3(position.x(), position.y(), position.z());
+    PositionMoveRotation positionMoveRotation = new PositionMoveRotation(vec3, Vec3.ZERO, 0, 0);
+    return ClientboundTeleportEntityPacket.teleport(id, positionMoveRotation, Set.of(), false);
   }
 
   protected ClientboundPacket wrap(Packet<?> packet) {
