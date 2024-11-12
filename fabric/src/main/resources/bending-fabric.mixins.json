@@ -6,7 +6,6 @@
   "mixins": [
     "accessor.BlockBehaviourAccess",
     "accessor.ChunkMapAccess",
-    "accessor.CommandSourceStackAccess",
     "accessor.CreeperAccess",
     "accessor.EntityAccess",
     "accessor.FallingBlockEntityAccess",

@@ -19,7 +19,6 @@
 
 package me.moros.bending.fabric.platform;
 
-import me.moros.bending.fabric.mixin.accessor.CommandSourceStackAccess;
 import me.moros.bending.fabric.platform.CommandSender.PlayerCommandSender;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
@@ -49,7 +48,7 @@ public sealed class CommandSender implements ForwardingAudience.Single permits P
   }
 
   public static CommandSender from(CommandSourceStack stack) {
-    if (((CommandSourceStackAccess) stack).bending$source() instanceof ServerPlayer) {
+    if (stack.getPlayer() instanceof ServerPlayer) {
       return new PlayerCommandSender(stack);
     }
     return new CommandSender(stack);
