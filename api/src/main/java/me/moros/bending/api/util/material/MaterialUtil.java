@@ -74,8 +74,6 @@ public final class MaterialUtil {
       .add(WATER_PLANTS)
       .add(BlockTag.SAPLINGS)
       .add(BlockTag.FLOWERS)
-      .add(BlockTag.SMALL_FLOWERS)
-      .add(BlockTag.TALL_FLOWERS)
       .add(BlockTag.CROPS)
       .add(BlockTag.CAVE_VINES)
       .add(BlockTag.CORALS)
