@@ -33,7 +33,7 @@ dependencies {
     compileOnly(libs.towny)
     compileOnly(libs.lwc)
     compileOnly(libs.worldguard) {
-        // TOOD remove exclusions when worldguard updates constraints
+        // TODO remove exclusions when worldguard updates constraints
         exclude(module = "gson")
         exclude(module = "guava")
         exclude(module = "fastutil")
