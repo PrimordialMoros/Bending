@@ -16,7 +16,7 @@ fabric-loom = "1.9.2"
 fabric-api = "0.110.5+1.21.4"
 fabric-loader = "0.16.9"
 shadow = "8.3.5"
-flyway = "10.21.0"
+flyway = "11.0.1"
 junit = "5.11.3"
 
 [libraries]
