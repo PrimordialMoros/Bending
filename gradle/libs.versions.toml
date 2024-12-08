@@ -78,7 +78,7 @@ sgui = { module = "eu.pb4:sgui", version = "1.7.2+1.21.2" }
 fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.3.3" }
 
 # Bukkit
-inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.18" }
+inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.19-dev" }
 grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.4" }
 towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.101.0.2" }
 lwc = { module = "com.griefcraft:lwc", version = "2.4.0" }
