@@ -62,7 +62,7 @@ public final class LuckPermsHook<T> {
       .suggestions(List.of("true", "false"))
       .build(fromSingleValue(u -> String.valueOf(u.elements().size() >= Element.VALUES.size())))
       .register(manager);
-    builder("elements-count")
+    builder("element-count")
       .suggestions(IntStream.rangeClosed(0, Element.VALUES.size()).mapToObj(String::valueOf).toList())
       .build(fromSingleValue(u -> String.valueOf(u.elements().size())))
       .register(manager);
