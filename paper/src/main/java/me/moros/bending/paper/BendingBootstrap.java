@@ -19,15 +19,8 @@
 
 package me.moros.bending.paper;
 
-import io.papermc.paper.plugin.bootstrap.BootstrapContext;
-import io.papermc.paper.registry.event.RegistryEvents;
-import io.papermc.paper.registry.keys.DamageTypeKeys;
-import me.moros.bending.api.util.KeyUtil;
 import me.moros.bending.common.logging.Slf4jLogger;
 import me.moros.bending.paper.protection.WorldGuardFlag;
-import org.bukkit.damage.DamageEffect;
-import org.bukkit.damage.DamageScaling;
-import org.bukkit.damage.DeathMessageType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class BendingBootstrap extends JavaPlugin {
@@ -51,18 +44,5 @@ public final class BendingBootstrap extends JavaPlugin {
   @Override
   public void onDisable() {
     instance.onPluginDisable();
-  }
-
-  public void bootstrap(BootstrapContext context) {
-    context.getLifecycleManager().registerEventHandler(RegistryEvents.DAMAGE_TYPE.freeze().newHandler(event -> {
-      event.registry().register(
-        DamageTypeKeys.create(KeyUtil.simple("ability")),
-        b -> b.damageEffect(DamageEffect.HURT)
-          .damageScaling(DamageScaling.NEVER)
-          .deathMessageType(DeathMessageType.DEFAULT)
-          .exhaustion(0.1F)
-          .messageId("bending.ability.generic.death")
-      );
-    }));
   }
 }
