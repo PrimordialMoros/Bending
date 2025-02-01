@@ -27,6 +27,7 @@ public final class FeaturePermissions {
   public static final String LAVA = create("lava");
   public static final String BLUE_FIRE = create("bluefire");
   public static final String BOARD = create("board");
+  @Deprecated
   public static final String OVERRIDE_LOCK = create("admin.overridelock");
 
   private static String create(String node) {

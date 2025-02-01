@@ -25,7 +25,6 @@ import me.moros.bending.api.ability.Activation;
 import me.moros.bending.api.platform.block.Lockable;
 import me.moros.bending.api.platform.item.Inventory;
 import me.moros.bending.api.user.User;
-import me.moros.bending.api.util.FeaturePermissions;
 import me.moros.bending.api.util.material.EarthMaterials;
 
 public class Locksmithing extends AbilityInstance {
