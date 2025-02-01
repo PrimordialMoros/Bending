@@ -29,6 +29,7 @@ public final class Metadata {
   public static final DataKey<Boolean> NPC = KeyUtil.data("npc", Boolean.class);
 
   public static final DataKey<Boolean> ARMOR_KEY = KeyUtil.data("armor", Boolean.class);
+  @Deprecated
   public static final DataKey<String> METAL_KEY = KeyUtil.data("bending-metal-key", String.class);
 
   private Metadata() {
@@ -36,6 +37,6 @@ public final class Metadata {
 
   // Maybe use registry
   public static boolean isPersistent(DataKey<?> key) {
-    return key == ARMOR_KEY || key == METAL_KEY;
+    return key == ARMOR_KEY;
   }
 }

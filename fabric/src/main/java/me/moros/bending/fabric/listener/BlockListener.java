@@ -24,32 +24,21 @@ import java.util.function.Supplier;
 
 import me.moros.bending.api.ability.ActionType;
 import me.moros.bending.api.game.Game;
-import me.moros.bending.api.platform.block.Lockable;
 import me.moros.bending.api.temporal.ActionLimiter;
 import me.moros.bending.api.temporal.TempBlock;
-import me.moros.bending.common.ability.earth.passive.Locksmithing;
 import me.moros.bending.common.util.Initializer;
 import me.moros.bending.fabric.event.ServerBlockEvents;
 import me.moros.bending.fabric.event.ServerPlayerEvents;
 import me.moros.bending.fabric.platform.PlatformAdapter;
-import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.Nameable;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 public record BlockListener(Supplier<Game> gameSupplier) implements FabricListener, Initializer {
   @Override
   public void init() {
     ServerPlayerEvents.PLACE_BLOCK.register(this::onBlockPlace);
-    PlayerBlockBreakEvents.BEFORE.register(this::onBlockBreak);
     ServerBlockEvents.AFTER_BREAK.register(this::onAfterBlockBreak);
     ServerBlockEvents.BLOCK_DROP_LOOT.register(this::onBlockDropLoot);
     ServerBlockEvents.CHANGE.register(this::onBlockChange);
@@ -64,26 +53,6 @@ public record BlockListener(Supplier<Game> gameSupplier) implements FabricListen
       }
       var block = PlatformAdapter.fromFabricWorld(player.serverLevel()).blockAt(pos.getX(), pos.getY(), pos.getZ());
       TempBlock.MANAGER.get(block).ifPresent(TempBlock::removeWithoutReverting);
-    }
-    return true;
-  }
-
-  private boolean onBlockBreak(Level level, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity) {
-    if (level.isClientSide || disabledWorld(player)) {
-      return true;
-    }
-    if (blockEntity instanceof Lockable lockable) {
-      return canBreakLockedContainer((ServerPlayer) player, lockable);
-    }
-    return true;
-  }
-
-  private boolean canBreakLockedContainer(ServerPlayer player, Lockable lockable) {
-    if (!Locksmithing.canBreak(PlatformAdapter.fromFabricEntity(player), lockable)) {
-      var displayName = ((Nameable) lockable).getDisplayName();
-      player.displayClientMessage(net.minecraft.network.chat.Component.translatable("container.isLocked", displayName), true);
-      player.playNotifySound(SoundEvents.CHEST_LOCKED, SoundSource.BLOCKS, 1, 1);
-      return false;
     }
     return true;
   }

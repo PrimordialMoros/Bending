@@ -73,12 +73,12 @@ hsql = { module = "org.hsqldb:hsqldb", version = "2.7.4" }
 fabric-minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
 fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
 fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
-fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "2.5.0+1.21.2" }
-sgui = { module = "eu.pb4:sgui", version = "1.7.2+1.21.2" }
+fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "2.5.1+1.21.3" }
+sgui = { module = "eu.pb4:sgui", version = "1.8.1+1.21.4" }
 fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.3.3" }
 
 # Bukkit
-inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.19" }
+inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.19-dev" }
 grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.4" }
 towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.101.1.1" }
 lwc = { module = "com.griefcraft:lwc", version = "2.4.0" }
@@ -108,6 +108,6 @@ junit = ["junit-api", "junit-engine"]
 [plugins]
 jmh = { id = "me.champeau.jmh", version = "0.7.3" }
 fabric-loom = { id = "fabric-loom", version.ref = "fabric-loom" }
-paperweight-userdev = { id = "io.papermc.paperweight.userdev", version = "1.7.7" }
+paperweight-userdev = { id = "io.papermc.paperweight.userdev", version = "2.0.0-beta.8" }
 hangar = { id = "io.papermc.hangar-publish-plugin", version = "0.1.2" }
 run-paper = { id = "xyz.jpenilla.run-paper", version = "2.3.1" }

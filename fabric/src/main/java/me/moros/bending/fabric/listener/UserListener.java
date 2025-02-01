@@ -26,6 +26,7 @@ import me.moros.bending.api.ability.ActionType;
 import me.moros.bending.api.ability.Activation;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.platform.block.Block;
+import me.moros.bending.api.platform.block.Lockable;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.temporal.ActionLimiter;
 import me.moros.bending.api.temporal.TempArmor;
@@ -35,13 +36,13 @@ import me.moros.bending.api.util.metadata.EntityInteraction;
 import me.moros.bending.api.util.metadata.Metadata;
 import me.moros.bending.common.ability.earth.EarthGlove;
 import me.moros.bending.common.ability.earth.MetalCable;
+import me.moros.bending.common.ability.earth.passive.Locksmithing;
 import me.moros.bending.common.util.Initializer;
 import me.moros.bending.fabric.event.ServerEntityEvents;
 import me.moros.bending.fabric.event.ServerInventoryEvents;
 import me.moros.bending.fabric.event.ServerItemEvents;
 import me.moros.bending.fabric.event.ServerPlayerEvents;
 import me.moros.bending.fabric.platform.FabricMetadata;
-import me.moros.bending.fabric.platform.NBTUtil;
 import me.moros.bending.fabric.platform.PlatformAdapter;
 import me.moros.bending.fabric.platform.item.ItemUtil;
 import me.moros.math.Vector3d;
@@ -51,13 +52,8 @@ import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
-import net.fabricmc.fabric.api.util.TriState;
-import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.component.DataComponentMap;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -72,7 +68,6 @@ import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
@@ -317,17 +312,12 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
     return true;
   }
 
-  private TriState onAccessLock(Player player, ItemPredicate itemPredicate, ItemStack item) {
+  private boolean onAccessLock(Player player, Lockable lockable) {
     if (!disabledWorld(player)) {
-      var key = ItemUtil.getKey(item, Metadata.METAL_KEY);
-      if (key != null) {
-        var nbt = new CompoundTag();
-        NBTUtil.write(nbt, Metadata.METAL_KEY, key);
-        var dataMap = DataComponentMap.builder().set(DataComponents.CUSTOM_DATA, CustomData.of(nbt)).build();
-        return TriState.of(itemPredicate.components().test(dataMap));
-      }
+      User user = Registries.BENDERS.get(player.getUUID());
+      return user != null && Locksmithing.canUnlockContainer(user, lockable);
     }
-    return TriState.DEFAULT;
+    return false;
   }
 
   private double onEntityDamage(LivingEntity entity, DamageSource source, double damage) {

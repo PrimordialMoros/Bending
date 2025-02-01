@@ -19,10 +19,9 @@
 
 package me.moros.bending.fabric.event;
 
+import me.moros.bending.api.platform.block.Lockable;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.fabricmc.fabric.api.util.TriState;
-import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -40,14 +39,13 @@ public final class ServerItemEvents {
     return true;
   });
 
-  public static final Event<AccessLock> ACCESS_LOCK = EventFactory.createArrayBacked(AccessLock.class, callbacks -> (player, itemPredicate, item) -> {
+  public static final Event<AccessLock> ACCESS_LOCK = EventFactory.createArrayBacked(AccessLock.class, callbacks -> (player, lockable) -> {
     for (var callback : callbacks) {
-      var result = callback.onAccess(player, itemPredicate, item);
-      if (result != TriState.DEFAULT) {
-        return result;
+      if (callback.onAccess(player, lockable)) {
+        return true;
       }
     }
-    return TriState.DEFAULT;
+    return false;
   });
 
   @FunctionalInterface
@@ -57,6 +55,6 @@ public final class ServerItemEvents {
 
   @FunctionalInterface
   public interface AccessLock {
-    TriState onAccess(Player player, ItemPredicate itemPredicate, ItemStack item);
+    boolean onAccess(Player player, Lockable lockable);
   }
 }

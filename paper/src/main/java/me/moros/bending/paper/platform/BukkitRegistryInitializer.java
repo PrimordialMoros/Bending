@@ -43,6 +43,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Tag;
 import org.bukkit.block.data.BlockData;
 
@@ -151,6 +152,7 @@ public final class BukkitRegistryInitializer implements RegistryInitializer {
   }
 
   private Sound mapSound(org.bukkit.Sound sound) {
-    return Sound.registry().getOrThrow(sound.key());
+    NamespacedKey soundKey = org.bukkit.Registry.SOUNDS.getKeyOrThrow(sound);
+    return Sound.registry().getOrThrow(soundKey);
   }
 }

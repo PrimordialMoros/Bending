@@ -20,24 +20,11 @@
 package me.moros.bending.paper.platform.block;
 
 import me.moros.bending.api.platform.block.Lockable;
-import me.moros.bending.api.platform.item.ItemSnapshot;
-import me.moros.bending.paper.platform.PlatformAdapter;
 
 public record LockableImpl(org.bukkit.block.Lockable handle) implements Lockable {
   @Override
   public boolean hasLock() {
     return handle().isLocked();
-  }
-
-  @Override
-  public boolean canUnlock(ItemSnapshot item) {
-    // TODO change
-    return false;
-  }
-
-  @Override
-  public void lock(ItemSnapshot item) {
-    handle().setLockItem(PlatformAdapter.toBukkitItem(item));
   }
 
   @Override

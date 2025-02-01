@@ -22,6 +22,7 @@ package me.moros.bending.paper.listener;
 import java.util.UUID;
 
 import com.destroystokyo.paper.event.player.PlayerJumpEvent;
+import io.papermc.paper.event.block.BlockLockCheckEvent;
 import io.papermc.paper.event.entity.EntityInsideBlockEvent;
 import io.papermc.paper.event.entity.EntityMoveEvent;
 import io.papermc.paper.event.player.PlayerArmSwingEvent;
@@ -42,9 +43,11 @@ import me.moros.bending.api.util.metadata.EntityInteraction;
 import me.moros.bending.api.util.metadata.Metadata;
 import me.moros.bending.common.ability.earth.EarthGlove;
 import me.moros.bending.common.ability.earth.MetalCable;
+import me.moros.bending.common.ability.earth.passive.Locksmithing;
 import me.moros.bending.common.locale.Message;
 import me.moros.bending.paper.platform.DamageUtil;
 import me.moros.bending.paper.platform.PlatformAdapter;
+import me.moros.bending.paper.platform.block.LockableImpl;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import org.bukkit.GameMode;
@@ -57,6 +60,7 @@ import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -267,6 +271,17 @@ public record UserListener(Game game) implements Listener, BukkitListener {
       if (user != null && game.activationController().onUserGlide(user)) {
         event.setCancelled(true);
       }
+    }
+  }
+
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onAccessLock(BlockLockCheckEvent event) {
+    if (event.getPlayer().getGameMode() == GameMode.SPECTATOR || disabledWorld(event)) {
+      return;
+    }
+    User user = Registries.BENDERS.get(event.getPlayer().getUniqueId());
+    if (user != null && Locksmithing.canUnlockContainer(user, new LockableImpl(event.getBlockState()))) {
+      event.setResult(Result.ALLOW);
     }
   }
 

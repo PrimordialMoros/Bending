@@ -37,8 +37,8 @@ import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.Unbreakable;
 
 public class FabricItemBuilder implements ItemBuilder {
-  private final Map<DataKey<?>, Object> meta = new HashMap<>();
   private final ItemStack stack;
+  private final Map<DataKey<?>, Object> meta = new HashMap<>();
   private final MinecraftServerAudiences adapter;
 
   public FabricItemBuilder(ItemStack stack, MinecraftServer server) {

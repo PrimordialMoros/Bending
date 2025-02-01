@@ -20,16 +20,16 @@
 package me.moros.bending.fabric.mixin.block.entity;
 
 import me.moros.bending.api.platform.block.Lockable;
-import me.moros.bending.api.platform.item.ItemSnapshot;
-import me.moros.bending.fabric.platform.PlatformAdapter;
-import net.minecraft.advancements.critereon.ItemPredicate;
-import net.minecraft.advancements.critereon.MinMaxBounds.Ints;
-import net.minecraft.core.component.DataComponentPredicate;
-import net.minecraft.core.registries.Registries;
+import me.moros.bending.fabric.event.ServerItemEvents;
 import net.minecraft.world.LockCode;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(BeaconBlockEntity.class)
 public abstract class BeaconBlockEntityMixin extends BlockEntityMixin implements Lockable {
@@ -38,7 +38,7 @@ public abstract class BeaconBlockEntityMixin extends BlockEntityMixin implements
 
   @Override
   public boolean hasLock() {
-    return lockKey == LockCode.NO_LOCK;
+    return lockKey != LockCode.NO_LOCK;
   }
 
   @Override
@@ -46,14 +46,10 @@ public abstract class BeaconBlockEntityMixin extends BlockEntityMixin implements
     lockKey = LockCode.NO_LOCK;
   }
 
-  @Override
-  public void lock(ItemSnapshot item) {
-    var fabricItem = PlatformAdapter.toFabricItem(item);
-    ItemPredicate itemPredicate = ItemPredicate.Builder.item()
-      .of(getLevel().registryAccess().lookupOrThrow(Registries.ITEM), fabricItem.getItem())
-      .withCount(Ints.atLeast(item.amount()))
-      .hasComponents(DataComponentPredicate.allOf(fabricItem.getComponents()))
-      .build();
-    lockKey = new LockCode(itemPredicate);
+  @Inject(method = "createMenu", at = @At(value = "HEAD"), cancellable = true)
+  private void bending$createMenu(int i, Inventory inventory, Player player, CallbackInfoReturnable<Boolean> cir) {
+    if (!player.isSpectator() && ServerItemEvents.ACCESS_LOCK.invoker().onAccess(player, this)) {
+      cir.setReturnValue(true);
+    }
   }
 }

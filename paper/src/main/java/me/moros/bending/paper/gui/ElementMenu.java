@@ -26,6 +26,7 @@ import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
 import com.github.stefvanschie.inventoryframework.pane.Pane.Priority;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
+import io.papermc.paper.datacomponent.DataComponentTypes;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.element.ElementHandler;
 import me.moros.bending.api.gui.ElementGui;
@@ -77,7 +78,7 @@ public final class ElementMenu extends AbstractGui<ItemStack, ChestGui> {
 
   private ItemStack backgroundItem() {
     ItemStack item = PlatformAdapter.toBukkitItem(BACKGROUND.get());
-    item.editMeta(m -> m.setHideTooltip(true));
+    item.setData(DataComponentTypes.HIDE_TOOLTIP);
     return item;
   }
 
@@ -102,7 +103,7 @@ public final class ElementMenu extends AbstractGui<ItemStack, ChestGui> {
 
   @Override
   protected void handleItemStackGlow(ItemStack itemStack, boolean glow) {
-    itemStack.editMeta(m -> m.setEnchantmentGlintOverride(glow));
+    itemStack.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, glow);
   }
 
   public static ElementGui createMenu(ElementHandler handler, Player player) {

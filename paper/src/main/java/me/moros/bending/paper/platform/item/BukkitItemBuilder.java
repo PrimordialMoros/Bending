@@ -23,6 +23,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.ItemLore;
+import io.papermc.paper.datacomponent.item.Unbreakable;
 import me.moros.bending.api.locale.Translation;
 import me.moros.bending.api.platform.item.ItemBuilder;
 import me.moros.bending.api.platform.item.ItemSnapshot;
@@ -38,12 +41,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class BukkitItemBuilder implements ItemBuilder {
   private final ItemStack stack;
   private final Map<DataKey<?>, Object> meta = new HashMap<>();
-  private Component name;
-  private List<Component> lore;
-  private boolean unbreakable;
 
   public BukkitItemBuilder(ItemStack stack) {
-    this.stack = stack;
+    this.stack = stack.clone();
   }
 
   // TODO remove when components are properly supported
@@ -53,13 +53,13 @@ public class BukkitItemBuilder implements ItemBuilder {
 
   @Override
   public ItemBuilder name(Component name) {
-    this.name = name;
+    this.stack.setData(DataComponentTypes.CUSTOM_NAME, tryRender(name));
     return this;
   }
 
   @Override
   public ItemBuilder lore(List<Component> lore) {
-    this.lore = List.copyOf(lore);
+    this.stack.setData(DataComponentTypes.LORE, ItemLore.lore(lore.stream().map(this::tryRender).toList()));
     return this;
   }
 
@@ -73,7 +73,11 @@ public class BukkitItemBuilder implements ItemBuilder {
 
   @Override
   public ItemBuilder unbreakable(boolean unbreakable) {
-    this.unbreakable = unbreakable;
+    if (unbreakable) {
+      stack.setData(DataComponentTypes.UNBREAKABLE, Unbreakable.unbreakable(false));
+    } else {
+      stack.unsetData(DataComponentTypes.UNBREAKABLE);
+    }
     return this;
   }
 
@@ -82,18 +86,16 @@ public class BukkitItemBuilder implements ItemBuilder {
     if (amount <= 0) {
       throw new IllegalStateException("Non positive amount: " + amount);
     }
-    var copy = stack.clone();
-    copy.setAmount(amount);
-    copy.editMeta(m -> {
-      m.displayName(tryRender(name));
-      m.lore(lore == null ? null : lore.stream().map(this::tryRender).toList());
-      m.setUnbreakable(unbreakable);
-      var data = m.getPersistentDataContainer();
-      for (var entry : meta.entrySet()) {
-        addMeta(data, entry.getKey(), entry.getValue()); // Get around type erasure
-      }
-    });
-    return new BukkitItem(copy);
+    stack.setAmount(amount);
+    if (!meta.isEmpty()) {
+      stack.editMeta(m -> {
+        var data = m.getPersistentDataContainer();
+        for (var entry : meta.entrySet()) {
+          addMeta(data, entry.getKey(), entry.getValue()); // Get around type erasure
+        }
+      });
+    }
+    return new BukkitItem(stack);
   }
 
   @SuppressWarnings("unchecked")

@@ -24,9 +24,14 @@ import me.moros.bending.api.platform.item.ItemSnapshot;
 public interface Lockable {
   boolean hasLock();
 
-  boolean canUnlock(ItemSnapshot item);
+  @Deprecated
+  default boolean canUnlock(ItemSnapshot item) {
+    return false;
+  }
 
-  void lock(ItemSnapshot item);
+  @Deprecated
+  default void lock(ItemSnapshot item) {
+  }
 
   void unlock();
 }

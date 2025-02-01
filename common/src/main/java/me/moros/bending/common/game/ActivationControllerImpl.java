@@ -57,7 +57,6 @@ import me.moros.bending.common.ability.earth.EarthSmash;
 import me.moros.bending.common.ability.earth.EarthSurf;
 import me.moros.bending.common.ability.earth.passive.DensityShift;
 import me.moros.bending.common.ability.earth.passive.FerroControl;
-import me.moros.bending.common.ability.earth.passive.Locksmithing;
 import me.moros.bending.common.ability.earth.sequence.EarthPillars;
 import me.moros.bending.common.ability.fire.FireJet;
 import me.moros.bending.common.ability.fire.FireShield;
@@ -228,7 +227,6 @@ public final class ActivationControllerImpl implements ActivationController {
     if (block != null) {
       method = Activation.INTERACT_BLOCK;
       FerroControl.act(user, block);
-      Locksmithing.act(user, block);
       EarthSmash.tryDestroy(user, block);
     } else if (entity != null) {
       method = Activation.INTERACT_ENTITY;
