@@ -2,7 +2,7 @@
 storage = "3.3.0"
 math = "3.0.0"
 tasker = "1.2.0"
-adventure = "4.18.0"
+adventure = "4.19.0"
 adventure-fabric = "6.2.0"
 configurate = "4.2.0-SNAPSHOT"
 cloud = "2.0.0"
@@ -12,11 +12,11 @@ sponge-api = "13.0.0"
 sponge-common = "1.21.4-13.0.0-SNAPSHOT"
 paper-api = "1.21.4-R0.1-SNAPSHOT"
 minecraft = "1.21.4"
-fabric-loom = "1.9.2"
-fabric-api = "0.115.1+1.21.4"
+fabric-loom = "1.10.1"
+fabric-api = "0.117.0+1.21.4"
 fabric-loader = "0.16.10"
-shadow = "8.3.5"
-flyway = "11.3.0"
+shadow = "8.3.6"
+flyway = "11.3.3"
 junit = "5.11.4"
 
 [libraries]
@@ -31,7 +31,7 @@ tasker-fabric = { module = "me.moros:tasker-fabric", version.ref = "tasker" }
 
 javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.0" }
-jdbi = { module = "org.jdbi:jdbi3-core", version = "3.47.0" }
+jdbi = { module = "org.jdbi:jdbi3-core", version = "3.48.0" }
 hikari = { module = "com.zaxxer:HikariCP", version = "6.2.1" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-mysql = { module = "org.flywaydb:flyway-mysql", version.ref = "flyway" }
@@ -64,7 +64,7 @@ cloud-sponge = { module = "org.incendo:cloud-sponge", version.ref = "cloud-platf
 
 # Databases
 mysql = { module = "com.mysql:mysql-connector-j", version = "9.2.0" }
-mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.5.1" }
+mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.5.2" }
 postgresql = { module = "org.postgresql:postgresql", version = "42.7.5" }
 h2 = { module = "com.h2database:h2", version = "2.3.232" }
 hsql = { module = "org.hsqldb:hsqldb", version = "2.7.4" }
@@ -73,8 +73,8 @@ hsql = { module = "org.hsqldb:hsqldb", version = "2.7.4" }
 fabric-minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
 fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
 fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
-fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "2.5.1+1.21.3" }
-sgui = { module = "eu.pb4:sgui", version = "1.8.1+1.21.4" }
+fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "2.5.2+1.21.3" }
+sgui = { module = "eu.pb4:sgui", version = "1.8.2+1.21.4" }
 fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.3.3" }
 
 # Bukkit
@@ -82,7 +82,7 @@ inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF"
 grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.4" }
 towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.101.1.1" }
 lwc = { module = "com.griefcraft:lwc", version = "2.4.0" }
-worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.12" }
+worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.13" }
 papi = { module = "me.clip:placeholderapi", version = "2.11.6" }
 
 # Sponge
@@ -94,7 +94,7 @@ sponge-mixin = { module = "org.spongepowered:mixin", version = "0.8.7" }
 shadow = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "shadow" }
 sponge-vanilla = { module = "org.spongepowered:vanillagradle", version = "0.2.1-20240507.024226-82" }
 minotaur = { module = "com.modrinth.minotaur:Minotaur", version = "2.8.7" }
-checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.48" }
+checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.49" }
 
 [bundles]
 cloud = ["cloud-core", "cloud-minecraft"]
@@ -108,6 +108,6 @@ junit = ["junit-api", "junit-engine"]
 [plugins]
 jmh = { id = "me.champeau.jmh", version = "0.7.3" }
 fabric-loom = { id = "fabric-loom", version.ref = "fabric-loom" }
-paperweight-userdev = { id = "io.papermc.paperweight.userdev", version = "2.0.0-beta.8" }
+paperweight-userdev = { id = "io.papermc.paperweight.userdev", version = "2.0.0-beta.14" }
 hangar = { id = "io.papermc.hangar-publish-plugin", version = "0.1.2" }
 run-paper = { id = "xyz.jpenilla.run-paper", version = "2.3.1" }
