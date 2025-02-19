@@ -6,6 +6,10 @@
   "schedule": [
     "after 6pm on the 6th day of the month"
   ],
+  "ignoreDeps": [
+    "com.mojang:minecraft",
+    "com.github.stefvanschie.inventoryframework:IF"
+  ],
   "packageRules": [
     {
       "description": "Correct version handling for dependencies with format major.minor.patch+mcver",
