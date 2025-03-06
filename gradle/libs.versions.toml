@@ -4,20 +4,20 @@ math = "3.0.0"
 tasker = "1.2.0"
 adventure = "4.19.0"
 adventure-fabric = "6.2.0"
-configurate = "4.2.0-SNAPSHOT"
+configurate = "4.2.0"
 cloud = "2.0.0"
 cloud-platform = "2.0.0-SNAPSHOT"
 bstats = "3.1.0"
 sponge-api = "13.0.0"
-sponge-common = "1.21.4-13.0.0-SNAPSHOT"
+sponge-common = "1.21.4-14.0.0-SNAPSHOT"
 paper-api = "1.21.4-R0.1-SNAPSHOT"
 minecraft = "1.21.4"
-fabric-loom = "1.10.1"
-fabric-api = "0.117.0+1.21.4"
+fabric-loom = "1.10.4"
+fabric-api = "0.118.0+1.21.4"
 fabric-loader = "0.16.10"
 shadow = "8.3.6"
-flyway = "11.3.3"
-junit = "5.11.4"
+flyway = "11.3.4"
+junit = "5.12.0"
 
 [libraries]
 storage = { module = "me.moros:storage", version.ref = "storage" }
@@ -47,7 +47,7 @@ adventure-minimessage = { module = "net.kyori:adventure-text-minimessage", versi
 adventure-fabric = { module = "net.kyori:adventure-platform-fabric", version.ref = "adventure-fabric" }
 
 luckperms-api = { module = "net.luckperms:api", version = "5.4" }
-mini-placeholders = { module = "io.github.miniplaceholders:miniplaceholders-api", version = "2.2.3" }
+mini-placeholders = { module = "io.github.miniplaceholders:miniplaceholders-api", version = "2.3.0" }
 
 configurate-core = { module = "org.spongepowered:configurate-core", version.ref = "configurate" }
 configurate-hocon = { module = "org.spongepowered:configurate-hocon", version.ref = "configurate" }
@@ -94,7 +94,7 @@ sponge-mixin = { module = "org.spongepowered:mixin", version = "0.8.7" }
 shadow = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "shadow" }
 sponge-vanilla = { module = "org.spongepowered:vanillagradle", version = "0.2.1-20240507.024226-82" }
 minotaur = { module = "com.modrinth.minotaur:Minotaur", version = "2.8.7" }
-checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.49" }
+checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.52" }
 
 [bundles]
 cloud = ["cloud-core", "cloud-minecraft"]
