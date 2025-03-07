@@ -39,8 +39,9 @@ flyway-pgsql = { module = "org.flywaydb:flyway-database-postgresql", version.ref
 flyway-hsqldb = { module = "org.flywaydb:flyway-database-hsqldb", version.ref = "flyway" }
 eventbus = { module = "com.seiama:event-api", version = "1.0.0-SNAPSHOT" }
 
-junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
-junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+junit-bom = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform = { module = "org.junit.platform:junit-platform-launcher" }
 
 adventure-api = { module = "net.kyori:adventure-api", version.ref = "adventure" }
 adventure-minimessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "adventure" }
@@ -103,7 +104,7 @@ drivers-local = ["h2", "hsql"]
 drivers-remote = ["mysql", "mariadb", "postgresql"]
 drivers-nonstandard = ["mariadb", "postgresql", "h2", "hsql"]
 flyway = ["flyway-core", "flyway-mysql", "flyway-pgsql", "flyway-hsqldb"]
-junit = ["junit-api", "junit-engine"]
+junit = ["junit-bom", "junit-jupiter"]
 
 [plugins]
 jmh = { id = "me.champeau.jmh", version = "0.7.3" }

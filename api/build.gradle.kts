@@ -11,6 +11,7 @@ dependencies {
     compileOnly(libs.caffeine)
     testImplementation(libs.bundles.junit)
     testImplementation(libs.adventure.api)
+    testRuntimeOnly(libs.junit.platform)
 }
 
 sourceSets {
