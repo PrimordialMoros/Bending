@@ -4,20 +4,20 @@ math = "3.0.0"
 tasker = "1.2.0"
 adventure = "4.19.0"
 adventure-fabric = "6.2.0"
-configurate = "4.2.0-SNAPSHOT"
+configurate = "4.2.0"
 cloud = "2.0.0"
 cloud-platform = "2.0.0-SNAPSHOT"
 bstats = "3.1.0"
 sponge-api = "13.0.0"
-sponge-common = "1.21.4-13.0.0-SNAPSHOT"
+sponge-common = "1.21.4-14.0.0-SNAPSHOT"
 paper-api = "1.21.4-R0.1-SNAPSHOT"
 minecraft = "1.21.4"
-fabric-loom = "1.10.1"
-fabric-api = "0.117.0+1.21.4"
+fabric-loom = "1.10.4"
+fabric-api = "0.118.0+1.21.4"
 fabric-loader = "0.16.10"
 shadow = "8.3.6"
-flyway = "11.3.3"
-junit = "5.11.4"
+flyway = "11.3.4"
+junit = "5.12.0"
 
 [libraries]
 storage = { module = "me.moros:storage", version.ref = "storage" }
@@ -39,15 +39,16 @@ flyway-pgsql = { module = "org.flywaydb:flyway-database-postgresql", version.ref
 flyway-hsqldb = { module = "org.flywaydb:flyway-database-hsqldb", version.ref = "flyway" }
 eventbus = { module = "com.seiama:event-api", version = "1.0.0-SNAPSHOT" }
 
-junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
-junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+junit-bom = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform = { module = "org.junit.platform:junit-platform-launcher" }
 
 adventure-api = { module = "net.kyori:adventure-api", version.ref = "adventure" }
 adventure-minimessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "adventure" }
 adventure-fabric = { module = "net.kyori:adventure-platform-fabric", version.ref = "adventure-fabric" }
 
 luckperms-api = { module = "net.luckperms:api", version = "5.4" }
-mini-placeholders = { module = "io.github.miniplaceholders:miniplaceholders-api", version = "2.2.3" }
+mini-placeholders = { module = "io.github.miniplaceholders:miniplaceholders-api", version = "2.3.0" }
 
 configurate-core = { module = "org.spongepowered:configurate-core", version.ref = "configurate" }
 configurate-hocon = { module = "org.spongepowered:configurate-hocon", version.ref = "configurate" }
@@ -94,7 +95,7 @@ sponge-mixin = { module = "org.spongepowered:mixin", version = "0.8.7" }
 shadow = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "shadow" }
 sponge-vanilla = { module = "org.spongepowered:vanillagradle", version = "0.2.1-20240507.024226-82" }
 minotaur = { module = "com.modrinth.minotaur:Minotaur", version = "2.8.7" }
-checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.49" }
+checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.52" }
 
 [bundles]
 cloud = ["cloud-core", "cloud-minecraft"]
@@ -103,7 +104,7 @@ drivers-local = ["h2", "hsql"]
 drivers-remote = ["mysql", "mariadb", "postgresql"]
 drivers-nonstandard = ["mariadb", "postgresql", "h2", "hsql"]
 flyway = ["flyway-core", "flyway-mysql", "flyway-pgsql", "flyway-hsqldb"]
-junit = ["junit-api", "junit-engine"]
+junit = ["junit-bom", "junit-jupiter"]
 
 [plugins]
 jmh = { id = "me.champeau.jmh", version = "0.7.3" }
