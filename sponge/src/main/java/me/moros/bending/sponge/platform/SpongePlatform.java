@@ -134,8 +134,8 @@ public class SpongePlatform implements Platform, PlatformFactory {
       var pos = new BlockPos(block.blockX(), block.blockY(), block.blockZ());
       var item = new net.minecraft.world.item.ItemStack(Items.DIAMOND_PICKAXE);
       var fortune = level.registryAccess()
-        .registryOrThrow(Registries.ENCHANTMENT)
-        .getHolderOrThrow(Enchantments.FORTUNE);
+        .lookupOrThrow(Registries.ENCHANTMENT)
+        .getOrThrow(Enchantments.FORTUNE);
       item.enchant(fortune, 2);
       return net.minecraft.world.level.block.Block.getDrops(nmsState, level, pos, level.getBlockEntity(pos), null, item)
         .stream().map(i -> PlatformAdapter.fromSpongeItem((ItemStack) (Object) i)).toList();
@@ -144,10 +144,10 @@ public class SpongePlatform implements Platform, PlatformFactory {
   }
 
   private ItemSnapshot findCampfireRecipe(Item item) {
-    var spongeItem = PlatformAdapter.toSpongeItem(item).createSnapshot();
+    var spongeItem = PlatformAdapter.toSpongeItem(item);
     for (var recipe : Sponge.server().recipeManager().allOfType(RecipeTypes.CAMPFIRE_COOKING)) {
       if (recipe.isValid(spongeItem)) {
-        return PlatformAdapter.fromSpongeItem(recipe.exemplaryResult().createStack());
+        return PlatformAdapter.fromSpongeItem(recipe.exemplaryResult().asMutableCopy());
       }
     }
     return ItemSnapshot.AIR.get();

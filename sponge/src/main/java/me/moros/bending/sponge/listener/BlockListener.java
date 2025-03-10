@@ -21,20 +21,12 @@ package me.moros.bending.sponge.listener;
 
 import me.moros.bending.api.ability.ActionType;
 import me.moros.bending.api.game.Game;
-import me.moros.bending.api.platform.block.Block;
-import me.moros.bending.api.platform.sound.Sound;
 import me.moros.bending.api.temporal.ActionLimiter;
 import me.moros.bending.api.temporal.TempBlock;
-import me.moros.bending.common.ability.earth.passive.Locksmithing;
 import me.moros.bending.sponge.platform.PlatformAdapter;
-import me.moros.bending.sponge.platform.block.LockableImpl;
-import net.kyori.adventure.text.Component;
-import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.transaction.Operations;
-import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
@@ -60,13 +52,9 @@ public class BlockListener extends SpongeListener {
       return;
     }
     var blockCause = event.cause().first(LocatableBlock.class).orElse(null);
-    var player = living instanceof ServerPlayer p ? p : null;
     for (var loc : event.locations()) {
       var block = PlatformAdapter.fromSpongeWorld(loc.world()).blockAt(loc.blockX(), loc.blockY(), loc.blockZ());
       if (blockCause != null && TempBlock.MANAGER.isTemp(block)) {
-        event.setCancelled(true);
-        return;
-      } else if (player != null && loc.blockEntity().map(be -> handleLockedContainer(block, be, player)).orElse(false)) {
         event.setCancelled(true);
         return;
       }
@@ -91,22 +79,6 @@ public class BlockListener extends SpongeListener {
         transaction.setValid(TempBlock.MANAGER.isTemp(block));
       }
     }
-  }
-
-  private boolean handleLockedContainer(Block block, BlockEntity blockEntity, ServerPlayer player) {
-    if (blockEntity.supports(Keys.LOCK_TOKEN)) {
-      if (!Locksmithing.canBreak(PlatformAdapter.fromSpongeEntity(player), new LockableImpl(blockEntity))) {
-        Component name = blockEntity.get(Keys.CUSTOM_NAME).orElse(null);
-        if (name == null) {
-          var key = PlatformAdapter.fromSpongeBlock(blockEntity.block().type()).translationKey();
-          name = Component.translatable(key);
-        }
-        player.sendActionBar(Component.translatable("container.isLocked").arguments(name));
-        Sound.BLOCK_CHEST_LOCKED.asEffect().play(block);
-        return true;
-      }
-    }
-    return false;
   }
 
   @Listener(order = Order.EARLY)

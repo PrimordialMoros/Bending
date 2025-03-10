@@ -19,6 +19,7 @@
 
 package me.moros.bending.sponge;
 
+import java.lang.invoke.MethodHandles;
 import java.nio.file.Path;
 
 import com.google.inject.Inject;
@@ -50,24 +51,22 @@ import org.incendo.cloud.sponge.SpongeCommandManager;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.data.DataRegistration;
-import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.entity.damage.DamageScalings;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
-import org.spongepowered.api.event.cause.entity.damage.DamageTypeTemplate;
 import org.spongepowered.api.event.lifecycle.LoadedGameEvent;
 import org.spongepowered.api.event.lifecycle.ProvideServiceEvent;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
 import org.spongepowered.api.event.lifecycle.RegisterDataEvent;
-import org.spongepowered.api.event.lifecycle.RegisterDataPackValueEvent;
+import org.spongepowered.api.event.lifecycle.RegisterRegistryValueEvent;
+import org.spongepowered.api.event.lifecycle.RegisterTagEvent;
 import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
 import org.spongepowered.api.event.lifecycle.StoppingEngineEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.tag.DamageTypeTags;
-import org.spongepowered.api.tag.TagTemplate;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
@@ -93,11 +92,12 @@ public final class SpongeBending extends AbstractBending<PluginContainer> {
     load();
     new SpongePermissionInitializer().init();
     var eventManager = event.game().eventManager();
-    eventManager.registerListeners(parent, new BlockListener(game));
-    eventManager.registerListeners(parent, new UserListener(game));
-    eventManager.registerListeners(parent, new ConnectionListener(logger(), game));
-    eventManager.registerListeners(parent, new WorldListener(game));
-    eventManager.registerListeners(parent, new PlaceholderListener());
+    var lookup = MethodHandles.lookup();
+    eventManager.registerListeners(parent, new BlockListener(game), lookup);
+    eventManager.registerListeners(parent, new UserListener(game), lookup);
+    eventManager.registerListeners(parent, new ConnectionListener(logger(), game), lookup);
+    eventManager.registerListeners(parent, new WorldListener(game), lookup);
+    eventManager.registerListeners(parent, new PlaceholderListener(), lookup);
   }
 
   @Listener
@@ -128,21 +128,21 @@ public final class SpongeBending extends AbstractBending<PluginContainer> {
   @Listener
   public void onRegisterData(RegisterDataEvent event) {
     event.register(DataRegistration.of(PlatformAdapter.dataKey(Metadata.ARMOR_KEY), ItemStack.class));
-    event.register(DataRegistration.of(PlatformAdapter.dataKey(Metadata.METAL_KEY), ItemStack.class));
   }
 
   @Listener
-  private void onDamageTypePack(RegisterDataPackValueEvent<DamageTypeTemplate> event) {
-    var template = DamageTypeTemplate.builder().name("bending-damage").scaling(DamageScalings.NEVER.get())
-      .exhaustion(0).key(AbilityDamageSource.BENDING_DAMAGE).build();
-    event.register(template);
+  private void onDamageTypePack(RegisterRegistryValueEvent.GameScoped event) {
+    event.registry(RegistryTypes.DAMAGE_TYPE, r -> {
+      var bendingDmgType = DamageType.builder().name("bending-damage").scaling(DamageScalings.NEVER.get())
+        .exhaustion(0).build();
+      r.register(AbilityDamageSource.BENDING_DAMAGE, bendingDmgType);
+    });
   }
 
   @Listener
-  private void onDamageTypeTagPack(RegisterDataPackValueEvent<TagTemplate<DamageType>> event) {
-    var template = TagTemplate.builder(DataPacks.DAMAGE_TYPE_TAG).key(DamageTypeTags.BYPASSES_INVULNERABILITY.key())
-      .addValue(RegistryKey.of(RegistryTypes.DAMAGE_TYPE, AbilityDamageSource.BENDING_DAMAGE)).build();
-    event.register(template);
+  private void onDamageTypeTagPack(RegisterTagEvent event) {
+    var key = RegistryKey.of(RegistryTypes.DAMAGE_TYPE, AbilityDamageSource.BENDING_DAMAGE);
+    event.tag(DamageTypeTags.BYPASSES_INVULNERABILITY).append(key);
   }
 
   @Override

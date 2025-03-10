@@ -19,24 +19,19 @@
 
 package me.moros.bending.sponge.platform.block;
 
-import java.util.Optional;
-
 import me.moros.bending.api.platform.block.Lockable;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.Keys;
 
 public record LockableImpl(DataHolder.Mutable handle) implements Lockable {
   @Override
-  public Optional<String> lock() {
-    return handle.get(Keys.LOCK_TOKEN).filter(s -> !s.isBlank());
+  public boolean hasLock() {
+    String lock = handle.getOrElse(Keys.LOCK_TOKEN, "");
+    return !lock.isBlank();
   }
 
   @Override
-  public void lock(String lock) {
-    if (lock.isBlank()) {
-      handle.offer(Keys.LOCK_TOKEN, "");
-    } else {
-      handle.offer(Keys.LOCK_TOKEN, lock);
-    }
+  public void unlock() {
+    handle.offer(Keys.LOCK_TOKEN, "");
   }
 }

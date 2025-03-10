@@ -109,7 +109,7 @@ public final class PlatformAdapter {
   }
 
   public static ItemStackSnapshot toSpongeItemSnapshot(ItemSnapshot item) {
-    return ((SpongeItem) item).handle().createSnapshot();
+    return ((SpongeItem) item).handle().asImmutable();
   }
 
   public static ItemSnapshot fromSpongeItem(ItemStack itemStack) {

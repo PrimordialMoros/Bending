@@ -43,7 +43,6 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.level.block.SoundType;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.MatterTypes;
@@ -155,7 +154,7 @@ final class SpongeRegistryInitializer implements RegistryInitializer {
   }
 
   private Sound mapSound(SoundEvent sound) {
-    Object key = sound.getLocation();
-    return Sound.registry().getOrThrow(PlatformAdapter.fromRsk((ResourceKey) key)); // Defaulted registry
+    var key = sound.location();
+    return Sound.registry().getOrThrow(Key.key(key.getNamespace(), key.getPath())); // Defaulted registry
   }
 }

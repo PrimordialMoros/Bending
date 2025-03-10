@@ -342,7 +342,7 @@ public class UserListener extends SpongeListener {
   }
 
   @Listener(order = Order.EARLY)
-  public void onBlockInteractEarly(InteractBlockEvent.Secondary event, @Root Living entity) {
+  public void onBlockInteractEarly(InteractBlockEvent.Secondary.Pre event, @Root Living entity) {
     onInteraction(event, entity);
   }
 

@@ -47,10 +47,11 @@ public class PlaceholderListener {
 
   @Listener
   public void registerTokensEvent(RegisterRegistryValueEvent.GameScoped event) {
-    var registry = event.registry(RegistryTypes.PLACEHOLDER_PARSER);
-    for (var keyed : provider) {
-      registerParser(registry, keyed);
-    }
+    event.registry(RegistryTypes.PLACEHOLDER_PARSER, r -> {
+      for (var keyed : provider) {
+        registerParser(r, keyed);
+      }
+    });
   }
 
   private void registerParser(RegistryStep<PlaceholderParser> registry, KeyedValue<? extends Placeholder> keyed) {
