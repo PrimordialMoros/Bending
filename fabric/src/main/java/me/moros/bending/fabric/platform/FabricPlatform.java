@@ -51,7 +51,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -141,12 +140,11 @@ public class FabricPlatform implements Platform, PlatformFactory {
 
   private ItemSnapshot findCampfireRecipe(Item item) {
     var fabricItem = PlatformAdapter.toFabricItem(item);
-    var recipe = RecipeManager.createCheck(RecipeType.CAMPFIRE_COOKING)
-      .getRecipeFor(new SingleRecipeInput(fabricItem), server.overworld())
-      .map(RecipeHolder::value).orElse(null);
-    if (recipe != null) {
-      return PlatformAdapter.fromFabricItem(recipe.assemble(new SingleRecipeInput(fabricItem), server.registryAccess()));
-    }
-    return ItemSnapshot.AIR.get();
+    var recipeInput = new SingleRecipeInput(fabricItem);
+    return server.getRecipeManager()
+      .getAllMatches(RecipeType.CAMPFIRE_COOKING, recipeInput, server.overworld())
+      .map(RecipeHolder::value).findAny()
+      .map(r -> PlatformAdapter.fromFabricItem(r.assemble(recipeInput, server.registryAccess())))
+      .orElseGet(ItemSnapshot.AIR);
   }
 }
