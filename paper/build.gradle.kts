@@ -32,12 +32,7 @@ dependencies {
     compileOnly(libs.grief.prevention)
     compileOnly(libs.towny)
     compileOnly(libs.lwc)
-    compileOnly(libs.worldguard) {
-        // TODO remove exclusions when worldguard updates constraints
-        exclude(module = "gson")
-        exclude(module = "guava")
-        exclude(module = "fastutil")
-    }
+    compileOnly(libs.worldguard)
     compileOnly(libs.papi)
     paperweight.paperDevBundle(libs.versions.paper.api)
 }
@@ -52,6 +47,9 @@ tasks {
             reloc("org.incendo.cloud", "cloud")
             reloc("com.typesafe", "typesafe")
             reloc("org.spongepowered.configurate", "configurate")
+            reloc("net.kyori.option", "option") // configurate
+            reloc("org.antlr", "antlr")
+            reloc("org.jspecify", "jspecify")
             reloc("com.github.stefvanschie.inventoryframework", "inventoryframework")
         }
     }

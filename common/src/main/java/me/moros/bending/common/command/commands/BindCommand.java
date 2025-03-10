@@ -115,6 +115,6 @@ public record BindCommand<C extends Audience>(Commander<C> commander) implements
     Message.BOUND_SLOTS.send(sender, user.name().hoverEvent(HoverEvent.showText(elementHover)));
     Component binds = Component.join(JoinConfiguration.newlines(), CommandUtil.presetSlots(user.slots()))
       .hoverEvent(HoverEvent.showText(Message.ABILITY_HOVER.build()));
-    user.sendMessage(binds);
+    sender.sendMessage(binds);
   }
 }

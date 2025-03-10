@@ -43,6 +43,9 @@ tasks {
         dependencies {
             reloc("com.typesafe", "typesafe")
             reloc("org.spongepowered.configurate", "configurate")
+            reloc("net.kyori.option", "option") // configurate
+            reloc("org.antlr", "antlr")
+            reloc("org.jspecify", "jspecify")
             reloc("com.github.benmanes.caffeine", "caffeine")
             reloc("com.zaxxer.hikari", "hikari")
             reloc("org.jdbi", "jdbi")
