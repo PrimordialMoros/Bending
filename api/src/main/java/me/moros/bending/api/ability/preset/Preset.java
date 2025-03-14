@@ -42,7 +42,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * An immutable representation of slots.
  */
 public final class Preset {
-  private static final Preset EMPTY = from(new AbilityDescription[9]);
+  private static final Preset EMPTY = new Preset("", new AbilityDescription[9]);
 
   private final String name;
   private final AbilityDescription[] abilities;
@@ -145,7 +145,7 @@ public final class Preset {
   }
 
   public Preset withName(String newName) {
-    if (this.name.equals(newName)) {
+    if (isEmpty() || this.name.equals(newName)) {
       return this;
     }
     validateName(newName);
@@ -154,7 +154,7 @@ public final class Preset {
 
   public static Preset from(AbilityDescription[] abilities) {
     Objects.requireNonNull(abilities);
-    return new Preset("", abilities);
+    return createOrReuseEmpty("", abilities);
   }
 
   /**
@@ -167,6 +167,13 @@ public final class Preset {
   public static Preset create(String name, AbilityDescription[] abilities) {
     Objects.requireNonNull(abilities);
     validateName(name);
+    return createOrReuseEmpty(name, abilities);
+  }
+
+  private static Preset createOrReuseEmpty(String name, AbilityDescription[] abilities) {
+    if (EMPTY.matchesBinds(abilities)) {
+      return EMPTY;
+    }
     return new Preset(name, abilities);
   }
 

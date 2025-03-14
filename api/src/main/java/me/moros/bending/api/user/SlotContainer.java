@@ -28,11 +28,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 // CopyOnWrite slots
 final class SlotContainer {
   private transient volatile AbilityDescription[] slots;
+  private transient volatile Preset presetRepresentation;
   private transient final Object lock;
 
   SlotContainer() {
-    this.slots = new AbilityDescription[9];
     this.lock = new Object();
+    this.slots = new AbilityDescription[9];
+    this.presetRepresentation = Preset.empty();
   }
 
   AbilityDescription[] getArray() {
@@ -41,6 +43,7 @@ final class SlotContainer {
 
   private void setArray(AbilityDescription[] array) {
     slots = array;
+    presetRepresentation = Preset.from(getArray());
   }
 
   @Nullable AbilityDescription get(int idx) {
@@ -59,7 +62,7 @@ final class SlotContainer {
   }
 
   Preset toPreset() {
-    return Preset.from(getArray());
+    return presetRepresentation;
   }
 
   void fromPreset(Preset preset, Predicate<AbilityDescription> predicate) {
