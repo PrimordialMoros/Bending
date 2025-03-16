@@ -144,6 +144,14 @@ public interface EventBus {
   boolean postPresetRegisterEvent(User user, Preset preset);
 
   /**
+   * Posts a new {@link PresetUnregisterEvent}.
+   * @param user the user that unregistered their preset
+   * @param preset the preset that was being unregistered
+   * @return true if the event was executed and was not cancelled, false otherwise
+   */
+  boolean postPresetUnregisterEvent(User user, Preset preset);
+
+  /**
    * Posts a new {@link TickEffectEvent}.
    * @param source the user responsible for applying the effect
    * @param target the target of the effect

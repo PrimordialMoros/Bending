@@ -139,6 +139,11 @@ public class EventBusImpl implements EventBus {
   }
 
   @Override
+  public boolean postPresetUnregisterEvent(User user, Preset preset) {
+    return !preset.isEmpty() && post(new PresetUnregisterEventImpl(user, preset));
+  }
+
+  @Override
   public TickEffectEvent postTickEffectEvent(User source, Entity target, int duration, BendingEffect type) {
     TickEffectEvent event = new TickEffectEventImpl(source, target, duration, type);
     post(event);

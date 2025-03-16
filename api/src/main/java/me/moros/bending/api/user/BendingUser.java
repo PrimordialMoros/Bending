@@ -321,7 +321,11 @@ sealed class BendingUser implements User, DelegateLivingEntity permits BendingPl
 
   @Override
   public boolean removePreset(Preset preset) {
-    return presets.remove(preset);
+    if (presets.remove(preset)) {
+      game().eventBus().postPresetUnregisterEvent(this, preset);
+      return true;
+    }
+    return false;
   }
 
   @Override

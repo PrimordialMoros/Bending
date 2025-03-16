@@ -23,12 +23,12 @@ dependencies {
     bendingImplementation(libs.cloud.minecraft)
     bendingImplementation(libs.cloud.paper)
     bendingImplementation(libs.inventory.framework)
-    bendingImplementation(libs.bundles.configurate) { exclude(module = "gson") }
     runtimeDownload(libs.caffeine)
     runtimeDownload(libs.hikari)
     runtimeDownload(libs.jdbi)
     runtimeDownload(libs.bundles.flyway)
     runtimeDownload(libs.bundles.drivers.nonstandard)
+    runtimeDownload(libs.bundles.configurate.loaders)
     compileOnly(libs.grief.prevention)
     compileOnly(libs.towny)
     compileOnly(libs.lwc)

@@ -26,7 +26,7 @@ tasks {
         from(rootDir.resolve("LICENSE")) {
             rename { "META-INF/${it}_${rootProject.name.uppercase()}" }
         }
-        val excluded = setOf("checker-qual", "error_prone_annotations", "geantyref", "slf4j-api")
+        val excluded = setOf("checker-qual", "error_prone_annotations", "jspecify", "geantyref", "slf4j-api")
         dependencies {
             exclude {
                 excluded.contains(it.moduleName)

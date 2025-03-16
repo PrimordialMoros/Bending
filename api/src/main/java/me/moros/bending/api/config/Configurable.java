@@ -35,10 +35,11 @@ public interface Configurable extends Serializable {
   List<String> path();
 
   /**
-   * Controls if this configuration external and cannot be loaded from the main configuration file.
+   * Controls if this configuration is external and cannot be loaded from the main configuration file.
    * @return whether this configuration is external
    * @see ConfigProcessor#calculate(Ability, Class)
    */
+  @Deprecated(forRemoval = true)
   default boolean external() {
     return false;
   }

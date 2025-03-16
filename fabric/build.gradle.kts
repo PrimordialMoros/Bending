@@ -18,15 +18,26 @@ dependencies {
     modImplementation(libs.fabric.loader)
     modImplementation(libs.fabric.api)
     modImplementation(libs.fabric.placeholder)
-    modImplementation(include(libs.fabric.permissions.get())!!)
-    modImplementation(include(libs.sgui.get())!!)
-    modImplementation(include(libs.adventure.fabric.get())!!)
-    modImplementation(include(libs.cloud.fabric.get())!!)
-    implementation(include(libs.cloud.minecraft.get())!!)
+
+    modImplementation(libs.fabric.permissions)
+    include(libs.fabric.permissions)
+    modImplementation(libs.sgui)
+    include(libs.sgui)
+    modImplementation(libs.adventure.fabric)
+    include(libs.adventure.fabric)
+    modImplementation(libs.cloud.fabric)
+    include(libs.cloud.fabric)
+
+    implementation(libs.cloud.minecraft)
+    include(libs.cloud.minecraft)
+    implementation(libs.bundles.configurate)
+    include(libs.bundles.configurate)
+    implementation(libs.option)
+    include(libs.option)
+
     bendingImplementation(projects.bendingCommon)
     bendingImplementation(projects.bendingNms)
     bendingImplementation(libs.tasker.fabric)
-    bendingImplementation(libs.bundles.configurate) { exclude(module = "gson") }
     bendingImplementation(libs.caffeine)
     bendingImplementation(libs.hikari)
     bendingImplementation(libs.jdbi)
@@ -41,16 +52,12 @@ loom {
 tasks {
     shadowJar {
         dependencies {
-            reloc("com.typesafe", "typesafe")
-            reloc("org.spongepowered.configurate", "configurate")
-            reloc("net.kyori.option", "option") // configurate
-            reloc("org.antlr", "antlr")
-            reloc("org.jspecify", "jspecify")
             reloc("com.github.benmanes.caffeine", "caffeine")
             reloc("com.zaxxer.hikari", "hikari")
             reloc("org.jdbi", "jdbi")
             reloc("org.h2", "h2")
             reloc("org.flyway", "flyway")
+            reloc("org.antlr", "antlr")
             reloc("com.fasterxml.jackson", "jackson")
         }
     }

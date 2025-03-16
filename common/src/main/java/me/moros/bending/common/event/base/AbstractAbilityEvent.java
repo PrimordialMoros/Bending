@@ -23,9 +23,6 @@ import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.event.AbilityEvent;
 import me.moros.bending.api.user.User;
 
-/**
- * Called when a user's ability cooldown has expired.
- */
 public abstract class AbstractAbilityEvent extends AbstractUserEvent implements AbilityEvent {
   private final AbilityDescription desc;
 

@@ -17,20 +17,17 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.common.event.base;
+package me.moros.bending.api.event;
 
-import me.moros.bending.api.event.UserEvent;
-import me.moros.bending.api.user.User;
+import me.moros.bending.api.ability.preset.Preset;
 
-public abstract class AbstractUserEvent implements UserEvent {
-  private final User user;
-
-  protected AbstractUserEvent(User user) {
-    this.user = user;
-  }
-
-  @Override
-  public User user() {
-    return user;
-  }
+/**
+ * Called when a {@link Preset} is unregistered by a user.
+ */
+public interface PresetUnregisterEvent extends UserEvent {
+  /**
+   * Provides the preset that was unregistered.
+   * @return the preset
+   */
+  Preset preset();
 }
