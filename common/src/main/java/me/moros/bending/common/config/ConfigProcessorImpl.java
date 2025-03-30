@@ -19,7 +19,6 @@
 
 package me.moros.bending.common.config;
 
-import java.io.UncheckedIOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -38,9 +37,7 @@ import me.moros.bending.common.config.processor.CachedConfig.ConfigException;
 import me.moros.bending.common.logging.Logger;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.reference.ConfigurationReference;
-import org.spongepowered.configurate.serialize.SerializationException;
 
-@SuppressWarnings("unchecked")
 record ConfigProcessorImpl(Logger logger, ConfigurationReference<? extends ConfigurationNode> root,
                            Map<Class<? extends Configurable>, CachedConfig<?>> cache) implements ConfigProcessor {
   ConfigProcessorImpl(Logger logger, ConfigurationReference<? extends ConfigurationNode> root) {
@@ -49,15 +46,6 @@ record ConfigProcessorImpl(Logger logger, ConfigurationReference<? extends Confi
 
   void cache(Class<? extends Configurable> configType) {
     getCachedConfig(configType);
-  }
-
-  <T extends Configurable> T get(T def) {
-    ConfigurationNode node = root.node().node(def.path());
-    try {
-      return (T) node.get(def.getClass(), def);
-    } catch (SerializationException e) {
-      throw new UncheckedIOException(e);
-    }
   }
 
   @Override
@@ -76,6 +64,7 @@ record ConfigProcessorImpl(Logger logger, ConfigurationReference<? extends Confi
       .collect(Collectors.toMap(AttributeModifier::attribute, AttributeModifier::modifier, Modifier::merge));
   }
 
+  @SuppressWarnings("unchecked")
   private <T extends Configurable> CachedConfig<T> getCachedConfig(Class<T> configType) {
     return (CachedConfig<T>) cache.computeIfAbsent(configType, s -> {
       try {

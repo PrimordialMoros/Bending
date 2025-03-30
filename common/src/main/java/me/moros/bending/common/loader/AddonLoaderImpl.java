@@ -30,12 +30,14 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import me.moros.bending.api.addon.Addon;
+import me.moros.bending.api.addon.BendingContext;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.common.logging.Logger;
 
-record AddonLoaderImpl(Logger logger, AddonClassLoader loader, Collection<Addon> addons) implements AddonLoader {
+record AddonLoaderImpl(Logger logger, AddonClassLoader loader, BendingContext context,
+                       Collection<Addon> addons) implements AddonLoader {
   AddonLoaderImpl(Logger logger, AddonClassLoader loader) {
-    this(logger, loader, ConcurrentHashMap.newKeySet());
+    this(logger, loader, new BendingContextImpl(), ConcurrentHashMap.newKeySet());
   }
 
   @Override
@@ -46,7 +48,7 @@ record AddonLoaderImpl(Logger logger, AddonClassLoader loader, Collection<Addon>
   private void tryLoad(Supplier<Addon> provider) {
     Addon addon = provider.get();
     try {
-      addon.load();
+      addon.load(context);
       this.addons.add(addon);
     } catch (Throwable t) {
       logger().warn("Unable to load addon %s".formatted(addon.getClass().getName()), t);

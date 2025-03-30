@@ -19,37 +19,8 @@
 
 package me.moros.bending.api.addon;
 
-import me.moros.bending.api.game.Game;
+import me.moros.bending.api.config.ConfigLoader;
 
-/**
- * Represents an addon that can be loaded.
- */
-public interface Addon {
-  /**
-   * Called when this addon is first loaded but before a {@link Game} instance is created.
-   */
-  @Deprecated(forRemoval = true)
-  default void load() {
-  }
-
-  /**
-   * Called when this addon is first loaded but before a {@link Game} instance is created.
-   * @param context the bending context
-   */
-  default void load(BendingContext context) {
-    load();
-  }
-
-  /**
-   * Called when a game instance has been created and initialized.
-   * @param game the initialized game instance
-   */
-  default void enable(Game game) {
-  }
-
-  /**
-   * Called when an addon is unloaded.
-   */
-  default void unload() {
-  }
+public interface BendingContext {
+  ConfigLoader configLoader();
 }

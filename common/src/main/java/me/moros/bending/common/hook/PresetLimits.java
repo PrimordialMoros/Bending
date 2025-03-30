@@ -41,10 +41,6 @@ public record PresetLimits(ToIntFunction<User> maxPresetsFn) implements Addon {
   }
 
   @Override
-  public void load() {
-  }
-
-  @Override
   public void enable(Game game) {
     game.eventBus().subscribe(PresetRegisterEvent.class, this::onPresetRegister);
   }

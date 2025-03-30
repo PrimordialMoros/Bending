@@ -20,6 +20,7 @@
 package me.moros.bending.common.config;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -35,6 +36,7 @@ import me.moros.bending.api.config.Configurable;
 import me.moros.bending.common.logging.Logger;
 import me.moros.bending.common.util.Debounced;
 import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.objectmapping.ObjectMapper;
@@ -117,10 +119,19 @@ public final class ConfigManager {
   }
 
   public static <T extends Configurable> T load(Supplier<T> supplier) {
-    return INSTANCE.processor.get(supplier.get());
+    return loadConfigFromNode(INSTANCE.reference.node(), supplier.get());
   }
 
   public static void cache(Class<? extends Configurable> configType) {
     INSTANCE.processor.cache(configType);
+  }
+
+  @SuppressWarnings("unchecked")
+  private static <T extends Configurable> T loadConfigFromNode(ConfigurationNode node, T def) {
+    try {
+      return (T) node.node(def.path()).get(def.getClass(), def);
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 }
