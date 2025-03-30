@@ -45,11 +45,6 @@ tasks {
         exclude("fonts/") // We aren't using any fonts from IF
         dependencies {
             reloc("org.incendo.cloud", "cloud")
-            reloc("com.typesafe", "typesafe")
-            reloc("org.spongepowered.configurate", "configurate")
-            reloc("net.kyori.option", "option") // configurate
-            reloc("org.antlr", "antlr")
-            reloc("org.jspecify", "jspecify")
             reloc("com.github.stefvanschie.inventoryframework", "inventoryframework")
         }
     }
