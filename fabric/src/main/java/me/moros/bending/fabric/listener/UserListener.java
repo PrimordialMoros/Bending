@@ -100,6 +100,7 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
     ServerEntityEvents.DAMAGE.register(this::onEntityDamage);
     ServerLivingEntityEvents.ALLOW_DAMAGE.register(this::onEntityAllowDamage);
     ServerLivingEntityEvents.AFTER_DEATH.register(this::onUserDeath);
+    net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents.ENTITY_UNLOAD.register(this::onEntityUnload);
   }
 
   private boolean validGameMode(ServerPlayer player) {
@@ -363,5 +364,12 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
     if (user != null) {
       game().activationController().onUserDeconstruct(user);
     }
+  }
+
+  private void onEntityUnload(Entity entity, ServerLevel level) {
+    if (disabledWorld(entity) || entity instanceof ServerPlayer) { // Event mixin is at method head which also includes player entities
+      return;
+    }
+    Registries.BENDERS.getIfExists(entity.getUUID()).ifPresent(game().activationController()::onUserDeconstruct);
   }
 }

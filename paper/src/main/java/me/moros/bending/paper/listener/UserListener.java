@@ -302,6 +302,15 @@ public record UserListener(Game game) implements Listener, BukkitListener {
     Registries.BENDERS.getIfExists(uuid).ifPresent(game.activationController()::onUserDeconstruct);
   }
 
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onEntityRemove(EntityRemoveEvent event) {
+    if (disabledWorld(event) || event.getEntity().isPersistent()) {
+      return;
+    }
+    UUID uuid = event.getEntity().getUniqueId();
+    Registries.BENDERS.getIfExists(uuid).ifPresent(game.activationController()::onUserDeconstruct);
+  }
+
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onPlayerDeath(PlayerDeathEvent event) {
     Player player = event.getEntity();
