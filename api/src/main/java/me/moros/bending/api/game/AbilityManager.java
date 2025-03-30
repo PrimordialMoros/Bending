@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 import me.moros.bending.api.ability.Ability;
 import me.moros.bending.api.ability.Updatable;
 import me.moros.bending.api.user.User;
+import net.kyori.adventure.key.Key;
 
 /**
  * Handles active {@link Ability} instances.
@@ -81,4 +82,6 @@ public interface AbilityManager extends Updatable, Iterable<Ability> {
   private Predicate<Ability> isInstance(Class<? extends Ability> type) {
     return type::isInstance;
   }
+
+  Key worldKey();
 }

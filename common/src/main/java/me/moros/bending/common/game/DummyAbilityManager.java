@@ -28,9 +28,13 @@ import me.moros.bending.api.ability.Ability;
 import me.moros.bending.api.ability.Updatable;
 import me.moros.bending.api.game.AbilityManager;
 import me.moros.bending.api.user.User;
+import me.moros.bending.api.util.KeyUtil;
+import net.kyori.adventure.key.Key;
 
 public final class DummyAbilityManager implements AbilityManager {
   public static final AbilityManager INSTANCE = new DummyAbilityManager();
+
+  private static final Key DUMMY_KEY = KeyUtil.simple("dummy");
 
   private DummyAbilityManager() {
   }
@@ -91,5 +95,10 @@ public final class DummyAbilityManager implements AbilityManager {
 
   @Override
   public void destroyAllInstances() {
+  }
+
+  @Override
+  public Key worldKey() {
+    return DUMMY_KEY;
   }
 }

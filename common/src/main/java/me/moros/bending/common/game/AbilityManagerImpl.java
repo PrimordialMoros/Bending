@@ -216,4 +216,9 @@ public class AbilityManagerImpl implements AbilityManager {
     }
     globalInstances.clear();
   }
+
+  @Override
+  public Key worldKey() {
+    return world;
+  }
 }
