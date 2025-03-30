@@ -111,6 +111,10 @@ public class TemporalManager<K, V extends Temporary> {
     return time <= 0 ? max : Math.min(time, max);
   }
 
+  public int size() {
+    return instances.size();
+  }
+
   protected Stream<V> stream() {
     return instances.values().stream();
   }
