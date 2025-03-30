@@ -29,9 +29,9 @@ import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.ColorPalette;
 import me.moros.bending.api.util.Tasker;
 import me.moros.bending.common.command.Commander;
-import me.moros.bending.common.command.ContextKeys;
 import me.moros.bending.common.command.Permissions;
 import me.moros.bending.common.command.parser.AbilityParser;
+import me.moros.bending.common.command.parser.UserParser;
 import me.moros.bending.common.locale.Message;
 import me.moros.bending.common.util.Initializer;
 import me.moros.bending.common.util.ReflectionUtil;
@@ -39,6 +39,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.incendo.cloud.component.DefaultValue;
 import org.incendo.cloud.minecraft.extras.RichDescription;
 
 public record AttributeCommand<C extends Audience>(Commander<C> commander) implements Initializer {
@@ -47,20 +48,21 @@ public record AttributeCommand<C extends Audience>(Commander<C> commander) imple
     commander().register(commander().rootBuilder()
       .literal("attribute")
       .required("ability", AbilityParser.parserGlobal())
+      .optional("target", UserParser.parser(), DefaultValue.parsed("me"))
       .commandDescription(RichDescription.of(Message.ATTRIBUTE_DESC.build()))
       .permission(Permissions.ATTRIBUTE)
-      .handler(c -> onViewConfig(c.get(ContextKeys.BENDING_PLAYER), c.get("ability")))
+      .handler(c -> onViewConfig(c.sender(), c.get("ability"), c.get("target")))
     );
   }
 
-  private void onViewConfig(User user, AbilityDescription desc) {
+  private void onViewConfig(C sender, AbilityDescription desc, User target) {
     Tasker.async().submit(() -> {
-      List<Component> attributeInfo = collectAttributes(user, desc);
+      List<Component> attributeInfo = collectAttributes(target, desc);
       if (attributeInfo.isEmpty()) {
-        Message.ATTRIBUTE_LIST_EMPTY.send(user, desc.displayName());
+        Message.ATTRIBUTE_LIST_EMPTY.send(sender, desc.displayName());
       } else {
-        Message.ATTRIBUTE_LIST_HEADER.send(user, desc.displayName());
-        attributeInfo.forEach(user::sendMessage);
+        Message.ATTRIBUTE_LIST_HEADER.send(sender, desc.displayName());
+        attributeInfo.forEach(sender::sendMessage);
       }
     }).exceptionally(e -> {
       commander().plugin().logger().warn(e.getMessage(), e);
@@ -76,16 +78,18 @@ public record AttributeCommand<C extends Audience>(Commander<C> commander) imple
     List<Component> result = new ArrayList<>();
     var attributeValues = user.game().configProcessor().listAttributes(user, desc, configType);
     for (AttributeValue av : attributeValues) {
-      Component valueComponent = Component.text(String.valueOf(av.finalValue()), ColorPalette.ACCENT);
-      if (av.modified()) {
-        valueComponent = valueComponent
-          .decorate(TextDecoration.UNDERLINED)
-          .hoverEvent(HoverEvent.showText(Component.text("Base: " + av.baseValue())));
-      }
+      Component valueComponent = Component.text(String.valueOf(av.finalValue()), ColorPalette.ACCENT)
+        .decoration(TextDecoration.UNDERLINED, av.modified());
+      Component hover = Component.text().color(ColorPalette.TEXT_COLOR)
+        .append(Component.text("Name: " + av.name()))
+        .append(Component.newline())
+        .append(Component.text("Base: " + av.baseValue()))
+        .build();
       Component text = Component.text().color(ColorPalette.TEXT_COLOR)
-        .append(Component.text(av.attribute().value()).hoverEvent(HoverEvent.showText(Component.text(av.name()))))
+        .append(Component.text(av.attribute().value()))
         .append(Component.text(": "))
         .append(valueComponent)
+        .hoverEvent(HoverEvent.showText(hover))
         .build();
       result.add(text);
     }
