@@ -2,8 +2,8 @@
 storage = "3.3.0"
 math = "3.0.0"
 tasker = "1.2.0"
-adventure = "4.19.0"
-adventure-fabric = "6.2.0"
+adventure = "4.20.0"
+adventure-fabric = "6.3.0"
 configurate = "4.2.0"
 cloud = "2.0.0"
 cloud-platform = "2.0.0-SNAPSHOT"
@@ -12,12 +12,12 @@ sponge-api = "13.0.0"
 sponge-common = "1.21.4-14.0.0-SNAPSHOT"
 paper-api = "1.21.4-R0.1-SNAPSHOT"
 minecraft = "1.21.4"
-fabric-loom = "1.10.4"
-fabric-api = "0.118.0+1.21.4"
-fabric-loader = "0.16.10"
+fabric-loom = "1.10.5"
+fabric-api = "0.119.2+1.21.4"
+fabric-loader = "0.16.12"
 shadow = "8.3.6"
-flyway = "11.3.4"
-junit = "5.12.0"
+flyway = "11.6.0"
+junit = "5.12.1"
 
 [libraries]
 storage = { module = "me.moros:storage", version.ref = "storage" }
@@ -31,8 +31,8 @@ tasker-fabric = { module = "me.moros:tasker-fabric", version.ref = "tasker" }
 
 javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.0" }
-jdbi = { module = "org.jdbi:jdbi3-core", version = "3.48.0" }
-hikari = { module = "com.zaxxer:HikariCP", version = "6.2.1" }
+jdbi = { module = "org.jdbi:jdbi3-core", version = "3.49.0" }
+hikari = { module = "com.zaxxer:HikariCP", version = "6.3.0" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-mysql = { module = "org.flywaydb:flyway-mysql", version.ref = "flyway" }
 flyway-pgsql = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
@@ -66,7 +66,7 @@ cloud-sponge = { module = "org.incendo:cloud-sponge", version.ref = "cloud-platf
 
 # Databases
 mysql = { module = "com.mysql:mysql-connector-j", version = "9.2.0" }
-mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.5.2" }
+mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.5.3" }
 postgresql = { module = "org.postgresql:postgresql", version = "42.7.5" }
 h2 = { module = "com.h2database:h2", version = "2.3.232" }
 hsql = { module = "org.hsqldb:hsqldb", version = "2.7.4" }
@@ -96,7 +96,7 @@ sponge-mixin = { module = "org.spongepowered:mixin", version = "0.8.7" }
 shadow = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "shadow" }
 sponge-vanilla = { module = "org.spongepowered:vanillagradle", version = "0.2.1-20240507.024226-82" }
 minotaur = { module = "com.modrinth.minotaur:Minotaur", version = "2.8.7" }
-checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.52" }
+checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.53" }
 
 [bundles]
 cloud = ["cloud-core", "cloud-minecraft"]
@@ -111,6 +111,6 @@ junit = ["junit-bom", "junit-jupiter"]
 [plugins]
 jmh = { id = "me.champeau.jmh", version = "0.7.3" }
 fabric-loom = { id = "fabric-loom", version.ref = "fabric-loom" }
-paperweight-userdev = { id = "io.papermc.paperweight.userdev", version = "2.0.0-beta.14" }
-hangar = { id = "io.papermc.hangar-publish-plugin", version = "0.1.2" }
+paperweight-userdev = { id = "io.papermc.paperweight.userdev", version = "2.0.0-beta.16" }
+hangar = { id = "io.papermc.hangar-publish-plugin", version = "0.1.3" }
 run-paper = { id = "xyz.jpenilla.run-paper", version = "2.3.1" }
