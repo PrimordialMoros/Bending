@@ -32,9 +32,9 @@ import net.kyori.adventure.platform.modcommon.MinecraftServerAudiences;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.Unit;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemLore;
-import net.minecraft.world.item.component.Unbreakable;
 
 public class FabricItemBuilder implements ItemBuilder {
   private final ItemStack stack;
@@ -67,7 +67,7 @@ public class FabricItemBuilder implements ItemBuilder {
   @Override
   public ItemBuilder unbreakable(boolean unbreakable) {
     if (unbreakable) {
-      stack.set(DataComponents.UNBREAKABLE, new Unbreakable(false));
+      stack.set(DataComponents.UNBREAKABLE, Unit.INSTANCE);
     } else {
       stack.remove(DataComponents.UNBREAKABLE);
     }

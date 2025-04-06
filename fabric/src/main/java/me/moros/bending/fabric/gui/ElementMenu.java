@@ -22,6 +22,7 @@ package me.moros.bending.fabric.gui;
 import java.util.Map;
 
 import eu.pb4.sgui.api.gui.SimpleGui;
+import it.unimi.dsi.fastutil.objects.ReferenceSortedSets;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.element.ElementHandler;
 import me.moros.bending.api.gui.ElementGui;
@@ -34,9 +35,9 @@ import me.moros.bending.fabric.platform.PlatformAdapter;
 import net.kyori.adventure.platform.modcommon.MinecraftServerAudiences;
 import net.kyori.adventure.util.TriState;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.util.Unit;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.TooltipDisplay;
 
 public final class ElementMenu extends AbstractGui<ItemStack, SimpleGui> {
   private ElementMenu(ElementHandler handler, Player player) {
@@ -49,7 +50,7 @@ public final class ElementMenu extends AbstractGui<ItemStack, SimpleGui> {
     SimpleGui gui = new SimpleGui(MenuType.GENERIC_9x3, player, false);
     gui.setTitle(MinecraftServerAudiences.of(player.server).asNative(Message.ELEMENTS_GUI_TITLE.build()));
     var fill = PlatformAdapter.toFabricItem(BACKGROUND.get());
-    fill.set(DataComponents.HIDE_TOOLTIP, Unit.INSTANCE);
+    fill.set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(true, ReferenceSortedSets.emptySet()));
     for (int i = 0; i < gui.getSize(); i++) {
       gui.setSlot(i, fill);
     }

@@ -128,7 +128,7 @@ public class FireJet extends AbilityInstance {
     double speed = halfSpeed + halfSpeed * Math.sin(Math.PI * timeFactor);
 
     user.applyVelocity(this, user.direction().multiply(speed));
-    user.setProperty(EntityProperties.FALL_DISTANCE, 0F);
+    user.setProperty(EntityProperties.FALL_DISTANCE, 0D);
 
     Vector3d target = user.location().add(user.velocity().negate());
     int amount = jetBlast ? 16 : 10;

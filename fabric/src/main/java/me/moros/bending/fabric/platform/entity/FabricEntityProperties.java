@@ -103,7 +103,7 @@ final class FabricEntityProperties {
         .get(Entity::isInvulnerable)
         .set(Entity::setInvulnerable))
       .create(EntityProperties.IN_WATER, Entity.class, b -> b
-        .get(Entity::isInWaterOrBubble))
+        .get(Entity::isInWater))
       .create(EntityProperties.IN_LAVA, Entity.class, b -> b
         .get(Entity::isInLava))
       .create(EntityProperties.INVISIBLE, Entity.class, b -> b
@@ -151,7 +151,7 @@ final class FabricEntityProperties {
         .get(e -> MinecraftServerAudiences.of(Objects.requireNonNull(e.getServer())).asAdventure(e.getName())))
       .create(EntityProperties.POSITION, Entity.class, b -> b
         .get(e -> Vector3d.of(e.getX(), e.getY(), e.getZ()))
-        .set((e, v) -> e.moveTo(v.x(), v.y(), v.z())))
+        .set((e, v) -> e.snapTo(v.x(), v.y(), v.z())))
       .create(EntityProperties.VELOCITY, Entity.class, b -> b
         .valueOperator(Vector3d::clampVelocity)
         .get(e -> {

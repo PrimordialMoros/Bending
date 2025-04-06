@@ -198,7 +198,7 @@ public class AirBurst extends AbilityInstance {
         velocity = velocity.add(push.multiply(factor * 0.5));
       }
       entity.applyVelocity(AirBurst.this, velocity);
-      entity.setProperty(EntityProperties.FALL_DISTANCE, 0F);
+      entity.setProperty(EntityProperties.FALL_DISTANCE, 0D);
       return false;
     }
 

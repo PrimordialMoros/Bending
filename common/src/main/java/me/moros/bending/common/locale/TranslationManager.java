@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -44,12 +45,12 @@ import me.moros.bending.common.logging.Logger;
 import me.moros.bending.common.util.Debounced;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.translation.GlobalTranslator;
-import net.kyori.adventure.translation.TranslationRegistry;
+import net.kyori.adventure.translation.TranslationStore;
 import net.kyori.adventure.translation.Translator;
 import org.spongepowered.configurate.reference.WatchServiceListener;
 
 /**
- * TranslationManager loads localized strings and adds them to a {@link TranslationRegistry} that can be used
+ * TranslationManager loads localized strings and adds them to a {@link TranslationStore} that can be used
  * to create {@link TranslatableComponent}.
  * @see Message
  */
@@ -59,7 +60,7 @@ public final class TranslationManager implements Iterable<Locale> {
   private final Logger logger;
   private final Path translationsDirectory;
   private final Set<Locale> localeSet;
-  private final AtomicReference<TranslationRegistry> registryReference;
+  private final AtomicReference<TranslationStore.StringBased<MessageFormat>> registryReference;
   private final Debounced<?> buffer;
 
   public TranslationManager(Logger logger, Path directory, WatchServiceListener listener) throws IOException {
@@ -84,9 +85,9 @@ public final class TranslationManager implements Iterable<Locale> {
     logger.info("Registered translations: " + TextUtil.collect(localeSet, Locale::getLanguage));
   }
 
-  private TranslationRegistry createRegistry() {
+  private TranslationStore.StringBased<MessageFormat> createRegistry() {
     localeSet.clear();
-    var registry = TranslationRegistry.create(KeyUtil.simple("translations"));
+    var registry = TranslationStore.messageFormat(KeyUtil.simple("translations"));
     registry.defaultLocale(Translation.DEFAULT_LOCALE);
     loadCustom(registry);
     loadDefaults(registry);
@@ -94,12 +95,12 @@ public final class TranslationManager implements Iterable<Locale> {
     return registry;
   }
 
-  private void loadDefaults(TranslationRegistry registry) {
+  private void loadDefaults(TranslationStore.StringBased<MessageFormat> registry) {
     ResourceBundle bundle = ResourceBundle.getBundle(PATH, Translation.DEFAULT_LOCALE);
     registerBundle(registry, Translation.DEFAULT_LOCALE, bundle);
   }
 
-  private void loadCustom(TranslationRegistry registry) {
+  private void loadCustom(TranslationStore.StringBased<MessageFormat> registry) {
     Collection<Path> paths;
     try (Stream<Path> stream = Files.list(translationsDirectory)) {
       paths = stream.filter(TranslationManager::isValidPropertyFile).toList();
@@ -109,7 +110,7 @@ public final class TranslationManager implements Iterable<Locale> {
     paths.forEach(path -> loadTranslationFile(path, registry));
   }
 
-  private void loadTranslationFile(Path path, TranslationRegistry registry) {
+  private void loadTranslationFile(Path path, TranslationStore.StringBased<MessageFormat> registry) {
     String localeString = removeFileExtension(path);
     Locale locale = Translator.parseLocale(localeString);
     if (locale == null) {
@@ -126,12 +127,12 @@ public final class TranslationManager implements Iterable<Locale> {
     registerBundle(registry, locale, bundle);
   }
 
-  private void registerBundle(TranslationRegistry registry, Locale locale, ResourceBundle bundle) {
+  private void registerBundle(TranslationStore.StringBased<MessageFormat> registry, Locale locale, ResourceBundle bundle) {
     registry.registerAll(locale, bundle, false);
     localeSet.add(locale);
   }
 
-  private void loadFromRegistry(TranslationRegistry registry) {
+  private void loadFromRegistry(TranslationStore.StringBased<MessageFormat> registry) {
     for (Translation translation : Registries.TRANSLATIONS) {
       Locale locale = translation.locale();
       localeSet.add(locale);

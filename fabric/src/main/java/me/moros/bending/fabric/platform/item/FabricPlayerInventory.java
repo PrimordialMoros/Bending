@@ -40,7 +40,7 @@ public class FabricPlayerInventory extends FabricInventory implements PlayerInve
 
   @Override
   public int selectedSlot() {
-    return handle.selected;
+    return handle.getSelectedSlot();
   }
 
   @Override
@@ -49,19 +49,13 @@ public class FabricPlayerInventory extends FabricInventory implements PlayerInve
       return false;
     }
     ItemStack toMatch = new ItemStack(PlatformAdapter.toFabricItemType(type), amount);
-    return hasItemInSubContainer(handle.items, toMatch)
-      || hasItemInSubContainer(handle.armor, toMatch)
-      || hasItemInSubContainer(handle.offhand, toMatch);
-  }
-
-  private boolean hasItemInSubContainer(Iterable<ItemStack> container, ItemStack neededItem) {
-    for (ItemStack item : container) {
-      if (!item.isEmpty() && ItemStack.isSameItem(item, neededItem)) {
+    for (ItemStack item : handle) {
+      if (!item.isEmpty() && ItemStack.isSameItem(item, toMatch)) {
         int count = item.getCount();
-        if (count >= neededItem.getCount()) {
+        if (count >= toMatch.getCount()) {
           return true;
         } else {
-          neededItem.shrink(count);
+          toMatch.shrink(count);
         }
       }
     }

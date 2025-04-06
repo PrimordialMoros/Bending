@@ -43,7 +43,7 @@ abstract class AbstractFlight {
   }
 
   void resetSprintAndFall() {
-    user.setProperty(EntityProperties.FALL_DISTANCE, 0F);
+    user.setProperty(EntityProperties.FALL_DISTANCE, 0D);
     if (sprinting == TriState.NOT_SET) {
       sprinting = user.checkProperty(EntityProperties.SPRINTING);
     }

@@ -97,7 +97,7 @@ public class WaterWave extends AbilityInstance {
     // scale down to 0 speed near the end
     double factor = 1 - ((System.currentTimeMillis() - startTime) / (double) userConfig.duration);
     user.applyVelocity(this, user.direction().multiply(userConfig.speed * factor));
-    user.setProperty(EntityProperties.FALL_DISTANCE, 0F);
+    user.setProperty(EntityProperties.FALL_DISTANCE, 0D);
 
     Vector3d center = user.location().add(Vector3d.MINUS_J);
     Collection<TempBlock> toRevert = new ArrayList<>();

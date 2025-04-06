@@ -195,12 +195,12 @@ public record FabricWorld(ServerLevel handle) implements World {
 
   @Override
   public boolean isDay() {
-    return dimension() == Dimension.OVERWORLD && handle().isDay();
+    return dimension() == Dimension.OVERWORLD && handle().isBrightOutside();
   }
 
   @Override
   public boolean isNight() {
-    return dimension() == Dimension.OVERWORLD && handle().isNight();
+    return dimension() == Dimension.OVERWORLD && handle().isDarkOutside();
   }
 
   @Override
@@ -221,7 +221,7 @@ public record FabricWorld(ServerLevel handle) implements World {
     if (entity == null) {
       var entityType = BuiltInRegistries.ENTITY_TYPE.getValue(PlatformAdapter.rsl(type.key()));
       entity = Objects.requireNonNull(entityType.create(handle(), EntitySpawnReason.TRIGGERED)); // TODO use different reason?
-      entity.moveTo(x, y, z);
+      entity.snapTo(x, y, z);
     }
     return PlatformAdapter.fromFabricEntity(entity);
   }

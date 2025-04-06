@@ -82,7 +82,7 @@ public abstract class ServerGamePacketListenerImplMixin {
     slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;stopUsingItem()V"))
   )
   private void bending$onHandleSetCarriedItem(ServerboundSetCarriedItemPacket packet, CallbackInfo ci) {
-    int oldSlot = this.player.getInventory().selected;
+    int oldSlot = this.player.getInventory().getSelectedSlot();
     int newSlot = packet.getSlot();
     ServerPlayerEvents.CHANGE_SLOT.invoker().onHeldSlotChange(this.player, oldSlot, newSlot);
   }
@@ -105,7 +105,7 @@ public abstract class ServerGamePacketListenerImplMixin {
       double x = from.x();
       double y = from.y();
       double z = from.z();
-      this.player.absMoveTo(x, y, z, xRot, yRot);
+      this.player.absSnapTo(x, y, z, xRot, yRot);
       PositionMoveRotation positionMoveRotation = new PositionMoveRotation(new Vec3(x, y, z), Vec3.ZERO, xRot, yRot);
       this.teleport(positionMoveRotation, EnumSet.of(Relative.X_ROT, Relative.Y_ROT));
       ci.cancel();

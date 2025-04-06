@@ -152,11 +152,11 @@ public abstract class AbstractPacketUtil implements PacketUtil {
     progress.update(AdvancementRequirements.allOf(List.of(criteriaId)));
     progress.grantProgress(criteriaId);
     var progressMap = Map.of(ADVANCEMENT_KEY, progress);
-    return new ClientboundUpdateAdvancementsPacket(false, List.of(advancement), Set.of(), progressMap);
+    return new ClientboundUpdateAdvancementsPacket(false, List.of(advancement), Set.of(), progressMap, true); // TODO CHECK
   }
 
   protected ClientboundUpdateAdvancementsPacket clearNotification() {
-    return new ClientboundUpdateAdvancementsPacket(false, List.of(), Set.of(ADVANCEMENT_KEY), Map.of());
+    return new ClientboundUpdateAdvancementsPacket(false, List.of(), Set.of(ADVANCEMENT_KEY), Map.of(), true); // TODO test both values
   }
 
   protected ClientboundAddEntityPacket createEntity(int id, Position center, EntityType<?> type, int data) {

@@ -250,7 +250,7 @@ public class MetalCable extends AbilityInstance {
     }
     double offset = Math.clamp(cable.location().y() - entity.location().y(), 0, entity.height());
     attached = new AttachedEntity(entity, offset);
-    entity.setProperty(EntityProperties.FALL_DISTANCE, 0F);
+    entity.setProperty(EntityProperties.FALL_DISTANCE, 0D);
     hasHit = true;
   }
 
@@ -276,7 +276,7 @@ public class MetalCable extends AbilityInstance {
       Vector3d targetLocation = user.rayTrace(userConfig.projectileRange).cast(user.world()).entityCenterOrPosition();
       Vector3d velocity = targetLocation.subtract(location).normalize().multiply(userConfig.launchSpeed);
       attachedEntity.handle().applyVelocity(this, velocity.add(0, 0.2, 0));
-      attachedEntity.handle().setProperty(EntityProperties.FALL_DISTANCE, 0F);
+      attachedEntity.handle().setProperty(EntityProperties.FALL_DISTANCE, 0D);
     }
     attached = null;
     remove();

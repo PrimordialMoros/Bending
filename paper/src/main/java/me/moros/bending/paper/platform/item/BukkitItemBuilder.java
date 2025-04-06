@@ -25,7 +25,6 @@ import java.util.Map;
 
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
-import io.papermc.paper.datacomponent.item.Unbreakable;
 import me.moros.bending.api.locale.Translation;
 import me.moros.bending.api.platform.item.ItemBuilder;
 import me.moros.bending.api.platform.item.ItemSnapshot;
@@ -74,7 +73,7 @@ public class BukkitItemBuilder implements ItemBuilder {
   @Override
   public ItemBuilder unbreakable(boolean unbreakable) {
     if (unbreakable) {
-      stack.setData(DataComponentTypes.UNBREAKABLE, Unbreakable.unbreakable(false));
+      stack.setData(DataComponentTypes.UNBREAKABLE);
     } else {
       stack.unsetData(DataComponentTypes.UNBREAKABLE);
     }

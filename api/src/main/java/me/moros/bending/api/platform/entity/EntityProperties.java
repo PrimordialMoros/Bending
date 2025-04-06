@@ -65,7 +65,7 @@ public final class EntityProperties {
 
   public static final FloatProperty YAW = floatProp("yaw");
   public static final FloatProperty PITCH = floatProp("pitch");
-  public static final FloatProperty FALL_DISTANCE = floatProp("fall_distance");
+  public static final DoubleProperty FALL_DISTANCE = doubleProp("fall_distance");
   public static final FloatProperty MAX_HEALTH = floatProp("max_health", 0, Float.MAX_VALUE);
   public static final FloatProperty HEALTH = floatProp("health", 0, Float.MAX_VALUE);
 

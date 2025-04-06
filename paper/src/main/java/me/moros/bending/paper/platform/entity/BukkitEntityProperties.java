@@ -77,7 +77,7 @@ final class BukkitEntityProperties {
         .get(Entity::isInvulnerable)
         .set(Entity::setInvulnerable))
       .create(EntityProperties.IN_WATER, Entity.class, b -> b
-        .get(Entity::isInWaterOrBubbleColumn))
+        .get(Entity::isInWater))
       .create(EntityProperties.IN_LAVA, Entity.class, b -> b
         .get(Entity::isInLava))
       .create(EntityProperties.INVISIBLE, Entity.class, b -> b
@@ -114,8 +114,8 @@ final class BukkitEntityProperties {
       .create(EntityProperties.PITCH, Entity.class, b -> b
         .get(Entity::getPitch))
       .create(EntityProperties.FALL_DISTANCE, Entity.class, b -> b
-        .get(Entity::getFallDistance)
-        .set(Entity::setFallDistance))
+        .get(e -> (double) e.getFallDistance())
+        .set((e, d) -> e.setFallDistance(d.floatValue())))
       .create(EntityProperties.MAX_HEALTH, LivingEntity.class, b -> b
         .get(e -> (float) Objects.requireNonNull(e.getAttribute(Attribute.MAX_HEALTH)).getValue()))
       .create(EntityProperties.HEALTH, LivingEntity.class, b -> b

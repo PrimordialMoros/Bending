@@ -27,6 +27,7 @@ import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
 import com.github.stefvanschie.inventoryframework.pane.Pane.Priority;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.ability.element.ElementHandler;
 import me.moros.bending.api.gui.ElementGui;
@@ -78,7 +79,7 @@ public final class ElementMenu extends AbstractGui<ItemStack, ChestGui> {
 
   private ItemStack backgroundItem() {
     ItemStack item = PlatformAdapter.toBukkitItem(BACKGROUND.get());
-    item.setData(DataComponentTypes.HIDE_TOOLTIP);
+    item.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hideTooltip(true).build());
     return item;
   }
 

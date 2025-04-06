@@ -62,7 +62,7 @@ public class EarthCling extends AbilityInstance {
       //noinspection ConstantConditions
       if (!user.onCooldown(user.selectedAbility())) {
         user.applyVelocity(this, Vector3d.ZERO);
-        user.setProperty(EntityProperties.FALL_DISTANCE, 0F);
+        user.setProperty(EntityProperties.FALL_DISTANCE, 0D);
       } else {
         if (user.velocity().y() < 0) {
           Particle.CRIT.builder(user.eyeLocation()).count(2).offset(0.05, 0.4, 0.05).spawn(user.world());

@@ -21,7 +21,7 @@ package me.moros.bending.fabric.platform;
 
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
+import java.util.Optional;
 
 import me.moros.bending.api.util.data.DataKey;
 import net.minecraft.nbt.CompoundTag;
@@ -36,7 +36,6 @@ public final class NBTUtil {
   static {
     ADAPTERS = Map.ofEntries(
       entry(String.class, CompoundTag::getString, CompoundTag::putString),
-      entry(UUID.class, CompoundTag::getUUID, CompoundTag::putUUID),
       entry(Boolean.class, CompoundTag::getBoolean, CompoundTag::putBoolean),
       entry(Short.class, CompoundTag::getShort, CompoundTag::putShort),
       entry(Float.class, CompoundTag::getFloat, CompoundTag::putFloat),
@@ -59,7 +58,7 @@ public final class NBTUtil {
       return null;
     }
     var adapter = getAdapter(key.type());
-    return adapter == null ? null : adapter.reader().read(tag, key.asString());
+    return adapter == null ? null : adapter.reader().read(tag, key.asString()).orElse(null);
   }
 
   public static <T> void write(CompoundTag tag, DataKey<T> key, T value) {
@@ -79,7 +78,7 @@ public final class NBTUtil {
 
   @FunctionalInterface
   private interface Reader<T> {
-    T read(CompoundTag tag, String key);
+    Optional<T> read(CompoundTag tag, String key);
   }
 
   @FunctionalInterface
