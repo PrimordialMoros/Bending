@@ -19,12 +19,14 @@
 
 package me.moros.bending.paper.protection;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import me.moros.bending.api.config.Configurable;
 import me.moros.bending.api.protection.Protection;
 import me.moros.bending.api.registry.Registries;
-import me.moros.bending.common.Bending;
+import me.moros.bending.common.config.ConfigManager;
 import me.moros.bending.common.util.Initializer;
 import me.moros.bending.paper.protection.plugin.GriefPreventionProtection;
 import me.moros.bending.paper.protection.plugin.LWCProtection;
@@ -32,13 +34,13 @@ import me.moros.bending.paper.protection.plugin.TownyProtection;
 import me.moros.bending.paper.protection.plugin.WorldGuardProtection;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 public final class ProtectionInitializer implements Initializer {
-  private final CommentedConfigurationNode config;
+  private final Config config;
 
-  public ProtectionInitializer(Bending plugin) {
-    this.config = plugin.configManager().config();
+  public ProtectionInitializer() {
+    this.config = ConfigManager.load(Config::new);
   }
 
   @Override
@@ -53,12 +55,25 @@ public final class ProtectionInitializer implements Initializer {
   }
 
   private void tryRegisterProtection(String name, Function<Plugin, Protection> factory) {
-    if (config.node("protection", name).getBoolean(true)) {
-      Plugin plugin = Bukkit.getPluginManager().getPlugin(name);
-      if (plugin != null && plugin.isEnabled()) {
-        Protection protection = factory.apply(plugin);
-        Registries.PROTECTIONS.register(protection);
-      }
+    Plugin plugin = Bukkit.getPluginManager().getPlugin(name);
+    if (plugin != null && plugin.isEnabled() && Boolean.TRUE.equals(config.protection.get(name))) {
+      Protection protection = factory.apply(plugin);
+      Registries.PROTECTIONS.register(protection);
+    }
+  }
+
+  private static final class Config implements Configurable {
+    @Setting(nodeFromParent = true)
+    private final Map<String, Boolean> protection = Map.of(
+      "WorldGuard", true,
+      "GriefPrevention", true,
+      "Towny", true,
+      "LWC", true
+    );
+
+    @Override
+    public List<String> path() {
+      return List.of("protection");
     }
   }
 }

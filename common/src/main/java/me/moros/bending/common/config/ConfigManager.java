@@ -102,7 +102,7 @@ public final class ConfigManager {
     reference.close();
   }
 
-  public CommentedConfigurationNode config() {
+  private CommentedConfigurationNode config() {
     return reference.node();
   }
 
@@ -119,7 +119,7 @@ public final class ConfigManager {
   }
 
   public static <T extends Configurable> T load(Supplier<T> supplier) {
-    return loadConfigFromNode(INSTANCE.reference.node(), supplier.get());
+    return loadConfigFromNode(INSTANCE.config(), supplier.get());
   }
 
   public static void cache(Class<? extends Configurable> configType) {

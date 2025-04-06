@@ -65,7 +65,7 @@ final class PaperBending extends AbstractBending<BendingBootstrap> {
     injectTasker(new PaperExecutor(parent));
     String version = parent.getPluginMeta().getAPIVersion();
     ReflectionUtil.injectStatic(Platform.Holder.class, new BukkitPlatform(logger(), version));
-    new ProtectionInitializer(this).init();
+    new ProtectionInitializer().init();
     registerHooks(parent.getServer());
     load();
     new BukkitPermissionInitializer().init();
