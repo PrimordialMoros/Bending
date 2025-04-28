@@ -19,6 +19,7 @@
 
 package me.moros.bending.fabric.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import me.moros.bending.fabric.event.ServerBlockEvents;
 import me.moros.bending.fabric.event.ServerPlayerEvents;
 import net.minecraft.core.BlockPos;
@@ -33,7 +34,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ServerPlayerGameMode.class)
 public abstract class ServerPlayerGameModeMixin {
@@ -49,12 +49,11 @@ public abstract class ServerPlayerGameModeMixin {
     ServerPlayerEvents.CHANGE_GAMEMODE.invoker().onGameModeChange(this.player, gameType);
   }
 
-  @Inject(method = "destroyBlock", at = @At(value = "INVOKE",
-    target = "Lnet/minecraft/server/level/ServerPlayerGameMode;isCreative()Z"), cancellable = true
+  @ModifyExpressionValue(
+    method = "destroyBlock",
+    at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;preventsBlockDrops()Z")
   )
-  private void bending$onDestroyBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-    if (!ServerBlockEvents.AFTER_BREAK.invoker().onBreak(this.level, pos)) {
-      cir.setReturnValue(true);
-    }
+  private boolean bending$onDestroyBlock(boolean original, BlockPos pos) {
+    return original && ServerBlockEvents.AFTER_BREAK.invoker().onBreak(this.level, pos);
   }
 }

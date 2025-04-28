@@ -22,7 +22,7 @@ package me.moros.bending.fabric.event;
 import me.moros.bending.api.platform.block.Lockable;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
@@ -50,7 +50,7 @@ public final class ServerItemEvents {
 
   @FunctionalInterface
   public interface DropItem {
-    boolean onDrop(ServerPlayer player, ItemStack item);
+    boolean onDrop(LivingEntity entity, ItemStack item);
   }
 
   @FunctionalInterface

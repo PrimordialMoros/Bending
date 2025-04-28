@@ -20,17 +20,34 @@
 package me.moros.bending.fabric.mixin.entity;
 
 import me.moros.bending.fabric.event.ServerEntityEvents;
+import me.moros.bending.fabric.event.ServerItemEvents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = LivingEntity.class, priority = 900)
 public abstract class LivingEntityMixin extends EntityMixin {
   @ModifyVariable(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isSleeping()Z"), ordinal = 0, argsOnly = true)
   private float bending$onHurt(float originalValue, ServerLevel serverLevel, DamageSource source, float amount) {
     return (float) ServerEntityEvents.DAMAGE.invoker().onDamage((LivingEntity) (Object) this, source, originalValue);
+  }
+
+  @Inject(method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;",
+    at = @At(value = "RETURN", ordinal = 1), cancellable = true
+  )
+  private void bending$onDrop(ItemStack stack, boolean dropAround, boolean traceItem, CallbackInfoReturnable<ItemEntity> cir) {
+    if (stack.isEmpty() || this.level().isClientSide) {
+      return;
+    }
+    if (!ServerItemEvents.DROP_ITEM.invoker().onDrop((LivingEntity) (Object) this, stack)) {
+      cir.setReturnValue(null);
+    }
   }
 }

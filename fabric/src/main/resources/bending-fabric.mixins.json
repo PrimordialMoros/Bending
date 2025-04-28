@@ -27,7 +27,6 @@
     "entity.LivingEntityMixin",
     "entity.MobMixin",
     "entity.ProjectileMixin",
-    "entity.ServerPlayerMixin",
     "BlockItemMixin",
     "FlowingFluidMixin",
     "ServerGamePacketListenerImplMixin",

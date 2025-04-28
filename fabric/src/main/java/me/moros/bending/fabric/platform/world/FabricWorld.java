@@ -285,7 +285,7 @@ public record FabricWorld(ServerLevel handle) implements World {
 
   @Override
   public int viewDistance() {
-    return ((ChunkMapAccess) handle().getChunkSource().chunkMap).bending$viewDistance() - 1;
+    return ((ChunkMapAccess) handle().getChunkSource().chunkMap).bending$viewDistance();
   }
 
   @Override

@@ -50,6 +50,7 @@ import net.minecraft.network.protocol.game.ClientboundSetScorePacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.scores.DisplaySlot;
+import net.minecraft.world.scores.Team;
 import net.minecraft.world.scores.Team.CollisionRule;
 import net.minecraft.world.scores.Team.Visibility;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria.RenderType;
@@ -265,8 +266,8 @@ public abstract class Sidebar implements Board {
     if (action != TeamAction.REMOVE) {
       ComponentSerialization.TRUSTED_STREAM_CODEC.encode(buf, net.minecraft.network.chat.Component.literal(String.valueOf(score)));
       buf.writeByte(0x00); // flags
-      buf.writeUtf(Visibility.ALWAYS.name);
-      buf.writeUtf(CollisionRule.ALWAYS.name);
+      Team.Visibility.STREAM_CODEC.encode(buf, Visibility.ALWAYS);
+      Team.CollisionRule.STREAM_CODEC.encode(buf, CollisionRule.ALWAYS);
       buf.writeEnum(ChatFormatting.RESET);
       ComponentSerialization.TRUSTED_STREAM_CODEC.encode(buf, toNative(scoreEntry.prefix()));
       ComponentSerialization.TRUSTED_STREAM_CODEC.encode(buf, toNative(scoreEntry.suffix()));

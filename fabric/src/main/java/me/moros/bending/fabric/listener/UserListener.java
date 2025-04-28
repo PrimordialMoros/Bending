@@ -305,9 +305,9 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
     return true;
   }
 
-  private boolean onDropItem(ServerPlayer player, ItemStack stack) {
-    if (!disabledWorld(player)) {
-      game().activationController().ignoreNextSwing(player.getUUID());
+  private boolean onDropItem(LivingEntity entity, ItemStack stack) {
+    if (!disabledWorld(entity)) {
+      game().activationController().ignoreNextSwing(entity.getUUID());
       return !ItemUtil.hasKey(stack, Metadata.ARMOR_KEY);
     }
     return true;
