@@ -21,7 +21,6 @@ package me.moros.bending.api.collision;
 
 import java.util.function.Predicate;
 
-import me.moros.bending.api.collision.geometry.AABB;
 import me.moros.bending.api.collision.geometry.Collider;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.EntityProperties;
@@ -30,7 +29,6 @@ import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.temporal.TempEntity;
 import me.moros.bending.api.user.User;
-import me.moros.math.Vector3d;
 import net.kyori.adventure.util.TriState;
 
 /**
@@ -96,11 +94,9 @@ public final class CollisionUtil {
    * @return true if at least one entity was processed, false otherwise
    */
   public static boolean handle(User user, Collider collider, CollisionCallback callback, boolean livingOnly, boolean selfCollision, boolean earlyEscape) {
-    Vector3d extents = collider.halfExtents();
     boolean hit = false;
     Predicate<Entity> filter = entityPredicate(user, livingOnly, selfCollision);
-    AABB box = AABB.of(collider.position().subtract(extents), collider.position().add(extents));
-    for (Entity entity : user.world().nearbyEntities(box, filter)) {
+    for (Entity entity : user.world().nearbyEntities(collider.outer(), filter)) {
       if (collider.intersects(entity.bounds()) && user.canBuild(entity.block())) {
         boolean result = callback.onEntityHit(entity);
         if (earlyEscape && result) {
