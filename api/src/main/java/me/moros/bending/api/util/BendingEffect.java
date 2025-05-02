@@ -96,13 +96,23 @@ public enum BendingEffect {
     if (event.cancelled() || duration <= 0) {
       return;
     }
-    if (this == FROST_TICK) {
-      handleFreeze(entity, duration);
-    }
+
     int current = Math.max(0, getCurrentTicks(entity));
-    if (current < duration) {
-      setCurrentTicks(entity, Math.min(maxTicks, cumulative ? current + duration : duration));
+    int ticksToApply = 0;
+    if (cumulative) {
+      ticksToApply = current + duration;
+    } else if (current < duration) {
+      ticksToApply = duration;
+    }
+    ticksToApply = Math.clamp(ticksToApply, 0, maxTicks);
+
+    if (ticksToApply > 0) {
+      setCurrentTicks(entity, ticksToApply);
       trackEntity(entity, source);
+    }
+
+    if (this == FROST_TICK) {
+      handleFreeze(entity, ticksToApply);
     }
   }
 
