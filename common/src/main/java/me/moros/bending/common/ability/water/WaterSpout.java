@@ -128,7 +128,7 @@ public class WaterSpout extends AbilityInstance implements SpoutAbility {
     }
 
     @Override
-    public void render() {
+    public void render(Vector3d location) {
       Position newPosition = user.location().toVector3i();
       if (newPosition.equals(lastPosition)) {
         return;
@@ -148,12 +148,12 @@ public class WaterSpout extends AbilityInstance implements SpoutAbility {
     }
 
     @Override
-    public void postRender() {
+    public void postRender(Vector3d location) {
       if (user.checkProperty(EntityProperties.FLYING) != TriState.TRUE) {
         user.applyVelocity(WaterSpout.this, user.velocity().add(g));
       }
       if (ThreadLocalRandom.current().nextInt(8) == 0) {
-        SoundEffect.WATER.play(user.world(), user.location());
+        SoundEffect.WATER.play(user.world(), location);
       }
     }
 

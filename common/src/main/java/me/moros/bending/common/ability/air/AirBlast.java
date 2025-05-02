@@ -29,7 +29,6 @@ import me.moros.bending.api.ability.Activation;
 import me.moros.bending.api.ability.common.basic.ParticleStream;
 import me.moros.bending.api.collision.geometry.Collider;
 import me.moros.bending.api.collision.geometry.Ray;
-import me.moros.bending.api.collision.geometry.Sphere;
 import me.moros.bending.api.config.Configurable;
 import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.Modifiable;
@@ -164,24 +163,21 @@ public class AirBlast extends AbilityInstance {
 
   private class AirStream extends ParticleStream {
     public AirStream(Ray ray) {
-      super(user, ray, userConfig.speed, 1.3);
+      super(user, ray, userConfig.speed, 1);
       canCollide = b -> b.isLiquid() || MaterialUtil.isFire(b);
       livingOnly = false;
+      selfCollision = selectedOrigin;
     }
 
     @Override
-    public void render() {
+    public void render(Vector3d location) {
       ParticleBuilder.air(location).count(6).offset(0.275).spawn(user.world());
     }
 
     @Override
-    public void postRender() {
+    public void postRender(Vector3d location) {
       if (ThreadLocalRandom.current().nextInt(4) == 0) {
         SoundEffect.AIR_FAST.play(user.world(), location);
-      }
-      // Handle user separately from the general entity collision.
-      if (selectedOrigin && user.bounds().intersects(Sphere.of(location, 2))) {
-        onEntityHit(user);
       }
     }
 

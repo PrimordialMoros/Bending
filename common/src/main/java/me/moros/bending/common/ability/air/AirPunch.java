@@ -104,14 +104,14 @@ public class AirPunch extends AbilityInstance {
     }
 
     @Override
-    public void render() {
+    public void render(Vector3d location) {
       VectorUtil.circle(Vector3d.ONE.multiply(0.75), user.direction(), 10).forEach(v ->
         Particle.CLOUD.builder(location.add(v)).count(0).offset(v).extra(-0.04).spawn(user.world())
       );
     }
 
     @Override
-    public void postRender() {
+    public void postRender(Vector3d location) {
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
         SoundEffect.AIR_FAST.play(user.world(), location);
       }

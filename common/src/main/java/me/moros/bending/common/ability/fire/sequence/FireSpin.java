@@ -104,13 +104,13 @@ public class FireSpin extends AbilityInstance {
     }
 
     @Override
-    public void render() {
+    public void render(Vector3d location) {
       ParticleBuilder.fire(user, location).extra(0.01).spawn(user.world());
       TempLight.builder(++ticks).build(user.world().blockAt(location));
     }
 
     @Override
-    public void postRender() {
+    public void postRender(Vector3d location) {
       if (ThreadLocalRandom.current().nextInt(12) == 0) {
         SoundEffect.FIRE.play(user.world(), location);
       }
@@ -128,7 +128,7 @@ public class FireSpin extends AbilityInstance {
 
     @Override
     public boolean onBlockHit(Block block) {
-      FragileStructure.tryDamageStructure(block, 3, Ray.of(location, ray.direction()));
+      FragileStructure.tryDamageStructure(block, 3, Ray.of(collider().position(), ray.direction()));
       return true;
     }
   }

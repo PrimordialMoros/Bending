@@ -335,12 +335,12 @@ public class WaterRing extends AbilityInstance {
     }
 
     @Override
-    public void render() {
+    public void render(Vector3d location) {
       Particle.ITEM_SNOWBALL.builder(location).count(3).offset(0.25).spawn(user.world());
     }
 
     @Override
-    public void postRender() {
+    public void postRender(Vector3d location) {
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
         SoundEffect.ICE.play(user.world(), location);
       }

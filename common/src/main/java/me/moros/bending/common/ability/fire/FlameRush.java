@@ -35,7 +35,6 @@ import me.moros.bending.api.ability.common.basic.ParticleStream;
 import me.moros.bending.api.collision.Collision;
 import me.moros.bending.api.collision.geometry.Collider;
 import me.moros.bending.api.collision.geometry.Ray;
-import me.moros.bending.api.collision.geometry.Sphere;
 import me.moros.bending.api.config.Configurable;
 import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.Modifiable;
@@ -166,6 +165,7 @@ public class FlameRush extends AbilityInstance {
 
   private class FireStream extends ParticleStream {
     private static final SoundEffect LOUD_FIRE = SoundEffect.FIRE.with(2, 1);
+    private static final double ORIGINAL_COLLISION_RADIUS = 0.5;
 
     private final double factor;
 
@@ -175,7 +175,7 @@ public class FlameRush extends AbilityInstance {
     private int ticks = 0;
 
     public FireStream(Ray ray, double factor) {
-      super(user, ray, userConfig.speed / 3, 0.5);
+      super(user, ray, userConfig.speed / 3, ORIGINAL_COLLISION_RADIUS);
       this.factor = factor;
       canCollide = BlockType::isLiquid;
       steps = 3;
@@ -183,7 +183,7 @@ public class FlameRush extends AbilityInstance {
     }
 
     @Override
-    public void render() {
+    public void render(Vector3d location) {
       currentPoint += Math.PI / 30;
       double radius = 0.2 * factor + 0.6 * (distanceTravelled / maxRange);
       int amount = FastMath.ceil(12 * radius);
@@ -196,18 +196,20 @@ public class FlameRush extends AbilityInstance {
       ParticleBuilder.fire(user, spiral2).spawn(user.world());
       Particle.SMOKE.builder(spiral1).spawn(user.world());
       Particle.SMOKE.builder(spiral2).spawn(user.world());
-      collider = Sphere.of(location, collisionRadius + 0.7 * radius);
+      collisionRadius = ORIGINAL_COLLISION_RADIUS + 0.7 * radius;
       TempLight.builder(++ticks).build(user.world().blockAt(location));
     }
 
     @Override
     protected Vector3d controlDirection() {
-      streamDirection = streamDirection.add(user.direction().multiply(0.08)).normalize().multiply(speed);
+      if (description().equals(user.selectedAbility())) {
+        streamDirection = streamDirection.add(user.direction().multiply(0.08)).normalize().multiply(speed);
+      }
       return streamDirection;
     }
 
     @Override
-    public void postRender() {
+    public void postRender(Vector3d location) {
       if (ThreadLocalRandom.current().nextInt(3) == 0) {
         LOUD_FIRE.play(user.world(), location);
       }
@@ -225,7 +227,7 @@ public class FlameRush extends AbilityInstance {
 
     @Override
     public boolean onBlockHit(Block block) {
-      FragileStructure.tryDamageStructure(block, FastMath.round(8 * factor), Ray.of(location, streamDirection));
+      FragileStructure.tryDamageStructure(block, FastMath.round(8 * factor), Ray.of(collider().position(), streamDirection));
       return true;
     }
   }

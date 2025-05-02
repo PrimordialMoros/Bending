@@ -26,14 +26,14 @@ import java.util.function.Predicate;
 import me.moros.bending.api.ability.SimpleAbility;
 import me.moros.bending.api.ability.Updatable;
 import me.moros.bending.api.collision.CollisionUtil;
+import me.moros.bending.api.collision.geometry.AABB;
 import me.moros.bending.api.collision.geometry.Collider;
 import me.moros.bending.api.collision.geometry.Ray;
-import me.moros.bending.api.collision.geometry.Sphere;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockType;
+import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.material.MaterialUtil;
-import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import me.moros.math.Vector3i;
 import me.moros.math.VectorUtil;
@@ -43,18 +43,20 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
   protected final Ray ray;
 
   protected Predicate<BlockType> canCollide = b -> false;
-  protected Sphere collider;
-  protected Vector3d location;
+  private Ray collider;
+  private Vector3d location;
   protected final Vector3d dir;
 
   protected boolean livingOnly = true;
+  protected boolean selfCollision = false;
   protected boolean singleCollision = false;
   protected int steps = 1;
   protected double distanceTravelled = 0;
+  protected double collisionRadius;
+  private Vector3d expansion;
 
   protected final double speed;
   protected final double maxRange;
-  protected final double collisionRadius;
 
   protected ParticleStream(User user, Ray ray, double speed, double collisionRadius) {
     this.user = user;
@@ -63,36 +65,55 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
     this.location = ray.position();
     this.maxRange = ray.direction().length();
     this.collisionRadius = collisionRadius;
-    this.collider = Sphere.of(location, collisionRadius);
     dir = ray.direction().normalize().multiply(speed);
+    this.collider = Ray.of(location, dir.multiply(steps));
+    this.expansion = calculateExpansion();
+  }
+
+  private Vector3d calculateExpansion() {
+    return Vector3d.ONE.multiply(collisionRadius);
   }
 
   @Override
   public UpdateResult update() {
     Vector3d vector = controlDirection();
-    int d = FastMath.ceil(speed * steps);
-    for (int i = 0; i < steps; i++) {
-      render();
-      postRender();
-      if (steps <= 1 || i % d == 0) {
-        boolean hitEntity = CollisionUtil.handle(user, collider, this, livingOnly, false, singleCollision);
-        if (hitEntity) {
-          return UpdateResult.REMOVE;
-        }
-      }
 
+    Vector3d originalLocation = location;
+    double originalCollisionRadius = collisionRadius;
+    expansion = calculateExpansion();
+
+    boolean remove = false;
+    int completedSteps = 0;
+    for (int i = 0; i < steps; i++) {
+      render(location);
+      postRender(location);
       Vector3d originalVector = location;
       location = location.add(vector);
       distanceTravelled += speed;
       if (location.distanceSq(ray.position()) > maxRange * maxRange || !user.canBuild(location)) {
-        return UpdateResult.REMOVE;
+        remove = true;
+        break;
       }
-      if (!validDiagonals(originalVector, vector)) {
-        return UpdateResult.REMOVE;
+      if (!validDiagonals(originalVector, dir)) {
+        remove = true;
+        break;
       }
-      collider = collider.at(location);
+      completedSteps++;
     }
-    return UpdateResult.CONTINUE;
+
+    collider = Ray.of(originalLocation, vector.multiply(Math.max(1, completedSteps)));
+    AABB outer = AABB.fromRay(collider, originalCollisionRadius);
+
+    boolean hitEntity = CollisionUtil.handle(user, outer, this::onFilteredEntityHit, livingOnly, false, singleCollision);
+    if (selfCollision) {
+      hitEntity |= onFilteredEntityHit(user);
+    }
+
+    return (remove || hitEntity) ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+  }
+
+  protected boolean onFilteredEntityHit(Entity entity) {
+    return collider.intersects(entity.bounds().grow(expansion)) && onEntityHit(entity);
   }
 
   private boolean validDiagonals(Vector3d originalVector, Vector3d directionVector) {
@@ -112,7 +133,7 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
       return true;
     }
     if (!MaterialUtil.isTransparent(block)) {
-      if (block.bounds().intersects(collider)) {
+      if (block.bounds().grow(expansion).intersects(collider)) {
         return onBlockHit(block);
       }
     }

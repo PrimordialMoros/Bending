@@ -170,12 +170,12 @@ public class AirSwipe extends AbilityInstance {
     }
 
     @Override
-    public void render() {
+    public void render(Vector3d location) {
       ParticleBuilder.air(location).spawn(user.world());
     }
 
     @Override
-    public void postRender() {
+    public void postRender(Vector3d location) {
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
         SoundEffect.AIR_FAST.play(user.world(), location);
       }

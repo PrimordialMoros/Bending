@@ -43,7 +43,7 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
   private final AABB box;
   protected final Disk collider;
   protected final Ray ray;
-  protected Vector3d location;
+  private Vector3d location;
 
   protected final double radius;
 
@@ -73,8 +73,8 @@ public abstract class AbstractWheel implements Updatable, SimpleAbility {
     if (base.type().isLiquid()) {
       return UpdateResult.REMOVE;
     }
-    render();
-    postRender();
+    render(location);
+    postRender(location);
     onBlockHit(base.offset(Direction.UP));
     boolean hit = CollisionUtil.handle(user, collider(), this);
     return hit ? UpdateResult.REMOVE : UpdateResult.CONTINUE;

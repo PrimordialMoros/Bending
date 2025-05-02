@@ -145,7 +145,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
         tempBlock = current;
         TempBlock.builder(type).build(current);
       }
-      postRender();
+      postRender(center());
     } else {
       onBlockHit(current);
       return UpdateResult.REMOVE;
@@ -176,7 +176,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
   }
 
   @Override
-  public void render() {
+  public void render(Vector3d location) {
   }
 
   @Override

@@ -30,10 +30,10 @@ import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.AbilityInstance;
 import me.moros.bending.api.ability.Activation;
 import me.moros.bending.api.ability.MultiUpdatable;
+import me.moros.bending.api.ability.SimpleAbility;
 import me.moros.bending.api.ability.common.basic.ParticleStream;
 import me.moros.bending.api.collision.geometry.Collider;
 import me.moros.bending.api.collision.geometry.Ray;
-import me.moros.bending.api.collision.geometry.Sphere;
 import me.moros.bending.api.config.BendingProperties;
 import me.moros.bending.api.config.Configurable;
 import me.moros.bending.api.config.attribute.Attribute;
@@ -44,6 +44,7 @@ import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.platform.particle.Particle;
+import me.moros.bending.api.platform.sound.Sound;
 import me.moros.bending.api.platform.sound.SoundEffect;
 import me.moros.bending.api.platform.world.WorldUtil;
 import me.moros.bending.api.temporal.TempBlock;
@@ -112,31 +113,39 @@ public class FrostBreath extends AbilityInstance {
 
   @Override
   public Collection<Collider> colliders() {
-    return streams.stream().map(ParticleStream::collider).toList();
+    return streams.stream().map(SimpleAbility::collider).toList();
   }
 
   private class FrostStream extends ParticleStream {
+    private static final SoundEffect SNOW_EFFECT = Sound.BLOCK_POWDER_SNOW_FALL.asEffect(1, 0.7F);
+
+    private static final double ORIGINAL_COLLISION_RADIUS = 0.5;
+
     public FrostStream(Ray ray) {
-      super(user, ray, 0.6, 0.5);
+      super(user, ray, 0.6, ORIGINAL_COLLISION_RADIUS);
       canCollide = BlockType::isLiquid;
     }
 
     @Override
-    public void render() {
-      distanceTravelled += speed;
+    public void render(Vector3d location) {
       double offset = 0.15 * distanceTravelled;
-      collider = Sphere.of(location, collisionRadius + offset);
-      int count = FastMath.ceil(0.75 * distanceTravelled);
-      Particle.ITEM_SNOWBALL.builder(location).count(count).offset(offset).extra(0.02).spawn(user.world());
+      collisionRadius = ORIGINAL_COLLISION_RADIUS + offset;
+      int count = FastMath.ceil(0.35 * distanceTravelled);
+      int iceCount = FastMath.ceil(0.25 * distanceTravelled);
+      Particle.SNOWFLAKE.builder(location).count(count).offset(offset).extra(0.02).spawn(user.world());
+      BlockType.PACKED_ICE.asParticle(location).count(iceCount).offset(offset).extra(0.02).spawn(user.world());
     }
 
     @Override
-    public void postRender() {
-      for (Block block : user.world().nearbyBlocks(location, collider.radius())) {
+    public void postRender(Vector3d location) {
+      for (Block block : user.world().nearbyBlocks(location, collisionRadius)) {
         if (!user.canBuild(block)) {
           continue;
         }
         onBlockHit(block);
+      }
+      if (ThreadLocalRandom.current().nextInt(3) == 0) {
+        SNOW_EFFECT.play(user.world(), location);
       }
     }
 

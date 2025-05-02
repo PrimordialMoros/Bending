@@ -27,10 +27,10 @@ import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.AbilityInstance;
 import me.moros.bending.api.ability.Activation;
 import me.moros.bending.api.ability.MultiUpdatable;
+import me.moros.bending.api.ability.SimpleAbility;
 import me.moros.bending.api.ability.common.basic.ParticleStream;
 import me.moros.bending.api.collision.geometry.Collider;
 import me.moros.bending.api.collision.geometry.Ray;
-import me.moros.bending.api.collision.geometry.Sphere;
 import me.moros.bending.api.config.Configurable;
 import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.Modifiable;
@@ -103,20 +103,22 @@ public class AirBreath extends AbilityInstance {
 
   @Override
   public Collection<Collider> colliders() {
-    return streams.stream().map(ParticleStream::collider).toList();
+    return streams.stream().map(SimpleAbility::collider).toList();
   }
 
   private class AirStream extends ParticleStream {
+    private static final double ORIGINAL_COLLISION_RADIUS = 0.5;
+
     public AirStream(Ray ray) {
-      super(user, ray, userConfig.speed, 0.5);
+      super(user, ray, 1, ORIGINAL_COLLISION_RADIUS);
       canCollide = b -> b.isLiquid() || MaterialUtil.isFire(b);
       livingOnly = false;
     }
 
     @Override
-    public void render() {
+    public void render(Vector3d location) {
       double offset = 0.15 * distanceTravelled;
-      collider = Sphere.of(location, collisionRadius + offset);
+      collisionRadius = ORIGINAL_COLLISION_RADIUS + offset;
       Block block = user.world().blockAt(location);
       if (MaterialUtil.isWater(block)) {
         ParticleBuilder.bubble(block).spawn(user.world());
@@ -126,7 +128,7 @@ public class AirBreath extends AbilityInstance {
     }
 
     @Override
-    public void postRender() {
+    public void postRender(Vector3d location) {
       if (ThreadLocalRandom.current().nextInt(4) == 0) {
         SoundEffect.AIR.play(user.world(), location);
       }
@@ -163,8 +165,6 @@ public class AirBreath extends AbilityInstance {
     private double range = 7;
     @Modifiable(Attribute.DURATION)
     private long duration = 1000;
-    @Modifiable(Attribute.SPEED)
-    private double speed = 1;
     @Modifiable(Attribute.STRENGTH)
     private double knockback = 0.5;
 

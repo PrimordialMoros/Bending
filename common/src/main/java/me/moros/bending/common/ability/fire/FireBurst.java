@@ -158,7 +158,7 @@ public class FireBurst extends AbilityInstance {
     }
 
     @Override
-    public void render() {
+    public void render(Vector3d location) {
       long time = System.currentTimeMillis();
       if (time >= nextRenderTime) {
         ParticleBuilder.fire(user, location).offset(0.2).extra(0.01).spawn(user.world());
@@ -168,7 +168,7 @@ public class FireBurst extends AbilityInstance {
     }
 
     @Override
-    public void postRender() {
+    public void postRender(Vector3d location) {
       if (ThreadLocalRandom.current().nextInt(12) == 0) {
         SoundEffect.FIRE.play(user.world(), location);
       }
@@ -190,7 +190,7 @@ public class FireBurst extends AbilityInstance {
       WorldUtil.tryLightBlock(block);
       double igniteRadius = 1.5;
       Vector3d standing = user.location().add(0, 0.5, 0);
-      for (Block b : user.world().nearbyBlocks(location, igniteRadius)) {
+      for (Block b : user.world().nearbyBlocks(collider().position(), igniteRadius)) {
         if (standing.distanceSq(b.center()) < 4 || !user.canBuild(b)) {
           continue;
         }
@@ -202,7 +202,7 @@ public class FireBurst extends AbilityInstance {
             .ability(FireBurst.this).build(b);
         }
       }
-      FragileStructure.tryDamageStructure(block, 4, Ray.of(location, ray.direction()));
+      FragileStructure.tryDamageStructure(block, 4, Ray.of(collider().position(), ray.direction()));
       return true;
     }
   }

@@ -37,7 +37,7 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
 
   protected final Vector3d origin;
 
-  protected Vector3d location;
+  private Vector3d location;
   protected Vector3d targetLocation;
   protected Vector3d direction;
   protected Collider collider;
@@ -93,11 +93,10 @@ public abstract class AbstractLine extends MovementResolver implements Updatable
     if (!resolved.success()) {
       return UpdateResult.REMOVE;
     }
-    render();
-    location = location.add(resolved.point()).multiply(0.5);
-    render(); // Render again at midpoint for a smoother line
+    render(location);
+    render(location.add(resolved.point()).multiply(0.5)); // Render again at midpoint for a smoother line
     location = resolved.point();
-    postRender();
+    postRender(location);
 
     Block block = user.world().blockAt(location);
 

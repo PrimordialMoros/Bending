@@ -120,7 +120,7 @@ public class EarthShards extends AbilityInstance {
     }
 
     @Override
-    public void render() {
+    public void render(Vector3d location) {
       int max = distanceTravelled <= 0 ? 1 : renderSteps;
       for (int i = 0; i < max; i++) {
         ParticleBuilder.rgb(location.subtract(smallDir.multiply(i)), "#555555", 0.15F).spawn(user.world());

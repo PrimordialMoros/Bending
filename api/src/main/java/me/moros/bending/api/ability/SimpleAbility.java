@@ -22,6 +22,7 @@ package me.moros.bending.api.ability;
 import me.moros.bending.api.collision.CollisionUtil.CollisionCallback;
 import me.moros.bending.api.collision.geometry.Collider;
 import me.moros.bending.api.platform.block.Block;
+import me.moros.math.Vector3d;
 
 /**
  * Represents a simple ability.
@@ -30,12 +31,30 @@ public interface SimpleAbility extends CollisionCallback {
   /**
    * Render the ability, called when ability is updated.
    */
-  void render();
+  @Deprecated(forRemoval = true)
+  default void render() {
+    render(collider().position());
+  }
 
   /**
    * Handle ability after rendering is completed, typically used for playing sounds and extra calculations.
    */
+  @Deprecated(forRemoval = true)
   default void postRender() {
+    postRender(collider().position());
+  }
+
+  /**
+   * Render the ability, called when ability is updated.
+   * @param location the location to render at
+   */
+  void render(Vector3d location);
+
+  /**
+   * Handle ability after rendering is completed, typically used for playing sounds and extra calculations.
+   * @param location the location the ability was just rendered at
+   */
+  default void postRender(Vector3d location) {
   }
 
   /**

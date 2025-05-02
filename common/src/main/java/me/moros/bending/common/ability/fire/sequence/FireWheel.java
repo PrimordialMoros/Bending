@@ -106,7 +106,7 @@ public class FireWheel extends AbilityInstance {
     }
 
     @Override
-    public void render() {
+    public void render(Vector3d location) {
       Vector3d rotateAxis = Vector3d.PLUS_J.cross(this.ray.direction());
       VectorUtil.circle(this.ray.direction().multiply(this.radius), rotateAxis, 36).forEach(v ->
         ParticleBuilder.fire(user, location.add(v)).extra(0.01).spawn(user.world())
@@ -114,7 +114,7 @@ public class FireWheel extends AbilityInstance {
     }
 
     @Override
-    public void postRender() {
+    public void postRender(Vector3d location) {
       if (ThreadLocalRandom.current().nextInt(6) == 0) {
         SoundEffect.FIRE.play(user.world(), location);
       }

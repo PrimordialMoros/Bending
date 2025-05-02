@@ -229,15 +229,14 @@ public class EarthBlast extends AbilityInstance {
     }
 
     @Override
-    public void postRender() {
+    public void postRender(Vector3d location) {
       if (electrified > 1) {
         electrified = Math.max(1, electrified - 0.05);
-        Vector3d center = center();
         if (ThreadLocalRandom.current().nextInt(5) == 0) {
-          SoundEffect.LIGHTNING.play(user.world(), center);
+          SoundEffect.LIGHTNING.play(user.world(), location);
         }
         int particles = FastMath.ceil(24 * (electrified - 1));
-        Particle.ELECTRIC_SPARK.builder(center).offset(0.5).count(particles).spawn(user.world());
+        Particle.ELECTRIC_SPARK.builder(location).offset(0.5).count(particles).spawn(user.world());
       }
     }
 

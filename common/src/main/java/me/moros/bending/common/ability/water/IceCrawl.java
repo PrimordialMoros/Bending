@@ -147,7 +147,7 @@ public class IceCrawl extends AbilityInstance {
     }
 
     @Override
-    public void render() {
+    public void render(Vector3d location) {
       double x = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
       double z = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
       Vector3d spawnLoc = location.add(x, -0.75, z);
@@ -159,7 +159,7 @@ public class IceCrawl extends AbilityInstance {
     }
 
     @Override
-    public void postRender() {
+    public void postRender(Vector3d location) {
       if (ThreadLocalRandom.current().nextInt(5) == 0) {
         SoundEffect.ICE.play(user.world(), location);
       }
@@ -195,7 +195,7 @@ public class IceCrawl extends AbilityInstance {
 
     @Override
     protected void onCollision(Vector3d point) {
-      FragileStructure.tryDamageStructure(user.world().blockAt(point), 5, Ray.of(location, direction));
+      FragileStructure.tryDamageStructure(user.world().blockAt(point), 5, Ray.of(collider.position(), direction));
     }
   }
 

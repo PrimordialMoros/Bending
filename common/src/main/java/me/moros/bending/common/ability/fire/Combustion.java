@@ -123,7 +123,7 @@ public class Combustion extends AbilityInstance implements Explosive {
 
   @Override
   public void explode() {
-    createExplosion(beam.location(), userConfig.power, userConfig.damage);
+    createExplosion(beam.collider().position(), userConfig.power, userConfig.damage);
   }
 
   private void createExplosion(Vector3d center, double size, double damage) {
@@ -164,8 +164,8 @@ public class Combustion extends AbilityInstance implements Explosive {
     }
 
     @Override
-    public void render() {
-      renderRing();
+    public void render(Vector3d location) {
+      renderRing(location);
       Particle.SMOKE.builder(location).spawn(user.world());
       Particle.WAX_OFF.builder(location).extra(0.005).spawn(user.world());
     }
@@ -178,7 +178,7 @@ public class Combustion extends AbilityInstance implements Explosive {
       return streamDirection;
     }
 
-    private void renderRing() {
+    private void renderRing(Vector3d location) {
       if (distanceTravelled >= randomBeamDistance) {
         LOUD_COMBUSTION.play(user.world(), location);
         randomBeamDistance = distanceTravelled + 4 + 2 * ThreadLocalRandom.current().nextGaussian();
@@ -191,7 +191,7 @@ public class Combustion extends AbilityInstance implements Explosive {
     }
 
     @Override
-    public void postRender() {
+    public void postRender(Vector3d location) {
       if (ThreadLocalRandom.current().nextInt(3) == 0) {
         SoundEffect.COMBUSTION.play(user.world(), location);
       }
@@ -207,10 +207,6 @@ public class Combustion extends AbilityInstance implements Explosive {
     public boolean onBlockHit(Block block) {
       explode();
       return true;
-    }
-
-    private Vector3d location() {
-      return location;
     }
   }
 

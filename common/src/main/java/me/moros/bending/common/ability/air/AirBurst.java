@@ -158,7 +158,7 @@ public class AirBurst extends AbilityInstance {
     }
 
     @Override
-    public void render() {
+    public void render(Vector3d location) {
       long time = System.currentTimeMillis();
       if (time >= nextRenderTime) {
         ParticleBuilder.air(location).offset(0.2).spawn(user.world());
@@ -167,7 +167,7 @@ public class AirBurst extends AbilityInstance {
     }
 
     @Override
-    public void postRender() {
+    public void postRender(Vector3d location) {
       if (ThreadLocalRandom.current().nextInt(18) == 0) {
         SoundEffect.AIR_FAST.play(user.world(), location);
       }

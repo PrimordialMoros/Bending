@@ -32,7 +32,6 @@ import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.material.MaterialUtil;
-import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -66,10 +65,10 @@ public abstract class AbstractSpout extends AbstractFlight implements Updatable,
     }
     flight.flying(distance <= height);
     // Create a bounding box for collision that extends through the spout from the ground to the player.
-    Position pos = user.location().floor();
+    Vector3d pos = user.location().floor();
     collider = AABB.of(Vector3d.of(-0.5, -distance, -0.5), Vector3d.of(0.5, 0, 0.5)).at(pos);
-    render();
-    postRender();
+    render(pos);
+    postRender(pos);
     return UpdateResult.CONTINUE;
   }
 

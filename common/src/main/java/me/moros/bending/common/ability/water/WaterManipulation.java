@@ -209,14 +209,13 @@ public class WaterManipulation extends AbilityInstance {
     }
 
     @Override
-    public void postRender() {
-      Vector3d center = center();
+    public void postRender(Vector3d location) {
       if (ThreadLocalRandom.current().nextInt(5) == 0) {
         SoundEffect effect = isIce ? SoundEffect.ICE : SoundEffect.WATER;
-        effect.play(user.world(), center);
+        effect.play(user.world(), location);
       }
       if (isIce) {
-        Particle.ITEM_SNOWBALL.builder(center).count(8).offset(0.4).spawn(user.world());
+        Particle.ITEM_SNOWBALL.builder(location).count(8).offset(0.4).spawn(user.world());
       } else {
         Block trail1 = previousBlock();
         if (trail1 != null) {

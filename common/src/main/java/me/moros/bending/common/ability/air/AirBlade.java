@@ -192,7 +192,7 @@ public class AirBlade extends AbilityInstance {
     }
 
     @Override
-    public void render() {
+    public void render(Vector3d location) {
       int amount = FastMath.ceil(22 * radius);
       Rotation rotation = createNextRotation(Vector3d.PLUS_J.cross(this.ray.direction()), amount);
       VectorUtil.rotate(this.ray.direction().multiply(this.radius), rotation, amount).forEach(v ->
@@ -201,7 +201,7 @@ public class AirBlade extends AbilityInstance {
     }
 
     @Override
-    public void postRender() {
+    public void postRender(Vector3d location) {
       if (ThreadLocalRandom.current().nextInt(8) == 0) {
         SoundEffect.AIR.play(user.world(), location);
       }

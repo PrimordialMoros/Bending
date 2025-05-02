@@ -183,7 +183,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
 
   @Override
   public void explode() {
-    createExplosion(stream.location(), userConfig.explosionRadius, userConfig.damage * factor);
+    createExplosion(stream.collider().position(), userConfig.explosionRadius, userConfig.damage * factor);
   }
 
   private void createExplosion(Vector3d center, double size, double damage) {
@@ -219,13 +219,13 @@ public class FireBlast extends AbilityInstance implements Explosive {
     }
 
     @Override
-    public void render() {
+    public void render(Vector3d location) {
       ParticleBuilder.fire(user, location).count(amount).offset(offset).extra(particleSpeed).spawn(user.world());
       TempLight.builder(++ticks).build(user.world().blockAt(location));
     }
 
     @Override
-    public void postRender() {
+    public void postRender(Vector3d location) {
       if (explosive || ThreadLocalRandom.current().nextInt(6) == 0) {
         SoundEffect.FIRE.play(user.world(), location);
       }
@@ -248,7 +248,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
       Vector3d reverse = ray.direction().negate();
       WorldUtil.tryLightBlock(block);
       Vector3d standing = user.location().add(0, 0.5, 0);
-      for (Block b : user.world().nearbyBlocks(location, userConfig.igniteRadius * factor)) {
+      for (Block b : user.world().nearbyBlocks(collider().position(), userConfig.igniteRadius * factor)) {
         if (standing.distanceSq(b.center()) < 4 || !user.canBuild(b)) {
           continue;
         }
@@ -260,13 +260,9 @@ public class FireBlast extends AbilityInstance implements Explosive {
             .ability(FireBlast.this).build(b);
         }
       }
-      FragileStructure.tryDamageStructure(block, FastMath.round(4 * factor), Ray.of(location, ray.direction()));
+      FragileStructure.tryDamageStructure(block, FastMath.round(4 * factor), Ray.of(collider().position(), ray.direction()));
       explode();
       return true;
-    }
-
-    private Vector3d location() {
-      return location;
     }
   }
 

@@ -28,10 +28,10 @@ import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.AbilityInstance;
 import me.moros.bending.api.ability.Activation;
 import me.moros.bending.api.ability.MultiUpdatable;
+import me.moros.bending.api.ability.SimpleAbility;
 import me.moros.bending.api.ability.common.basic.ParticleStream;
 import me.moros.bending.api.collision.geometry.Collider;
 import me.moros.bending.api.collision.geometry.Ray;
-import me.moros.bending.api.collision.geometry.Sphere;
 import me.moros.bending.api.config.BendingProperties;
 import me.moros.bending.api.config.Configurable;
 import me.moros.bending.api.config.attribute.Attribute;
@@ -112,28 +112,29 @@ public class FireBreath extends AbilityInstance {
 
   @Override
   public Collection<Collider> colliders() {
-    return streams.stream().map(ParticleStream::collider).toList();
+    return streams.stream().map(SimpleAbility::collider).toList();
   }
 
   private class FireStream extends ParticleStream {
+    private static final double ORIGINAL_COLLISION_RADIUS = 0.5;
     private int ticks = 3;
 
     public FireStream(Ray ray) {
-      super(user, ray, 0.4, 0.5);
+      super(user, ray, 0.4, ORIGINAL_COLLISION_RADIUS);
       canCollide = t -> t.isLiquid() || t == BlockType.SNOW;
     }
 
     @Override
-    public void render() {
+    public void render(Vector3d location) {
       double offset = 0.2 * distanceTravelled;
-      collider = Sphere.of(location, collisionRadius + offset);
+      collisionRadius = ORIGINAL_COLLISION_RADIUS + offset;
       ParticleBuilder.fire(user, location).count(FastMath.ceil(0.75 * distanceTravelled))
         .offset(offset).extra(0.02).spawn(user.world());
       TempLight.builder(++ticks).build(user.world().blockAt(location));
     }
 
     @Override
-    public void postRender() {
+    public void postRender(Vector3d location) {
       if (ThreadLocalRandom.current().nextInt(3) == 0) {
         SoundEffect.FIRE.play(user.world(), location);
       }

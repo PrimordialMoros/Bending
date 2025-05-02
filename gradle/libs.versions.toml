@@ -13,7 +13,7 @@ sponge-common = "1.21.5-15.0.0-SNAPSHOT"
 paper-api = "1.21.5-no-moonrise-SNAPSHOT"
 minecraft = "1.21.5"
 fabric-loom = "1.10.5"
-fabric-api = "0.121.0+1.21.5"
+fabric-api = "0.122.0+1.21.5"
 fabric-loader = "0.16.14"
 shadow = "8.3.6"
 flyway = "11.8.0"
@@ -31,7 +31,7 @@ tasker-fabric = { module = "me.moros:tasker-fabric", version.ref = "tasker" }
 
 javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.0" }
-jdbi = { module = "org.jdbi:jdbi3-core", version = "3.49.2" }
+jdbi = { module = "org.jdbi:jdbi3-core", version = "3.49.3" }
 hikari = { module = "com.zaxxer:HikariCP", version = "6.3.0" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-mysql = { module = "org.flywaydb:flyway-mysql", version.ref = "flyway" }

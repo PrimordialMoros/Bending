@@ -111,7 +111,7 @@ public class AirSpout extends AbilityInstance implements SpoutAbility {
     }
 
     @Override
-    public void render() {
+    public void render(Vector3d location) {
       long time = System.currentTimeMillis();
       if (time < nextRenderTime) {
         return;
@@ -123,9 +123,9 @@ public class AirSpout extends AbilityInstance implements SpoutAbility {
     }
 
     @Override
-    public void postRender() {
+    public void postRender(Vector3d location) {
       if (ThreadLocalRandom.current().nextInt(8) == 0) {
-        SoundEffect.AIR.play(user.world(), user.location());
+        SoundEffect.AIR.play(user.world(), location);
       }
     }
   }
