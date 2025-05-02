@@ -31,7 +31,7 @@ public interface SimpleAbility extends CollisionCallback {
   /**
    * Render the ability, called when ability is updated.
    */
-  @Deprecated(forRemoval = true)
+  @Deprecated(forRemoval = true, since = "3.12.0")
   default void render() {
     render(collider().position());
   }
@@ -39,7 +39,7 @@ public interface SimpleAbility extends CollisionCallback {
   /**
    * Handle ability after rendering is completed, typically used for playing sounds and extra calculations.
    */
-  @Deprecated(forRemoval = true)
+  @Deprecated(forRemoval = true, since = "3.12.0")
   default void postRender() {
     postRender(collider().position());
   }

@@ -28,7 +28,7 @@ public interface Addon {
   /**
    * Called when this addon is first loaded but before a {@link Game} instance is created.
    */
-  @Deprecated(forRemoval = true)
+  @Deprecated(forRemoval = true, since = "3.12.0")
   default void load() {
   }
 

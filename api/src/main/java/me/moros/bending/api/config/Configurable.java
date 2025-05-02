@@ -39,7 +39,7 @@ public interface Configurable extends Serializable {
    * @return whether this configuration is external
    * @see ConfigProcessor#calculate(Ability, Class)
    */
-  @Deprecated(forRemoval = true)
+  @Deprecated(forRemoval = true, since = "3.12.0")
   default boolean external() {
     return false;
   }

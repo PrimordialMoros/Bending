@@ -24,12 +24,12 @@ import me.moros.bending.api.platform.item.ItemSnapshot;
 public interface Lockable {
   boolean hasLock();
 
-  @Deprecated
+  @Deprecated(forRemoval = true, since = "3.12.0")
   default boolean canUnlock(ItemSnapshot item) {
     return false;
   }
 
-  @Deprecated
+  @Deprecated(forRemoval = true, since = "3.12.0")
   default void lock(ItemSnapshot item) {
   }
 
