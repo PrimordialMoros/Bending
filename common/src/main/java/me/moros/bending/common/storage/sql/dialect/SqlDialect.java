@@ -56,7 +56,7 @@ public sealed interface SqlDialect extends SqlQueries permits SqlDialectImpl {
       MigrationVersion version = mariaDBVersion(source.source());
       boolean isMariaDB = version != null;
       if (isMariaDB && type == StorageType.MYSQL) {
-        logger.warn("Connected database is MariaDB but you've specified MySql engine in config!");
+        logger.warn("Connected database is MariaDB but you've specified MySql engine in config.");
       }
       if (!(isMariaDB && version.isAtLeast("10.7"))) {
         logger.warn("You should consider upgrading your database to MariaDB 10.7+");

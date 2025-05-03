@@ -46,7 +46,6 @@ junit-platform = { module = "org.junit.platform:junit-platform-launcher" }
 adventure-api = { module = "net.kyori:adventure-api", version.ref = "adventure" }
 adventure-minimessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "adventure" }
 adventure-fabric = { module = "net.kyori:adventure-platform-fabric", version.ref = "adventure-fabric" }
-option = { module = "net.kyori:option", version = "1.1.0" }
 
 luckperms-api = { module = "net.luckperms:api", version = "5.4" }
 mini-placeholders = { module = "io.github.miniplaceholders:miniplaceholders-api", version = "2.3.0" }

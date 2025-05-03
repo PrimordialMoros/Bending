@@ -21,7 +21,6 @@ package me.moros.bending.common.game;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -97,10 +96,9 @@ public final class GameImpl implements Game {
     int abilityAmount = Registries.ABILITIES.size();
     int sequenceAmount = Registries.SEQUENCES.size();
     int collisionAmount = Registries.COLLISIONS.size();
-    plugin.logger().info("Found %d registered abilities (%d Sequences)!".formatted(abilityAmount, sequenceAmount));
-    plugin.logger().info("Found %d registered collisions!".formatted(collisionAmount));
+    plugin.logger().info("Found %d registered abilities (%d Sequences)".formatted(abilityAmount, sequenceAmount));
+    plugin.logger().info("Found %d registered collisions".formatted(collisionAmount));
     plugin.logger().info("Registered protection plugins: " + TextUtil.collect(Registries.PROTECTIONS));
-    plugin.logger().info("Registered translations: " + TextUtil.collect(plugin.translationManager(), Locale::getLanguage));
   }
 
   private void update() {

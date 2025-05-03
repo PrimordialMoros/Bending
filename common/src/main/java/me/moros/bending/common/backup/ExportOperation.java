@@ -67,7 +67,7 @@ final class ExportOperation extends AbstractOperation {
   @Override
   protected boolean executeOperation() {
     if (Files.exists(path)) {
-      logToAudience(Component.text("File already exists!", ColorPalette.FAIL));
+      logToAudience(Component.text("File already exists.", ColorPalette.FAIL));
       return false;
     }
     logToAudience(Component.text("Discovering users to export...", ColorPalette.NEUTRAL));

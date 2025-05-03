@@ -85,7 +85,7 @@ public class EventBusImpl implements EventBus {
   @Override
   public <T extends BendingEvent> boolean post(T event) {
     if (closed) {
-      throw new IllegalStateException("Eventbus has been terminated, cannot post new events!");
+      throw new IllegalStateException("Eventbus has been terminated, cannot post new events.");
     }
     eventBus.post(event);
     return !(event instanceof Cancellable c) || !c.cancelled();

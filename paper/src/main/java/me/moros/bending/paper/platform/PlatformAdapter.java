@@ -104,7 +104,7 @@ public final class PlatformAdapter {
   public static Item fromBukkitItem(Material material) {
     var item = Item.registry().get(material.key());
     if (item == null || !material.isItem()) {
-      throw new IllegalStateException(material.name() + " is not a valid item!");
+      throw new IllegalStateException(material.name() + " is not a valid item.");
     }
     return item;
   }
@@ -112,7 +112,7 @@ public final class PlatformAdapter {
   public static BlockType fromBukkitBlock(Material material) {
     var blockType = BlockType.registry().get(material.key());
     if (blockType == null || !material.isBlock()) {
-      throw new IllegalStateException(material.name() + " is not a valid block type!");
+      throw new IllegalStateException(material.name() + " is not a valid block type.");
     }
     return blockType;
   }
@@ -120,7 +120,7 @@ public final class PlatformAdapter {
   public static Material toBukkitItemMaterial(Item item) {
     var mat = Registry.MATERIAL.get(nsk(item.key()));
     if (mat == null || !mat.isItem()) {
-      throw new IllegalStateException(item.key() + " is not a valid item!");
+      throw new IllegalStateException(item.key() + " is not a valid item.");
     }
     return mat;
   }

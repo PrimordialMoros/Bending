@@ -84,7 +84,7 @@ public sealed interface DataProviderRegistry<T> permits DataProviderRegistryImpl
 
     public DataProviderRegistry<T> build() {
       if (propertyMap.isEmpty()) {
-        throw new IllegalStateException("No properties registered!");
+        throw new IllegalStateException("No properties registered.");
       }
       return new DataProviderRegistryImpl<>(Map.copyOf(propertyMap));
     }

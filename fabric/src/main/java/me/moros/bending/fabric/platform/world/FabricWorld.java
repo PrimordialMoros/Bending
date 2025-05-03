@@ -206,7 +206,7 @@ public record FabricWorld(ServerLevel handle) implements World {
   @Override
   public Entity createEntity(Position pos, EntityType type) {
     if (type == EntityType.PLAYER) {
-      throw new IllegalArgumentException("Cannot create a Player!");
+      throw new IllegalArgumentException("Cannot create a Player.");
     }
     final double x = pos.x();
     final double y = pos.y();

@@ -32,8 +32,6 @@ dependencies {
     include(libs.cloud.minecraft)
     implementation(libs.bundles.configurate)
     include(libs.bundles.configurate)
-    implementation(libs.option)
-    include(libs.option)
 
     bendingImplementation(projects.bendingCommon)
     bendingImplementation(projects.bendingNms)

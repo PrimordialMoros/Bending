@@ -72,10 +72,10 @@ public abstract class AbstractConnectionListener {
       if (t == null) {
         long deltaTime = System.currentTimeMillis() - startTime;
         if (deltaTime > 500) {
-          logger.warn("Processing login for %s took %dms.".formatted(uuid, deltaTime));
+          logger.warn("Processing login for %s took %dms".formatted(uuid, deltaTime));
         }
       } else if (t instanceof TimeoutException) {
-        logger.warn("Timed out while retrieving data for " + uuid);
+        logger.warn("Timed out while retrieving data for %s".formatted(uuid));
       } else {
         logger.warn(t.getMessage(), t);
       }

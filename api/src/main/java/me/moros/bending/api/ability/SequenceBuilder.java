@@ -40,13 +40,13 @@ public final class SequenceBuilder {
     Objects.requireNonNull(ability);
     Objects.requireNonNull(activation);
     if (steps.size() > Sequence.MAX_STEPS) {
-      throw new IllegalStateException("Cannot add more than %d steps!".formatted(Sequence.MAX_STEPS));
+      throw new IllegalStateException("Cannot add more than %d steps.".formatted(Sequence.MAX_STEPS));
     }
     if (!ability.canBind()) {
-      throw new IllegalArgumentException("%s cannot be used as a sequence activation step!".formatted(ability.key().asString()));
+      throw new IllegalArgumentException("%s cannot be used as a sequence activation step.".formatted(ability.key().asString()));
     }
     if (activation == Activation.PASSIVE || activation == Activation.SEQUENCE) {
-      throw new IllegalArgumentException("%s cannot be used for sequence activation!".formatted(activation.name()));
+      throw new IllegalArgumentException("%s cannot be used for sequence activation.".formatted(activation.name()));
     }
     this.steps.add(SequenceStep.of(ability, activation));
     return this;
@@ -64,7 +64,7 @@ public final class SequenceBuilder {
 
   List<SequenceStep> validateAndBuild() {
     if (steps.size() < 2) {
-      throw new IllegalStateException("Sequences require at least 2 activation steps!");
+      throw new IllegalStateException("Sequences require at least 2 activation steps.");
     }
     return List.copyOf(steps);
   }

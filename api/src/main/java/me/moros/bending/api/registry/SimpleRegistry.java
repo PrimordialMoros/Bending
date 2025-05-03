@@ -84,7 +84,7 @@ public class SimpleRegistry<K, V> implements Registry<K, V> {
 
   protected void checkLock() {
     if (isLocked()) {
-      throw new RegistryModificationException("Registry " + key.asString() + " is locked!");
+      throw new RegistryModificationException("Registry " + key.asString() + " is locked.");
     }
   }
 

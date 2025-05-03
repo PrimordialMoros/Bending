@@ -197,7 +197,7 @@ public class Pillar implements Updatable, Iterable<Block> {
 
     public Builder<T> direction(Direction direction) {
       if (!WorldUtil.FACES.contains(direction)) {
-        throw new IllegalStateException("Pillar direction must be one of the 6 main BlockFaces!");
+        throw new IllegalStateException("Pillar direction must be one of the 6 main BlockFaces.");
       }
       this.direction = direction;
       return this;

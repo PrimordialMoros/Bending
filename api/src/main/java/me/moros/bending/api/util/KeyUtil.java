@@ -44,7 +44,7 @@ public final class KeyUtil {
    */
   public static Function<String, @Nullable Key> stringToKey(String namespace) {
     if (!Key.parseableNamespace(namespace)) {
-      throw new IllegalArgumentException("Invalid namespace %s!".formatted(namespace));
+      throw new IllegalArgumentException("Invalid namespace %s.".formatted(namespace));
     }
     return input -> fromString(input, namespace);
   }

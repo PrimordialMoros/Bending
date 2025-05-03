@@ -29,7 +29,7 @@ record EventExceptionHandlerImpl(Logger logger) implements EventExceptionHandler
 
   @Override
   public <E> void eventExceptionCaught(EventBus<? super E> bus, EventSubscription<? super E> subscription, E event, Throwable throwable) {
-    logger.warn("Exception posting event %s to subscriber %s".formatted(event, subscription.subscriber()), throwable);
+    logger.warn("Exception posting event %s to subscriber %s.".formatted(event, subscription.subscriber()), throwable);
   }
 
   private record NoOpEventExceptionHandler() implements EventExceptionHandler {

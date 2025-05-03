@@ -71,7 +71,7 @@ final class FabricEntityProperties {
           var handler = player.getAbilities();
           boolean needsUpdate = handler.flying != flying;
           if (!handler.mayfly && flying) {
-            throw new IllegalArgumentException("Player is not allowed to fly!");
+            throw new IllegalArgumentException("Player is not allowed to fly.");
           }
           handler.flying = flying;
           if (needsUpdate) {

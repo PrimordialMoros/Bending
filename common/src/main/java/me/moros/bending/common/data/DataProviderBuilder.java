@@ -53,7 +53,7 @@ public final class DataProviderBuilder<T, T1 extends T, V> {
 
   DataProvider<T1, V> validateAndBuildProvider() {
     if (getter == null && setter == null) {
-      throw new IllegalStateException("Cannot build empty data provider!");
+      throw new IllegalStateException("Cannot build empty data provider.");
     }
     return new DataProviderImpl<>(predicate, operator, getter, setter);
   }

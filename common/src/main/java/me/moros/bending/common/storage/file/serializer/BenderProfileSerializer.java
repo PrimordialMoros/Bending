@@ -57,7 +57,7 @@ final class BenderProfileSerializer extends AbstractSerializer<BenderProfile> {
     ConfigurationNode uuidNode = nonVirtualNode(source, UUID);
     UUID uuid = uuidNode.get(UUID.class);
     if (uuid == null) {
-      throw new SerializationException(uuidNode, UUID.class, "Invalid uuid!");
+      throw new SerializationException(uuidNode, UUID.class, "Invalid uuid.");
     }
     boolean board = getSafe(nonVirtualNodeOrNull(source, BOARD), n -> n.getBoolean(true)).orElse(true);
     var elements = getSafe(nonVirtualNodeOrNull(source, ELEMENTS), n -> n.get(ELEMENT_SET_TOKEN)).orElseGet(ElementSet::of);

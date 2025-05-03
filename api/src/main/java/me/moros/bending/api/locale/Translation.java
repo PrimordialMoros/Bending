@@ -110,7 +110,7 @@ public final class Translation implements Keyed, Iterable<Entry<String, MessageF
       formats.put(bundleKey, new MessageFormat(bundle.getString(bundleKey), locale));
     }
     if (formats.isEmpty()) {
-      throw new IllegalArgumentException("No translations found!");
+      throw new IllegalArgumentException("No translations found.");
     }
     return new Translation(key, locale, formats);
   }
@@ -143,7 +143,7 @@ public final class Translation implements Keyed, Iterable<Entry<String, MessageF
       formats.put(entry.getKey(), new MessageFormat(entry.getValue(), locale));
     }
     if (formats.isEmpty()) {
-      throw new IllegalArgumentException("No translations found!");
+      throw new IllegalArgumentException("No translations found.");
     }
     return new Translation(key, locale, formats);
   }

@@ -145,7 +145,7 @@ public sealed class AbilityDescription implements Keyed, Translatable permits Ab
     }
     boolean validName = name.chars().allMatch(c -> (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'));
     if (name.isEmpty() || !validName) {
-      throw new IllegalArgumentException("Name must be an alphabetical non-empty string!");
+      throw new IllegalArgumentException("Name must be an alphabetical non-empty string.");
     }
     return new Builder(namespace, name, constructor);
   }

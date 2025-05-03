@@ -427,7 +427,7 @@ public class Lightning extends AbilityInstance {
         @Override
         public Vector3d next() {
           if (!hasNext()) {
-            throw new NoSuchElementException("Reached segment end!");
+            throw new NoSuchElementException("Reached segment end.");
           }
           f += POINT_DISTANCE;
           return start.add(direction.multiply(f));
