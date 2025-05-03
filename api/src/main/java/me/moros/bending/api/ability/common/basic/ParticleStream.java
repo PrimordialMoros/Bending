@@ -82,8 +82,6 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
     double originalCollisionRadius = collisionRadius;
     expansion = calculateExpansion();
 
-    boolean remove = false;
-    int completedSteps = 0;
     for (int i = 0; i < steps; i++) {
       render(location);
       postRender(location);
@@ -91,17 +89,14 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
       location = location.add(vector);
       distanceTravelled += speed;
       if (location.distanceSq(ray.position()) > maxRange * maxRange || !user.canBuild(location)) {
-        remove = true;
-        break;
+        return UpdateResult.REMOVE;
       }
       if (!validDiagonals(originalVector, dir)) {
-        remove = true;
-        break;
+        return UpdateResult.REMOVE;
       }
-      completedSteps++;
     }
 
-    collider = Ray.of(originalLocation, vector.multiply(Math.max(1, completedSteps)));
+    collider = Ray.of(originalLocation, vector.multiply(steps));
     AABB outer = AABB.fromRay(collider, originalCollisionRadius);
 
     boolean hitEntity = CollisionUtil.handle(user, outer, this::onFilteredEntityHit, livingOnly, false, singleCollision);
@@ -109,7 +104,7 @@ public abstract class ParticleStream implements Updatable, SimpleAbility {
       hitEntity |= onFilteredEntityHit(user);
     }
 
-    return (remove || hitEntity) ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
+    return hitEntity ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
   }
 
   protected boolean onFilteredEntityHit(Entity entity) {
