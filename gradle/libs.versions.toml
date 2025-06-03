@@ -93,6 +93,7 @@ sponge-mixin = { module = "org.spongepowered:mixin", version = "0.8.7" }
 
 # Plugins for build-logic
 shadow = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "shadow" }
+maven-publish = { module = "com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin", version = "0.32.0" }
 sponge-vanilla = { module = "org.spongepowered:vanillagradle", version = "0.2.1-20240507.024226-82" }
 minotaur = { module = "com.modrinth.minotaur:Minotaur", version = "2.8.7" }
 checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.53" }
