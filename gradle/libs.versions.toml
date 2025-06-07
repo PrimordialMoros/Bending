@@ -13,11 +13,11 @@ sponge-common = "1.21.5-15.0.0-SNAPSHOT"
 paper-api = "1.21.5-no-moonrise-SNAPSHOT"
 minecraft = "1.21.5"
 fabric-loom = "1.10.5"
-fabric-api = "0.124.2+1.21.5"
+fabric-api = "0.126.0+1.21.5"
 fabric-loader = "0.16.14"
 shadow = "8.3.6"
-flyway = "11.8.2"
-junit = "5.12.2"
+flyway = "11.9.1"
+junit = "5.13.0"
 
 [libraries]
 storage = { module = "me.moros:storage", version.ref = "storage" }
@@ -47,7 +47,7 @@ adventure-api = { module = "net.kyori:adventure-api", version.ref = "adventure" 
 adventure-minimessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "adventure" }
 adventure-fabric = { module = "net.kyori:adventure-platform-fabric", version.ref = "adventure-fabric" }
 
-luckperms-api = { module = "net.luckperms:api", version = "5.4" }
+luckperms-api = { module = "net.luckperms:api", version = "5.5" }
 mini-placeholders = { module = "io.github.miniplaceholders:miniplaceholders-api", version = "2.3.0" }
 
 configurate-core = { module = "org.spongepowered:configurate-core", version.ref = "configurate" }
@@ -66,7 +66,7 @@ cloud-sponge = { module = "org.incendo:cloud-sponge", version.ref = "cloud-platf
 # Databases
 mysql = { module = "com.mysql:mysql-connector-j", version = "9.3.0" }
 mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.5.3" }
-postgresql = { module = "org.postgresql:postgresql", version = "42.7.5" }
+postgresql = { module = "org.postgresql:postgresql", version = "42.7.6" }
 h2 = { module = "com.h2database:h2", version = "2.3.232" }
 hsql = { module = "org.hsqldb:hsqldb", version = "2.7.4" }
 
@@ -74,8 +74,8 @@ hsql = { module = "org.hsqldb:hsqldb", version = "2.7.4" }
 fabric-minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
 fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
 fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
-fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "2.6.3+1.21.5" }
-sgui = { module = "eu.pb4:sgui", version = "1.9.0+1.21.5" }
+fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "2.6.4+1.21.5" }
+sgui = { module = "eu.pb4:sgui", version = "1.9.1+1.21.5" }
 fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.3.3" }
 
 # Bukkit
@@ -96,7 +96,7 @@ shadow = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "s
 maven-publish = { module = "com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin", version = "0.32.0" }
 sponge-vanilla = { module = "org.spongepowered:vanillagradle", version = "0.2.1-20240507.024226-82" }
 minotaur = { module = "com.modrinth.minotaur:Minotaur", version = "2.8.7" }
-checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.53" }
+checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.55" }
 
 [bundles]
 cloud = ["cloud-core", "cloud-minecraft"]
