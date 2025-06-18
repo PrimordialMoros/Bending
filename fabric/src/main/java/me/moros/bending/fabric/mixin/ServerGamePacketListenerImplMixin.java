@@ -28,6 +28,7 @@ import me.moros.math.Vector3d;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket.Action;
+import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ServerboundSwingPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -59,16 +60,28 @@ public abstract class ServerGamePacketListenerImplMixin {
     }
   }
 
+  @Inject(method = "handlePlayerInput", at = @At(value = "INVOKE",
+    target = "Lnet/minecraft/server/level/ServerPlayer;setLastClientInput(Lnet/minecraft/world/entity/player/Input;)V"), cancellable = true)
+  private void bending$onHandlePlayerInput(ServerboundPlayerInputPacket packet, CallbackInfo ci) {
+    var lastInput = this.player.getLastClientInput();
+    boolean shiftKeyDown = packet.input().shift();
+    if (lastInput.shift() != shiftKeyDown) {
+      if (!ServerPlayerEvents.TOGGLE_SNEAK.invoker().onSneak(this.player, shiftKeyDown)) {
+        ci.cancel();
+        shiftKeyDown = this.player.isShiftKeyDown();
+        if (this.player.hasClientLoaded()) {
+          this.player.resetLastActionTime();
+          this.player.setShiftKeyDown(shiftKeyDown);
+        }
+      }
+    }
+  }
+
   @Inject(method = "handlePlayerCommand", at = @At(value = "INVOKE",
     target = "Lnet/minecraft/server/level/ServerPlayer;resetLastActionTime()V"), cancellable = true)
   private void bending$onHandlePlayerCommand(ServerboundPlayerCommandPacket packet, CallbackInfo ci) {
     var action = packet.getAction();
     switch (action) {
-      case PRESS_SHIFT_KEY, RELEASE_SHIFT_KEY -> {
-        if (!ServerPlayerEvents.TOGGLE_SNEAK.invoker().onSneak(this.player, action == Action.PRESS_SHIFT_KEY)) {
-          ci.cancel();
-        }
-      }
       case START_SPRINTING, STOP_SPRINTING -> {
         if (!ServerPlayerEvents.TOGGLE_SPRINT.invoker().onSprint(this.player, action == Action.START_SPRINTING)) {
           ci.cancel();

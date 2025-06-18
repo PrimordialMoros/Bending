@@ -2,22 +2,22 @@
 storage = "3.3.0"
 math = "3.0.0"
 tasker = "1.2.0"
-adventure = "4.21.0"
-adventure-fabric = "6.4.0"
+adventure = "4.22.0"
+adventure-fabric = "6.4.2-SNAPSHOT"
 configurate = "4.2.0"
 cloud = "2.0.0"
 cloud-platform = "2.0.0-SNAPSHOT"
 bstats = "3.1.0"
 sponge-api = "15.0.0"
-sponge-common = "1.21.5-15.0.0-SNAPSHOT"
-paper-api = "1.21.5-no-moonrise-SNAPSHOT"
-minecraft = "1.21.5"
+sponge-common = "1.21.6-15.0.0-SNAPSHOT"
+paper-api = "1.21.6-R0.1-SNAPSHOT"
+minecraft = "1.21.6"
 fabric-loom = "1.10.5"
-fabric-api = "0.126.0+1.21.5"
+fabric-api = "0.127.0+1.21.6"
 fabric-loader = "0.16.14"
 shadow = "8.3.6"
 flyway = "11.9.1"
-junit = "5.13.0"
+junit = "5.13.1"
 
 [libraries]
 storage = { module = "me.moros:storage", version.ref = "storage" }
@@ -30,8 +30,8 @@ tasker-sponge = { module = "me.moros:tasker-sponge", version.ref = "tasker" }
 tasker-fabric = { module = "me.moros:tasker-fabric", version.ref = "tasker" }
 
 javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.0" }
-jdbi = { module = "org.jdbi:jdbi3-core", version = "3.49.4" }
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.1" }
+jdbi = { module = "org.jdbi:jdbi3-core", version = "3.49.5" }
 hikari = { module = "com.zaxxer:HikariCP", version = "6.3.0" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-mysql = { module = "org.flywaydb:flyway-mysql", version.ref = "flyway" }
@@ -66,7 +66,7 @@ cloud-sponge = { module = "org.incendo:cloud-sponge", version.ref = "cloud-platf
 # Databases
 mysql = { module = "com.mysql:mysql-connector-j", version = "9.3.0" }
 mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.5.3" }
-postgresql = { module = "org.postgresql:postgresql", version = "42.7.6" }
+postgresql = { module = "org.postgresql:postgresql", version = "42.7.7" }
 h2 = { module = "com.h2database:h2", version = "2.3.232" }
 hsql = { module = "org.hsqldb:hsqldb", version = "2.7.4" }
 
@@ -74,16 +74,16 @@ hsql = { module = "org.hsqldb:hsqldb", version = "2.7.4" }
 fabric-minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
 fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
 fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
-fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "2.6.4+1.21.5" }
-sgui = { module = "eu.pb4:sgui", version = "1.9.1+1.21.5" }
-fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.3.3" }
+fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "2.7.0+1.21.6" }
+sgui = { module = "eu.pb4:sgui", version = "1.10.0+1.21.6" }
+fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.4.0-SNAPSHOT" }
 
 # Bukkit
 inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.19-dev" }
 grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.4" }
 towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.101.1.1" }
 lwc = { module = "com.griefcraft:lwc", version = "2.4.0" }
-worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.13" }
+worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.14" }
 papi = { module = "me.clip:placeholderapi", version = "2.11.6" }
 
 # Sponge

@@ -48,7 +48,7 @@ public final class ElementMenu extends AbstractGui<ItemStack, SimpleGui> {
   protected SimpleGui construct(Map<Element, ItemStack> elementMap) {
     var player = PlatformAdapter.toFabricEntity(player());
     SimpleGui gui = new SimpleGui(MenuType.GENERIC_9x3, player, false);
-    gui.setTitle(MinecraftServerAudiences.of(player.server).asNative(Message.ELEMENTS_GUI_TITLE.build()));
+    gui.setTitle(MinecraftServerAudiences.of(player.getServer()).asNative(Message.ELEMENTS_GUI_TITLE.build()));
     var fill = PlatformAdapter.toFabricItem(BACKGROUND.get());
     fill.set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(true, ReferenceSortedSets.emptySet()));
     for (int i = 0; i < gui.getSize(); i++) {

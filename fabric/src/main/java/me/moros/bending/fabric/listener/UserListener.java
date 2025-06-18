@@ -171,7 +171,7 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
   private InteractionResult onRightClickBlock(Player playerEntity, Level world, InteractionHand hand, BlockHitResult blockHitResult) {
     if (hand == InteractionHand.MAIN_HAND && !world.isClientSide && playerEntity instanceof ServerPlayer player) {
       var pos = blockHitResult.getBlockPos();
-      var block = PlatformAdapter.fromFabricWorld(player.serverLevel()).blockAt(pos.getX(), pos.getY(), pos.getZ());
+      var block = PlatformAdapter.fromFabricWorld(player.level()).blockAt(pos.getX(), pos.getY(), pos.getZ());
       var loc = blockHitResult.getLocation();
       Vector3d point = Vector3d.of(loc.x(), loc.y(), loc.z());
       return onUserInteract(player, null, new BlockInteraction(block, point));
