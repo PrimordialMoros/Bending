@@ -28,13 +28,12 @@ import me.moros.bending.common.logging.Logger;
 import me.moros.bending.common.util.Initializer;
 import me.moros.bending.fabric.mixin.accessor.ServerLoginPacketListenerImplAccess;
 import me.moros.bending.fabric.platform.entity.FabricPlayer;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerLoginConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerLoginNetworking.LoginSynchronizer;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 
 public final class ConnectionListener extends AbstractConnectionListener implements Initializer {
@@ -45,8 +44,8 @@ public final class ConnectionListener extends AbstractConnectionListener impleme
   @Override
   public void init() {
     ServerLoginConnectionEvents.QUERY_START.register(this::onPlayerPreLogin);
-    ServerPlayConnectionEvents.JOIN.register(this::onPlayerJoin);
-    ServerPlayConnectionEvents.DISCONNECT.register(this::onPlayerLogout);
+    ServerPlayerEvents.JOIN.register(this::onPlayerJoin);
+    ServerPlayerEvents.LEAVE.register(this::onPlayerLeave);
   }
 
   private void onPlayerPreLogin(ServerLoginPacketListenerImpl handler, MinecraftServer server, PacketSender sender, LoginSynchronizer synchronizer) {
@@ -56,12 +55,11 @@ public final class ConnectionListener extends AbstractConnectionListener impleme
     }
   }
 
-  private void onPlayerJoin(ServerGamePacketListenerImpl handler, PacketSender sender, MinecraftServer server) {
-    ServerPlayer player = handler.getPlayer();
+  private void onPlayerJoin(ServerPlayer player) {
     syncJoin(player.getUUID(), () -> new FabricPlayer(player));
   }
 
-  private void onPlayerLogout(ServerGamePacketListenerImpl handler, MinecraftServer server) {
-    onQuit(handler.getPlayer().getUUID());
+  private void onPlayerLeave(ServerPlayer player) {
+    onQuit(player.getUUID());
   }
 }

@@ -21,6 +21,7 @@ package me.moros.bending.common.util;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -78,7 +79,7 @@ public abstract class PermissionInitializer implements Initializer {
   private String registerAbilityNodes(Element element) {
     var node = elementParentNode(element);
     var abilityNodes = collect(element);
-    abilityNodes.add(Permissions.CHOOSE + "." + element.key().value());
+    abilityNodes.add(Permissions.CHOOSE + "." + element.toString().toLowerCase(Locale.ROOT));
     registerDefault(node, abilityNodes);
     return node;
   }

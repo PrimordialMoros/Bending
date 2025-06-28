@@ -88,9 +88,9 @@ hangarPublish.publications.register("plugin") {
         platformVersions.add(libs.versions.minecraft)
         dependencies.url("LuckPerms", "https://luckperms.net/") { required = false }
         dependencies.url("WorldGuard", "https://enginehub.org/worldguard/") { required = false }
-        dependencies.url("PlaceholderAPI", "https://www.spigotmc.org/resources/placeholderapi.6245/"){ required = false }
         dependencies.url("LWC Extended", "https://www.spigotmc.org/resources/lwc-extended.69551/") { required = false }
         dependencies.hangar("MiniPlaceholders") { required = false }
+        dependencies.hangar("PlaceholderAPI") { required = false }
         dependencies.hangar("Towny") { required = false }
         dependencies.hangar("GriefPrevention") { required = false }
     }

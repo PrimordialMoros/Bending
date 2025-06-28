@@ -19,6 +19,7 @@
 
 package me.moros.bending.common.command.commands;
 
+import java.util.Locale;
 import java.util.function.BiConsumer;
 
 import me.moros.bending.api.ability.element.Element;
@@ -98,7 +99,7 @@ public record ElementCommand<C extends Audience>(Commander<C> commander) impleme
 
   @Override
   public void onElementChoose(User user, Element element) {
-    if (!user.hasPermission(Permissions.CHOOSE + "." + element.key().value())) {
+    if (!user.hasPermission(Permissions.CHOOSE + "." + element.toString().toLowerCase(Locale.ROOT))) {
       Message.ELEMENT_CHOOSE_NO_PERMISSION.send(user, element.displayName());
       return;
     }
