@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.AbilityDescription.Sequence;
 import me.moros.bending.api.ability.element.Element;
+import me.moros.bending.api.locale.Translation;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.ColorPalette;
@@ -36,6 +37,7 @@ import me.moros.bending.common.locale.Message;
 import me.moros.bending.common.util.Initializer;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.translation.GlobalTranslator;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
 import org.incendo.cloud.minecraft.extras.ImmutableMinecraftHelp;
@@ -102,13 +104,17 @@ public record HelpCommand<C extends Audience>(Commander<C> commander, MinecraftH
   }
 
   private void onAbilityInfo(C sender, AbilityDescription ability) {
+    Message.ABILITY_INFO_DESCRIPTION.send(sender, ability.displayName(), Message.ABILITY_DESCRIPTION.build(ability));
     Component instructions;
     if (ability instanceof Sequence sequence) {
       instructions = sequence.instructions();
     } else {
+      String instructionsKey = ability.translationKey() + ".instructions";
+      if (!GlobalTranslator.translator().canTranslate(instructionsKey, Translation.DEFAULT_LOCALE)) {
+        return;
+      }
       instructions = Message.ABILITY_INSTRUCTIONS.build(ability);
     }
-    Message.ABILITY_INFO_DESCRIPTION.send(sender, ability.displayName(), Message.ABILITY_DESCRIPTION.build(ability));
     Message.ABILITY_INFO_INSTRUCTIONS.send(sender, ability.displayName(), instructions);
   }
 
