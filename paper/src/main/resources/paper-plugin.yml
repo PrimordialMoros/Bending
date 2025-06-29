@@ -14,18 +14,3 @@ dependencies:
     PlaceholderAPI:
       load: BEFORE
       required: false
-    MiniPlaceholders:
-      load: BEFORE
-      required: false
-    GriefPrevention:
-      load: BEFORE
-      required: false
-    LWC:
-      load: BEFORE
-      required: false
-    Towny:
-      load: BEFORE
-      required: false
-    WorldGuard:
-      load: BEFORE
-      required: false

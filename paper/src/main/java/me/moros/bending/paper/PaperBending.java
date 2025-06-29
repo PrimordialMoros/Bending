@@ -44,7 +44,6 @@ import me.moros.bending.paper.listener.WorldListener;
 import me.moros.bending.paper.platform.BrigadierSetup;
 import me.moros.bending.paper.platform.BukkitPermissionInitializer;
 import me.moros.bending.paper.platform.BukkitPlatform;
-import me.moros.bending.paper.protection.ProtectionInitializer;
 import me.moros.tasker.paper.PaperExecutor;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.AdvancedPie;
@@ -65,7 +64,6 @@ final class PaperBending extends AbstractBending<BendingBootstrap> {
     injectTasker(new PaperExecutor(parent));
     String version = parent.getPluginMeta().getAPIVersion();
     ReflectionUtil.injectStatic(Platform.Holder.class, new BukkitPlatform(logger(), version));
-    new ProtectionInitializer().init();
     registerHooks(parent.getServer());
     load();
     new BukkitPermissionInitializer().init();

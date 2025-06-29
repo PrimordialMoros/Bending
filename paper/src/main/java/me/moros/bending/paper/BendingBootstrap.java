@@ -20,7 +20,6 @@
 package me.moros.bending.paper;
 
 import me.moros.bending.common.logging.Slf4jLogger;
-import me.moros.bending.paper.protection.WorldGuardFlag;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class BendingBootstrap extends JavaPlugin {
@@ -30,9 +29,6 @@ public final class BendingBootstrap extends JavaPlugin {
   public void onLoad() {
     if (instance == null) {
       instance = new PaperBending(this, getDataFolder().toPath(), new Slf4jLogger(getSLF4JLogger()));
-    }
-    if (getServer().getPluginManager().getPlugin("WorldGuard") != null) {
-      WorldGuardFlag.registerFlag();
     }
   }
 
