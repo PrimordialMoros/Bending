@@ -58,7 +58,6 @@ tasks {
             reloc("org.jdbi", "jdbi")
             reloc("org.h2", "h2")
             reloc("org.flyway", "flyway")
-            reloc("org.antlr", "antlr")
             reloc("com.fasterxml.jackson", "jackson")
         }
     }

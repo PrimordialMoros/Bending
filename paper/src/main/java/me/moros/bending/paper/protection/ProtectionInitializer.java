@@ -28,8 +28,8 @@ import me.moros.bending.api.protection.Protection;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.common.config.ConfigManager;
 import me.moros.bending.common.util.Initializer;
+import me.moros.bending.paper.protection.plugin.BoltProtection;
 import me.moros.bending.paper.protection.plugin.GriefPreventionProtection;
-import me.moros.bending.paper.protection.plugin.LWCProtection;
 import me.moros.bending.paper.protection.plugin.TownyProtection;
 import me.moros.bending.paper.protection.plugin.WorldGuardProtection;
 import org.bukkit.Bukkit;
@@ -49,7 +49,7 @@ public final class ProtectionInitializer implements Initializer {
       "WorldGuard", WorldGuardProtection::new,
       "GriefPrevention", GriefPreventionProtection::new,
       "Towny", TownyProtection::new,
-      "LWC", LWCProtection::new
+      "Bolt", BoltProtection::new
     );
     map.forEach(this::tryRegisterProtection);
   }
@@ -68,7 +68,7 @@ public final class ProtectionInitializer implements Initializer {
       "WorldGuard", true,
       "GriefPrevention", true,
       "Towny", true,
-      "LWC", true
+      "Bolt", true
     );
 
     @Override

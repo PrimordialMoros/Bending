@@ -19,30 +19,28 @@
 
 package me.moros.bending.paper.protection.plugin;
 
-import com.griefcraft.lwc.LWC;
-import com.griefcraft.lwc.LWCPlugin;
-import com.griefcraft.model.Protection;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.protection.AbstractProtection;
 import me.moros.bending.paper.platform.PlatformAdapter;
 import org.bukkit.plugin.Plugin;
+import org.popcraft.bolt.BoltAPI;
+import org.popcraft.bolt.util.Permission;
 
-public final class LWCProtection extends AbstractProtection {
-  private final LWC lwc;
+public final class BoltProtection extends AbstractProtection {
+  private final BoltAPI bolt;
 
-  public LWCProtection(Plugin plugin) {
+  public BoltProtection(Plugin plugin) {
     super(plugin.getName());
-    lwc = ((LWCPlugin) plugin).getLWC();
+    bolt = plugin.getServer().getServicesManager().load(BoltAPI.class);
   }
 
   @Override
   public boolean canBuild(LivingEntity entity, Block block) {
     if (entity instanceof Player player) {
       var b = PlatformAdapter.toBukkitWorld(block.world()).getBlockAt(block.blockX(), block.blockY(), block.blockZ());
-      Protection protection = lwc.getProtectionCache().getProtection(b);
-      return protection == null || lwc.canAccessProtection(PlatformAdapter.toBukkitEntity(player), protection);
+      return bolt.canAccess(bolt.findProtection(b), player.uuid(), Permission.DESTROY);
     }
     return true;
   }

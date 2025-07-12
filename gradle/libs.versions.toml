@@ -16,7 +16,7 @@ fabric-loom = "1.11.4"
 fabric-api = "0.129.0+1.21.7"
 fabric-loader = "0.16.14"
 shadow = "8.3.8"
-flyway = "11.10.1"
+flyway = "11.10.2"
 junit = "5.13.3"
 
 [libraries]
@@ -82,7 +82,7 @@ fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.
 inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.19-dev" }
 grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.4" }
 towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.101.1.1" }
-lwc = { module = "com.griefcraft:lwc", version = "2.4.0" }
+bolt = { module = "org.popcraft:bolt-bukkit", version = "1.1.66" }
 worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.14" }
 papi = { module = "me.clip:placeholderapi", version = "2.11.6" }
 

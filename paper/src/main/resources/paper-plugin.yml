@@ -20,7 +20,7 @@ dependencies:
     GriefPrevention:
       load: BEFORE
       required: false
-    LWC:
+    Bolt:
       load: BEFORE
       required: false
     Towny:
