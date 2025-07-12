@@ -80,6 +80,10 @@ fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.
 
 # Bukkit
 inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.19-dev" }
+grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.4" }
+towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.101.1.1" }
+lwc = { module = "com.griefcraft:lwc", version = "2.4.0" }
+worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.14" }
 papi = { module = "me.clip:placeholderapi", version = "2.11.6" }
 
 # Sponge

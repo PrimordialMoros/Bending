@@ -7,8 +7,12 @@ plugins {
 
 repositories {
     maven("https://repo.papermc.io/repository/maven-public/") // Paper
+    maven("https://maven.enginehub.org/repo/") // WorldGuard
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/") // PAPI
+    maven("https://repo.codemc.io/repository/maven-public/") // LWC
+    maven("https://repo.glaremasters.me/repository/towny/") // Towny
     maven("https://repo.moros.me/snapshots/")
+    maven("https://jitpack.io/") // GriefPrevention
 }
 
 dependencies {
@@ -25,6 +29,10 @@ dependencies {
     runtimeDownload(libs.bundles.flyway)
     runtimeDownload(libs.bundles.drivers.nonstandard)
     runtimeDownload(libs.bundles.configurate.loaders)
+    compileOnly(libs.grief.prevention)
+    compileOnly(libs.towny)
+    compileOnly(libs.lwc)
+    compileOnly(libs.worldguard)
     compileOnly(libs.papi)
     paperweight.paperDevBundle(libs.versions.paper.api)
 }
@@ -79,8 +87,12 @@ hangarPublish.publications.register("plugin") {
         jar = bendingPlatform.productionJar
         platformVersions.add(libs.versions.minecraft)
         dependencies.url("LuckPerms", "https://luckperms.net/") { required = false }
+        dependencies.url("WorldGuard", "https://enginehub.org/worldguard/") { required = false }
+        dependencies.url("LWC Extended", "https://www.spigotmc.org/resources/lwc-extended.69551/") { required = false }
         dependencies.hangar("MiniPlaceholders") { required = false }
         dependencies.hangar("PlaceholderAPI") { required = false }
+        dependencies.hangar("Towny") { required = false }
+        dependencies.hangar("GriefPrevention") { required = false }
     }
 }
 

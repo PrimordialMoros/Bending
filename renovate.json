@@ -27,6 +27,21 @@
       "versioning": "regex:^(?<major>\\d+)(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?(?<prerelease>[^.-]+)?(?:\\+(?<compatibility>.*))?$"
     },
     {
+      "description": "Towny version handling",
+      "matchPackageNames": [
+        "com.palmergames.bukkit.towny:towny"
+      ],
+      "versioning": "regex:^0\\.(?<major>\\d+)(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?$"
+    },
+    {
+      "description": "Ignore Towny patch updates",
+      "matchPackageNames": [
+        "com.palmergames.bukkit.towny:towny"
+      ],
+      "matchUpdateTypes": "patch",
+      "enabled": false
+    },
+    {
       "groupName": "all non-major dependencies",
       "groupSlug": "all-minor-patch",
       "matchUpdateTypes": [

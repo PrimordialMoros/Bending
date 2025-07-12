@@ -17,32 +17,23 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.paper;
+package me.moros.bending.paper.protection;
 
-import me.moros.bending.common.logging.Slf4jLogger;
-import me.moros.bending.paper.protection.WorldGuardFlag;
-import org.bukkit.plugin.java.JavaPlugin;
+import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.protection.flags.StateFlag;
+import com.sk89q.worldguard.protection.flags.registry.FlagConflictException;
+import com.sk89q.worldguard.protection.flags.registry.FlagRegistry;
 
-public final class BendingBootstrap extends JavaPlugin {
-  private PaperBending instance;
-
-  @Override
-  public void onLoad() {
-    if (instance == null) {
-      instance = new PaperBending(this, getDataFolder().toPath(), new Slf4jLogger(getSLF4JLogger()));
-    }
-    if (getServer().getPluginManager().getPlugin("WorldGuard") != null) {
-      WorldGuardFlag.registerFlag();
-    }
+public final class WorldGuardFlag {
+  private WorldGuardFlag() {
   }
 
-  @Override
-  public void onEnable() {
-    instance.onPluginEnable();
-  }
-
-  @Override
-  public void onDisable() {
-    instance.onPluginDisable();
+  public static void registerFlag() {
+    FlagRegistry registry = WorldGuard.getInstance().getFlagRegistry();
+    try {
+      registry.register(new StateFlag("bending", false));
+    } catch (FlagConflictException e) {
+      // Do nothing
+    }
   }
 }
