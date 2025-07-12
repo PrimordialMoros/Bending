@@ -100,4 +100,10 @@ modrinth {
     versionName = "paper-$version"
     loaders = listOf("paper")
     gameVersions.add(libs.versions.minecraft)
+    dependencies {
+        optional.project("worldguard")
+        optional.project("bolt")
+        optional.project("towny")
+        optional.project("griefprevention")
+    }
 }
