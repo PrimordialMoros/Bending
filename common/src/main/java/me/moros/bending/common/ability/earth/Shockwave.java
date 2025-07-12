@@ -227,8 +227,11 @@ public class Shockwave extends AbilityInstance {
       }
       double deltaY = Math.min(0.38, 0.18 + distanceTravelled / (3 * range));
       Block below = block.offset(Direction.DOWN);
+      int blockLight = user.world().blockLightLevel(block);
+      int skyLight = user.world().skyLightLevel(block);
       BlockState data = below.state();
-      TempDisplayEntity.builder(data).gravity(true).velocity(Vector3d.of(0, deltaY, 0)).duration(1200).build(below);
+      TempDisplayEntity.builder(data).gravity(true).velocity(Vector3d.of(0, deltaY, 0)).duration(1200)
+        .edit(c -> c.brightness(blockLight, skyLight)).build(below);
       data.asParticle(block.center().add(0, deltaY, 0)).count(5)
         .offset(0.5, 0.25, 0.5).spawn(user.world());
       if (ThreadLocalRandom.current().nextInt(6) == 0) {

@@ -57,6 +57,7 @@ import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.api.util.material.WaterMaterials;
 import me.moros.math.Vector3d;
+import me.moros.math.Vector3i;
 
 public class IceCrawl extends AbilityInstance {
   private Config userConfig;
@@ -150,11 +151,12 @@ public class IceCrawl extends AbilityInstance {
     public void render(Vector3d location) {
       double x = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
       double z = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
-      Vector3d spawnLoc = location.add(x, -0.75, z);
+      int blockLight = user.world().blockLightLevel(location);
+      int skyLight = user.world().skyLightLevel(location);
       TempDisplayEntity.builder(BlockType.PACKED_ICE).gravity(true).duration(1200)
         .velocity(Vector3d.of(0, 0.16, 0))
-        .edit(d -> d.transformation(Transformation.scaled(0.75)))
-        .build(user.world(), spawnLoc);
+        .edit(d -> d.transformation(Transformation.scaled(0.75)).brightness(blockLight, skyLight))
+        .build(user.world(), location.add(x, -0.75, z));
       BlockType.PACKED_ICE.asParticle(location).count(6).offset(0.25, 0.125, 0.25).spawn(user.world());
     }
 
@@ -169,7 +171,11 @@ public class IceCrawl extends AbilityInstance {
     public boolean onEntityHit(Entity entity) {
       entity.damage(userConfig.damage, user, description());
       if (entity.valid() && entity instanceof LivingEntity livingEntity) {
+        Vector3i lightLoc = entity.location().toVector3i();
+        int blockLight = entity.world().blockLightLevel(lightLoc);
+        int skyLight = entity.world().skyLightLevel(lightLoc);
         TempDisplayEntity.builder(BlockType.PACKED_ICE).duration(userConfig.freezeDuration)
+          .edit(c -> c.brightness(blockLight, skyLight))
           .build(user.world(), entity.location().add(0, -0.2, 0));
         ActionLimiter.builder().limit(ActionType.MOVE).duration(userConfig.freezeDuration).build(user, livingEntity);
       }

@@ -263,6 +263,16 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
   }
 
   @Override
+  public int blockLightLevel(int x, int y, int z) {
+    return handle().getBlockAt(x, y, z).getLightFromBlocks();
+  }
+
+  @Override
+  public int skyLightLevel(int x, int y, int z) {
+    return handle().getBlockAt(x, y, z).getLightFromSky();
+  }
+
+  @Override
   public Dimension dimension() {
     return switch (handle().getEnvironment()) {
       case NORMAL -> Dimension.OVERWORLD;

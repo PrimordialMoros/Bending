@@ -183,12 +183,13 @@ public class EarthLine extends AbilityInstance {
     public void render(Vector3d location) {
       double x = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
       double z = ThreadLocalRandom.current().nextDouble(-0.125, 0.125);
-      Vector3d spawnLoc = location.add(x, -0.75, z);
+      int blockLight = user.world().blockLightLevel(location);
+      int skyLight = user.world().skyLightLevel(location);
       BlockState type = user.world().blockAt(location).offset(Direction.DOWN).state();
       TempDisplayEntity.builder(type).gravity(true).duration(700)
         .velocity(Vector3d.of(0, 0.2, 0))
-        .edit(d -> d.transformation(Transformation.scaled(0.75)))
-        .build(user.world(), spawnLoc);
+        .edit(d -> d.transformation(Transformation.scaled(0.75)).brightness(blockLight, skyLight))
+        .build(user.world(), location.add(x, -0.75, z));
       type.asParticle(location).count(6).offset(0.25, 0.125, 0.25).spawn(user.world());
     }
 
@@ -274,7 +275,11 @@ public class EarthLine extends AbilityInstance {
       entity.applyVelocity(EarthLine.this, Vector3d.MINUS_J);
       Vector3d center = entity.location().add(0, -0.2, 0);
       Vector3d offset = Vector3d.of(0, 0.6, 0);
-      var builder = TempDisplayEntity.builder(material).duration(userConfig.prisonDuration);
+      int blockLight = user.world().blockLightLevel(blockToCheck);
+      int skyLight = user.world().skyLightLevel(blockToCheck);
+      var builder = TempDisplayEntity.builder(material)
+        .edit(c -> c.brightness(blockLight, skyLight))
+        .duration(userConfig.prisonDuration);
       VectorUtil.circle(Vector3d.PLUS_I.multiply(0.8), Vector3d.PLUS_J, 8).forEach(v -> {
         builder.build(user.world(), center.add(v));
         builder.build(user.world(), center.add(offset).add(v));

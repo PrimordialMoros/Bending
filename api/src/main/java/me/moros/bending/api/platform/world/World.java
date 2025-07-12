@@ -162,6 +162,18 @@ public interface World extends Keyed, ForwardingAudience, BlockGetter, BlockSett
 
   int lightLevel(int x, int y, int z);
 
+  default int blockLightLevel(Position position) {
+    return blockLightLevel(position.blockX(), position.blockY(), position.blockZ());
+  }
+
+  int blockLightLevel(int x, int y, int z);
+
+  default int skyLightLevel(Position position) {
+    return skyLightLevel(position.blockX(), position.blockY(), position.blockZ());
+  }
+
+  int skyLightLevel(int x, int y, int z);
+
   Dimension dimension();
 
   default CompletableFuture<?> loadChunkAsync(Position position) {

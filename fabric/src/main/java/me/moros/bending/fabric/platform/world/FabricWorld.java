@@ -54,6 +54,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
@@ -262,6 +263,16 @@ public record FabricWorld(ServerLevel handle) implements World {
   @Override
   public int lightLevel(int x, int y, int z) {
     return handle().getMaxLocalRawBrightness(new BlockPos(x, y, z));
+  }
+
+  @Override
+  public int blockLightLevel(int x, int y, int z) {
+    return handle().getBrightness(LightLayer.BLOCK, new BlockPos(x, y, z));
+  }
+
+  @Override
+  public int skyLightLevel(int x, int y, int z) {
+    return handle().getBrightness(LightLayer.SKY, new BlockPos(x, y, z));
   }
 
   @Override

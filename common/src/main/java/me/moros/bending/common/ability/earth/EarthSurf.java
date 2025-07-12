@@ -44,6 +44,7 @@ import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.math.Vector3d;
+import me.moros.math.Vector3i;
 import me.moros.math.VectorUtil;
 
 public class EarthSurf extends AbilityInstance {
@@ -151,8 +152,11 @@ public class EarthSurf extends AbilityInstance {
       if (ticks % 3 == 0) {
         return;
       }
+      Vector3i lightLoc = user.location().add(Vector3i.MINUS_J).toVector3i();
+      int blockLight = user.world().blockLightLevel(lightLoc);
+      int skyLight = user.world().skyLightLevel(lightLoc);
       var builder = TempDisplayEntity.builder(data).gravity(true).velocity(Vector3d.of(0, 0.25, 0))
-        .minYOffset(-1.25).duration(750);
+        .edit(c -> c.brightness(blockLight, skyLight)).minYOffset(-1.25).duration(750);
       Vector3d center = user.location().add(Vector3d.MINUS_J);
       Vector3d dir = user.direction().withY(0).normalize(user.velocity().withY(0).normalize());
       VectorUtil.createArc(dir, Vector3d.PLUS_J, Math.PI / 3, 3).forEach(v ->
