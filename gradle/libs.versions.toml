@@ -9,11 +9,11 @@ cloud = "2.0.0"
 cloud-platform = "2.0.0-SNAPSHOT"
 bstats = "3.1.0"
 sponge-api = "16.0.0"
-sponge-common = "1.21.7-16.0.0-SNAPSHOT"
-paper-api = "1.21.7-R0.1-SNAPSHOT"
-minecraft = "1.21.7"
+sponge-common = "1.21.8-16.0.0-SNAPSHOT"
+paper-api = "1.21.8-R0.1-SNAPSHOT"
+minecraft = "1.21.8"
 fabric-loom = "1.11.4"
-fabric-api = "0.129.0+1.21.7"
+fabric-api = "0.129.0+1.21.8"
 fabric-loader = "0.16.14"
 shadow = "8.3.8"
 flyway = "11.10.2"
@@ -30,7 +30,7 @@ tasker-sponge = { module = "me.moros:tasker-sponge", version.ref = "tasker" }
 tasker-fabric = { module = "me.moros:tasker-fabric", version.ref = "tasker" }
 
 javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.1" }
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.2" }
 jdbi = { module = "org.jdbi:jdbi3-core", version = "3.49.5" }
 hikari = { module = "com.zaxxer:HikariCP", version = "6.3.0" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
@@ -81,8 +81,8 @@ fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.
 # Bukkit
 inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.19-dev" }
 grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.4" }
-towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.101.1.1" }
-bolt = { module = "org.popcraft:bolt-bukkit", version = "1.1.66" }
+towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.101.2.0" }
+bolt = { module = "org.popcraft:bolt-bukkit", version = "1.1.68" }
 worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.14" }
 papi = { module = "me.clip:placeholderapi", version = "2.11.6" }
 
@@ -93,7 +93,7 @@ sponge-mixin = { module = "org.spongepowered:mixin", version = "0.8.7" }
 
 # Plugins for build-logic
 shadow = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "shadow" }
-maven-publish = { module = "com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin", version = "0.33.0" }
+maven-publish = { module = "com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin", version = "0.34.0" }
 sponge-vanilla = { module = "org.spongepowered:vanillagradle", version = "0.2.1-20240507.024226-82" }
 minotaur = { module = "com.modrinth.minotaur:Minotaur", version = "2.8.7" }
 checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.56" }
