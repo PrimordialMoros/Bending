@@ -41,6 +41,7 @@ module me.moros.bending {
   exports me.moros.bending.api.util.material;
   exports me.moros.bending.api.util.metadata;
   exports me.moros.bending.api.util.collect;
+  exports me.moros.bending.api.util.qte;
 
   requires transitive me.moros.tasker;
   requires transitive me.moros.math;

@@ -69,6 +69,7 @@ import me.moros.bending.common.ability.fire.Lightning;
 import me.moros.bending.common.ability.fire.sequence.FireKick;
 import me.moros.bending.common.ability.fire.sequence.FireSpin;
 import me.moros.bending.common.ability.fire.sequence.FireWheel;
+import me.moros.bending.common.ability.water.BloodBending;
 import me.moros.bending.common.ability.water.FrostBreath;
 import me.moros.bending.common.ability.water.HealingWaters;
 import me.moros.bending.common.ability.water.IceCrawl;
@@ -222,6 +223,9 @@ public final class AbilityInitializer implements Initializer {
 
     abilities.add(AbilityDescription.builder("HealingWaters", HealingWaters::new)
       .element(WATER).activation(SNEAK).build());
+
+    abilities.add(AbilityDescription.builder("BloodBending", BloodBending::new)
+      .element(WATER).activation(SNEAK, ATTACK).build());
 
     abilities.add(AbilityDescription.builder("WaterBubble", WaterBubble::new)
       .element(WATER).activation(SNEAK).build());

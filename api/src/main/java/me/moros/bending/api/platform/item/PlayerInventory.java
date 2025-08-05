@@ -66,4 +66,10 @@ public interface PlayerInventory extends Inventory {
    * @return true if the exact amount was removed, false otherwise
    */
   boolean remove(Item type, int amount);
+
+  /**
+   * Drop all items in the specified slot from this inventory.
+   * @param slot the slot to drop
+   */
+  void dropItem(EquipmentSlot slot);
 }

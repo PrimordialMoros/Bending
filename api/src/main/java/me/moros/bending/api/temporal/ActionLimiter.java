@@ -63,17 +63,19 @@ public final class ActionLimiter extends Temporary {
 
   private boolean reverted = false;
 
-  private ActionLimiter(LivingEntity entity, Collection<ActionType> limitedActions, int ticks) {
+  private ActionLimiter(LivingEntity entity, Collection<ActionType> limitedActions, boolean showBar, int ticks) {
     this.uuid = entity.uuid();
     this.entity = entity;
     this.limitedActions = EnumSet.copyOf(limitedActions);
-    this.hadAI = entity.checkProperty(EntityProperties.AI);
-    entity.setProperty(EntityProperties.AI, false);
-    if (entity instanceof Player player) {
-      if (ticks > 2) {
-        BossBar bar = BossBar.bossBar(Component.text("Restricted"), 1, Color.YELLOW, Overlay.PROGRESS);
-        BARS.putIfAbsent(uuid, BendingBar.of(bar, player, ticks));
-      }
+    if (limitedActions.contains(ActionType.MOVE)) {
+      this.hadAI = entity.checkProperty(EntityProperties.AI);
+      entity.setProperty(EntityProperties.AI, false);
+    } else {
+      this.hadAI = TriState.NOT_SET;
+    }
+    if (showBar && ticks > 2 && entity instanceof Player player) {
+      BossBar bar = BossBar.bossBar(Component.text("Restricted"), 1, Color.YELLOW, Overlay.PROGRESS);
+      BARS.putIfAbsent(uuid, BendingBar.of(bar, player, ticks));
     }
     MANAGER.addEntry(uuid, this, ticks);
   }
@@ -111,6 +113,7 @@ public final class ActionLimiter extends Temporary {
 
   public static final class Builder {
     private Set<ActionType> limitedActions = EnumSet.allOf(ActionType.class);
+    private boolean showBar = true;
     private long duration = 5000;
 
     private Builder() {
@@ -130,6 +133,11 @@ public final class ActionLimiter extends Temporary {
       return limit(c);
     }
 
+    public Builder showBar(boolean showBar) {
+      this.showBar = showBar;
+      return this;
+    }
+
     public Builder duration(long duration) {
       this.duration = duration;
       return this;
@@ -145,7 +153,7 @@ public final class ActionLimiter extends Temporary {
       if (event.cancelled() || event.duration() <= 0) {
         return Optional.empty();
       }
-      return Optional.of(new ActionLimiter(target, limitedActions, MANAGER.fromMillis(event.duration())));
+      return Optional.of(new ActionLimiter(target, limitedActions, showBar, MANAGER.fromMillis(event.duration())));
     }
   }
 }

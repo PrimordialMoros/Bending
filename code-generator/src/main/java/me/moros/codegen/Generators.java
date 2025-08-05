@@ -68,13 +68,13 @@ public final class Generators {
     var generator = new ApiGenerator(BASE_PKG, output, version);
 
     generator.generate(from(BuiltInRegistries.BLOCK), "block", "BlockType");
-    generator.generate(from(BuiltInRegistries.ENTITY_TYPE), "entity", "EntityType");
     generator.generate(from(BuiltInRegistries.ITEM), "item", "Item");
     generator.generate(from(BuiltInRegistries.PARTICLE_TYPE), "particle", "Particle");
     generator.generate(from(BuiltInRegistries.MOB_EFFECT), "potion", "PotionEffect");
     generator.generate(from(BuiltInRegistries.SOUND_EVENT), "sound", "Sound");
 
     generator.generate(tagsFrom("block"), "block", "Tags", "BlockTag", "TagImpl");
+    generator.generate(tagsFrom("entity_type"), "entity", "Tags", "EntityTypeTag", "TagImpl");
     generator.generate(tagsFrom("item"), "item", "Tags", "ItemTag", "TagImpl");
 
     LOGGER.log(Level.INFO, "Finished generating code");

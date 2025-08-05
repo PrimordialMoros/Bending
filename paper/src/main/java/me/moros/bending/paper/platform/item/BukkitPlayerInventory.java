@@ -21,6 +21,7 @@ package me.moros.bending.paper.platform.item;
 
 import java.util.Objects;
 
+import me.moros.bending.api.platform.item.EquipmentSlot;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.platform.item.PlayerInventory;
@@ -70,5 +71,10 @@ public class BukkitPlayerInventory extends BukkitInventory implements PlayerInve
       return false;
     }
     return true;
+  }
+
+  @Override
+  public void dropItem(EquipmentSlot slot) {
+    Objects.requireNonNull(handle.getHolder()).dropItem(toBukkit(slot)); // already handles revert
   }
 }

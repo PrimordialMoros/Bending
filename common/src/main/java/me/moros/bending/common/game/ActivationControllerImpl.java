@@ -61,6 +61,7 @@ import me.moros.bending.common.ability.earth.sequence.EarthPillars;
 import me.moros.bending.common.ability.fire.FireJet;
 import me.moros.bending.common.ability.fire.FireShield;
 import me.moros.bending.common.ability.fire.HeatControl;
+import me.moros.bending.common.ability.water.BloodBending;
 import me.moros.bending.common.ability.water.HealingWaters;
 import me.moros.bending.common.ability.water.WaterWave;
 import me.moros.bending.common.ability.water.passive.HydroSink;
@@ -234,6 +235,7 @@ public final class ActivationControllerImpl implements ActivationController {
     Tornado.switchMode(user);
     AirBlast.switchMode(user);
     EarthLine.switchMode(user);
+    BloodBending.switchMode(user);
     HealingWaters.switchMode(user);
     HeatControl.toggleMode(user);
 

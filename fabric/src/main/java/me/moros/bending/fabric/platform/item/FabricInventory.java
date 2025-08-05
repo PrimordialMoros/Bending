@@ -50,7 +50,7 @@ public class FabricInventory implements Inventory {
     handle.setItemSlot(toVanilla(slot), PlatformAdapter.toFabricItem(snapshot));
   }
 
-  private static EquipmentSlot toVanilla(me.moros.bending.api.platform.item.EquipmentSlot slot) {
+  protected static EquipmentSlot toVanilla(me.moros.bending.api.platform.item.EquipmentSlot slot) {
     return switch (slot) {
       case MAINHAND -> EquipmentSlot.MAINHAND;
       case OFFHAND -> EquipmentSlot.OFFHAND;

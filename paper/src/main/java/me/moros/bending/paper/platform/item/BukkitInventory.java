@@ -51,7 +51,7 @@ public class BukkitInventory implements Inventory {
     handle().setItem(toBukkit(slot), PlatformAdapter.toBukkitItem(item));
   }
 
-  private static EquipmentSlot toBukkit(me.moros.bending.api.platform.item.EquipmentSlot slot) {
+  protected static EquipmentSlot toBukkit(me.moros.bending.api.platform.item.EquipmentSlot slot) {
     return switch (slot) {
       case MAINHAND -> EquipmentSlot.HAND;
       case OFFHAND -> EquipmentSlot.OFF_HAND;

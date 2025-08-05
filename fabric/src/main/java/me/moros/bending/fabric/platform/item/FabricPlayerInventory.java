@@ -19,6 +19,7 @@
 
 package me.moros.bending.fabric.platform.item;
 
+import me.moros.bending.api.platform.item.EquipmentSlot;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.platform.item.PlayerInventory;
@@ -83,5 +84,14 @@ public class FabricPlayerInventory extends FabricInventory implements PlayerInve
       }
     }
     return false;
+  }
+
+  @Override
+  public void dropItem(EquipmentSlot slot) {
+    ItemStack item = handle.player.getItemBySlot(toVanilla(slot));
+    try (Transaction transaction = Transaction.openOuter()) {
+      PlayerInventoryStorage.of(handle).drop(ItemVariant.of(item), item.getCount(), transaction);
+      transaction.commit();
+    }
   }
 }
