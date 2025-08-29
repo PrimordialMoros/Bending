@@ -30,22 +30,6 @@ import me.moros.math.Vector3d;
 public interface SimpleAbility extends CollisionCallback {
   /**
    * Render the ability, called when ability is updated.
-   */
-  @Deprecated(forRemoval = true, since = "3.12.0")
-  default void render() {
-    render(collider().position());
-  }
-
-  /**
-   * Handle ability after rendering is completed, typically used for playing sounds and extra calculations.
-   */
-  @Deprecated(forRemoval = true, since = "3.12.0")
-  default void postRender() {
-    postRender(collider().position());
-  }
-
-  /**
-   * Render the ability, called when ability is updated.
    * @param location the location to render at
    */
   void render(Vector3d location);

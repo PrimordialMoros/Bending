@@ -68,7 +68,6 @@ public abstract class PermissionInitializer implements Initializer {
   }
 
   private void initMisc() {
-    registerDefault(FeaturePermissions.OVERRIDE_LOCK, List.of(), TriState.FALSE);
   }
 
   private Collection<String> initAbilityNodes() {

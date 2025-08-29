@@ -19,19 +19,8 @@
 
 package me.moros.bending.api.platform.block;
 
-import me.moros.bending.api.platform.item.ItemSnapshot;
-
 public interface Lockable {
   boolean hasLock();
-
-  @Deprecated(forRemoval = true, since = "3.12.0")
-  default boolean canUnlock(ItemSnapshot item) {
-    return false;
-  }
-
-  @Deprecated(forRemoval = true, since = "3.12.0")
-  default void lock(ItemSnapshot item) {
-  }
 
   void unlock();
 }

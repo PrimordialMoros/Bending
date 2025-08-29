@@ -22,8 +22,6 @@ package me.moros.bending.api.config;
 import java.io.Serializable;
 import java.util.List;
 
-import me.moros.bending.api.ability.Ability;
-
 /**
  * This is an interface that defines a serializable config.
  */
@@ -33,14 +31,4 @@ public interface Configurable extends Serializable {
    * @return the path of this configuration's root node.
    */
   List<String> path();
-
-  /**
-   * Controls if this configuration is external and cannot be loaded from the main configuration file.
-   * @return whether this configuration is external
-   * @see ConfigProcessor#calculate(Ability, Class)
-   */
-  @Deprecated(forRemoval = true, since = "3.12.0")
-  default boolean external() {
-    return false;
-  }
 }
