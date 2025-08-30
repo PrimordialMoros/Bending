@@ -48,7 +48,7 @@ adventure-minimessage = { module = "net.kyori:adventure-text-minimessage", versi
 adventure-fabric = { module = "net.kyori:adventure-platform-fabric", version.ref = "adventure-fabric" }
 
 luckperms-api = { module = "net.luckperms:api", version = "5.5" }
-mini-placeholders = { module = "io.github.miniplaceholders:miniplaceholders-api", version = "2.3.0" }
+mini-placeholders = { module = "io.github.miniplaceholders:miniplaceholders-api", version = "3.0.1" }
 
 configurate-core = { module = "org.spongepowered:configurate-core", version.ref = "configurate" }
 configurate-hocon = { module = "org.spongepowered:configurate-hocon", version.ref = "configurate" }

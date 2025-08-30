@@ -22,8 +22,8 @@ package me.moros.bending.common.hook;
 import java.util.function.Function;
 
 import io.github.miniplaceholders.api.Expansion;
-import io.github.miniplaceholders.api.placeholder.AudiencePlaceholder;
-import io.github.miniplaceholders.api.utils.TagsUtils;
+import io.github.miniplaceholders.api.resolver.AudienceTagResolver;
+import io.github.miniplaceholders.api.utils.Tags;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.placeholder.DynamicPlaceholder;
@@ -34,6 +34,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.Tag;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public record MiniPlaceholdersHook(PlaceholderProvider provider) implements Initializer {
   public MiniPlaceholdersHook() {
@@ -53,18 +54,18 @@ public record MiniPlaceholdersHook(PlaceholderProvider provider) implements Init
     builder.build().register();
   }
 
-  private AudiencePlaceholder staticParser(StaticPlaceholder placeholder) {
+  private AudienceTagResolver<@NonNull Audience> staticParser(StaticPlaceholder placeholder) {
     return (audience, queue, ctx) -> parse(audience, placeholder);
   }
 
-  private AudiencePlaceholder dynamicParser(DynamicPlaceholder placeholder) {
-    return (audience, queue, ctx) -> !queue.hasNext() ? TagsUtils.EMPTY_TAG : parse(audience, u -> placeholder.handle(u, queue.pop().value()));
+  private AudienceTagResolver<@NonNull Audience> dynamicParser(DynamicPlaceholder placeholder) {
+    return (audience, queue, ctx) -> !queue.hasNext() ? Tags.EMPTY_TAG : parse(audience, u -> placeholder.handle(u, queue.pop().value()));
   }
 
   private Tag parse(Audience audience, Function<User, Component> placeholder) {
     return audience.pointers().get(Identity.UUID)
       .flatMap(Registries.BENDERS::getIfExists)
       .map(placeholder)
-      .map(Tag::selfClosingInserting).orElse(TagsUtils.EMPTY_TAG);
+      .map(Tag::selfClosingInserting).orElse(Tags.EMPTY_TAG);
   }
 }
