@@ -2,8 +2,8 @@
 storage = "3.3.0"
 math = "3.0.0"
 tasker = "1.2.0"
-adventure = "4.23.0"
-adventure-fabric = "6.5.0-SNAPSHOT"
+adventure = "4.24.0"
+adventure-fabric = "6.6.0"
 configurate = "4.2.0"
 cloud = "2.0.0"
 cloud-platform = "2.0.0-SNAPSHOT"
@@ -12,12 +12,12 @@ sponge-api = "16.0.0"
 sponge-common = "1.21.8-16.0.0-SNAPSHOT"
 paper-api = "1.21.8-R0.1-SNAPSHOT"
 minecraft = "1.21.8"
-fabric-loom = "1.11.4"
-fabric-api = "0.129.0+1.21.8"
-fabric-loader = "0.16.14"
-shadow = "8.3.8"
-flyway = "11.10.2"
-junit = "5.13.3"
+fabric-loom = "1.11.8"
+fabric-api = "0.133.0+1.21.8"
+fabric-loader = "0.17.2"
+shadow = "8.3.9"
+flyway = "11.12.0"
+junit = "5.13.4"
 
 [libraries]
 storage = { module = "me.moros:storage", version.ref = "storage" }
@@ -64,8 +64,8 @@ cloud-fabric = { module = "org.incendo:cloud-fabric", version.ref = "cloud-platf
 cloud-sponge = { module = "org.incendo:cloud-sponge", version.ref = "cloud-platform" }
 
 # Databases
-mysql = { module = "com.mysql:mysql-connector-j", version = "9.3.0" }
-mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.5.4" }
+mysql = { module = "com.mysql:mysql-connector-j", version = "9.4.0" }
+mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.5.5" }
 postgresql = { module = "org.postgresql:postgresql", version = "42.7.7" }
 h2 = { module = "com.h2database:h2", version = "2.3.232" }
 hsql = { module = "org.hsqldb:hsqldb", version = "2.7.4" }
@@ -82,7 +82,7 @@ fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.
 inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.19-dev" }
 grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.4" }
 towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.101.2.0" }
-bolt = { module = "org.popcraft:bolt-bukkit", version = "1.1.68" }
+bolt = { module = "org.popcraft:bolt-bukkit", version = "1.1.79" }
 worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.14" }
 papi = { module = "me.clip:placeholderapi", version = "2.11.6" }
 
@@ -95,8 +95,8 @@ sponge-mixin = { module = "org.spongepowered:mixin", version = "0.8.7" }
 shadow = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "shadow" }
 maven-publish = { module = "com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin", version = "0.34.0" }
 sponge-vanilla = { module = "org.spongepowered:vanillagradle", version = "0.2.1-20240507.024226-82" }
-minotaur = { module = "com.modrinth.minotaur:Minotaur", version = "2.8.7" }
-checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.56" }
+minotaur = { module = "com.modrinth.minotaur:Minotaur", version = "2.8.10" }
+checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.57" }
 
 [bundles]
 cloud = ["cloud-core", "cloud-minecraft"]
