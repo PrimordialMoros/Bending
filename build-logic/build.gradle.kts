@@ -5,13 +5,13 @@ plugins {
 repositories {
     gradlePluginPortal()
     mavenCentral()
-    maven("https://repo.spongepowered.org/repository/maven-public/")
+    maven("https://maven.neoforged.net/releases/")
 }
 
 dependencies {
     implementation(libs.shadow)
     implementation(libs.maven.publish)
-    implementation(libs.sponge.vanilla)
+    implementation(libs.moddevgradle)
     implementation(libs.minotaur)
     implementation(libs.checker)
 }

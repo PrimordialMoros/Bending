@@ -18,6 +18,8 @@ fabric-loader = "0.17.2"
 shadow = "8.3.9"
 flyway = "11.12.0"
 junit = "5.13.4"
+moddevgradle = "2.0.107"
+neoform = "1.21.8-20250717.133445"
 
 [libraries]
 storage = { module = "me.moros:storage", version.ref = "storage" }
@@ -94,7 +96,7 @@ sponge-mixin = { module = "org.spongepowered:mixin", version = "0.8.7" }
 # Plugins for build-logic
 shadow = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "shadow" }
 maven-publish = { module = "com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin", version = "0.34.0" }
-sponge-vanilla = { module = "org.spongepowered:vanillagradle", version = "0.2.1-20240507.024226-82" }
+moddevgradle = { module = "net.neoforged:moddev-gradle", version.ref = "moddevgradle" }
 minotaur = { module = "com.modrinth.minotaur:Minotaur", version = "2.8.10" }
 checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.57" }
 

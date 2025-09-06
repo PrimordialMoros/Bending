@@ -31,7 +31,7 @@ jobs:
           path: |
             ~/.gradle/caches/fabric-loom
             ~/.gradle/caches/paperweight-userdev
-            ~/.gradle/caches/VanillaGradle
+            ~/.gradle/caches/neoformruntime
             .gradle/loom-cache
           key: ${{ runner.os }}-build-cache-${{ hashFiles('**/libs.versions.toml', '**/*.gradle.kts', '**/gradle-wrapper.properties') }}
           restore-keys: |
