@@ -117,7 +117,7 @@ public class AirSpout extends AbilityInstance implements SpoutAbility {
         return;
       }
       for (int i = 0; i < distance; i++) {
-        ParticleBuilder.air(user.location().subtract(0, i, 0)).count(3).offset(0.4).spawn(user.world());
+        ParticleBuilder.air(user.location().subtract(0, i, 0)).count(2).offset(0.4).spawn(user.world());
       }
       nextRenderTime = time + 100;
     }

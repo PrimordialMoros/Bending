@@ -10,16 +10,16 @@ cloud-platform = "2.0.0-SNAPSHOT"
 bstats = "3.1.0"
 sponge-api = "16.0.0"
 sponge-common = "1.21.8-16.0.0-SNAPSHOT"
-paper-api = "1.21.8-R0.1-SNAPSHOT"
-minecraft = "1.21.8"
+paper-api = "1.21.9-R0.1-SNAPSHOT"
+minecraft = "1.21.9"
 fabric-loom = "1.11.8"
-fabric-api = "0.133.0+1.21.8"
+fabric-api = "0.133.14+1.21.9"
 fabric-loader = "0.17.2"
-shadow = "9.1.0"
-flyway = "11.12.0"
-junit = "5.13.4"
-moddevgradle = "2.0.107"
-neoform = "1.21.8-20250717.133445"
+shadow = "9.2.2"
+flyway = "11.13.2"
+junit = "6.0.0"
+moddevgradle = "2.0.110"
+neoform = "1.21.9-20250930.151910"
 
 [libraries]
 storage = { module = "me.moros:storage", version.ref = "storage" }
@@ -67,17 +67,17 @@ cloud-sponge = { module = "org.incendo:cloud-sponge", version.ref = "cloud-platf
 
 # Databases
 mysql = { module = "com.mysql:mysql-connector-j", version = "9.4.0" }
-mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.5.5" }
-postgresql = { module = "org.postgresql:postgresql", version = "42.7.7" }
-h2 = { module = "com.h2database:h2", version = "2.3.232" }
+mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.5.6" }
+postgresql = { module = "org.postgresql:postgresql", version = "42.7.8" }
+h2 = { module = "com.h2database:h2", version = "2.4.240" }
 hsql = { module = "org.hsqldb:hsqldb", version = "2.7.4" }
 
 # Fabric
 fabric-minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
 fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
 fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
-fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "2.7.1+1.21.6" }
-sgui = { module = "eu.pb4:sgui", version = "1.10.1+1.21.7" }
+fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "2.8.0+1.21.9" }
+sgui = { module = "eu.pb4:sgui", version = "1.11.0+1.21.9" }
 fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.4.1" }
 
 # Bukkit
@@ -98,7 +98,7 @@ shadow = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "s
 maven-publish = { module = "com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin", version = "0.34.0" }
 moddevgradle = { module = "net.neoforged:moddev-gradle", version.ref = "moddevgradle" }
 minotaur = { module = "com.modrinth.minotaur:Minotaur", version = "2.8.10" }
-checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.57" }
+checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.59" }
 
 [bundles]
 cloud = ["cloud-core", "cloud-minecraft"]
@@ -113,6 +113,6 @@ junit = ["junit-bom", "junit-jupiter"]
 [plugins]
 jmh = { id = "me.champeau.jmh", version = "0.7.3" }
 fabric-loom = { id = "fabric-loom", version.ref = "fabric-loom" }
-paperweight-userdev = { id = "io.papermc.paperweight.userdev", version = "2.0.0-beta.18" }
+paperweight-userdev = { id = "io.papermc.paperweight.userdev", version = "2.0.0-beta.19" }
 hangar = { id = "io.papermc.hangar-publish-plugin", version = "0.1.3" }
-run-paper = { id = "xyz.jpenilla.run-paper", version = "2.3.1" }
+run-paper = { id = "xyz.jpenilla.run-paper", version = "3.0.0" }

@@ -152,7 +152,7 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
   }
 
   private InteractionResult onLeftClickBlock(Player playerEntity, Level world, InteractionHand hand, BlockPos blockPos, Direction direction) {
-    if (!world.isClientSide && playerEntity instanceof ServerPlayer player) {
+    if (!world.isClientSide() && playerEntity instanceof ServerPlayer player) {
       return onUserSwing(player, hand);
     }
     return InteractionResult.PASS;
@@ -169,7 +169,7 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
   }
 
   private InteractionResult onRightClickBlock(Player playerEntity, Level world, InteractionHand hand, BlockHitResult blockHitResult) {
-    if (hand == InteractionHand.MAIN_HAND && !world.isClientSide && playerEntity instanceof ServerPlayer player) {
+    if (hand == InteractionHand.MAIN_HAND && !world.isClientSide() && playerEntity instanceof ServerPlayer player) {
       var pos = blockHitResult.getBlockPos();
       var block = PlatformAdapter.fromFabricWorld(player.level()).blockAt(pos.getX(), pos.getY(), pos.getZ());
       var loc = blockHitResult.getLocation();
@@ -180,14 +180,14 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
   }
 
   private InteractionResult onRightClickAir(Player playerEntity, Level world, InteractionHand hand) {
-    if (!world.isClientSide && playerEntity instanceof ServerPlayer player) {
+    if (!world.isClientSide() && playerEntity instanceof ServerPlayer player) {
       onUserInteract(player, null, null);
     }
     return InteractionResult.PASS;
   }
 
   private InteractionResult onRightClickEntity(Player playerEntity, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
-    if (hand == InteractionHand.MAIN_HAND && !world.isClientSide && playerEntity instanceof ServerPlayer player) {
+    if (hand == InteractionHand.MAIN_HAND && !world.isClientSide() && playerEntity instanceof ServerPlayer player) {
       var target = PlatformAdapter.fromFabricEntity(entity);
       Vector3d point;
       if (hitResult == null) {
@@ -284,7 +284,7 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
   }
 
   private boolean onInventoryClick(ServerPlayer player, ItemStack stack) {
-    if (ItemUtil.hasKey(stack, Metadata.ARMOR_KEY)) {
+    if (ItemUtil.getKey(stack, Metadata.ARMOR_KEY) != null) {
       if (!TempArmor.MANAGER.isTemp(player.getUUID())) {
         stack.setCount(0);
       }
@@ -308,7 +308,7 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
   private boolean onDropItem(LivingEntity entity, ItemStack stack) {
     if (!disabledWorld(entity)) {
       game().activationController().ignoreNextSwing(entity.getUUID());
-      return !ItemUtil.hasKey(stack, Metadata.ARMOR_KEY);
+      return ItemUtil.getKey(stack, Metadata.ARMOR_KEY) == null;
     }
     return true;
   }

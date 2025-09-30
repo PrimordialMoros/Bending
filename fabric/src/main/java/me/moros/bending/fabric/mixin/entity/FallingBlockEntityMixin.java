@@ -39,7 +39,7 @@ public abstract class FallingBlockEntityMixin {
     cancellable = true
   )
   private static void bending$onFall(Level level, BlockPos pos, BlockState state, CallbackInfoReturnable<FallingBlockEntity> cir, @Local FallingBlockEntity entity) {
-    if (level.isClientSide) {
+    if (level.isClientSide()) {
       return;
     }
     if (!ServerBlockEvents.CHANGE.invoker().onChange((ServerLevel) level, pos)) {

@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class IceBlockMixin {
   @Inject(method = "melt", at = @At("HEAD"), cancellable = true)
   private void bending$onMelt(BlockState state, Level level, BlockPos pos, CallbackInfo ci) {
-    if (!level.isClientSide && !ServerBlockEvents.CHANGE.invoker().onChange((ServerLevel) level, pos)) {
+    if (!level.isClientSide() && !ServerBlockEvents.CHANGE.invoker().onChange((ServerLevel) level, pos)) {
       ci.cancel();
     }
   }

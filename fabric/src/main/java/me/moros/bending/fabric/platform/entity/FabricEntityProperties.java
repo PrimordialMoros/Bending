@@ -148,7 +148,7 @@ final class FabricEntityProperties {
         .get(LivingEntity::getHealth))
       // misc
       .create(EntityProperties.NAME, Entity.class, b -> b
-        .get(e -> MinecraftServerAudiences.of(Objects.requireNonNull(e.getServer())).asAdventure(e.getName())))
+        .get(e -> MinecraftServerAudiences.of(Objects.requireNonNull(e.level().getServer())).asAdventure(e.getName())))
       .create(EntityProperties.POSITION, Entity.class, b -> b
         .get(e -> Vector3d.of(e.getX(), e.getY(), e.getZ()))
         .set((e, v) -> e.snapTo(v.x(), v.y(), v.z())))

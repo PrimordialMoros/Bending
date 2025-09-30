@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(BeaconBlockEntity.class)
-public abstract class BeaconBlockEntityMixin extends BlockEntityMixin implements Lockable {
+public abstract class BeaconBlockEntityMixin implements Lockable {
   @Shadow
   private LockCode lockKey;
 

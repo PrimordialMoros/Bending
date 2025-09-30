@@ -29,7 +29,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(HopperBlockEntity.class)
-public abstract class HopperBlockEntityMixin extends BlockEntityMixin {
+public abstract class HopperBlockEntityMixin {
   @Inject(
     method = "addItem(Lnet/minecraft/world/Container;Lnet/minecraft/world/entity/item/ItemEntity;)Z",
     at = @At("HEAD"), cancellable = true

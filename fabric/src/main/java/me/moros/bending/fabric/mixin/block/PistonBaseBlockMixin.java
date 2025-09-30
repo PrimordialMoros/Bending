@@ -43,7 +43,7 @@ public abstract class PistonBaseBlockMixin {
   )
   private void bending$onMoveBlocks(Level level, BlockPos blockPos, Direction direction, boolean extending,
                                     CallbackInfoReturnable<Boolean> cir, @Local PistonStructureResolver helper) {
-    if (level.isClientSide) {
+    if (level.isClientSide()) {
       return;
     }
     List<BlockPos> toPush = helper.getToPush();

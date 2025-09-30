@@ -43,7 +43,7 @@ public abstract class LivingEntityMixin extends EntityMixin {
     at = @At(value = "RETURN", ordinal = 1), cancellable = true
   )
   private void bending$onDrop(ItemStack stack, boolean dropAround, boolean traceItem, CallbackInfoReturnable<ItemEntity> cir) {
-    if (stack.isEmpty() || this.level().isClientSide) {
+    if (stack.isEmpty() || this.level().isClientSide()) {
       return;
     }
     if (!ServerItemEvents.DROP_ITEM.invoker().onDrop((LivingEntity) (Object) this, stack)) {

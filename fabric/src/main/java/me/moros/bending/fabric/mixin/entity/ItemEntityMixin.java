@@ -27,7 +27,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ItemEntity.class)
-public abstract class ItemEntityMixin extends EntityMixin {
+public abstract class ItemEntityMixin {
   @Inject(method = "tryToMerge", at = @At("HEAD"), cancellable = true)
   private void bending$onTryToMerge(ItemEntity other, CallbackInfo ci) {
     if (!ServerEntityEvents.MERGE.invoker().onMerge((ItemEntity) (Object) this, other)) {

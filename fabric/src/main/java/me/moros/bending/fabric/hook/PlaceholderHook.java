@@ -67,7 +67,7 @@ public record PlaceholderHook(PlaceholderProvider provider) implements Initializ
     if (user != null) {
       Component result = placeholder.apply(user);
       if (result != Component.empty()) {
-        return PlaceholderResult.value(asNative(Objects.requireNonNull(entity.getServer()), result));
+        return PlaceholderResult.value(asNative(Objects.requireNonNull(entity.level().getServer()), result));
       }
     }
     return PlaceholderResult.invalid();

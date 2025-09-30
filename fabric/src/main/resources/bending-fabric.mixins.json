@@ -12,7 +12,6 @@
     "accessor.ServerLoginPacketListenerImplAccess",
     "block.entity.BaseContainerBlockEntityMixin",
     "block.entity.BeaconBlockEntityMixin",
-    "block.entity.BlockEntityMixin",
     "block.entity.HopperBlockEntityMixin",
     "block.BlockBehaviourMixin",
     "block.BlockMixin",

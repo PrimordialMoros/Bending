@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class FrostedIceBlockMixin {
   @Inject(method = "slightlyMelt", at = @At("HEAD"), cancellable = true)
   private void bending$onSlightlyMelt(BlockState state, Level level, BlockPos pos, CallbackInfoReturnable<Boolean> ci) {
-    if (!level.isClientSide && !ServerBlockEvents.CHANGE.invoker().onChange((ServerLevel) level, pos)) {
+    if (!level.isClientSide() && !ServerBlockEvents.CHANGE.invoker().onChange((ServerLevel) level, pos)) {
       ci.setReturnValue(false);
     }
   }

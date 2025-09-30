@@ -27,10 +27,6 @@ import net.minecraft.world.item.component.CustomData;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class ItemUtil {
-  public static boolean hasKey(ItemStack stack, DataKey<?> key) {
-    return stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).contains(key.asString());
-  }
-
   public static <T> @Nullable T getKey(ItemStack stack, DataKey<T> key) {
     CustomData data = stack.get(DataComponents.CUSTOM_DATA);
     return data == null ? null : NBTUtil.read(data.copyTag(), key); // TODO avoid copy?
