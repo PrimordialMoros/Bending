@@ -82,7 +82,7 @@ fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.
 
 # Bukkit
 inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.19-dev" }
-grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.4" }
+grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "18.0.0" }
 towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.101.2.0" }
 bolt = { module = "org.popcraft:bolt-bukkit", version = "1.1.79" }
 worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.14" }
