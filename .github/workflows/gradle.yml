@@ -24,7 +24,7 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
       - name: Setup gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
       - name: Setup additional gradle cache
         uses: actions/cache@v4
         with:
@@ -87,12 +87,12 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
       - name: Setup gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
         with:
           cache-read-only: true
           add-job-summary: 'on-failure'
       - name: Generate and submit dependency graph
-        uses: gradle/actions/dependency-submission@v4
+        uses: gradle/actions/dependency-submission@v5
       - id: status
         name: Determine status
         run: ./gradlew printVersionStatus --quiet >> $GITHUB_ENV
