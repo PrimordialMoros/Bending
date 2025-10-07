@@ -2,23 +2,23 @@
 storage = "3.3.0"
 math = "3.0.0"
 tasker = "1.2.0"
-adventure = "4.24.0"
-adventure-fabric = "6.6.0"
+adventure = "4.25.0"
+adventure-fabric = "6.7.0"
 configurate = "4.2.0"
 cloud = "2.0.0"
 cloud-platform = "2.0.0-SNAPSHOT"
 bstats = "3.1.0"
 sponge-api = "16.0.0"
-sponge-common = "1.21.8-16.0.0-SNAPSHOT"
+sponge-common = "1.21.8-17.0.0-SNAPSHOT"
 paper-api = "1.21.9-R0.1-SNAPSHOT"
 minecraft = "1.21.9"
 fabric-loom = "1.11.8"
-fabric-api = "0.133.14+1.21.9"
+fabric-api = "0.134.0+1.21.9"
 fabric-loader = "0.17.2"
 shadow = "9.2.2"
-flyway = "11.13.2"
+flyway = "11.13.3"
 junit = "6.0.0"
-moddevgradle = "2.0.110"
+moddevgradle = "2.0.112"
 neoform = "1.21.9-20250930.151910"
 
 [libraries]
@@ -33,7 +33,7 @@ tasker-fabric = { module = "me.moros:tasker-fabric", version.ref = "tasker" }
 
 javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.2" }
-jdbi = { module = "org.jdbi:jdbi3-core", version = "3.49.5" }
+jdbi = { module = "org.jdbi:jdbi3-core", version = "3.49.6" }
 hikari = { module = "com.zaxxer:HikariCP", version = "7.0.2" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-mysql = { module = "org.flywaydb:flyway-mysql", version.ref = "flyway" }
@@ -78,13 +78,13 @@ fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fab
 fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
 fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "2.8.0+1.21.9" }
 sgui = { module = "eu.pb4:sgui", version = "1.11.0+1.21.9" }
-fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.4.1" }
+fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.5.0" }
 
 # Bukkit
 inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.19-dev" }
-grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.4" }
+grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.5" }
 towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.101.2.0" }
-bolt = { module = "org.popcraft:bolt-bukkit", version = "1.1.79" }
+bolt = { module = "org.popcraft:bolt-bukkit", version = "1.1.83" }
 worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.14" }
 papi = { module = "me.clip:placeholderapi", version = "2.11.6" }
 
@@ -115,4 +115,4 @@ jmh = { id = "me.champeau.jmh", version = "0.7.3" }
 fabric-loom = { id = "fabric-loom", version.ref = "fabric-loom" }
 paperweight-userdev = { id = "io.papermc.paperweight.userdev", version = "2.0.0-beta.19" }
 hangar = { id = "io.papermc.hangar-publish-plugin", version = "0.1.3" }
-run-paper = { id = "xyz.jpenilla.run-paper", version = "3.0.0" }
+run-paper = { id = "xyz.jpenilla.run-paper", version = "3.0.1" }
