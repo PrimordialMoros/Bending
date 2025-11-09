@@ -22,22 +22,26 @@ tasks {
     shadowJar {
         configurations = listOf(project.configurations.getByName("bendingImplementation"))
         archiveClassifier = ""
-        archiveBaseName = project.name
-        from(rootDir.resolve("LICENSE")) {
-            rename { "META-INF/${it}_${rootProject.name.uppercase()}" }
+        mergeServiceFiles()
+        filesMatching("META-INF/services/**") {
+            duplicatesStrategy = DuplicatesStrategy.INCLUDE
+        }
+        val licenseName = "LICENSE_${rootProject.name.uppercase()}"
+        from("$rootDir/LICENSE") {
+            into("META-INF")
+            rename { licenseName }
         }
         val excluded = setOf("checker-qual", "error_prone_annotations", "jspecify", "geantyref", "slf4j-api")
         dependencies {
             exclude {
                 excluded.contains(it.moduleName)
             }
+            reloc("org.bstats", "bstats")
+            reloc("com.seiama.event", "eventbus")
+            reloc("me.moros.storage", "storage")
         }
-        reloc("org.bstats", "bstats")
-        reloc("com.seiama.event", "eventbus")
-        reloc("me.moros.storage", "storage")
-        mergeServiceFiles()
     }
-    val copyJar = register("copyJar", CopyFile::class) {
+    val copyJar = register<CopyFile>("copyJar") {
         fileToCopy = platformExt.productionJar
         destination = platformExt.productionJar.flatMap { rootProject.layout.buildDirectory.file(it.asFile.name) }
         dependsOn(jar)

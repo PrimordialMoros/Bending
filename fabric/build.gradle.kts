@@ -62,9 +62,10 @@ tasks {
         }
     }
     named<Copy>("processResources") {
-        filesMatching("fabric.mod.json") {
-            expand(mapOf("version" to project.version, "mcVersion" to libs.versions.minecraft.get()))
-        }
+        expandProperties(
+            "fabric.mod.json",
+            mapOf("version" to project.version, "mcVersion" to libs.versions.minecraft.get())
+        )
     }
     remapJar {
         val shadowJar = getByName<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar")
