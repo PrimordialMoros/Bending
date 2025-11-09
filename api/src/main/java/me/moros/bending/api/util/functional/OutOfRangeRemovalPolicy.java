@@ -24,7 +24,7 @@ import java.util.function.Supplier;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.user.User;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Policy to remove ability when it reaches maximum range.

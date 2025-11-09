@@ -28,7 +28,7 @@ import me.moros.bending.api.util.data.DataKeyed;
 import me.moros.bending.fabric.platform.FabricMetadata;
 import net.kyori.adventure.audience.Audience;
 import net.minecraft.world.entity.projectile.Projectile;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class FabricEntity implements Entity {
   private net.minecraft.world.entity.Entity handle;

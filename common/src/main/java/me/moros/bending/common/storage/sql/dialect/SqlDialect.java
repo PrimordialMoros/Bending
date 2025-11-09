@@ -26,8 +26,8 @@ import com.zaxxer.hikari.HikariDataSource;
 import me.moros.bending.common.logging.Logger;
 import me.moros.storage.StorageDataSource;
 import me.moros.storage.StorageType;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.flywaydb.core.api.MigrationVersion;
+import org.jspecify.annotations.Nullable;
 
 public sealed interface SqlDialect extends SqlQueries permits SqlDialectImpl {
   boolean nativeUuid();

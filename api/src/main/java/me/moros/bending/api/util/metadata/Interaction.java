@@ -20,7 +20,7 @@
 package me.moros.bending.api.util.metadata;
 
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public sealed interface Interaction<T> permits BlockInteraction, EntityInteraction {
   @Nullable T value();

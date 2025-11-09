@@ -57,7 +57,7 @@ import org.bukkit.entity.FallingBlock;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public record BukkitWorld(org.bukkit.World handle) implements World {
   @Override

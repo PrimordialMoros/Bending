@@ -24,7 +24,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 record DataProviderImpl<T, V>(Predicate<T> supportPredicate,
                               @Nullable UnaryOperator<V> operator,

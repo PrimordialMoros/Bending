@@ -19,7 +19,7 @@
 
 package me.moros.bending.common.data;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public sealed interface DataProvider<T, V> permits DataProviderImpl {
   boolean supports(T instance);

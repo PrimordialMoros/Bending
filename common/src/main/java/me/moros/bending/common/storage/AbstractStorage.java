@@ -36,8 +36,7 @@ import me.moros.bending.api.storage.BendingStorage;
 import me.moros.bending.api.user.profile.BenderProfile;
 import me.moros.bending.api.util.Tasker;
 import me.moros.bending.common.logging.Logger;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.jspecify.annotations.Nullable;
 
 abstract class AbstractStorage implements BendingStorage {
   protected final Logger logger;
@@ -134,7 +133,7 @@ abstract class AbstractStorage implements BendingStorage {
     });
   }
 
-  private <R> Function<Throwable, @PolyNull R> logError(@PolyNull R def) {
+  private <R> Function<Throwable, R> logError(R def) {
     return t -> {
       logger.error(t.getMessage(), t);
       return def;

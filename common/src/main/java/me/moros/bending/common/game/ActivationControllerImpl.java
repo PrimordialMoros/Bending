@@ -68,7 +68,7 @@ import me.moros.bending.common.ability.water.passive.HydroSink;
 import me.moros.bending.common.ability.water.sequence.Iceberg;
 import me.moros.bending.common.ability.water.sequence.WaterGimbal;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public final class ActivationControllerImpl implements ActivationController {
   private final ControllerCache cache;

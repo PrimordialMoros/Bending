@@ -23,7 +23,7 @@ import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.property.Property;
 import me.moros.bending.fabric.platform.PlatformAdapter;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public record FabricBlockState(net.minecraft.world.level.block.state.BlockState handle,
                                BlockType type) implements BlockState {

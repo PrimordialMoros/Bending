@@ -34,7 +34,7 @@ import me.moros.bending.sponge.platform.PlatformAdapter;
 import me.moros.bending.sponge.platform.item.SpongeInventory;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.PickupRules;
 import org.spongepowered.api.entity.EntityTypes;

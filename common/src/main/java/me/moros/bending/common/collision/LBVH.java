@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import me.moros.bending.api.collision.geometry.AABB;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 //https://developer.nvidia.com/blog/thinking-parallel-part-iii-tree-construction-gpu/
 public class LBVH<E extends Boundable> {

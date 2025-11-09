@@ -22,7 +22,7 @@ package me.moros.bending.api.collision.raytrace;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 record RayTraceImpl(Vector3d position, @Nullable Block block, @Nullable Entity entity) implements CompositeRayTrace {
   @Override

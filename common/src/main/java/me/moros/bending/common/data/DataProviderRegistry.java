@@ -29,7 +29,7 @@ import java.util.function.UnaryOperator;
 import me.moros.bending.api.platform.property.Property;
 import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.api.util.data.DataKeyed;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public sealed interface DataProviderRegistry<T> permits DataProviderRegistryImpl {
   <V> @Nullable DataProvider<T, V> getProvider(DataKeyed<V> dataKeyed);

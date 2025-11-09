@@ -40,7 +40,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.projectile.AbstractArrow.Pickup;
 import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.item.ItemStack;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class FabricLivingEntity extends FabricEntity implements LivingEntity {
   public FabricLivingEntity(net.minecraft.world.entity.LivingEntity handle) {

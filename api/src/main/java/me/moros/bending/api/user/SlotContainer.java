@@ -23,7 +23,7 @@ import java.util.function.Predicate;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.preset.Preset;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 // CopyOnWrite slots
 final class SlotContainer {

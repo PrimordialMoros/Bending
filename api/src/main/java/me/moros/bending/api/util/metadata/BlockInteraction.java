@@ -23,7 +23,7 @@ import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.util.KeyUtil;
 import me.moros.bending.api.util.data.DataKey;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public record BlockInteraction(Block value, @Nullable Vector3d point, long timestamp) implements Interaction<Block> {
   public static final DataKey<BlockInteraction> KEY = KeyUtil.data("last-interacted-block", BlockInteraction.class);

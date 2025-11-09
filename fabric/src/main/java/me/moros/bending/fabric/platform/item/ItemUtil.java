@@ -24,7 +24,7 @@ import me.moros.bending.fabric.platform.NBTUtil;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class ItemUtil {
   public static <T> @Nullable T getKey(ItemStack stack, DataKey<T> key) {

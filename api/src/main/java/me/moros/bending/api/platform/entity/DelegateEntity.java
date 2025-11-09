@@ -27,7 +27,7 @@ import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.api.util.data.DataKeyed;
 import net.kyori.adventure.audience.Audience;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represents a platform entity.

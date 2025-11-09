@@ -25,7 +25,7 @@ import java.util.Optional;
 
 import me.moros.bending.api.util.data.DataKey;
 import net.minecraft.nbt.CompoundTag;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public final class NBTUtil {
   private NBTUtil() {

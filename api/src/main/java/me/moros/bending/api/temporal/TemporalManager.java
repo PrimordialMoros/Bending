@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 
 import me.moros.bending.api.platform.Platform;
 import me.moros.tasker.TimerWheel;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Base implementation for registering and managing {@link Temporary}.

@@ -39,8 +39,7 @@ import me.moros.bending.api.platform.particle.Particle;
 import me.moros.bending.api.temporal.TempBlock;
 import me.moros.bending.api.util.Tasker;
 import me.moros.math.FastMath;
-import org.checkerframework.checker.index.qual.NonNegative;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class Fracture implements Updatable {
   private final Collection<Block> wall;
@@ -127,8 +126,8 @@ public class Fracture implements Updatable {
       this.constructor = constructor;
     }
 
-    public Builder<T> interval(@NonNegative long interval) {
-      this.interval = interval;
+    public Builder<T> interval(long interval) {
+      this.interval = Math.max(0, interval);
       return this;
     }
 

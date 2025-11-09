@@ -42,7 +42,7 @@ import me.moros.bending.api.util.data.DataContainer;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.util.TriState;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represents a user that can bend.

@@ -30,7 +30,7 @@ import me.moros.bending.api.temporal.TempBlock;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * State implementation for a source block that travels towards the user.

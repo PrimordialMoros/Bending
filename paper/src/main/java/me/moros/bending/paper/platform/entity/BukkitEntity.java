@@ -28,7 +28,7 @@ import me.moros.bending.api.util.data.DataKeyed;
 import me.moros.bending.paper.platform.BukkitDataHolder;
 import net.kyori.adventure.audience.Audience;
 import org.bukkit.entity.Projectile;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class BukkitEntity implements Entity {
   private final org.bukkit.entity.Entity handle;

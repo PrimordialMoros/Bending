@@ -20,7 +20,6 @@
 package me.moros.bending.api.ability;
 
 import me.moros.bending.api.user.User;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 /**
  * Represents a base ability instance.
@@ -40,7 +39,7 @@ public abstract class AbilityInstance implements Ability {
   }
 
   @Override
-  public @MonotonicNonNull User user() {
+  public User user() {
     return user;
   }
 }

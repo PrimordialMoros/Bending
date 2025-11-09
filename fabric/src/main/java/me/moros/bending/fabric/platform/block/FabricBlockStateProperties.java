@@ -23,7 +23,7 @@ import java.util.Map;
 
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Property;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static java.util.Map.entry;
 import static me.moros.bending.api.platform.block.BlockStateProperties.*;

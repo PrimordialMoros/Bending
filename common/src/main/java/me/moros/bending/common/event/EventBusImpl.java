@@ -48,7 +48,7 @@ import me.moros.bending.api.util.BendingEffect;
 import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.common.logging.Logger;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class EventBusImpl implements EventBus {
   private final EventRegistry<BendingEvent> eventRegistry;

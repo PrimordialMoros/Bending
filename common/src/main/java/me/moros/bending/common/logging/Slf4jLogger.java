@@ -19,7 +19,7 @@
 
 package me.moros.bending.common.logging;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public record Slf4jLogger(org.slf4j.Logger handle) implements Logger {
   @Override

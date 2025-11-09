@@ -31,7 +31,7 @@ import java.util.stream.StreamSupport;
 
 import me.moros.bending.api.registry.Registry;
 import net.kyori.adventure.key.Key;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Utility class to handle chat related functionality.

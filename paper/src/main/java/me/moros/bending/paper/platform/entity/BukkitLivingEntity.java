@@ -40,7 +40,7 @@ import me.moros.math.Vector3d;
 import org.bukkit.Location;
 import org.bukkit.entity.AbstractArrow.PickupStatus;
 import org.bukkit.util.Vector;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class BukkitLivingEntity extends BukkitEntity implements LivingEntity {
   public BukkitLivingEntity(org.bukkit.entity.LivingEntity handle) {

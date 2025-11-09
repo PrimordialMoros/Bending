@@ -30,7 +30,7 @@ import me.moros.bending.CollisionUtil.CachedAbility;
 import me.moros.bending.CollisionUtil.CollectionType;
 import me.moros.bending.api.collision.geometry.Collider;
 import me.moros.bending.common.collision.LBVH;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;

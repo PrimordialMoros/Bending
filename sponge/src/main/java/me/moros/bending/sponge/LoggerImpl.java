@@ -20,7 +20,7 @@
 package me.moros.bending.sponge;
 
 import me.moros.bending.common.logging.Logger;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 record LoggerImpl(org.apache.logging.log4j.Logger handle) implements Logger {
   @Override

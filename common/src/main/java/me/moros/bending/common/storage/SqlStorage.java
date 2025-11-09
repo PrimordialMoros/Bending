@@ -48,7 +48,6 @@ import me.moros.bending.common.storage.sql.migration.V3__Migrate_from_legacy;
 import me.moros.bending.common.util.UUIDUtil;
 import me.moros.storage.StorageDataSource;
 import net.kyori.adventure.util.Index;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.flywaydb.core.Flyway;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.argument.AbstractArgumentFactory;
@@ -57,6 +56,7 @@ import org.jdbi.v3.core.config.ConfigRegistry;
 import org.jdbi.v3.core.mapper.ColumnMapper;
 import org.jdbi.v3.core.statement.PreparedBatch;
 import org.jdbi.v3.core.statement.StatementContext;
+import org.jspecify.annotations.Nullable;
 
 final class SqlStorage extends AbstractStorage {
   private final Index<UUID, AbilityDescription> abilityIndex;

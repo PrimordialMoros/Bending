@@ -24,7 +24,6 @@ import java.util.concurrent.Executors;
 import me.moros.tasker.executor.AsyncExecutor;
 import me.moros.tasker.executor.SimpleAsyncExecutor;
 import me.moros.tasker.executor.SyncExecutor;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 /**
  * Utility class to easily schedule sync, async tasks.
@@ -44,7 +43,7 @@ public final class Tasker {
    * Get the sync task executor.
    * @return the sync task executor
    */
-  public static @MonotonicNonNull SyncExecutor sync() {
+  public static SyncExecutor sync() {
     return SYNC;
   }
 

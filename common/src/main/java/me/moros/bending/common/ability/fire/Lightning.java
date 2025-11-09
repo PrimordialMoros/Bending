@@ -70,7 +70,7 @@ import me.moros.bending.common.ability.earth.MetalCable;
 import me.moros.math.Rotation;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class Lightning extends AbilityInstance {
   private static final double POINT_DISTANCE = 0.2;

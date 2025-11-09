@@ -37,7 +37,7 @@ import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 import me.moros.math.Vector3i;
 import me.moros.math.VectorUtil;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public abstract class BlockShot implements Updatable, SimpleAbility {
   private User user;

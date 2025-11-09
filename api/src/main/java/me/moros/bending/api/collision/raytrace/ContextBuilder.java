@@ -33,7 +33,7 @@ import me.moros.bending.api.platform.world.World;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import me.moros.math.Vector3i;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Utility class to easily cast ray traces.

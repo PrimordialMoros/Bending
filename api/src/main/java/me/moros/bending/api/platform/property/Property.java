@@ -22,7 +22,7 @@ package me.moros.bending.api.platform.property;
 import me.moros.bending.api.util.KeyUtil;
 import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.api.util.data.DataKeyed;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public sealed interface Property<T> extends DataKeyed<T> permits SimpleProperty {
   default boolean isValidValue(@Nullable T value) {

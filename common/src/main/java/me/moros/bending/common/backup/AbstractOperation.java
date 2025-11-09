@@ -31,7 +31,7 @@ import me.moros.bending.api.user.profile.BenderProfile;
 import me.moros.bending.api.util.Tasker;
 import me.moros.bending.common.Bending;
 import me.moros.tasker.Task;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 abstract sealed class AbstractOperation implements Operation permits ExportOperation, ImportOperation {
   protected static final String SUFFIX = ".json.gz";

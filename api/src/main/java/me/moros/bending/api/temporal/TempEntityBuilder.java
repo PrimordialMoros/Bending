@@ -28,7 +28,7 @@ import java.util.UUID;
 
 import me.moros.bending.api.platform.world.World;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @SuppressWarnings("unchecked")
 abstract class TempEntityBuilder<T, R, B extends TempEntityBuilder<T, R, B>> {

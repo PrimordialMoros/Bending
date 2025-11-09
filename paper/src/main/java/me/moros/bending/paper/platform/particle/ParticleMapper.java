@@ -29,7 +29,7 @@ import me.moros.bending.paper.platform.PlatformAdapter;
 import org.bukkit.Color;
 import org.bukkit.Particle.DustOptions;
 import org.bukkit.Particle.DustTransition;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public final class ParticleMapper {
   public static <T> @Nullable Object mapParticleData(ParticleContext<T> context) {

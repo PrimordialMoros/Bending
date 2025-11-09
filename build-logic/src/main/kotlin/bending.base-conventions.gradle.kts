@@ -1,7 +1,6 @@
 plugins {
     id("java-library")
     id("com.gradleup.shadow")
-    id("org.checkerframework")
 }
 
 group = rootProject.group

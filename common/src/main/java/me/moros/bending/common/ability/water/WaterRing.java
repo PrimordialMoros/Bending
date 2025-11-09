@@ -64,7 +64,7 @@ import me.moros.bending.common.ability.water.sequence.WaterGimbal;
 import me.moros.math.FastMath;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class WaterRing extends AbilityInstance {
   private static final double RING_RADIUS = 2.8;

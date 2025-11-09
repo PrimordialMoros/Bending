@@ -22,7 +22,7 @@ package me.moros.bending.api.util.data;
 import java.util.Map;
 import java.util.Optional;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 class SimpleDataContainer implements DataContainer {
   private final Map<DataKey<?>, Object> data;

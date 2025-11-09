@@ -19,7 +19,7 @@
 
 package me.moros.bending.api.platform.property;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public interface PropertyHolder {
   <V extends Comparable<V>> @Nullable V property(Property<V> property);

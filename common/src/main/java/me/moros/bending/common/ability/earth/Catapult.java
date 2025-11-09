@@ -45,7 +45,7 @@ import me.moros.bending.api.util.BendingEffect;
 import me.moros.bending.api.util.material.EarthMaterials;
 import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class Catapult extends AbilityInstance {
   private static final double ANGLE = Math.toRadians(60);

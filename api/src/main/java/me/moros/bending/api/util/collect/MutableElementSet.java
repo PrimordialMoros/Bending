@@ -29,7 +29,7 @@ import java.util.Spliterators;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import me.moros.bending.api.ability.element.Element;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 final class MutableElementSet extends AbstractSet<Element> implements ElementSet {
   static final int SPLITERATOR_CHARACTERISTICS = Spliterator.SUBSIZED | Spliterator.NONNULL | Spliterator.SIZED |

@@ -34,7 +34,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.Tag;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 public record MiniPlaceholdersHook(PlaceholderProvider provider) implements Initializer {
   public MiniPlaceholdersHook() {

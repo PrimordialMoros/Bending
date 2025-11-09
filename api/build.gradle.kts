@@ -5,6 +5,7 @@ plugins {
 version = apiVersion()
 
 dependencies {
+    api(libs.jspecify)
     api(libs.math.core)
     api(libs.tasker.core)
     compileOnlyApi(libs.adventure.api)

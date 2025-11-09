@@ -25,7 +25,7 @@ import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.util.KeyUtil;
 import me.moros.bending.api.util.data.DataKey;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public record EntityInteraction(WeakReference<Entity> entity, @Nullable Vector3d point,
                                 long timestamp) implements Interaction<Entity> {

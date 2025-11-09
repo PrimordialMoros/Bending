@@ -45,7 +45,7 @@ import me.moros.bending.api.util.collect.ElementSet;
 import me.moros.bending.api.util.data.DataContainer;
 import me.moros.bending.api.util.functional.BendingConditions;
 import net.kyori.adventure.util.TriState;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Base {@link User} implementation for all living entities.

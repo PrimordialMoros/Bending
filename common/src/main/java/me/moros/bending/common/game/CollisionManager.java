@@ -42,7 +42,7 @@ import me.moros.bending.common.collision.CollisionQuery.Pair;
 import me.moros.bending.common.collision.LBVH;
 import me.moros.bending.common.collision.MortonEncoded;
 import me.moros.math.FastMath;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public final class CollisionManager implements Updatable {
   private final AbilityManager manager;

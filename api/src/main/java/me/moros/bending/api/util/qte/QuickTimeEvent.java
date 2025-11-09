@@ -22,7 +22,6 @@ package me.moros.bending.api.util.qte;
 import java.util.concurrent.ThreadLocalRandom;
 
 import me.moros.bending.api.ability.Updatable;
-import me.moros.bending.api.platform.sound.Sound;
 import me.moros.math.FastMath;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.bossbar.BossBar;

@@ -29,7 +29,7 @@ import me.moros.bending.api.platform.entity.DelegateEntity;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.world.World;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class TempEntity extends Temporary {
   public static final TemporalManager<Integer, TempEntity> MANAGER = new TemporalManager<>(600);

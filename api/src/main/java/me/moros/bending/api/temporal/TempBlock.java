@@ -41,7 +41,7 @@ import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.api.util.material.WaterMaterials;
 import me.moros.math.FastMath;
 import me.moros.tasker.TimerWheel;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public final class TempBlock extends Temporary {
   private static final TimerWheel wheel = TimerWheel.hierarchical();

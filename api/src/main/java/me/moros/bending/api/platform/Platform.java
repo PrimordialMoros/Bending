@@ -21,7 +21,6 @@ package me.moros.bending.api.platform;
 
 import me.moros.bending.api.adapter.NativeAdapter;
 import me.moros.tasker.executor.TickAdapter;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 public interface Platform extends TickAdapter {
   /**
@@ -34,7 +33,7 @@ public interface Platform extends TickAdapter {
     }
   }
 
-  static @MonotonicNonNull Platform instance() {
+  static Platform instance() {
     return Holder.INSTANCE;
   }
 

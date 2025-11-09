@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.LongAdder;
 
 import me.moros.bending.api.storage.BendingStorage;
 import me.moros.bending.api.user.profile.BenderProfile;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 final class DummyStorage implements BendingStorage {
   static final BendingStorage INSTANCE = new DummyStorage();

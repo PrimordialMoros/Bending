@@ -24,7 +24,7 @@ import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.property.Property;
 import me.moros.bending.paper.platform.PlatformAdapter;
 import org.bukkit.block.data.BlockData;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class BukkitBlockState implements BlockState {
   private final BlockData handle;

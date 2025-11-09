@@ -19,6 +19,7 @@ fabric-loader = "0.17.3"
 shadow = "9.2.2"
 flyway = "11.16.0"
 junit = "6.0.1"
+jspecify = "1.0.0"
 moddevgradle = "2.0.116"
 neoform = "1.21.10-20251010.172816"
 
@@ -45,6 +46,8 @@ eventbus = { module = "com.seiama:event-api", version = "1.0.0-SNAPSHOT" }
 junit-bom = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit-platform = { module = "org.junit.platform:junit-platform-launcher" }
+
+jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 
 adventure-api = { module = "net.kyori:adventure-api", version.ref = "adventure" }
 adventure-minimessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "adventure" }
@@ -99,7 +102,6 @@ shadow = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "s
 maven-publish = { module = "com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin", version = "0.34.0" }
 moddevgradle = { module = "net.neoforged:moddev-gradle", version.ref = "moddevgradle" }
 minotaur = { module = "com.modrinth.minotaur:Minotaur", version = "2.8.10" }
-checker = { module = "org.checkerframework:checkerframework-gradle-plugin", version = "0.6.61" }
 
 [bundles]
 cloud = ["cloud-core", "cloud-minecraft"]

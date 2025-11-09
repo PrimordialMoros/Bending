@@ -249,6 +249,7 @@ public class BloodBending extends AbilityInstance {
       target.applyVelocity(parent, direction.normalize().multiply(Math.clamp(factor, -0.5, 0.5)));
       return UpdateResult.CONTINUE;
     }
+
     private void panic() {
       maxSpeedFactor = MAX_PANIC_SPEED_FACTOR;
     }

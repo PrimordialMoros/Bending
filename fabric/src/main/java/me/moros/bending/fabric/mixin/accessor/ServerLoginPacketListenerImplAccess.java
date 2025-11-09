@@ -21,7 +21,7 @@ package me.moros.bending.fabric.mixin.accessor;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 

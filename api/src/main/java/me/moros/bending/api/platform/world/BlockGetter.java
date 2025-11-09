@@ -33,7 +33,7 @@ import me.moros.bending.api.util.data.DataHolder;
 import me.moros.math.FastMath;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public interface BlockGetter {
   default Block blockAt(Position position) {

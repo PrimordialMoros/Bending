@@ -25,7 +25,7 @@ import me.moros.bending.api.ability.element.Element;
 import me.moros.bending.api.util.ColorPalette;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public enum Chakra {
   AIR_CHAKRA(Element.AIR),

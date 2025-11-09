@@ -31,7 +31,7 @@ import me.moros.bending.api.platform.potion.PotionEffect;
 import me.moros.bending.api.platform.property.IntegerProperty;
 import me.moros.bending.api.user.User;
 import me.moros.math.FastMath;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represents special effects applied by bending abilities.

@@ -23,7 +23,7 @@ import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.property.Property;
 import me.moros.bending.sponge.platform.PlatformAdapter;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public record SpongeBlockState(org.spongepowered.api.block.BlockState handle, BlockType type) implements BlockState {
   public SpongeBlockState(org.spongepowered.api.block.BlockState handle) {

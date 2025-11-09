@@ -30,7 +30,7 @@ import me.moros.bending.api.util.KeyUtil;
 import me.moros.bending.api.util.data.DataKey;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Common interface for bending registries.

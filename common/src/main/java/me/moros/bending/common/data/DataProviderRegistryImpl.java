@@ -23,7 +23,7 @@ import java.util.Map;
 
 import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.api.util.data.DataKeyed;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 record DataProviderRegistryImpl<T>(Map<DataKey<?>, Object> providerMap) implements DataProviderRegistry<T> {
   @SuppressWarnings("unchecked")

@@ -54,7 +54,7 @@ import net.minecraft.world.scores.Team;
 import net.minecraft.world.scores.Team.CollisionRule;
 import net.minecraft.world.scores.Team.Visibility;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria.RenderType;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static net.kyori.adventure.text.format.TextDecoration.STRIKETHROUGH;
 

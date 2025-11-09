@@ -33,7 +33,7 @@ import me.moros.bending.api.platform.potion.PotionEffect;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.util.TriState;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public interface LivingEntity extends Entity {
   double eyeHeight();

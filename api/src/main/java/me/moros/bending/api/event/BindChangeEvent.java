@@ -21,7 +21,7 @@ package me.moros.bending.api.event;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.preset.Preset;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represents an event that is called when a user's binds change.

@@ -21,7 +21,7 @@ package me.moros.bending.api.platform.property;
 
 import me.moros.bending.api.util.KeyUtil;
 import me.moros.bending.api.util.data.DataKey;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public final class IntegerProperty extends SimpleProperty<Integer> {
   private final int min;

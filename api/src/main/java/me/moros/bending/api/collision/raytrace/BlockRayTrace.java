@@ -20,7 +20,7 @@
 package me.moros.bending.api.collision.raytrace;
 
 import me.moros.bending.api.platform.block.Block;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represents a raytrace result that can hit a block.

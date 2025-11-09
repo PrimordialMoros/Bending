@@ -27,9 +27,9 @@ import java.util.stream.Stream;
 
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.preset.Preset;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jdbi.v3.core.result.RowReducer;
 import org.jdbi.v3.core.result.RowView;
+import org.jspecify.annotations.Nullable;
 
 public record PresetAccumulator(Function<UUID, @Nullable AbilityDescription> index)
   implements RowReducer<Map<String, AbilityDescription[]>, Preset> {

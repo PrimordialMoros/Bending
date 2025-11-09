@@ -24,7 +24,7 @@ import me.moros.bending.api.ability.preset.Preset;
 import me.moros.bending.api.event.BindChangeEvent;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.event.base.AbstractCancellableUserEvent;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class BindChangeEventImpl {
   public static class Single extends AbstractCancellableUserEvent implements BindChangeEvent.Single {

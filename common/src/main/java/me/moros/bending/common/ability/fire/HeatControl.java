@@ -56,7 +56,7 @@ import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.bending.common.util.BatchQueue;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.text.Component;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class HeatControl extends AbilityInstance {
   private enum Mode {COOLING, HEATING}

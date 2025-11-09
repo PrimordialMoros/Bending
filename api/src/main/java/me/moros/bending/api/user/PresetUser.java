@@ -24,7 +24,7 @@ import java.util.Set;
 import me.moros.bending.api.ability.preset.Preset;
 import me.moros.bending.api.ability.preset.PresetRegisterResult;
 import me.moros.bending.api.event.PresetRegisterEvent;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represents a user that has a set of {@link Preset Presets}.

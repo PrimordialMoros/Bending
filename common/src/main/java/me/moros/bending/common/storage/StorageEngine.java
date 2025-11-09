@@ -24,7 +24,7 @@ import java.util.Optional;
 import me.moros.bending.common.storage.file.loader.JsonLoader;
 import me.moros.bending.common.storage.file.loader.Loader;
 import me.moros.storage.StorageType;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public enum StorageEngine {
   // Remote databases

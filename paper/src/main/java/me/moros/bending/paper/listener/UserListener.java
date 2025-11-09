@@ -84,7 +84,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public record UserListener(Game game) implements Listener, BukkitListener {
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)

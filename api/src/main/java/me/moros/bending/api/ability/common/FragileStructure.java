@@ -38,7 +38,7 @@ import me.moros.bending.api.util.KeyUtil;
 import me.moros.bending.api.util.data.DataKey;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class FragileStructure implements Iterable<Block> {
   public static final DataKey<FragileStructure> DESTRUCTIBLE = KeyUtil.data("destructible", FragileStructure.class);

@@ -31,7 +31,7 @@ import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.user.User;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 final class DummyActivationController implements ActivationController {
   static final ActivationController INSTANCE = new DummyActivationController();

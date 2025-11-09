@@ -42,8 +42,6 @@ import me.moros.bending.api.temporal.TempBlock;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.material.MaterialUtil;
 import me.moros.math.Vector3d;
-import org.checkerframework.checker.index.qual.NonNegative;
-import org.checkerframework.checker.index.qual.Positive;
 
 public class Pillar implements Updatable, Iterable<Block> {
   private final User user;
@@ -203,13 +201,13 @@ public class Pillar implements Updatable, Iterable<Block> {
       return this;
     }
 
-    public Builder<T> interval(@NonNegative long interval) {
-      this.interval = interval;
+    public Builder<T> interval(long interval) {
+      this.interval = Math.max(0, interval);
       return this;
     }
 
-    public Builder<T> duration(@NonNegative long duration) {
-      this.duration = duration;
+    public Builder<T> duration(long duration) {
+      this.duration = Math.max(0, duration);
       return this;
     }
 
@@ -218,11 +216,11 @@ public class Pillar implements Updatable, Iterable<Block> {
       return this;
     }
 
-    public Optional<T> build(@Positive int length) {
+    public Optional<T> build(int length) {
       return build(length, length);
     }
 
-    public Optional<T> build(@Positive int length, @Positive int distance) {
+    public Optional<T> build(int length, int distance) {
       int maxLength = validateLength(length);
       if (maxLength < 1) {
         return Optional.empty();

@@ -26,7 +26,6 @@ import me.moros.bending.api.collision.Collision;
 import me.moros.bending.api.collision.geometry.Collider;
 import me.moros.bending.api.game.AbilityManager;
 import me.moros.bending.api.user.User;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 /**
  * Represents an ability that can be instantiated.
@@ -55,7 +54,7 @@ public interface Ability extends Updatable {
    * Get the user that is currently controlling this ability instance.
    * @return the user for this ability
    */
-  @MonotonicNonNull User user();
+  User user();
 
   /**
    * Called when the user of the ability instance is changed.

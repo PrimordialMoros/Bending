@@ -43,7 +43,7 @@ import net.kyori.adventure.bossbar.BossBar.Color;
 import net.kyori.adventure.bossbar.BossBar.Overlay;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.util.TriState;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public final class ActionLimiter extends Temporary {
   public static final TemporalManager<UUID, ActionLimiter> MANAGER = new TemporalManager<>(600) {

@@ -24,7 +24,7 @@ import java.util.function.Function;
 
 import me.moros.bending.api.registry.SimpleRegistry.SimpleMutableRegistry;
 import me.moros.bending.api.util.data.DataKey;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Utility class for building registries.

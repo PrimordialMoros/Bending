@@ -27,7 +27,7 @@ import java.util.function.Predicate;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public final class TagBuilder<V extends Keyed, R extends Tag<V>> {
   private final Function<Container<V>, R> function;

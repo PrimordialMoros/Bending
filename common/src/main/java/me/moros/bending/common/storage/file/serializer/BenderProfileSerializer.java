@@ -31,7 +31,7 @@ import me.moros.bending.api.ability.preset.Preset;
 import me.moros.bending.api.user.profile.BenderProfile;
 import me.moros.bending.api.util.collect.ElementSet;
 import me.moros.bending.common.storage.file.IOFunction;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 

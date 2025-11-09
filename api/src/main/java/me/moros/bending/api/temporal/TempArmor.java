@@ -35,7 +35,7 @@ import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.metadata.Metadata;
 import net.kyori.adventure.text.Component;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public final class TempArmor extends Temporary {
   public static final TemporalManager<UUID, TempArmor> MANAGER = new TemporalManager<>(2400);

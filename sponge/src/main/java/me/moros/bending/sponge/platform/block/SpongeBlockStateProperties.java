@@ -22,7 +22,7 @@ package me.moros.bending.sponge.platform.block;
 import java.util.Map;
 
 import me.moros.bending.api.platform.property.Property;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.api.state.BooleanStateProperties;
 import org.spongepowered.api.state.IntegerStateProperties;
 import org.spongepowered.api.state.StateProperty;

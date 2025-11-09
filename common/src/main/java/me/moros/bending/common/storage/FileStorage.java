@@ -38,7 +38,7 @@ import me.moros.bending.api.util.TextUtil;
 import me.moros.bending.common.logging.Logger;
 import me.moros.bending.common.storage.file.IOFunction;
 import me.moros.bending.common.storage.file.loader.Loader;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.configurate.NodePath;
 import org.spongepowered.configurate.reference.ConfigurationReference;
 

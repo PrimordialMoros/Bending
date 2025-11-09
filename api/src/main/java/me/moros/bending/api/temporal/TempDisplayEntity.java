@@ -37,7 +37,7 @@ import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.world.World;
 import me.moros.math.Vector3d;
 import net.kyori.adventure.text.Component;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class TempDisplayEntity extends Temporary {
   public static final TemporalManager<Integer, TempDisplayEntity> MANAGER = new TemporalManager<>(600) {

@@ -23,7 +23,7 @@ import java.util.function.Function;
 
 import me.moros.bending.api.util.data.DataKey;
 import net.kyori.adventure.key.Key;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Utility class for keys.

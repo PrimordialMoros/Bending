@@ -47,7 +47,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.util.TriState;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public abstract class AbstractGui<ItemStack, T> implements ElementGui {
   protected static final Supplier<ItemSnapshot> BACKGROUND = Suppliers.lazy(() ->

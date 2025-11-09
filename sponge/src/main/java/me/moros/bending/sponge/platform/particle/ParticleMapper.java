@@ -25,7 +25,7 @@ import me.moros.bending.api.platform.particle.Particle;
 import me.moros.bending.api.platform.particle.ParticleContext;
 import me.moros.bending.api.platform.particle.ParticleDustData;
 import me.moros.bending.sponge.platform.PlatformAdapter;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleOptions;

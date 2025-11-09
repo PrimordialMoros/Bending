@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Objects;
 
 import me.moros.bending.api.ability.AbilityDescription.Sequence;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Utility to link multiple {@link SequenceStep}.
