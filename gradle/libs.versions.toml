@@ -1,7 +1,7 @@
 [versions]
-storage = "3.3.0"
-math = "3.0.0"
-tasker = "1.2.0"
+storage = "4.0.0"
+math = "4.0.0-SNAPSHOT"
+tasker = "2.0.0"
 adventure = "4.25.0"
 adventure-fabric = "6.7.0"
 configurate = "4.2.0"

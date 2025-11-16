@@ -3,7 +3,6 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 pluginManagement {
     repositories {
         gradlePluginPortal()
-        maven("https://repo.spongepowered.org/repository/maven-public/")
         maven("https://maven.fabricmc.net/")
     }
     includeBuild("build-logic")
