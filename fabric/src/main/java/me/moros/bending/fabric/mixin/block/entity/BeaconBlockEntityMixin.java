@@ -19,17 +19,16 @@
 
 package me.moros.bending.fabric.mixin.block.entity;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.sugar.Local;
 import me.moros.bending.api.platform.block.Lockable;
 import me.moros.bending.fabric.event.ServerItemEvents;
 import net.minecraft.world.LockCode;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(BeaconBlockEntity.class)
 public abstract class BeaconBlockEntityMixin implements Lockable {
@@ -46,10 +45,14 @@ public abstract class BeaconBlockEntityMixin implements Lockable {
     lockKey = LockCode.NO_LOCK;
   }
 
-  @Inject(method = "createMenu", at = @At(value = "HEAD"), cancellable = true)
-  private void bending$createMenu(int i, Inventory inventory, Player player, CallbackInfoReturnable<Boolean> cir) {
+  @ModifyExpressionValue(
+    method = "createMenu",
+    at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BaseContainerBlockEntity;canUnlock(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/LockCode;Lnet/minecraft/network/chat/Component;)Z")
+  )
+  private boolean bending$canUnlock(boolean original, @Local(argsOnly = true) Player player) {
     if (!player.isSpectator() && ServerItemEvents.ACCESS_LOCK.invoker().onAccess(player, this)) {
-      cir.setReturnValue(true);
+      return true;
     }
+    return original;
   }
 }
