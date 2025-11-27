@@ -24,8 +24,8 @@ import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
+import org.joml.Quaternionfc;
+import org.joml.Vector3fc;
 
 record EntityMeta<T>(int index, EntityDataSerializer<T> serializer) {
   // Entity
@@ -37,10 +37,10 @@ record EntityMeta<T>(int index, EntityDataSerializer<T> serializer) {
   static final EntityMeta<Integer> INTERPOLATION_DELAY = create(8, EntityDataSerializers.INT);
   static final EntityMeta<Integer> TRANSFORMATION_INTERPOLATION_DURATION = create(9, EntityDataSerializers.INT);
   static final EntityMeta<Integer> POSITION_INTERPOLATION_DURATION = create(10, EntityDataSerializers.INT);
-  static final EntityMeta<Vector3f> TRANSLATION = create(11, EntityDataSerializers.VECTOR3);
-  static final EntityMeta<Vector3f> SCALE = create(12, EntityDataSerializers.VECTOR3);
-  static final EntityMeta<Quaternionf> ROTATION_LEFT = create(13, EntityDataSerializers.QUATERNION);
-  static final EntityMeta<Quaternionf> ROTATION_RIGHT = create(14, EntityDataSerializers.QUATERNION);
+  static final EntityMeta<Vector3fc> TRANSLATION = create(11, EntityDataSerializers.VECTOR3);
+  static final EntityMeta<Vector3fc> SCALE = create(12, EntityDataSerializers.VECTOR3);
+  static final EntityMeta<Quaternionfc> ROTATION_LEFT = create(13, EntityDataSerializers.QUATERNION);
+  static final EntityMeta<Quaternionfc> ROTATION_RIGHT = create(14, EntityDataSerializers.QUATERNION);
   static final EntityMeta<Byte> BILLBOARD = create(15, EntityDataSerializers.BYTE);
   static final EntityMeta<Integer> BRIGHTNESS = create(16, EntityDataSerializers.INT);
   static final EntityMeta<Float> VIEW_RANGE = create(17, EntityDataSerializers.FLOAT);

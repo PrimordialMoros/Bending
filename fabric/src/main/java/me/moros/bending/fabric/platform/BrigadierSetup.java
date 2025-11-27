@@ -22,7 +22,7 @@ package me.moros.bending.fabric.platform;
 import io.leangen.geantyref.TypeToken;
 import me.moros.bending.common.command.parser.AbilityParser;
 import net.kyori.adventure.audience.Audience;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.IdentifierArgument;
 import org.incendo.cloud.brigadier.BrigadierManagerHolder;
 
 public final class BrigadierSetup {
@@ -33,7 +33,7 @@ public final class BrigadierSetup {
     holder.brigadierManager().registerMapping(
       new TypeToken<AbilityParser<C>>() {
       },
-      builder -> builder.toConstant(ResourceLocationArgument.id()).cloudSuggestions()
+      builder -> builder.toConstant(IdentifierArgument.id()).cloudSuggestions()
     );
   }
 }

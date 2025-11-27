@@ -32,7 +32,12 @@ dependencies {
     compileOnly(libs.grief.prevention)
     compileOnly(libs.towny)
     compileOnly(libs.bolt)
-    compileOnly(libs.worldguard)
+    compileOnly(libs.worldguard) {
+        // TODO remove exclusions when worldguard updates constraints
+        exclude(module = "gson")
+        exclude(module = "guava")
+        exclude(module = "fastutil")
+    }
     compileOnly(libs.papi)
     paperweight.paperDevBundle(libs.versions.paper.api)
 }

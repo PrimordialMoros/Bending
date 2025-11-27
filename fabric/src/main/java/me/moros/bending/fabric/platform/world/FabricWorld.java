@@ -220,7 +220,7 @@ public record FabricWorld(ServerLevel handle) implements World {
       entity = new ItemEntity(handle(), x, y, z, Items.STONE.getDefaultInstance());
     }
     if (entity == null) {
-      var entityType = BuiltInRegistries.ENTITY_TYPE.getValue(PlatformAdapter.rsl(type.key()));
+      var entityType = BuiltInRegistries.ENTITY_TYPE.getValue(PlatformAdapter.identifier(type.key()));
       entity = Objects.requireNonNull(entityType.create(handle(), EntitySpawnReason.TRIGGERED)); // TODO use different reason?
       entity.snapTo(x, y, z);
     }
@@ -306,6 +306,6 @@ public record FabricWorld(ServerLevel handle) implements World {
 
   @Override
   public Key key() {
-    return handle().dimension().location();
+    return handle().dimension().identifier();
   }
 }

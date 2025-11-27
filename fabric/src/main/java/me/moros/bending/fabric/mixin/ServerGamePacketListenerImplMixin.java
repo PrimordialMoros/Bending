@@ -52,6 +52,8 @@ public abstract class ServerGamePacketListenerImplMixin {
   @Shadow
   public abstract void teleport(PositionMoveRotation positionMoveRotation, Set<Relative> relativeArguments);
 
+  @Shadow public abstract boolean hasClientLoaded();
+
   @Inject(method = "handleAnimate", at = @At(value = "INVOKE",
     target = "Lnet/minecraft/server/level/ServerPlayer;resetLastActionTime()V"), cancellable = true)
   private void bending$onInteractEvent(ServerboundSwingPacket packet, CallbackInfo ci) {
@@ -69,7 +71,7 @@ public abstract class ServerGamePacketListenerImplMixin {
       if (!ServerPlayerEvents.TOGGLE_SNEAK.invoker().onSneak(this.player, shiftKeyDown)) {
         ci.cancel();
         shiftKeyDown = this.player.isShiftKeyDown();
-        if (this.player.hasClientLoaded()) {
+        if (hasClientLoaded()) {
           this.player.resetLastActionTime();
           this.player.setShiftKeyDown(shiftKeyDown);
         }

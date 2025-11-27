@@ -43,7 +43,7 @@ import me.moros.bending.fabric.platform.world.FabricWorld;
 import net.kyori.adventure.key.Key;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
@@ -61,7 +61,7 @@ public final class PlatformAdapter {
   }
 
   public static Holder<MobEffect> toFabricPotion(PotionEffect effect) {
-    return BuiltInRegistries.MOB_EFFECT.get(rsl(effect.key())).orElseThrow();
+    return BuiltInRegistries.MOB_EFFECT.get(identifier(effect.key())).orElseThrow();
   }
 
   public static MobEffectInstance toFabricPotion(Potion p) {
@@ -91,7 +91,7 @@ public final class PlatformAdapter {
   }
 
   public static net.minecraft.world.item.Item toFabricItemType(Item item) {
-    return BuiltInRegistries.ITEM.getValue(rsl(item.key()));
+    return BuiltInRegistries.ITEM.getValue(identifier(item.key()));
   }
 
   public static ItemStack toFabricItem(Item item) {
@@ -106,8 +106,8 @@ public final class PlatformAdapter {
     return new FabricItem(itemStack);
   }
 
-  public static ResourceLocation rsl(Key key) {
-    return (ResourceLocation) key.key();
+  public static Identifier identifier(Key key) {
+    return (Identifier) key.key();
   }
 
   public static World fromFabricWorld(ServerLevel world) {

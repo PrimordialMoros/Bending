@@ -22,11 +22,11 @@ package me.moros.codegen.vanilla;
 import java.util.Collection;
 
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 record RegistryGenerator(Registry<?> registry) implements Generator {
   @Override
-  public Collection<ResourceLocation> generate() {
+  public Collection<Identifier> generate() {
     return registry.keySet();
   }
 }

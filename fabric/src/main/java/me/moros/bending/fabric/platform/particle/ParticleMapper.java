@@ -43,7 +43,7 @@ public final class ParticleMapper {
   @SuppressWarnings("unchecked")
   public static @Nullable ParticleOptions mapParticleOptions(ParticleContext<?> context) {
     var p = context.particle();
-    var fabricParticle = BuiltInRegistries.PARTICLE_TYPE.getValue(PlatformAdapter.rsl(p.key()));
+    var fabricParticle = BuiltInRegistries.PARTICLE_TYPE.getValue(PlatformAdapter.identifier(p.key()));
     if (fabricParticle != null) {
       var data = context.data();
       if ((p == Particle.BLOCK || p == Particle.FALLING_DUST || p == Particle.BLOCK_MARKER) && data instanceof BlockState state) {

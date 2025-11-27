@@ -28,11 +28,11 @@ import java.util.Collection;
 import java.util.List;
 
 import me.moros.codegen.Generators;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 record RegistryTagGenerator(Path directory) implements Generator {
   @Override
-  public Collection<ResourceLocation> generate() {
+  public Collection<Identifier> generate() {
     try (var stream = Files.walk(directory)) {
       return stream.filter(Files::isRegularFile).map(this::toResourceLocation).toList();
     } catch (IOException e) {
@@ -41,10 +41,10 @@ record RegistryTagGenerator(Path directory) implements Generator {
     return List.of();
   }
 
-  private ResourceLocation toResourceLocation(Path path) {
+  private Identifier toResourceLocation(Path path) {
     final String fileName = directory.relativize(path).toString();
     final String name = (File.separatorChar == '\\' ? fileName.replace('\\', '/') : fileName)
       .replace(".json", "");
-    return ResourceLocation.parse(name);
+    return Identifier.parse(name);
   }
 }

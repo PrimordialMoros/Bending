@@ -54,7 +54,8 @@ public class FabricPlayer extends FabricLivingEntity implements Player {
 
   @Override
   public boolean hasPermission(String permission) {
-    return Permissions.check(handle(), permission, handle().level().getServer().operatorUserPermissionLevel());
+    // TODO change on update
+    return Permissions.check(handle(), permission, handle().level().getServer().operatorUserPermissions().level().id());
   }
 
   @Override

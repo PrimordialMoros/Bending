@@ -46,9 +46,9 @@ public record PlaceholderHook(PlaceholderProvider provider) implements Initializ
   public void init() {
     for (var keyed : provider) {
       if (keyed.value() instanceof StaticPlaceholder staticPlaceholder) {
-        Placeholders.register(PlatformAdapter.rsl(keyed.key()), staticParser(staticPlaceholder));
+        Placeholders.register(PlatformAdapter.identifier(keyed.key()), staticParser(staticPlaceholder));
       } else if (keyed.value() instanceof DynamicPlaceholder dynamicPlaceholder) {
-        Placeholders.register(PlatformAdapter.rsl(keyed.key()), dynamicParser(dynamicPlaceholder));
+        Placeholders.register(PlatformAdapter.identifier(keyed.key()), dynamicParser(dynamicPlaceholder));
       }
     }
   }

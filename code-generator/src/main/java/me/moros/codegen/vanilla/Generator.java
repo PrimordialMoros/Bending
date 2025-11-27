@@ -23,10 +23,10 @@ import java.nio.file.Path;
 import java.util.Collection;
 
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public interface Generator {
-  Collection<ResourceLocation> generate();
+  Collection<Identifier> generate();
 
   static Generator registry(Registry<?> registry) {
     return new RegistryGenerator(registry);

@@ -31,7 +31,7 @@ import me.moros.bending.fabric.platform.PlatformAdapter;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -40,7 +40,7 @@ import net.minecraft.world.entity.Entity;
 public record WorldListener(Supplier<Game> gameSupplier) implements FabricListener, Initializer {
   @Override
   public void init() {
-    var early = ResourceLocation.fromNamespaceAndPath("bending", "early");
+    var early = Identifier.fromNamespaceAndPath("bending", "early");
     ServerWorldEvents.UNLOAD.register(this::onWorldUnload);
     ServerEntityWorldChangeEvents.AFTER_ENTITY_CHANGE_WORLD.register(early, this::onChangeWorld);
     ServerEntityWorldChangeEvents.AFTER_ENTITY_CHANGE_WORLD.addPhaseOrdering(early, Event.DEFAULT_PHASE);
@@ -49,7 +49,7 @@ public record WorldListener(Supplier<Game> gameSupplier) implements FabricListen
   }
 
   private void onWorldUnload(MinecraftServer server, ServerLevel world) {
-    var key = world.dimension().location();
+    var key = world.dimension().identifier();
     game().worldManager().onWorldUnload(key);
     FabricMetadata.INSTANCE.cleanup(key);
   }
@@ -68,8 +68,8 @@ public record WorldListener(Supplier<Game> gameSupplier) implements FabricListen
   }
 
   private void onChangeWorld(UUID uuid, ServerLevel origin, ServerLevel destination) {
-    var from = origin.dimension().location();
-    var to = destination.dimension().location();
+    var from = origin.dimension().identifier();
+    var to = destination.dimension().identifier();
     game().worldManager().onUserChangeWorld(uuid, from, to);
   }
 }

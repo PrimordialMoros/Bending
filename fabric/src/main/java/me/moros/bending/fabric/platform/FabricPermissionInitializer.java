@@ -30,13 +30,13 @@ import me.moros.bending.common.util.PermissionInitializer;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class FabricPermissionInitializer extends PermissionInitializer {
   private final Map<String, TriState> defaultPermissions = new ConcurrentHashMap<>();
 
   public FabricPermissionInitializer() {
-    var fallback = ResourceLocation.fromNamespaceAndPath("bending", "fallback");
+    var fallback = Identifier.fromNamespaceAndPath("bending", "fallback");
     PermissionCheckEvent.EVENT.register(fallback, this::onPermissionCheck);
     PermissionCheckEvent.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, fallback);
   }

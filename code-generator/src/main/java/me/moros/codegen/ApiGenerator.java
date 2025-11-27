@@ -33,7 +33,7 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import me.moros.codegen.vanilla.Generator;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 record ApiGenerator(String basePackage, Path output, String version) {
   private static final Pattern ILLEGAL = Pattern.compile("[./]");
@@ -84,7 +84,7 @@ record ApiGenerator(String basePackage, Path output, String version) {
     return generator.generate().stream().sorted().map(this::formatKey);
   }
 
-  private FieldData formatKey(ResourceLocation location) {
+  private FieldData formatKey(Identifier location) {
     final String resourceKey = location.getPath();
     final String constantName = ILLEGAL.matcher(resourceKey).replaceAll("_").toUpperCase(Locale.ROOT);
     return new FieldData(constantName, resourceKey);

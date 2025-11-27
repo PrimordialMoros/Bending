@@ -58,7 +58,7 @@ public enum FabricMetadata {
   }
 
   public DataHolder metadata(Entity entity) {
-    return metadata(entity.level().dimension().location(), entity.getUUID());
+    return metadata(entity.level().dimension().identifier(), entity.getUUID());
   }
 
   public boolean has(Key world, int x, int y, int z, DataKey<?> key) {
@@ -66,7 +66,7 @@ public enum FabricMetadata {
   }
 
   public boolean has(Entity entity, DataKey<?> key) {
-    return has(entity.level().dimension().location(), key, p -> p.map2().get(entity.getUUID()));
+    return has(entity.level().dimension().identifier(), key, p -> p.map2().get(entity.getUUID()));
   }
 
   private boolean has(Key worldKey, DataKey<?> key, Function<Pair<Position, UUID>, DataHolder> mapper) {

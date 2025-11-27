@@ -11,17 +11,17 @@ cloud-minecraft-modded = "2.0.0-SNAPSHOT"
 bstats = "3.1.0"
 sponge-api = "17.0.0"
 sponge-common = "1.21.10-17.0.0-SNAPSHOT"
-paper-api = "1.21.10-R0.1-SNAPSHOT"
-minecraft = "1.21.10"
-fabric-loom = "1.13.3"
-fabric-api = "0.138.0+1.21.10"
-fabric-loader = "0.17.3"
+paper-api = "1.21.11-pre3-R0.1-SNAPSHOT"
+minecraft = "1.21.11-pre3"
+fabric-loom = "1.13.6"
+fabric-api = "0.139.2+1.21.11"
+fabric-loader = "0.18.1"
 shadow = "9.2.2"
-flyway = "11.16.0"
+flyway = "11.18.0"
 junit = "6.0.1"
 jspecify = "1.0.0"
-moddevgradle = "2.0.116"
-neoform = "1.21.10-20251010.172816"
+moddevgradle = "2.0.120"
+neoform = "1.21.11-pre3-20251125.161933"
 
 [libraries]
 storage = { module = "me.moros:storage", version.ref = "storage" }
@@ -87,9 +87,9 @@ fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.
 # Bukkit
 inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.19-dev" }
 grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.5" }
-towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.101.2.0" }
+towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.102.0.0" }
 bolt = { module = "org.popcraft:bolt-bukkit", version = "1.2.86" }
-worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.14" }
+worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.15-SNAPSHOT" }
 papi = { module = "me.clip:placeholderapi", version = "2.11.7" }
 
 # Sponge
@@ -99,7 +99,7 @@ sponge-mixin = { module = "org.spongepowered:mixin", version = "0.8.7" }
 
 # Plugins for build-logic
 shadow = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "shadow" }
-maven-publish = { module = "com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin", version = "0.34.0" }
+maven-publish = { module = "com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin", version = "0.35.0" }
 moddevgradle = { module = "net.neoforged:moddev-gradle", version.ref = "moddevgradle" }
 minotaur = { module = "com.modrinth.minotaur:Minotaur", version = "2.8.10" }
 

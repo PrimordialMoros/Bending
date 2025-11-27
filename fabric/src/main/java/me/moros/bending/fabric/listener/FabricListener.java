@@ -40,6 +40,6 @@ interface FabricListener {
   }
 
   default boolean disabledWorld(ServerLevel world) {
-    return !game().worldManager().isEnabled(world.dimension().location());
+    return !game().worldManager().isEnabled(world.dimension().identifier());
   }
 }

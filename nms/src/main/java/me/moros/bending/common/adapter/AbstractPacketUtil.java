@@ -41,7 +41,7 @@ import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementType;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.advancements.critereon.ImpossibleTrigger;
+import net.minecraft.advancements.criterion.ImpossibleTrigger;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.Packet;
@@ -54,7 +54,7 @@ import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
@@ -136,7 +136,7 @@ public abstract class AbstractPacketUtil implements PacketUtil {
     playerList().getPlayers().forEach(p -> p.connection.send(packet));
   }
 
-  private static final ResourceLocation ADVANCEMENT_KEY = ResourceLocation.fromNamespaceAndPath("bending", "notification");
+  private static final Identifier ADVANCEMENT_KEY = Identifier.fromNamespaceAndPath("bending", "notification");
 
   protected ClientboundUpdateAdvancementsPacket createNotificationPacket(Item item, Component title) {
     String criteriaId = "bending:criteria_progress";

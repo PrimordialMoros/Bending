@@ -26,7 +26,7 @@ import me.moros.bending.common.adapter.AbstractNativeAdapter;
 import me.moros.bending.paper.platform.PlatformAdapter;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -58,8 +58,8 @@ final class NativeAdapterImpl extends AbstractNativeAdapter {
 
   @Override
   protected ItemStack adapt(Item item) {
-    var rsl = ResourceLocation.fromNamespaceAndPath(item.key().namespace(), item.key().value());
-    return BuiltInRegistries.ITEM.getValue(rsl).getDefaultInstance();
+    var id = Identifier.fromNamespaceAndPath(item.key().namespace(), item.key().value());
+    return BuiltInRegistries.ITEM.getValue(id).getDefaultInstance();
   }
 
   @Override
