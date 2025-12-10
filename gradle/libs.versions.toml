@@ -3,7 +3,7 @@ storage = "4.0.0"
 math = "4.0.0-SNAPSHOT"
 tasker = "2.0.0"
 adventure = "4.25.0"
-adventure-fabric = "6.7.0"
+adventure-fabric = "6.8.0"
 configurate = "4.2.0"
 cloud = "2.0.0"
 cloud-minecraft = "2.0.0-SNAPSHOT"
@@ -13,14 +13,14 @@ sponge-api = "17.0.0"
 sponge-common = "1.21.10-17.0.0-SNAPSHOT"
 paper-api = "1.21.11-pre3-R0.1-SNAPSHOT"
 minecraft = "1.21.11-pre3"
-fabric-loom = "1.13.6"
-fabric-api = "0.139.2+1.21.11"
-fabric-loader = "0.18.1"
-shadow = "9.2.2"
-flyway = "11.18.0"
+fabric-loom = "1.14.5"
+fabric-api = "0.139.4+1.21.11"
+fabric-loader = "0.18.2"
+shadow = "9.3.0"
+flyway = "11.19.0"
 junit = "6.0.1"
 jspecify = "1.0.0"
-moddevgradle = "2.0.120"
+moddevgradle = "2.0.123"
 neoform = "1.21.11-pre3-20251125.161933"
 
 [libraries]
@@ -35,7 +35,7 @@ tasker-fabric = { module = "me.moros:tasker-fabric", version.ref = "tasker" }
 
 javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.3" }
-jdbi = { module = "org.jdbi:jdbi3-core", version = "3.50.0" }
+jdbi = { module = "org.jdbi:jdbi3-core", version = "3.51.0" }
 hikari = { module = "com.zaxxer:HikariCP", version = "7.0.2" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-mysql = { module = "org.flywaydb:flyway-mysql", version.ref = "flyway" }
@@ -82,7 +82,7 @@ fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fab
 fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
 fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "2.8.0+1.21.9" }
 sgui = { module = "eu.pb4:sgui", version = "1.11.0+1.21.9" }
-fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.5.0" }
+fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.6.1" }
 
 # Bukkit
 inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.19-dev" }
@@ -117,5 +117,5 @@ junit = ["junit-bom", "junit-jupiter"]
 jmh = { id = "me.champeau.jmh", version = "0.7.3" }
 fabric-loom = { id = "fabric-loom", version.ref = "fabric-loom" }
 paperweight-userdev = { id = "io.papermc.paperweight.userdev", version = "2.0.0-beta.19" }
-hangar = { id = "io.papermc.hangar-publish-plugin", version = "0.1.3" }
+hangar = { id = "io.papermc.hangar-publish-plugin", version = "0.1.4" }
 run-paper = { id = "xyz.jpenilla.run-paper", version = "3.0.2" }
