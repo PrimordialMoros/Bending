@@ -67,6 +67,7 @@ public final class Generators {
 
     var generator = new ApiGenerator(BASE_PKG, output, version);
 
+    generator.generate(from(BuiltInRegistries.ATTRIBUTE), "entity", "AttributeType");
     generator.generate(from(BuiltInRegistries.BLOCK), "block", "BlockType");
     generator.generate(from(BuiltInRegistries.ITEM), "item", "Item");
     generator.generate(from(BuiltInRegistries.PARTICLE_TYPE), "particle", "Particle");

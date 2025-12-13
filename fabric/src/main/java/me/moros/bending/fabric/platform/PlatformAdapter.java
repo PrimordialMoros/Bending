@@ -19,9 +19,11 @@
 
 package me.moros.bending.fabric.platform;
 
+import me.moros.bending.api.config.attribute.ModifierOperation;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.damage.DamageCause;
+import me.moros.bending.api.platform.entity.AttributeType;
 import me.moros.bending.api.platform.entity.DelegateEntity;
 import me.moros.bending.api.platform.entity.DelegateLivingEntity;
 import me.moros.bending.api.platform.entity.DelegatePlayer;
@@ -53,8 +55,11 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Block;
 
 public final class PlatformAdapter {
   private PlatformAdapter() {
@@ -86,7 +91,7 @@ public final class PlatformAdapter {
     return Item.registry().getOrThrow(BuiltInRegistries.ITEM.getKey(material));
   }
 
-  public static BlockType fromFabricBlock(net.minecraft.world.level.block.Block material) {
+  public static BlockType fromFabricBlock(Block material) {
     return BlockType.registry().getOrThrow(BuiltInRegistries.BLOCK.getKey(material));
   }
 
@@ -196,6 +201,22 @@ public final class PlatformAdapter {
       case CREATIVE -> GameMode.CREATIVE;
       case ADVENTURE -> GameMode.ADVENTURE;
       case SPECTATOR -> GameMode.SPECTATOR;
+    };
+  }
+
+  public static Holder<Attribute> toFabricAttribute(AttributeType type) {
+    return BuiltInRegistries.ATTRIBUTE.get(identifier(type.key())).orElseThrow();
+  }
+
+  public static AttributeType fromFabricAttribute(Attribute attribute) {
+    return AttributeType.registry().getOrThrow(BuiltInRegistries.ATTRIBUTE.getKey(attribute));
+  }
+
+  public static Operation toFabricAttributeOperation(ModifierOperation operation) {
+    return switch (operation) {
+      case ADDITIVE -> Operation.ADD_VALUE;
+      case SUMMED_MULTIPLICATIVE -> Operation.ADD_MULTIPLIED_BASE;
+      case MULTIPLICATIVE -> Operation.ADD_MULTIPLIED_TOTAL;
     };
   }
 }

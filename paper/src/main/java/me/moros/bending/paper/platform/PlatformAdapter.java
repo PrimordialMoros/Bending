@@ -23,10 +23,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 
+import me.moros.bending.api.config.attribute.ModifierOperation;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.damage.DamageCause;
+import me.moros.bending.api.platform.entity.AttributeType;
 import me.moros.bending.api.platform.entity.DelegateEntity;
 import me.moros.bending.api.platform.entity.DelegateLivingEntity;
 import me.moros.bending.api.platform.entity.DelegatePlayer;
@@ -48,6 +50,8 @@ import net.kyori.adventure.key.Key;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier.Operation;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -228,6 +232,22 @@ public final class PlatformAdapter {
       case CREATIVE -> GameMode.CREATIVE;
       case ADVENTURE -> GameMode.ADVENTURE;
       case SPECTATOR -> GameMode.SPECTATOR;
+    };
+  }
+
+  public static Attribute toFabricAttribute(AttributeType type) {
+    return Registry.ATTRIBUTE.getOrThrow(type.key());
+  }
+
+  public static AttributeType fromFabricAttribute(Attribute attribute) {
+    return AttributeType.registry().getOrThrow(attribute.key());
+  }
+
+  public static Operation toBukkitAttributeOperation(ModifierOperation operation) {
+    return switch (operation) {
+      case ADDITIVE -> Operation.ADD_NUMBER;
+      case SUMMED_MULTIPLICATIVE -> Operation.ADD_SCALAR;
+      case MULTIPLICATIVE -> Operation.MULTIPLY_SCALAR_1;
     };
   }
 }

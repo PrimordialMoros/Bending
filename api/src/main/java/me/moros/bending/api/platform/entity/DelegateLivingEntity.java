@@ -79,4 +79,9 @@ public interface DelegateLivingEntity extends DelegateEntity, LivingEntity {
   default boolean isProjectile() {
     return entity().isProjectile();
   }
+
+  @Override
+  default @Nullable AttributeInstance attribute(AttributeType type) {
+    return entity().attribute(type);
+  }
 }

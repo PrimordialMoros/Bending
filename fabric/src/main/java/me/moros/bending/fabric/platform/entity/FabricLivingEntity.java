@@ -24,6 +24,8 @@ import java.util.Collection;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.event.BendingDamageEvent;
 import me.moros.bending.api.platform.Platform;
+import me.moros.bending.api.platform.entity.AttributeInstance;
+import me.moros.bending.api.platform.entity.AttributeType;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.LivingEntity;
 import me.moros.bending.api.platform.item.Inventory;
@@ -129,5 +131,11 @@ public class FabricLivingEntity extends FabricEntity implements LivingEntity {
     arrow.pickup = Pickup.DISALLOWED;
     w.addFreshEntity(arrow);
     return PlatformAdapter.fromFabricEntity(arrow);
+  }
+
+  @Override
+  public @Nullable AttributeInstance attribute(AttributeType type) {
+    var attr = handle().getAttribute(PlatformAdapter.toFabricAttribute(type));
+    return attr == null ? null : new FabricAttributeInstance(attr);
   }
 }

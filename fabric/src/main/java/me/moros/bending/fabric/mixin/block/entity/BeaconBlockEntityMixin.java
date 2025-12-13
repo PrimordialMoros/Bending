@@ -47,7 +47,7 @@ public abstract class BeaconBlockEntityMixin implements Lockable {
 
   @ModifyExpressionValue(
     method = "createMenu",
-    at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BaseContainerBlockEntity;canUnlock(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/LockCode;Lnet/minecraft/network/chat/Component;)Z")
+    at = @At(value = "INVOKE", target = "Lnet/minecraft/world/LockCode;canUnlock(Lnet/minecraft/world/entity/player/Player;)Z")
   )
   private boolean bending$canUnlock(boolean original, @Local(argsOnly = true) Player player) {
     if (!player.isSpectator() && ServerItemEvents.ACCESS_LOCK.invoker().onAccess(player, this)) {

@@ -156,4 +156,6 @@ public interface LivingEntity extends Entity {
   }
 
   Entity shootArrow(Position origin, Vector3d direction, double power);
+
+  @Nullable AttributeInstance attribute(AttributeType type);
 }
