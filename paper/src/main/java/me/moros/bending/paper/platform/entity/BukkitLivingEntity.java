@@ -25,8 +25,6 @@ import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.DamageSource;
 import me.moros.bending.api.event.BendingDamageEvent;
 import me.moros.bending.api.platform.Platform;
-import me.moros.bending.api.platform.entity.AttributeInstance;
-import me.moros.bending.api.platform.entity.AttributeType;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.EntityType;
 import me.moros.bending.api.platform.entity.LivingEntity;
@@ -126,11 +124,5 @@ public class BukkitLivingEntity extends BukkitEntity implements LivingEntity {
     arrow.setInvulnerable(true);
     arrow.setPickupStatus(PickupStatus.DISALLOWED);
     return PlatformAdapter.fromBukkitEntity(arrow);
-  }
-
-  @Override
-  public @Nullable AttributeInstance attribute(AttributeType type) {
-    var attr = handle().getAttribute(PlatformAdapter.toFabricAttribute(type));
-    return attr == null ? null : new BukkitAttributeInstance(attr);
   }
 }

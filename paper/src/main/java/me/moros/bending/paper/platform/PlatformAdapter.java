@@ -235,12 +235,8 @@ public final class PlatformAdapter {
     };
   }
 
-  public static Attribute toFabricAttribute(AttributeType type) {
+  public static Attribute toBukkitAttribute(AttributeType type) {
     return Registry.ATTRIBUTE.getOrThrow(type.key());
-  }
-
-  public static AttributeType fromFabricAttribute(Attribute attribute) {
-    return AttributeType.registry().getOrThrow(attribute.key());
   }
 
   public static Operation toBukkitAttributeOperation(ModifierOperation operation) {

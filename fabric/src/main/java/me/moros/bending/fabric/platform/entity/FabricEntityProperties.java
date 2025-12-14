@@ -172,6 +172,8 @@ final class FabricEntityProperties {
         .get(e -> e.getMainArm() == HumanoidArm.RIGHT))
       .create(EntityProperties.GAMEMODE, ServerPlayer.class, b -> b
         .get(e -> PlatformAdapter.fromFabricGameMode(e.gameMode.getGameModeForPlayer())))
+      .create(EntityProperties.ATTRIBUTES, LivingEntity.class, b -> b
+        .get(e -> new FabricAttributes(e.getAttributes())))
       .build();
   }
 }

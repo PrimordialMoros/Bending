@@ -208,10 +208,6 @@ public final class PlatformAdapter {
     return BuiltInRegistries.ATTRIBUTE.get(identifier(type.key())).orElseThrow();
   }
 
-  public static AttributeType fromFabricAttribute(Attribute attribute) {
-    return AttributeType.registry().getOrThrow(BuiltInRegistries.ATTRIBUTE.getKey(attribute));
-  }
-
   public static Operation toFabricAttributeOperation(ModifierOperation operation) {
     return switch (operation) {
       case ADDITIVE -> Operation.ADD_VALUE;

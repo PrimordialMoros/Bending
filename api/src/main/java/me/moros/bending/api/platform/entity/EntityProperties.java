@@ -77,4 +77,5 @@ public final class EntityProperties {
   public static final DataKeyed<EntityType> ENTITY_TYPE = prop("entity_type", EntityType.class);
   public static final DataKeyed<Boolean> RIGHT_HAND = prop("right_hand", Boolean.class);
   public static final DataKeyed<GameMode> GAMEMODE = prop("gamemode", GameMode.class);
+  public static final DataKeyed<AttributeProperties> ATTRIBUTES = prop("attribute", AttributeProperties.class);
 }

@@ -19,17 +19,17 @@
 
 package me.moros.bending.api.platform.entity;
 
+import java.util.OptionalDouble;
+
 import me.moros.bending.api.config.attribute.ModifierOperation;
 import net.kyori.adventure.key.Key;
 
-public interface AttributeInstance {
-  AttributeType type();
+public interface AttributeProperties {
+  OptionalDouble value(AttributeType type);
 
-  double value();
+  OptionalDouble baseValue(AttributeType type);
 
-  double baseValue();
+  boolean baseValue(AttributeType type, double baseValue);
 
-  void baseValue(double baseValue);
-
-  void modify(Key key, ModifierOperation operation, double value);
+  boolean modify(AttributeType type, Key key, ModifierOperation operation, double value);
 }

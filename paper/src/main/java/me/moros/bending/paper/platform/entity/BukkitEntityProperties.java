@@ -143,6 +143,8 @@ final class BukkitEntityProperties {
         .get(e -> e.getMainHand() == MainHand.RIGHT))
       .create(EntityProperties.GAMEMODE, Player.class, b -> b
         .get(e -> PlatformAdapter.fromBukkitGameMode(e.getGameMode())))
+      .create(EntityProperties.ATTRIBUTES, LivingEntity.class, b -> b
+        .get(BukkitAttributes::new))
       .build();
   }
 }
