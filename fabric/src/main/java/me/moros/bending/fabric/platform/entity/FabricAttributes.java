@@ -53,7 +53,7 @@ public record FabricAttributes(AttributeMap handle) implements AttributeProperti
   }
 
   @Override
-  public boolean modify(AttributeType type, Key key, ModifierOperation operation, double value) {
+  public boolean addModifier(AttributeType type, Key key, ModifierOperation operation, double value) {
     var instance = handle().getInstance(PlatformAdapter.toFabricAttribute(type));
     if (instance == null) {
       return false;
@@ -62,5 +62,11 @@ public record FabricAttributes(AttributeMap handle) implements AttributeProperti
     var op = PlatformAdapter.toFabricAttributeOperation(operation);
     instance.addTransientModifier(new AttributeModifier(id, value, op));
     return true;
+  }
+
+  @Override
+  public boolean removeModifier(AttributeType type, Key key) {
+    var instance = handle().getInstance(PlatformAdapter.toFabricAttribute(type));
+    return instance != null && instance.removeModifier(PlatformAdapter.identifier(key));
   }
 }

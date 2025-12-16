@@ -70,26 +70,26 @@ public final class TempArmor extends Temporary {
 
   public static Builder leather() {
     return builder()
-      .head(Item.LEATHER_HELMET)
-      .chest(Item.LEATHER_CHESTPLATE)
-      .legs(Item.LEATHER_LEGGINGS)
-      .feet(Item.LEATHER_BOOTS);
+      .head(Item.LEATHER_HELMET).chest(Item.LEATHER_CHESTPLATE)
+      .legs(Item.LEATHER_LEGGINGS).feet(Item.LEATHER_BOOTS);
   }
 
   public static Builder iron() {
     return builder()
-      .head(Item.IRON_HELMET)
-      .chest(Item.IRON_CHESTPLATE)
-      .legs(Item.IRON_LEGGINGS)
-      .feet(Item.IRON_BOOTS);
+      .head(Item.IRON_HELMET).chest(Item.IRON_CHESTPLATE)
+      .legs(Item.IRON_LEGGINGS).feet(Item.IRON_BOOTS);
   }
 
   public static Builder gold() {
     return builder()
-      .head(Item.GOLDEN_HELMET)
-      .chest(Item.GOLDEN_CHESTPLATE)
-      .legs(Item.GOLDEN_LEGGINGS)
-      .feet(Item.GOLDEN_BOOTS);
+      .head(Item.GOLDEN_HELMET).chest(Item.GOLDEN_CHESTPLATE)
+      .legs(Item.GOLDEN_LEGGINGS).feet(Item.GOLDEN_BOOTS);
+  }
+
+  public static Builder copper() {
+    return builder()
+      .head(Item.COPPER_HELMET).chest(Item.COPPER_CHESTPLATE)
+      .legs(Item.COPPER_LEGGINGS).feet(Item.COPPER_BOOTS);
   }
 
   public static final class Builder {

@@ -54,7 +54,7 @@ public record BukkitAttributes(LivingEntity handle) implements AttributeProperti
   }
 
   @Override
-  public boolean modify(AttributeType type, Key key, ModifierOperation operation, double value) {
+  public boolean addModifier(AttributeType type, Key key, ModifierOperation operation, double value) {
     var instance = attributeInstance(type);
     if (instance == null) {
       return false;
@@ -63,6 +63,16 @@ public record BukkitAttributes(LivingEntity handle) implements AttributeProperti
     var op = PlatformAdapter.toBukkitAttributeOperation(operation);
     instance.addTransientModifier(new AttributeModifier(id, value, op));
     return true;
+  }
+
+  @Override
+  public boolean removeModifier(AttributeType type, Key key) {
+    var instance = attributeInstance(type);
+    if (instance == null) {
+      return false;
+    }
+    instance.removeModifier(key);
+    return instance.getModifier(key) == null;
   }
 
   private AttributeInstance attributeInstance(AttributeType type) {

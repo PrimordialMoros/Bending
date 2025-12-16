@@ -30,6 +30,7 @@ import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.Modifiable;
 import me.moros.bending.api.platform.block.Block;
 import me.moros.bending.api.platform.block.BlockState;
+import me.moros.bending.api.platform.block.BlockTag;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.entity.EntityUtil;
 import me.moros.bending.api.platform.potion.PotionEffect;
@@ -49,7 +50,7 @@ import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 
 public class EarthArmor extends AbilityInstance {
-  private enum Mode {ROCK, IRON, GOLD}
+  private enum Mode {ROCK, IRON, GOLD, COPPER}
 
   private Config userConfig;
   private RemovalPolicy removalPolicy;
@@ -80,7 +81,13 @@ public class EarthArmor extends AbilityInstance {
     }
 
     if (EarthMaterials.isMetalBendable(source)) {
-      mode = source.type() == BlockType.GOLD_BLOCK ? Mode.GOLD : Mode.IRON;
+      if (BlockTag.COPPER.isTagged(source) || source.type() == BlockType.RAW_COPPER_BLOCK) {
+        mode = Mode.COPPER;
+      } else if (source.type() == BlockType.GOLD_BLOCK || source.type() == BlockType.RAW_GOLD_BLOCK) {
+        mode = Mode.GOLD;
+      } else {
+        mode = Mode.IRON;
+      }
       resistance = userConfig.metalPower;
       SoundEffect.METAL.play(source);
     } else {
@@ -120,6 +127,7 @@ public class EarthArmor extends AbilityInstance {
       case ROCK -> TempArmor.leather();
       case IRON -> TempArmor.iron();
       case GOLD -> TempArmor.gold();
+      case COPPER -> TempArmor.copper();
     };
     if (armorBuilder.duration(userConfig.duration).build(user).isEmpty()) {
       removalPolicy = (u, d) -> true;

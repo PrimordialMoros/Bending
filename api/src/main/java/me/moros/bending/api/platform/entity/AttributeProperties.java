@@ -31,5 +31,7 @@ public interface AttributeProperties {
 
   boolean baseValue(AttributeType type, double baseValue);
 
-  boolean modify(AttributeType type, Key key, ModifierOperation operation, double value);
+  boolean addModifier(AttributeType type, Key key, ModifierOperation operation, double value);
+
+  boolean removeModifier(AttributeType type, Key key);
 }

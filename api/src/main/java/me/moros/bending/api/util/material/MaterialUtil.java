@@ -97,6 +97,7 @@ public final class MaterialUtil {
       .buildAndRegister();
     BlockTag.builder(LOCKABLE_CONTAINERS.key())
       .add(BlockTag.reference(KeyUtil.simple("extra_lockable_containers")))
+      .add(BlockTag.COPPER_CHESTS)
       .add(BlockType.CHEST, BlockType.TRAPPED_CHEST, BlockType.BARREL, BlockType.SHULKER_BOX,
         BlockType.FURNACE, BlockType.BLAST_FURNACE, BlockType.SMOKER, BlockType.BEACON,
         BlockType.DISPENSER, BlockType.DROPPER, BlockType.HOPPER, BlockType.BREWING_STAND)
@@ -117,6 +118,7 @@ public final class MaterialUtil {
       .add(ItemTag.reference(KeyUtil.simple("extra_metal_armor")))
       .add(Item.IRON_HELMET, Item.IRON_CHESTPLATE, Item.IRON_LEGGINGS, Item.IRON_BOOTS,
         Item.GOLDEN_HELMET, Item.GOLDEN_CHESTPLATE, Item.GOLDEN_LEGGINGS, Item.GOLDEN_BOOTS,
+        Item.COPPER_HELMET, Item.COPPER_CHESTPLATE, Item.COPPER_LEGGINGS, Item.COPPER_BOOTS,
         Item.CHAINMAIL_HELMET, Item.CHAINMAIL_CHESTPLATE, Item.CHAINMAIL_LEGGINGS, Item.CHAINMAIL_BOOTS,
         Item.NETHERITE_HELMET, Item.NETHERITE_CHESTPLATE, Item.NETHERITE_LEGGINGS, Item.NETHERITE_BOOTS)
       .buildAndRegister();
