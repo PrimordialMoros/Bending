@@ -92,6 +92,7 @@ public class FabricPlayerInventory extends FabricInventory implements PlayerInve
     try (Transaction transaction = Transaction.openOuter()) {
       PlayerInventoryStorage.of(handle).drop(ItemVariant.of(item), item.getCount(), transaction);
       transaction.commit();
+      item.setCount(0);
     }
   }
 }
