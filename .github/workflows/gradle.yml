@@ -26,7 +26,7 @@ jobs:
       - name: Setup gradle
         uses: gradle/actions/setup-gradle@v5
       - name: Setup additional gradle cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.gradle/caches/fabric-loom
@@ -54,7 +54,7 @@ jobs:
           done
           echo -e $summary_table >> $GITHUB_STEP_SUMMARY
       - name: Upload artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: artifacts
           path: |
@@ -67,7 +67,7 @@ jobs:
     if: ${{ github.event_name == 'release' && github.event.action == 'published' }}
     steps:
       - name: Download stored artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: artifacts
           path: publish
