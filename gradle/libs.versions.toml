@@ -1,6 +1,6 @@
 [versions]
 storage = "4.0.0"
-math = "4.0.0-SNAPSHOT"
+math = "4.0.0"
 tasker = "2.0.0"
 adventure = "4.26.1"
 adventure-fabric = "6.8.0"
