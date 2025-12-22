@@ -23,8 +23,9 @@ sourceSets {
 
 tasks {
     register("printVersionStatus") {
+        val isSnapshot = isSnapshot()
         doLast {
-            println("STATUS=${if (isSnapshot()) "snapshot" else "release"}")
+            println("STATUS=${if (isSnapshot) "snapshot" else "release"}")
         }
     }
     test {
