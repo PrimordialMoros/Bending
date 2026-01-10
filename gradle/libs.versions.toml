@@ -13,14 +13,14 @@ sponge-api = "17.0.0"
 sponge-common = "1.21.10-17.0.0-SNAPSHOT"
 paper-api = "1.21.11-R0.1-SNAPSHOT"
 minecraft = "1.21.11"
-fabric-loom = "1.14.7"
-fabric-api = "0.140.0+1.21.11"
-fabric-loader = "0.18.3"
+fabric-loom = "1.14.10"
+fabric-api = "0.141.1+1.21.11"
+fabric-loader = "0.18.4"
 shadow = "9.3.0"
-flyway = "11.19.1"
-junit = "6.0.1"
+flyway = "11.20.1"
+junit = "6.0.2"
 jspecify = "1.0.0"
-moddevgradle = "2.0.131"
+moddevgradle = "2.0.139"
 neoform = "1.21.11-20251209.172050"
 
 [libraries]
@@ -80,8 +80,8 @@ hsql = { module = "org.hsqldb:hsqldb", version = "2.7.4" }
 fabric-minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
 fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
 fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
-fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "2.8.0+1.21.9" }
-sgui = { module = "eu.pb4:sgui", version = "1.11.0+1.21.9" }
+fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "2.8.1+1.21.10" }
+sgui = { module = "eu.pb4:sgui", version = "1.12.0+1.21.11" }
 fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.6.1" }
 
 # Bukkit
@@ -89,7 +89,7 @@ inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF"
 grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.5" }
 towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.102.0.0" }
 bolt = { module = "org.popcraft:bolt-bukkit", version = "1.2.86" }
-worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.15-SNAPSHOT" }
+worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.15" }
 papi = { module = "me.clip:placeholderapi", version = "2.11.7" }
 
 # Sponge
