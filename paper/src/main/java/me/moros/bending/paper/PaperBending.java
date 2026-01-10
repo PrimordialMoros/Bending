@@ -44,6 +44,8 @@ import me.moros.bending.paper.listener.WorldListener;
 import me.moros.bending.paper.platform.BrigadierSetup;
 import me.moros.bending.paper.platform.BukkitPermissionInitializer;
 import me.moros.bending.paper.platform.BukkitPlatform;
+import me.moros.bending.paper.platform.CommandSender;
+import me.moros.bending.paper.platform.CommandSender.PlayerCommandSender;
 import me.moros.bending.paper.protection.ProtectionInitializer;
 import me.moros.tasker.paper.PaperExecutor;
 import org.bstats.bukkit.Metrics;
@@ -53,8 +55,9 @@ import org.bstats.charts.SingleLineChart;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.ServicePriority;
+import org.incendo.cloud.SenderMapper;
 import org.incendo.cloud.execution.ExecutionCoordinator;
-import org.incendo.cloud.paper.LegacyPaperCommandManager;
+import org.incendo.cloud.paper.PaperCommandManager;
 
 final class PaperBending extends AbstractBending<BendingBootstrap> {
   PaperBending(BendingBootstrap parent, Path dir, Logger logger) {
@@ -76,10 +79,11 @@ final class PaperBending extends AbstractBending<BendingBootstrap> {
     pluginManager.registerEvents(new ConnectionListener(logger(), game), parent);
     pluginManager.registerEvents(new WorldListener(game), parent);
 
-    var manager = LegacyPaperCommandManager.createNative(parent, ExecutionCoordinator.simpleCoordinator());
-    manager.registerBrigadier();
+    var manager = PaperCommandManager.builder(SenderMapper.create(CommandSender::from, CommandSender::stack))
+      .executionCoordinator(ExecutionCoordinator.simpleCoordinator())
+      .buildOnEnable(parent);
     BrigadierSetup.setup(manager);
-    Commander.create(manager, Player.class, this).init();
+    Commander.create(manager, PlayerCommandSender.class, this).init();
 
     parent.getServer().getServicesManager().register(Game.class, game, parent, ServicePriority.Normal);
   }

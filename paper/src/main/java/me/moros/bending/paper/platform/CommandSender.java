@@ -17,13 +17,13 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.fabric.platform;
+package me.moros.bending.paper.platform;
 
-import me.moros.bending.fabric.platform.CommandSender.PlayerCommandSender;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
+import me.moros.bending.paper.platform.CommandSender.PlayerCommandSender;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.server.level.ServerPlayer;
+import org.bukkit.entity.Player;
 
 public sealed class CommandSender implements ForwardingAudience.Single permits PlayerCommandSender {
   private final CommandSourceStack stack;
@@ -44,16 +44,17 @@ public sealed class CommandSender implements ForwardingAudience.Single permits P
   }
 
   public static final class PlayerCommandSender extends CommandSender {
-    private PlayerCommandSender(CommandSourceStack stack, ServerPlayer player) {
+    private PlayerCommandSender(CommandSourceStack stack, Player player) {
       super(stack, player);
     }
   }
 
   public static CommandSender from(CommandSourceStack stack) {
-    ServerPlayer player = stack.getPlayer();
-    if (player != null) {
+    if (stack.getExecutor() instanceof Player player) {
+      return new PlayerCommandSender(stack, player);
+    } else if (stack.getSender() instanceof Player player) {
       return new PlayerCommandSender(stack, player);
     }
-    return new CommandSender(stack, stack);
+    return new CommandSender(stack, stack.getSender());
   }
 }
