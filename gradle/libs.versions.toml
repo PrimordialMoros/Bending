@@ -16,7 +16,7 @@ minecraft = "1.21.11"
 fabric-loom = "1.14.10"
 fabric-api = "0.141.1+1.21.11"
 fabric-loader = "0.18.4"
-shadow = "9.3.1"
+shadow = "9.3.0"
 flyway = "11.20.1"
 junit = "6.0.2"
 jspecify = "1.0.0"
@@ -80,8 +80,8 @@ hsql = { module = "org.hsqldb:hsqldb", version = "2.7.4" }
 fabric-minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
 fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
 fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
-fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "2.8.0+1.21.9" }
-sgui = { module = "eu.pb4:sgui", version = "1.11.0+1.21.9" }
+fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "2.8.1+1.21.10" }
+sgui = { module = "eu.pb4:sgui", version = "1.12.0+1.21.11" }
 fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.6.1" }
 
 # Bukkit
