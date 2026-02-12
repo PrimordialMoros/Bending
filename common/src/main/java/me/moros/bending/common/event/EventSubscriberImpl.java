@@ -21,7 +21,7 @@ package me.moros.bending.common.event;
 
 import java.util.function.Consumer;
 
-import com.seiama.event.EventSubscriber;
+import com.sasorio.event.EventSubscriber;
 
 record EventSubscriberImpl<E>(Consumer<E> consumer) implements EventSubscriber<E> {
   @Override

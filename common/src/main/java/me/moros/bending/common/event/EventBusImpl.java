@@ -22,11 +22,11 @@ package me.moros.bending.common.event;
 import java.util.Collection;
 import java.util.function.Consumer;
 
-import com.seiama.event.EventConfig;
-import com.seiama.event.bus.EventBus.EventExceptionHandler;
-import com.seiama.event.bus.SimpleEventBus;
-import com.seiama.event.registry.EventRegistry;
-import com.seiama.event.registry.SimpleEventRegistry;
+import com.sasorio.event.EventConfig;
+import com.sasorio.event.bus.EventBus.EventExceptionHandler;
+import com.sasorio.event.bus.SimpleEventBus;
+import com.sasorio.event.registry.EventRegistry;
+import com.sasorio.event.registry.SimpleEventRegistry;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.ability.Activation;
 import me.moros.bending.api.ability.element.Element;
@@ -52,7 +52,7 @@ import org.jspecify.annotations.Nullable;
 
 public class EventBusImpl implements EventBus {
   private final EventRegistry<BendingEvent> eventRegistry;
-  private final com.seiama.event.bus.EventBus<BendingEvent> eventBus;
+  private final com.sasorio.event.bus.EventBus<BendingEvent> eventBus;
   private boolean closed = false;
 
   public EventBusImpl(Logger logger) {

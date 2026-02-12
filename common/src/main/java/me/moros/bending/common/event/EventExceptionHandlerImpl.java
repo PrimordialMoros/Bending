@@ -19,9 +19,9 @@
 
 package me.moros.bending.common.event;
 
-import com.seiama.event.EventSubscription;
-import com.seiama.event.bus.EventBus;
-import com.seiama.event.bus.EventBus.EventExceptionHandler;
+import com.sasorio.event.EventSubscription;
+import com.sasorio.event.bus.EventBus;
+import com.sasorio.event.bus.EventBus.EventExceptionHandler;
 import me.moros.bending.common.logging.Logger;
 
 record EventExceptionHandlerImpl(Logger logger) implements EventExceptionHandler {

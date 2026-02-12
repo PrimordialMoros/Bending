@@ -19,7 +19,7 @@
 
 package me.moros.bending.common.event.base;
 
-import com.seiama.event.AbstractCancellable;
+import com.sasorio.event.AbstractCancellable;
 import me.moros.bending.api.event.Cancellable;
 import me.moros.bending.api.event.UserEvent;
 import me.moros.bending.api.user.User;

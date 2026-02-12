@@ -37,7 +37,7 @@ tasks {
                 excluded.contains(it.moduleName)
             }
             reloc("org.bstats", "bstats")
-            reloc("com.seiama.event", "eventbus")
+            reloc("com.sasorio.event", "eventbus")
             reloc("me.moros.storage", "storage")
         }
     }

@@ -13,7 +13,7 @@ sponge-api = "17.0.0"
 sponge-common = "1.21.10-17.0.0-SNAPSHOT"
 paper-api = "1.21.11-R0.1-SNAPSHOT"
 minecraft = "1.21.11"
-fabric-loom = "1.14.10"
+fabric-loom = "1.15.3"
 fabric-api = "0.141.1+1.21.11"
 fabric-loader = "0.18.4"
 shadow = "9.3.0"
@@ -41,7 +41,7 @@ flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-mysql = { module = "org.flywaydb:flyway-mysql", version.ref = "flyway" }
 flyway-pgsql = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
 flyway-hsqldb = { module = "org.flywaydb:flyway-database-hsqldb", version.ref = "flyway" }
-eventbus = { module = "com.seiama:event-api", version = "1.0.0-SNAPSHOT" }
+eventbus = { module = "com.sasorio:event-api", version = "1.0.0" }
 
 junit-bom = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
