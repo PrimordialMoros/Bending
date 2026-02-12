@@ -1,5 +1,6 @@
 import com.vanniktech.maven.publish.JavaLibrary
 import com.vanniktech.maven.publish.JavadocJar
+import com.vanniktech.maven.publish.SourcesJar
 
 plugins {
     id("bending.base-conventions")
@@ -37,7 +38,7 @@ mavenPublishing {
             url = "https://github.com/PrimordialMoros/Bending/issues"
         }
     }
-    configure(JavaLibrary(JavadocJar.Javadoc(), true))
+    configure(JavaLibrary(JavadocJar.Javadoc(), SourcesJar.Sources()))
     publishToMavenCentral()
     signAllPublications()
 }
