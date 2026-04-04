@@ -34,7 +34,6 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.Tag;
-import org.jspecify.annotations.NonNull;
 
 public record MiniPlaceholdersHook(PlaceholderProvider provider) implements Initializer {
   public MiniPlaceholdersHook() {
@@ -54,11 +53,11 @@ public record MiniPlaceholdersHook(PlaceholderProvider provider) implements Init
     builder.build().register();
   }
 
-  private AudienceTagResolver<@NonNull Audience> staticParser(StaticPlaceholder placeholder) {
+  private AudienceTagResolver<Audience> staticParser(StaticPlaceholder placeholder) {
     return (audience, queue, ctx) -> parse(audience, placeholder);
   }
 
-  private AudienceTagResolver<@NonNull Audience> dynamicParser(DynamicPlaceholder placeholder) {
+  private AudienceTagResolver<Audience> dynamicParser(DynamicPlaceholder placeholder) {
     return (audience, queue, ctx) -> !queue.hasNext() ? Tags.EMPTY_TAG : parse(audience, u -> placeholder.handle(u, queue.pop().value()));
   }
 

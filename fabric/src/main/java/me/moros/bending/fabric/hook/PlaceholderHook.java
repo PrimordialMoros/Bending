@@ -22,10 +22,11 @@ package me.moros.bending.fabric.hook;
 import java.util.Objects;
 import java.util.function.Function;
 
+import eu.pb4.placeholders.api.Placeholder.Handler;
 import eu.pb4.placeholders.api.PlaceholderContext;
-import eu.pb4.placeholders.api.PlaceholderHandler;
 import eu.pb4.placeholders.api.PlaceholderResult;
 import eu.pb4.placeholders.api.Placeholders;
+import eu.pb4.placeholders.api.ServerPlaceholderContext;
 import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.user.User;
 import me.moros.bending.common.placeholder.DynamicPlaceholder;
@@ -46,18 +47,18 @@ public record PlaceholderHook(PlaceholderProvider provider) implements Initializ
   public void init() {
     for (var keyed : provider) {
       if (keyed.value() instanceof StaticPlaceholder staticPlaceholder) {
-        Placeholders.register(PlatformAdapter.identifier(keyed.key()), staticParser(staticPlaceholder));
+        Placeholders.registerServer(PlatformAdapter.identifier(keyed.key()), staticParser(staticPlaceholder));
       } else if (keyed.value() instanceof DynamicPlaceholder dynamicPlaceholder) {
-        Placeholders.register(PlatformAdapter.identifier(keyed.key()), dynamicParser(dynamicPlaceholder));
+        Placeholders.registerServer(PlatformAdapter.identifier(keyed.key()), dynamicParser(dynamicPlaceholder));
       }
     }
   }
 
-  private PlaceholderHandler staticParser(StaticPlaceholder placeholder) {
+  private Handler<ServerPlaceholderContext, String> staticParser(StaticPlaceholder placeholder) {
     return (ctx, args) -> parse(ctx, placeholder);
   }
 
-  private PlaceholderHandler dynamicParser(DynamicPlaceholder placeholder) {
+  private Handler<ServerPlaceholderContext, String> dynamicParser(DynamicPlaceholder placeholder) {
     return (ctx, args) -> (args == null || args.isEmpty()) ? PlaceholderResult.invalid() : parse(ctx, u -> placeholder.handle(u, args));
   }
 

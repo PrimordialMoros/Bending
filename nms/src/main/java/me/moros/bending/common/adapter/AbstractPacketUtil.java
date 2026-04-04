@@ -60,7 +60,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.PositionMoveRotation;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
@@ -81,7 +81,7 @@ public abstract class AbstractPacketUtil implements PacketUtil {
 
   protected abstract net.minecraft.world.entity.Entity adapt(Entity entity);
 
-  protected abstract ItemStack adapt(Item item);
+  protected abstract ItemStackTemplate adapt(Item item);
 
   protected abstract net.minecraft.network.chat.Component adapt(Component component);
 
@@ -140,7 +140,7 @@ public abstract class AbstractPacketUtil implements PacketUtil {
 
   protected ClientboundUpdateAdvancementsPacket createNotificationPacket(Item item, Component title) {
     String criteriaId = "bending:criteria_progress";
-    ItemStack icon = adapt(item);
+    ItemStackTemplate icon = adapt(item);
     net.minecraft.network.chat.Component nmsTitle = adapt(title);
     net.minecraft.network.chat.Component nmsDesc = net.minecraft.network.chat.Component.empty();
     AdvancementType type = AdvancementType.TASK;
@@ -152,11 +152,11 @@ public abstract class AbstractPacketUtil implements PacketUtil {
     progress.update(AdvancementRequirements.allOf(List.of(criteriaId)));
     progress.grantProgress(criteriaId);
     var progressMap = Map.of(ADVANCEMENT_KEY, progress);
-    return new ClientboundUpdateAdvancementsPacket(false, List.of(advancement), Set.of(), progressMap, true); // TODO CHECK
+    return new ClientboundUpdateAdvancementsPacket(false, List.of(advancement), Set.of(), progressMap, true);
   }
 
   protected ClientboundUpdateAdvancementsPacket clearNotification() {
-    return new ClientboundUpdateAdvancementsPacket(false, List.of(), Set.of(ADVANCEMENT_KEY), Map.of(), true); // TODO test both values
+    return new ClientboundUpdateAdvancementsPacket(false, List.of(), Set.of(ADVANCEMENT_KEY), Map.of(), true);
   }
 
   protected ClientboundAddEntityPacket createEntity(int id, Position center, EntityType<?> type, int data) {

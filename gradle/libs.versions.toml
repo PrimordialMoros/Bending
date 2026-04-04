@@ -3,7 +3,7 @@ storage = "4.0.0"
 math = "4.0.0"
 tasker = "2.0.0"
 adventure = "4.26.1"
-adventure-fabric = "6.8.0"
+adventure-fabric = "6.9.0-SNAPSHOT"
 configurate = "4.2.0"
 cloud = "2.0.0"
 cloud-minecraft = "2.0.0-SNAPSHOT"
@@ -11,17 +11,17 @@ cloud-minecraft-modded = "2.0.0-SNAPSHOT"
 bstats = "3.2.1"
 sponge-api = "17.0.0"
 sponge-common = "1.21.10-17.0.1-SNAPSHOT"
-paper-api = "1.21.11-R0.1-SNAPSHOT"
-minecraft = "1.21.11"
+paper-api = "26.1.1.build.+"
+minecraft = "26.1.1"
 fabric-loom = "1.15.5"
-fabric-api = "0.141.3+1.21.11"
+fabric-api = "0.145.3+26.1.1"
 fabric-loader = "0.18.6"
 shadow = "9.4.1"
 flyway = "12.3.0"
 junit = "6.0.3"
 jspecify = "1.0.0"
 moddevgradle = "2.0.141"
-neoform = "1.21.11-20251209.172050"
+neoform = "26.1.1-1"
 
 [libraries]
 storage = { module = "me.moros:storage", version.ref = "storage" }
@@ -80,8 +80,8 @@ hsql = { module = "org.hsqldb:hsqldb", version = "2.7.4" }
 fabric-minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
 fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
 fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
-fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "2.8.2+1.21.10" }
-sgui = { module = "eu.pb4:sgui", version = "1.12.0+1.21.11" }
+fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "3.0.0-beta.2+26.1" }
+sgui = { module = "eu.pb4:sgui", version = "2.0.0-beta.2+26.1" }
 fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.7.0" }
 
 # Bukkit
@@ -115,7 +115,7 @@ junit = ["junit-bom", "junit-jupiter"]
 
 [plugins]
 jmh = { id = "me.champeau.jmh", version = "0.7.3" }
-fabric-loom = { id = "fabric-loom", version.ref = "fabric-loom" }
+fabric-loom = { id = "net.fabricmc.fabric-loom", version.ref = "fabric-loom" }
 paperweight-userdev = { id = "io.papermc.paperweight.userdev", version = "2.0.0-beta.21" }
 hangar = { id = "io.papermc.hangar-publish-plugin", version = "0.1.4" }
 run-paper = { id = "xyz.jpenilla.run-paper", version = "3.0.2" }

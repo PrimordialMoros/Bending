@@ -47,7 +47,7 @@ public class FabricInventory implements Inventory {
 
   @Override
   public void item(me.moros.bending.api.platform.item.EquipmentSlot slot, ItemSnapshot snapshot) {
-    handle.setItemSlot(toVanilla(slot), PlatformAdapter.toFabricItem(snapshot));
+    handle.setItemSlot(toVanilla(slot), PlatformAdapter.toFabricItem(snapshot).create());
   }
 
   protected static EquipmentSlot toVanilla(me.moros.bending.api.platform.item.EquipmentSlot slot) {

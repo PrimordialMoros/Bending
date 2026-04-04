@@ -30,31 +30,35 @@ import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.fabric.platform.FabricPersistentDataHolder;
 import net.kyori.adventure.platform.modcommon.MinecraftServerAudiences;
 import net.kyori.adventure.text.Component;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Unit;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.component.ItemLore;
 
 public class FabricItemBuilder implements ItemBuilder {
-  private final ItemStack stack;
+  private final ItemStackTemplate template;
+  private final DataComponentPatch.Builder patchBuilder;
   private final Map<DataKey<?>, Object> meta = new HashMap<>();
   private final MinecraftServerAudiences adapter;
 
-  public FabricItemBuilder(ItemStack stack, MinecraftServer server) {
-    this.stack = stack;
+  public FabricItemBuilder(ItemStackTemplate template, MinecraftServer server) {
+    this.template = template;
+    this.patchBuilder = DataComponentPatch.builder();
     this.adapter = MinecraftServerAudiences.of(server);
   }
 
   @Override
   public ItemBuilder name(Component name) {
-    stack.set(DataComponents.CUSTOM_NAME, adapter.asNative(name));
+    patchBuilder.set(DataComponents.CUSTOM_NAME, adapter.asNative(name));
     return this;
   }
 
   @Override
   public ItemBuilder lore(List<Component> lore) {
-    stack.set(DataComponents.LORE, new ItemLore(lore.stream().map(adapter::asNative).toList()));
+    patchBuilder.set(DataComponents.LORE, new ItemLore(lore.stream().map(adapter::asNative).toList()));
     return this;
   }
 
@@ -67,9 +71,9 @@ public class FabricItemBuilder implements ItemBuilder {
   @Override
   public ItemBuilder unbreakable(boolean unbreakable) {
     if (unbreakable) {
-      stack.set(DataComponents.UNBREAKABLE, Unit.INSTANCE);
+      patchBuilder.set(DataComponents.UNBREAKABLE, Unit.INSTANCE);
     } else {
-      stack.remove(DataComponents.UNBREAKABLE);
+      patchBuilder.remove(DataComponents.UNBREAKABLE);
     }
     return this;
   }
@@ -79,7 +83,7 @@ public class FabricItemBuilder implements ItemBuilder {
     if (amount <= 0) {
       throw new IllegalStateException("Non positive amount: " + amount);
     }
-    stack.setCount(amount);
+    ItemStack stack = template.apply(amount, patchBuilder.build());
     var store = FabricPersistentDataHolder.create(stack);
     for (var entry : meta.entrySet()) {
       addMeta(store, entry.getKey(), entry.getValue()); // Get around type erasure

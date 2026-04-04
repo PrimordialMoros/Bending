@@ -57,7 +57,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
+import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 
@@ -99,15 +101,23 @@ public final class PlatformAdapter {
     return BuiltInRegistries.ITEM.getValue(identifier(item.key()));
   }
 
-  public static ItemStack toFabricItem(Item item) {
+  public static ItemStackTemplate toFabricItem(Item item) {
+    return new ItemStackTemplate(toFabricItemType(item));
+  }
+
+  public static ItemStackTemplate toFabricItem(ItemSnapshot item) {
+    return ((FabricItem) item).asTemplate();
+  }
+
+  public static ItemStack toFabricItemStack(Item item) {
     return new ItemStack(toFabricItemType(item));
   }
 
-  public static ItemStack toFabricItem(ItemSnapshot item) {
-    return ((FabricItem) item).copy();
+  public static ItemStack toFabricItemStack(ItemSnapshot item) {
+    return toFabricItem(item).create();
   }
 
-  public static ItemSnapshot fromFabricItem(ItemStack itemStack) {
+  public static ItemSnapshot fromFabricItem(ItemInstance itemStack) {
     return new FabricItem(itemStack);
   }
 

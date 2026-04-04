@@ -20,32 +20,27 @@
 package me.moros.bending.fabric.platform.item;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemSnapshot;
-import me.moros.bending.api.util.data.DataHolder;
 import me.moros.bending.api.util.data.DataKey;
-import me.moros.bending.api.util.functional.Suppliers;
-import me.moros.bending.fabric.platform.FabricPersistentDataHolder;
+import me.moros.bending.api.util.metadata.Metadata;
 import me.moros.bending.fabric.platform.PlatformAdapter;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemInstance;
+import net.minecraft.world.item.ItemStackTemplate;
 
 public final class FabricItem implements ItemSnapshot {
   private final Item type;
-  private final ItemStack handle;
-  private final Supplier<DataHolder> holderSupplier;
-  private final int hashcode;
+  private final ItemStackTemplate handle;
 
-  public FabricItem(ItemStack handle) {
-    this.type = PlatformAdapter.fromFabricItem(handle.getItem());
-    this.handle = handle.copy();
-    this.holderSupplier = Suppliers.lazy(() -> FabricPersistentDataHolder.create(this.handle));
-    this.hashcode = ItemStack.hashItemAndComponents(this.handle);
+  public FabricItem(ItemInstance handle) {
+    var itemType = handle.typeHolder().value();
+    this.type = PlatformAdapter.fromFabricItem(itemType);
+    this.handle = new ItemStackTemplate(itemType, handle.count());
   }
 
-  public ItemStack copy() {
-    return handle.copy();
+  public ItemStackTemplate asTemplate() {
+    return handle;
   }
 
   @Override
@@ -55,12 +50,12 @@ public final class FabricItem implements ItemSnapshot {
 
   @Override
   public int amount() {
-    return handle.getCount();
+    return handle.count();
   }
 
   @Override
   public <T> Optional<T> get(DataKey<T> key) {
-    return holderSupplier.get().get(key);
+    return Metadata.isPersistent(key) ? Optional.ofNullable(ItemUtil.getKey(handle, key)) : Optional.empty();
   }
 
   @Override
@@ -71,11 +66,11 @@ public final class FabricItem implements ItemSnapshot {
     if (obj == null || getClass() != obj.getClass()) {
       return false;
     }
-    return ItemStack.isSameItemSameComponents(handle, ((FabricItem) obj).handle);
+    return handle.equals(((FabricItem) obj).handle);
   }
 
   @Override
   public int hashCode() {
-    return hashcode;
+    return handle.hashCode();
   }
 }

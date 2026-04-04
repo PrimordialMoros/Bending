@@ -17,18 +17,17 @@ repositories {
 
 dependencies {
     minecraft(libs.fabric.minecraft)
-    mappings(loom.officialMojangMappings())
-    modImplementation(libs.fabric.loader)
-    modImplementation(libs.fabric.api)
-    modImplementation(libs.fabric.placeholder)
+    implementation(libs.fabric.loader)
+    implementation(libs.fabric.api)
+    implementation(libs.fabric.placeholder)
 
-    modImplementation(libs.fabric.permissions)
+    implementation(libs.fabric.permissions)
     include(libs.fabric.permissions)
-    modImplementation(libs.sgui)
+    implementation(libs.sgui)
     include(libs.sgui)
-    modImplementation(libs.adventure.fabric)
+    implementation(libs.adventure.fabric)
     include(libs.adventure.fabric)
-    modImplementation(libs.cloud.fabric)
+    implementation(libs.cloud.fabric)
     include(libs.cloud.fabric)
 
     implementation(libs.cloud.minecraft)
@@ -67,17 +66,13 @@ tasks {
             mapOf("version" to project.version, "mcVersion" to libs.versions.minecraft.get())
         )
     }
-    remapJar {
-        val shadowJar = getByName<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar")
-        dependsOn(shadowJar)
-        inputFile = shadowJar.archiveFile
-        addNestedDependencies = true
+    shadowJar {
         archiveFileName = "${project.name}-mc${libs.versions.minecraft.get()}-${project.version}.jar"
     }
 }
 
 bendingPlatform {
-    productionJar = tasks.remapJar.flatMap { it.archiveFile }
+    productionJar = tasks.shadowJar.flatMap { it.archiveFile }
 }
 
 modrinth {

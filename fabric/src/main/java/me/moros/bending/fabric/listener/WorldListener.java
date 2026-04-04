@@ -28,9 +28,9 @@ import me.moros.bending.api.user.User;
 import me.moros.bending.common.util.Initializer;
 import me.moros.bending.fabric.platform.FabricMetadata;
 import me.moros.bending.fabric.platform.PlatformAdapter;
-import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
+import net.fabricmc.fabric.api.entity.event.v1.ServerEntityLevelChangeEvents;
 import net.fabricmc.fabric.api.event.Event;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLevelEvents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -41,11 +41,11 @@ public record WorldListener(Supplier<Game> gameSupplier) implements FabricListen
   @Override
   public void init() {
     var early = Identifier.fromNamespaceAndPath("bending", "early");
-    ServerWorldEvents.UNLOAD.register(this::onWorldUnload);
-    ServerEntityWorldChangeEvents.AFTER_ENTITY_CHANGE_WORLD.register(early, this::onChangeWorld);
-    ServerEntityWorldChangeEvents.AFTER_ENTITY_CHANGE_WORLD.addPhaseOrdering(early, Event.DEFAULT_PHASE);
-    ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register(early, this::onChangeWorld);
-    ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.addPhaseOrdering(early, Event.DEFAULT_PHASE);
+    ServerLevelEvents.UNLOAD.register(this::onWorldUnload);
+    ServerEntityLevelChangeEvents.AFTER_ENTITY_CHANGE_LEVEL.register(early, this::onChangeWorld);
+    ServerEntityLevelChangeEvents.AFTER_ENTITY_CHANGE_LEVEL.addPhaseOrdering(early, Event.DEFAULT_PHASE);
+    ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register(early, this::onChangeWorld);
+    ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.addPhaseOrdering(early, Event.DEFAULT_PHASE);
   }
 
   private void onWorldUnload(MinecraftServer server, ServerLevel world) {

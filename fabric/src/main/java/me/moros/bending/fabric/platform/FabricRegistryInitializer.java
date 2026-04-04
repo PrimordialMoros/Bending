@@ -137,7 +137,7 @@ final class FabricRegistryInitializer implements RegistryInitializer {
       .isAir(data.isAir())
       .isSolid(data.isSolid())
       .isLiquid(data.liquid())
-      .isFlammable(FlammableBlockRegistry.getDefaultInstance().get(block).getBurnChance() > 0)
+      .isFlammable(FlammableBlockRegistry.getDefaultInstance().get(block).getIgniteOdds() > 0)
       .hasGravity(data.getBlock() instanceof FallingBlock)
       .isCollidable(((BlockBehaviourAccess) block).bending$hasCollision())
       .hardness(block.defaultDestroyTime())

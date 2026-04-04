@@ -22,12 +22,13 @@ package me.moros.bending.fabric.platform.item;
 import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.fabric.platform.NBTUtil;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import org.jspecify.annotations.Nullable;
 
 public class ItemUtil {
-  public static <T> @Nullable T getKey(ItemStack stack, DataKey<T> key) {
+  public static <T> @Nullable T getKey(ItemInstance stack, DataKey<T> key) {
     CustomData data = stack.get(DataComponents.CUSTOM_DATA);
     return data == null ? null : NBTUtil.read(data.copyTag(), key); // TODO avoid copy?
   }

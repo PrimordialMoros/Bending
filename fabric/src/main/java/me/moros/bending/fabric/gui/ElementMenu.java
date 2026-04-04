@@ -34,6 +34,7 @@ import me.moros.bending.common.locale.Message;
 import me.moros.bending.fabric.platform.PlatformAdapter;
 import net.kyori.adventure.platform.modcommon.MinecraftServerAudiences;
 import net.kyori.adventure.util.TriState;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
@@ -49,17 +50,20 @@ public final class ElementMenu extends AbstractGui<ItemStack, SimpleGui> {
     var player = PlatformAdapter.toFabricEntity(player());
     SimpleGui gui = new SimpleGui(MenuType.GENERIC_9x3, player, false);
     gui.setTitle(MinecraftServerAudiences.of(player.level().getServer()).asNative(Message.ELEMENTS_GUI_TITLE.build()));
-    var fill = PlatformAdapter.toFabricItem(BACKGROUND.get());
-    fill.set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(true, ReferenceSortedSets.emptySet()));
+    var fill = PlatformAdapter.toFabricItem(BACKGROUND.get())
+      .apply(DataComponentPatch.builder()
+        .set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(true, ReferenceSortedSets.emptySet()))
+        .build()
+      );
     for (int i = 0; i < gui.getSize(); i++) {
       gui.setSlot(i, fill);
     }
-    gui.setSlot(4, PlatformAdapter.toFabricItem(generateHelpItem()));
+    gui.setSlot(4, PlatformAdapter.toFabricItemStack(generateHelpItem()));
     int offset = 10;
     User user = Registries.BENDERS.getOrThrow(player().uuid());
     for (Element element : Element.VALUES) {
       var data = createElementButton(element);
-      var item = PlatformAdapter.toFabricItem(data.item());
+      var item = PlatformAdapter.toFabricItem(data.item()).create();
       handleItemStackGlow(item, user.hasElement(element));
       elementMap.put(element, item);
       gui.setSlot(offset, item, (idx, ct, ct2, g) -> {

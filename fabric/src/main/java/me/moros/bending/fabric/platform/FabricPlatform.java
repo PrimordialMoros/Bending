@@ -140,11 +140,11 @@ public class FabricPlatform implements Platform, PlatformFactory {
 
   private ItemSnapshot findCampfireRecipe(Item item) {
     var fabricItem = PlatformAdapter.toFabricItem(item);
-    var recipeInput = new SingleRecipeInput(fabricItem);
+    var recipeInput = new SingleRecipeInput(fabricItem.create());
     return server.getRecipeManager()
       .getAllMatches(RecipeType.CAMPFIRE_COOKING, recipeInput, server.overworld())
       .map(RecipeHolder::value).findAny()
-      .map(r -> PlatformAdapter.fromFabricItem(r.assemble(recipeInput, server.registryAccess())))
+      .map(r -> PlatformAdapter.fromFabricItem(r.assemble(recipeInput)))
       .orElseGet(ItemSnapshot.AIR);
   }
 }
