@@ -45,6 +45,7 @@ public final class EarthMaterials {
     BlockTag.builder(EARTH_BENDABLE.key())
       .add(BlockTag.reference(KeyUtil.simple("extra_earth_sources")))
       .add(BlockTag.DIRT)
+      .add(BlockTag.GRASS_BLOCKS)
       .add(BlockTag.BASE_STONE_OVERWORLD)
       .add(BlockTag.BASE_STONE_NETHER)
       .add(BlockTag.STONE_BRICKS)
