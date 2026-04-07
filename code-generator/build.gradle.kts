@@ -14,7 +14,6 @@ repositories {
 
 dependencies {
     minecraft(libs.fabric.minecraft)
-    mappings(loom.officialMojangMappings())
     implementation(libs.javapoet)
 }
 
