@@ -26,6 +26,7 @@ import me.moros.bending.fabric.event.ServerBlockEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -42,18 +43,18 @@ public abstract class BlockMixin {
     method = "getDrops(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntity;)Ljava/util/List;",
     at = @At(value = "HEAD"), cancellable = true
   )
-  private static void bending$removeTempBlockDrops(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, @Nullable BlockEntity blockEntity, CallbackInfoReturnable<List<ItemStack>> cir) {
-    if (!ServerBlockEvents.BLOCK_DROP_LOOT.invoker().onDropLoot(serverLevel, blockPos)) {
+  private static void bending$removeTempBlockDrops(BlockState state, ServerLevel level, BlockPos pos, @Nullable BlockEntity blockEntity, CallbackInfoReturnable<List<ItemStack>> cir) {
+    if (!ServerBlockEvents.BLOCK_DROP_LOOT.invoker().onDropLoot(level, pos)) {
       cir.setReturnValue(Collections.emptyList());
     }
   }
 
   @Inject(
-    method = "getDrops(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/item/ItemStack;)Ljava/util/List;",
+    method = "getDrops(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/item/ItemInstance;)Ljava/util/List;",
     at = @At(value = "HEAD"), cancellable = true
   )
-  private static void bending$removeTempBlockDrops(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, @Nullable BlockEntity blockEntity, @Nullable Entity entity, ItemStack itemStack, CallbackInfoReturnable<List<ItemStack>> cir) {
-    if (!ServerBlockEvents.BLOCK_DROP_LOOT.invoker().onDropLoot(serverLevel, blockPos)) {
+  private static void bending$removeTempBlockDrops(BlockState state, ServerLevel level, BlockPos pos, @Nullable BlockEntity blockEntity, @Nullable Entity breaker, ItemInstance tool, CallbackInfoReturnable<List<ItemStack>> cir) {
+    if (!ServerBlockEvents.BLOCK_DROP_LOOT.invoker().onDropLoot(level, pos)) {
       cir.setReturnValue(Collections.emptyList());
     }
   }

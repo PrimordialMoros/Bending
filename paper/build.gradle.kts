@@ -16,13 +16,13 @@ repositories {
 }
 
 dependencies {
-    bendingImplementation(projects.bendingCommon)
-    bendingImplementation(projects.bendingNms)
-    bendingImplementation(libs.tasker.paper)
-    bendingImplementation(libs.bstats.bukkit)
-    bendingImplementation(libs.cloud.minecraft)
-    bendingImplementation(libs.cloud.paper)
-    bendingImplementation(libs.inventory.framework)
+    implementation(projects.bendingCommon)
+    implementation(projects.bendingNms)
+    implementation(libs.tasker.paper)
+    implementation(libs.bstats.bukkit)
+    implementation(libs.cloud.minecraft)
+    implementation(libs.cloud.paper)
+    implementation(libs.inventory.framework)
     runtimeDownload(libs.caffeine)
     runtimeDownload(libs.hikari)
     runtimeDownload(libs.jdbi)

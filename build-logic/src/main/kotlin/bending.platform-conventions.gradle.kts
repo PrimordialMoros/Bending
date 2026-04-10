@@ -5,11 +5,6 @@ plugins {
 
 val platformExt = extensions.create("bendingPlatform", BendingPlatformExtension::class)
 
-configurations.create("bendingImplementation")
-configurations.implementation {
-    extendsFrom(configurations.getByName("bendingImplementation"))
-}
-
 val runtimeDownload: Configuration by configurations.creating {
     isCanBeResolved = true
     isCanBeConsumed = false
@@ -20,7 +15,6 @@ val runtimeDownload: Configuration by configurations.creating {
 
 tasks {
     shadowJar {
-        configurations = listOf(project.configurations.getByName("bendingImplementation"))
         archiveClassifier = ""
         mergeServiceFiles()
         filesMatching("META-INF/services/**") {
@@ -31,7 +25,7 @@ tasks {
             into("META-INF")
             rename { licenseName }
         }
-        val excluded = setOf("checker-qual", "error_prone_annotations", "jspecify", "geantyref", "slf4j-api")
+        val excluded = setOf("error_prone_annotations", "gson", "geantyref", "option", "jspecify", "slf4j-api")
         dependencies {
             exclude {
                 excluded.contains(it.moduleName)

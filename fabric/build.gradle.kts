@@ -35,14 +35,14 @@ dependencies {
     implementation(libs.bundles.configurate)
     include(libs.bundles.configurate)
 
-    bendingImplementation(projects.bendingCommon)
-    bendingImplementation(projects.bendingNms)
-    bendingImplementation(libs.tasker.fabric)
-    bendingImplementation(libs.caffeine)
-    bendingImplementation(libs.hikari)
-    bendingImplementation(libs.jdbi)
-    bendingImplementation(libs.h2)
-    bendingImplementation(libs.flyway.core) { exclude(module = "gson") }
+    shadow(projects.bendingCommon)
+    shadow(projects.bendingNms)
+    shadow(libs.tasker.fabric)
+    shadow(libs.caffeine)
+    shadow(libs.hikari)
+    shadow(libs.jdbi)
+    shadow(libs.h2)
+    shadow(libs.flyway.core) { exclude(module = "gson") }
 }
 
 loom {
@@ -51,6 +51,16 @@ loom {
 
 tasks {
     shadowJar {
+        val processedFabricModJson = layout.buildDirectory.file("resources/main/fabric.mod.json").get().asFile.absoluteFile
+        eachFile {
+            // Exclude the fabric.mod.json in the resources folder to allow the one from Fabric's jar task to be added
+            if (path == "fabric.mod.json" && file.absoluteFile == processedFabricModJson) {
+                exclude()
+            }
+        }
+        from(zipTree(jar.flatMap { it.archiveFile }))
+        configurations = listOf(project.configurations.shadow.get())
+        archiveFileName = "${project.name}-mc${libs.versions.minecraft.get()}-${project.version}.jar"
         dependencies {
             reloc("com.github.benmanes.caffeine", "caffeine")
             reloc("com.zaxxer.hikari", "hikari")
@@ -58,6 +68,7 @@ tasks {
             reloc("org.h2", "h2")
             reloc("org.flyway", "flyway")
             reloc("com.fasterxml.jackson", "jackson")
+            reloc("tools.jackson", "jackson")
         }
     }
     named<Copy>("processResources") {
@@ -65,9 +76,6 @@ tasks {
             "fabric.mod.json",
             mapOf("version" to project.version, "mcVersion" to libs.versions.minecraft.get())
         )
-    }
-    shadowJar {
-        archiveFileName = "${project.name}-mc${libs.versions.minecraft.get()}-${project.version}.jar"
     }
 }
 
