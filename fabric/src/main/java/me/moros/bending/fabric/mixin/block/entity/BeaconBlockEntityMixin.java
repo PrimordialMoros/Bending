@@ -22,7 +22,7 @@ package me.moros.bending.fabric.mixin.block.entity;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import me.moros.bending.api.platform.block.Lockable;
-import me.moros.bending.fabric.event.ServerItemEvents;
+import me.moros.bending.fabric.event.ServerPlayerEvents;
 import net.minecraft.world.LockCode;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
@@ -50,7 +50,7 @@ public abstract class BeaconBlockEntityMixin implements Lockable {
     at = @At(value = "INVOKE", target = "Lnet/minecraft/world/LockCode;canUnlock(Lnet/minecraft/world/entity/player/Player;)Z")
   )
   private boolean bending$canUnlock(boolean original, @Local(argsOnly = true) Player player) {
-    if (!player.isSpectator() && ServerItemEvents.ACCESS_LOCK.invoker().onAccess(player, this)) {
+    if (!player.isSpectator() && ServerPlayerEvents.ACCESS_LOCK.invoker().onAccess(player, this)) {
       return true;
     }
     return original;

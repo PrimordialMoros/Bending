@@ -20,7 +20,7 @@
 package me.moros.bending.fabric.mixin.block.entity;
 
 import me.moros.bending.api.platform.block.Lockable;
-import me.moros.bending.fabric.event.ServerItemEvents;
+import me.moros.bending.fabric.event.ServerPlayerEvents;
 import net.minecraft.world.LockCode;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
@@ -47,7 +47,7 @@ public abstract class BaseContainerBlockEntityMixin implements Lockable {
 
   @Inject(method = "canOpen", at = @At(value = "HEAD"), cancellable = true)
   private void bending$canOpen(Player player, CallbackInfoReturnable<Boolean> cir) {
-    if (!player.isSpectator() && ServerItemEvents.ACCESS_LOCK.invoker().onAccess(player, this)) {
+    if (!player.isSpectator() && ServerPlayerEvents.ACCESS_LOCK.invoker().onAccess(player, this)) {
       cir.setReturnValue(true);
     }
   }

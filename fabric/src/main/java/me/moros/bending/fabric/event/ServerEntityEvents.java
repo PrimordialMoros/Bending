@@ -19,6 +19,8 @@
 
 package me.moros.bending.fabric.event;
 
+import java.util.Collection;
+
 import me.moros.math.Vector3d;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
@@ -27,6 +29,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.HitResult;
 
 public final class ServerEntityEvents {
@@ -81,6 +84,23 @@ public final class ServerEntityEvents {
     return true;
   });
 
+  public static final Event<DropItem> DROP_ITEM = EventFactory.createArrayBacked(DropItem.class, callbacks -> (entity, item) -> {
+    for (var callback : callbacks) {
+      if (!callback.onDrop(entity, item)) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  public static final Event<EntityDropLoot> DROP_LOOT = EventFactory.createArrayBacked(EntityDropLoot.class, callbacks -> (entity, loot) -> {
+    Collection<ItemStack> drops = loot;
+    for (var callback : callbacks) {
+      drops = callback.onDropLoot(entity, drops);
+    }
+    return drops;
+  });
+
   @FunctionalInterface
   public interface Merge {
     boolean onMerge(ItemEntity first, ItemEntity second);
@@ -104,5 +124,15 @@ public final class ServerEntityEvents {
   @FunctionalInterface
   public interface ProjectileHit {
     boolean onProjectileHit(Projectile projectile, HitResult hitResult);
+  }
+
+  @FunctionalInterface
+  public interface DropItem {
+    boolean onDrop(LivingEntity entity, ItemStack item);
+  }
+
+  @FunctionalInterface
+  public interface EntityDropLoot {
+    Collection<ItemStack> onDropLoot(LivingEntity entity, Collection<ItemStack> loot);
   }
 }

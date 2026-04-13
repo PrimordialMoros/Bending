@@ -19,6 +19,7 @@
 
 package me.moros.bending.fabric.listener;
 
+import java.util.Collection;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -40,7 +41,6 @@ import me.moros.bending.common.ability.earth.passive.Locksmithing;
 import me.moros.bending.common.util.Initializer;
 import me.moros.bending.fabric.event.ServerEntityEvents;
 import me.moros.bending.fabric.event.ServerInventoryEvents;
-import me.moros.bending.fabric.event.ServerItemEvents;
 import me.moros.bending.fabric.event.ServerPlayerEvents;
 import me.moros.bending.fabric.platform.FabricMetadata;
 import me.moros.bending.fabric.platform.PlatformAdapter;
@@ -95,8 +95,9 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
     ServerEntityEvents.TARGET.register(this::onEntityTarget);
     ServerPlayerEvents.MODIFY_INVENTORY_SLOT.register(this::onInventoryClick);
     ServerInventoryEvents.HOPPER.register(this::onHopperItemPickup);
-    ServerItemEvents.DROP_ITEM.register(this::onDropItem);
-    ServerItemEvents.ACCESS_LOCK.register(this::onAccessLock);
+    ServerEntityEvents.DROP_ITEM.register(this::onDropItem);
+    ServerEntityEvents.DROP_LOOT.register(this::onDropLoot);
+    ServerPlayerEvents.ACCESS_LOCK.register(this::onAccessLock);
     ServerEntityEvents.DAMAGE.register(this::onEntityDamage);
     ServerLivingEntityEvents.ALLOW_DAMAGE.register(this::onEntityAllowDamage);
     ServerLivingEntityEvents.AFTER_DEATH.register(this::onUserDeath);
@@ -311,6 +312,13 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
       return ItemUtil.getKey(stack, Metadata.ARMOR_KEY) == null;
     }
     return true;
+  }
+
+  private Collection<ItemStack> onDropLoot(LivingEntity entity, Collection<ItemStack> loot) {
+    if (!disabledWorld(entity)) {
+      loot.removeIf(i -> ItemUtil.getKey(i, Metadata.ARMOR_KEY));
+    }
+    return loot;
   }
 
   private boolean onAccessLock(Player player, Lockable lockable) {

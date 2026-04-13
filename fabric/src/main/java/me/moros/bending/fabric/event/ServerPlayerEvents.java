@@ -19,12 +19,14 @@
 
 package me.moros.bending.fabric.event;
 
+import me.moros.bending.api.platform.block.Lockable;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -91,6 +93,15 @@ public final class ServerPlayerEvents {
     return true;
   });
 
+  public static final Event<AccessLock> ACCESS_LOCK = EventFactory.createArrayBacked(AccessLock.class, callbacks -> (player, lockable) -> {
+    for (var callback : callbacks) {
+      if (callback.onAccess(player, lockable)) {
+        return true;
+      }
+    }
+    return false;
+  });
+
   @FunctionalInterface
   public interface Interact {
     InteractionResult onInteract(ServerPlayer player, InteractionHand hand);
@@ -124,5 +135,10 @@ public final class ServerPlayerEvents {
   @FunctionalInterface
   public interface PlaceBlock {
     boolean onPlace(ServerPlayer player, BlockPos pos, BlockState state);
+  }
+
+  @FunctionalInterface
+  public interface AccessLock {
+    boolean onAccess(Player player, Lockable lockable);
   }
 }

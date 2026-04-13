@@ -19,13 +19,18 @@
 
 package me.moros.bending.fabric.mixin.entity;
 
+import java.util.function.Consumer;
+
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import me.moros.bending.fabric.event.ServerEntityEvents;
-import me.moros.bending.fabric.event.ServerItemEvents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.LootTable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -39,15 +44,29 @@ public abstract class LivingEntityMixin extends EntityMixin {
     return (float) ServerEntityEvents.DAMAGE.invoker().onDamage((LivingEntity) (Object) this, source, originalValue);
   }
 
-  @Inject(method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;",
-    at = @At(value = "RETURN", ordinal = 1), cancellable = true
+  @Inject(method = "createItemStackToDrop",
+    at = @At(value = "HEAD"), cancellable = true
   )
-  private void bending$onDrop(ItemStack stack, boolean dropAround, boolean traceItem, CallbackInfoReturnable<ItemEntity> cir) {
-    if (stack.isEmpty() || this.level().isClientSide()) {
+  private void bending$onDrop(ItemStack itemStack, boolean randomly, boolean thrownFromHand, CallbackInfoReturnable<ItemEntity> cir) {
+    if (itemStack.isEmpty() || this.level().isClientSide()) {
       return;
     }
-    if (!ServerItemEvents.DROP_ITEM.invoker().onDrop((LivingEntity) (Object) this, stack)) {
+    if (!ServerEntityEvents.DROP_ITEM.invoker().onDrop((LivingEntity) (Object) this, itemStack)) {
       cir.setReturnValue(null);
     }
+  }
+
+  @WrapOperation(
+    method = "dropFromLootTable(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;ZLnet/minecraft/resources/ResourceKey;Ljava/util/function/Consumer;)V",
+    at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/loot/LootTable;getRandomItems(Lnet/minecraft/world/level/storage/loot/LootParams;JLjava/util/function/Consumer;)V")
+  )
+  private void bending$onDropLoot(LootTable instance, LootParams params, long optionalLootTableSeed, Consumer<ItemStack> output, Operation<Void> original) {
+    if (this.level().isClientSide()) {
+      original.call(instance, params, optionalLootTableSeed, output);
+      return;
+    }
+    var loot = instance.getRandomItems(params, optionalLootTableSeed);
+    var result = ServerEntityEvents.DROP_LOOT.invoker().onDropLoot((LivingEntity) (Object) this, loot);
+    result.forEach(output);
   }
 }
