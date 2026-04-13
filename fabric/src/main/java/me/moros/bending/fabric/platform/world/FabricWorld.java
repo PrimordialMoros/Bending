@@ -239,7 +239,7 @@ public record FabricWorld(ServerLevel handle) implements World {
 
   @Override
   public Entity dropItem(Position position, ItemSnapshot item, boolean canPickup) {
-    var type = PlatformAdapter.toFabricItem(item).create();
+    var type = PlatformAdapter.toFabricItem(item);
     ItemEntity droppedItem = new ItemEntity(handle(), position.x(), position.y(), position.z(), type);
     if (!canPickup) {
       droppedItem.setNeverPickUp();

@@ -26,17 +26,18 @@ import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.api.util.metadata.Metadata;
 import me.moros.bending.fabric.platform.PlatformAdapter;
-import net.minecraft.world.item.ItemInstance;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 
 public final class FabricItem implements ItemSnapshot {
+  private static final ItemSnapshot EMPTY = new EmptyFabricItem();
+
   private final Item type;
   private final ItemStackTemplate handle;
 
-  public FabricItem(ItemInstance handle) {
-    var itemType = handle.typeHolder().value();
-    this.type = PlatformAdapter.fromFabricItem(itemType);
-    this.handle = new ItemStackTemplate(itemType, handle.count());
+  private FabricItem(ItemStack handle) {
+    this.type = PlatformAdapter.fromFabricItem(handle.typeHolder().value());
+    this.handle = ItemStackTemplate.fromNonEmptyStack(handle);
   }
 
   public ItemStackTemplate asTemplate() {
@@ -72,5 +73,13 @@ public final class FabricItem implements ItemSnapshot {
   @Override
   public int hashCode() {
     return handle.hashCode();
+  }
+
+  public static ItemSnapshot createFabricItem(ItemStack handle) {
+    return handle.isEmpty() ? EMPTY : new FabricItem(handle);
+  }
+
+  public static boolean isEmpty(ItemSnapshot item) {
+    return EMPTY.equals(item);
   }
 }

@@ -30,7 +30,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.block.data.CraftBlockData;
@@ -57,9 +57,9 @@ final class NativeAdapterImpl extends AbstractNativeAdapter {
   }
 
   @Override
-  protected ItemStackTemplate adapt(Item item) {
+  protected ItemStack adapt(Item item) {
     var id = Identifier.fromNamespaceAndPath(item.key().namespace(), item.key().value());
-    return new ItemStackTemplate(BuiltInRegistries.ITEM.getValue(id));
+    return new ItemStack(BuiltInRegistries.ITEM.getValue(id));
   }
 
   @Override

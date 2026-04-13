@@ -29,7 +29,7 @@ import net.kyori.adventure.platform.modcommon.MinecraftServerAudiences;
 import net.kyori.adventure.text.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 
 public final class NativeAdapterImpl extends AbstractNativeAdapter {
@@ -56,7 +56,7 @@ public final class NativeAdapterImpl extends AbstractNativeAdapter {
   }
 
   @Override
-  protected ItemStackTemplate adapt(Item item) {
+  protected ItemStack adapt(Item item) {
     return PlatformAdapter.toFabricItem(item);
   }
 

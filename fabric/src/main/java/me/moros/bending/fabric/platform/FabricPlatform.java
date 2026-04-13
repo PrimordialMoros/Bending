@@ -54,6 +54,7 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.item.enchantment.Enchantments;
+import org.jspecify.annotations.Nullable;
 
 public class FabricPlatform implements Platform, PlatformFactory {
   private final MinecraftServer server;
@@ -118,7 +119,7 @@ public class FabricPlatform implements Platform, PlatformFactory {
   @Override
   public Optional<ItemSnapshot> campfireRecipeCooked(Item input) {
     var result = campfireRecipesCache.get(input);
-    return result.type() == Item.AIR ? Optional.empty() : Optional.of(result);
+    return result == null ? Optional.empty() : Optional.of(result);
   }
 
   @Override
@@ -138,13 +139,13 @@ public class FabricPlatform implements Platform, PlatformFactory {
     return List.of();
   }
 
-  private ItemSnapshot findCampfireRecipe(Item item) {
+  private @Nullable ItemSnapshot findCampfireRecipe(Item item) {
     var fabricItem = PlatformAdapter.toFabricItem(item);
-    var recipeInput = new SingleRecipeInput(fabricItem.create());
+    var recipeInput = new SingleRecipeInput(fabricItem);
     return server.getRecipeManager()
       .getAllMatches(RecipeType.CAMPFIRE_COOKING, recipeInput, server.overworld())
       .map(RecipeHolder::value).findAny()
       .map(r -> PlatformAdapter.fromFabricItem(r.assemble(recipeInput)))
-      .orElseGet(ItemSnapshot.AIR);
+      .orElse(null);
   }
 }

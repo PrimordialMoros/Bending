@@ -57,9 +57,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
-import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 
@@ -89,36 +87,28 @@ public final class PlatformAdapter {
     };
   }
 
-  public static Item fromFabricItem(net.minecraft.world.item.Item material) {
-    return Item.registry().getOrThrow(BuiltInRegistries.ITEM.getKey(material));
-  }
-
   public static BlockType fromFabricBlock(Block material) {
     return BlockType.registry().getOrThrow(BuiltInRegistries.BLOCK.getKey(material));
+  }
+
+  public static Item fromFabricItem(net.minecraft.world.item.Item itemType) {
+    return Item.registry().getOrThrow(BuiltInRegistries.ITEM.getKey(itemType));
+  }
+
+  public static ItemSnapshot fromFabricItem(ItemStack itemStack) {
+    return FabricItem.createFabricItem(itemStack);
   }
 
   public static net.minecraft.world.item.Item toFabricItemType(Item item) {
     return BuiltInRegistries.ITEM.getValue(identifier(item.key()));
   }
 
-  public static ItemStackTemplate toFabricItem(Item item) {
-    return new ItemStackTemplate(toFabricItemType(item));
-  }
-
-  public static ItemStackTemplate toFabricItem(ItemSnapshot item) {
-    return ((FabricItem) item).asTemplate();
-  }
-
-  public static ItemStack toFabricItemStack(Item item) {
+  public static ItemStack toFabricItem(Item item) {
     return new ItemStack(toFabricItemType(item));
   }
 
-  public static ItemStack toFabricItemStack(ItemSnapshot item) {
-    return toFabricItem(item).create();
-  }
-
-  public static ItemSnapshot fromFabricItem(ItemInstance itemStack) {
-    return new FabricItem(itemStack);
+  public static ItemStack toFabricItem(ItemSnapshot item) {
+    return FabricItem.isEmpty(item) ? ItemStack.EMPTY : ((FabricItem) item).asTemplate().create();
   }
 
   public static Identifier identifier(Key key) {

@@ -44,7 +44,7 @@ final class DisplayUtil {
         yield EntityType.BLOCK_DISPLAY;
       }
       case ItemDisplay display -> {
-        builder.setRaw(EntityMeta.DISPLAYED_ITEM, packetUtil.adapt(display.data()).create());
+        builder.setRaw(EntityMeta.DISPLAYED_ITEM, packetUtil.adapt(display.data()));
         builder.setRaw(EntityMeta.DISPLAY_TYPE, display.displayType().getId());
         yield EntityType.ITEM_DISPLAY;
       }

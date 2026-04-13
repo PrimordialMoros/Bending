@@ -37,6 +37,7 @@ import net.minecraft.core.particles.ShriekParticleOption;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.ARGB;
+import net.minecraft.world.item.ItemStackTemplate;
 import org.jspecify.annotations.Nullable;
 
 public final class ParticleMapper {
@@ -49,7 +50,8 @@ public final class ParticleMapper {
       if ((p == Particle.BLOCK || p == Particle.FALLING_DUST || p == Particle.BLOCK_MARKER) && data instanceof BlockState state) {
         return new BlockParticleOption((ParticleType<BlockParticleOption>) fabricParticle, PlatformAdapter.toFabricData(state));
       } else if (p == Particle.ITEM && data instanceof Item item) {
-        return new ItemParticleOption((ParticleType<ItemParticleOption>) fabricParticle, PlatformAdapter.toFabricItem(item));
+        ItemStackTemplate itemStackTemplate = ItemStackTemplate.fromNonEmptyStack(PlatformAdapter.toFabricItem(item));
+        return new ItemParticleOption((ParticleType<ItemParticleOption>) fabricParticle, itemStackTemplate);
       } else if (p == Particle.DUST && data instanceof ParticleDustData dust) {
         return new DustParticleOptions(fromColor(dust.red(), dust.green(), dust.blue()), dust.size());
       } else if (p == Particle.DUST_COLOR_TRANSITION && data instanceof Transitive dust) {

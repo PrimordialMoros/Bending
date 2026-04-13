@@ -60,6 +60,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.PositionMoveRotation;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -81,7 +82,7 @@ public abstract class AbstractPacketUtil implements PacketUtil {
 
   protected abstract net.minecraft.world.entity.Entity adapt(Entity entity);
 
-  protected abstract ItemStackTemplate adapt(Item item);
+  protected abstract ItemStack adapt(Item item);
 
   protected abstract net.minecraft.network.chat.Component adapt(Component component);
 
@@ -140,7 +141,7 @@ public abstract class AbstractPacketUtil implements PacketUtil {
 
   protected ClientboundUpdateAdvancementsPacket createNotificationPacket(Item item, Component title) {
     String criteriaId = "bending:criteria_progress";
-    ItemStackTemplate icon = adapt(item);
+    var icon = ItemStackTemplate.fromNonEmptyStack(adapt(item));
     net.minecraft.network.chat.Component nmsTitle = adapt(title);
     net.minecraft.network.chat.Component nmsDesc = net.minecraft.network.chat.Component.empty();
     AdvancementType type = AdvancementType.TASK;

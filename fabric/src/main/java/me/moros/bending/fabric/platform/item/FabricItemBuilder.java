@@ -35,17 +35,16 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Unit;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.component.ItemLore;
 
 public class FabricItemBuilder implements ItemBuilder {
-  private final ItemStackTemplate template;
+  private final ItemStack itemStack;
   private final DataComponentPatch.Builder patchBuilder;
   private final Map<DataKey<?>, Object> meta = new HashMap<>();
   private final MinecraftServerAudiences adapter;
 
-  public FabricItemBuilder(ItemStackTemplate template, MinecraftServer server) {
-    this.template = template;
+  public FabricItemBuilder(ItemStack itemStack, MinecraftServer server) {
+    this.itemStack = itemStack;
     this.patchBuilder = DataComponentPatch.builder();
     this.adapter = MinecraftServerAudiences.of(server);
   }
@@ -83,12 +82,13 @@ public class FabricItemBuilder implements ItemBuilder {
     if (amount <= 0) {
       throw new IllegalStateException("Non positive amount: " + amount);
     }
-    ItemStack stack = template.apply(amount, patchBuilder.build());
+    ItemStack stack = itemStack.copyWithCount(amount);
+    stack.applyComponents(patchBuilder.build());
     var store = FabricPersistentDataHolder.create(stack);
     for (var entry : meta.entrySet()) {
       addMeta(store, entry.getKey(), entry.getValue()); // Get around type erasure
     }
-    return new FabricItem(stack);
+    return FabricItem.createFabricItem(stack);
   }
 
   @SuppressWarnings("unchecked")
