@@ -120,8 +120,8 @@ public abstract class ServerGamePacketListenerImplMixin {
       double x = from.x();
       double y = from.y();
       double z = from.z();
-      this.player.absSnapTo(x, y, z, xRot, yRot);
-      PositionMoveRotation positionMoveRotation = new PositionMoveRotation(new Vec3(x, y, z), Vec3.ZERO, xRot, yRot);
+      this.player.absSnapTo(x, y, z, yRot, xRot);
+      PositionMoveRotation positionMoveRotation = new PositionMoveRotation(new Vec3(x, y, z), Vec3.ZERO, yRot, xRot);
       this.teleport(positionMoveRotation, EnumSet.of(Relative.X_ROT, Relative.Y_ROT));
       ci.cancel();
     }
