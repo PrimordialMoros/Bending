@@ -47,7 +47,5 @@ module me.moros.bending {
   requires transitive me.moros.math;
   requires static org.jspecify;
   requires static com.github.benmanes.caffeine;
-  requires static net.kyori.examination.api;
-  requires static transitive net.kyori.adventure;
-  requires static transitive net.kyori.adventure.key;
+  requires static transitive net.kyori.adventure.api;
 }
