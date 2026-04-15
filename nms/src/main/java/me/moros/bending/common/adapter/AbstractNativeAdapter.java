@@ -59,9 +59,9 @@ public abstract class AbstractNativeAdapter extends AbstractPacketUtil implement
   @Override
   public boolean tryPowerLightningRod(Block block) {
     ServerLevel level = adapt(block.world());
-    BlockState data = level.getBlockState(new BlockPos(block.blockX(), block.blockY(), block.blockZ()));
+    BlockPos pos = new BlockPos(block.blockX(), block.blockY(), block.blockZ());
+    BlockState data = level.getBlockState(pos);
     if (data.is(Blocks.LIGHTNING_ROD)) {
-      BlockPos pos = new BlockPos(block.blockX(), block.blockY(), block.blockZ());
       ((LightningRodBlock) data.getBlock()).onLightningStrike(data, adapt(block.world()), pos);
       return true;
     }

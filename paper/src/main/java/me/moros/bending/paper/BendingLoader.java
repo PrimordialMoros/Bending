@@ -30,14 +30,14 @@ import io.papermc.paper.plugin.loader.PluginLoader;
 import io.papermc.paper.plugin.loader.library.impl.MavenLibraryResolver;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.graph.Dependency;
-import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.repository.RemoteRepository.Builder;
 
 public final class BendingLoader implements PluginLoader {
   @Override
   public void classloader(PluginClasspathBuilder classpathBuilder) {
     MavenLibraryResolver resolver = new MavenLibraryResolver();
-    resolver.addRepository(new RemoteRepository.Builder("atlas", "default", "https://repo.moros.me/releases").build());
-    resolver.addRepository(new RemoteRepository.Builder("paper", "default", "https://repo.papermc.io/repository/maven-public").build());
+    resolver.addRepository(new Builder("atlas", "default", "https://repo.moros.me/releases").build());
+    resolver.addRepository(new Builder("central", "default", MavenLibraryResolver.MAVEN_CENTRAL_DEFAULT_MIRROR).build());
     for (var dependency : readFromResource()) {
       resolver.addDependency(new Dependency(new DefaultArtifact(dependency), null));
     }
