@@ -24,11 +24,13 @@ import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 
 import me.moros.bending.api.addon.Addon;
 import me.moros.bending.api.config.BendingProperties;
 import me.moros.bending.api.game.Game;
+import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.util.Tasker;
 import me.moros.bending.common.ability.AbilityInitializer;
 import me.moros.bending.common.config.BendingPropertiesImpl;
@@ -40,6 +42,8 @@ import me.moros.bending.common.locale.TranslationManager;
 import me.moros.bending.common.logging.Logger;
 import me.moros.bending.common.util.GameProviderUtil;
 import me.moros.bending.common.util.ReflectionUtil;
+import me.moros.tasker.executor.AsyncExecutor;
+import me.moros.tasker.executor.SimpleAsyncExecutor;
 import me.moros.tasker.executor.SyncExecutor;
 import org.spongepowered.configurate.reference.WatchServiceListener;
 
@@ -56,6 +60,7 @@ public abstract class AbstractBending<T> implements Bending {
   private final AddonLoader addonLoader;
 
   protected Game game;
+  protected Supplier<SyncExecutor> executorSupplier;
 
   protected AbstractBending(T parent, Path dir, Logger logger) {
     this.parent = parent;
@@ -74,12 +79,29 @@ public abstract class AbstractBending<T> implements Bending {
     new AbilityInitializer().init();
   }
 
-  protected void injectTasker(SyncExecutor syncExecutor) {
-    ReflectionUtil.injectStatic(Tasker.class, syncExecutor);
-  }
-
   private void injectProperties(BendingProperties properties) {
     ReflectionUtil.injectStatic(BendingProperties.Holder.class, properties);
+  }
+
+  protected void injectTasker(Supplier<SyncExecutor> executorSupplier) {
+    this.executorSupplier = executorSupplier;
+    initTasker();
+  }
+
+  protected void initTasker() {
+    if (Tasker.sync() == null || !Tasker.sync().isValid()) {
+      SyncExecutor sync = executorSupplier.get();
+      ReflectionUtil.injectStatic(Tasker.class, sync);
+    }
+    if (Tasker.async() == null || !Tasker.async().isValid()) {
+      AsyncExecutor async = new SimpleAsyncExecutor(Executors.newVirtualThreadPerTaskExecutor());
+      ReflectionUtil.injectStatic(Tasker.class, async);
+    }
+  }
+
+  protected void shutdownTasker() {
+    Tasker.sync().shutdown();
+    Tasker.async().shutdown();
   }
 
   protected void registerNamedAddon(String name, Supplier<Addon> provider) {
@@ -102,33 +124,24 @@ public abstract class AbstractBending<T> implements Bending {
     }
   }
 
-  protected void softDisable() {
-    if (game != null) {
-      addonLoader.unloadAll();
-      game.cleanup();
-      game.storage().close();
-      Tasker.sync().clear(); // Clear any sync tasks
-      GameProviderUtil.unregisterProvider();
-      game = null;
-    }
-  }
-
-  protected void disable() {
+  protected void disable(boolean fullShutdown) {
     if (game != null) {
       addonLoader.unloadAll();
       game.cleanup();
       game.eventBus().shutdown();
+      shutdownTasker();
+      game.storage().close();
+      GameProviderUtil.unregisterProvider();
+      game = null;
+      Registries.BENDERS.clear();
+    }
+    if (fullShutdown) {
       configManager().close();
       try {
         listener.close();
       } catch (IOException e) {
         logger.warn(e.getMessage(), e);
       }
-      Tasker.sync().shutdown();
-      Tasker.async().shutdown();
-      game.storage().close();
-      GameProviderUtil.unregisterProvider();
-      game = null;
     }
   }
 

@@ -30,7 +30,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 
 public final class FabricItem implements ItemSnapshot {
-  private static final ItemSnapshot EMPTY = new EmptyFabricItem();
+  private static final ItemSnapshot EMPTY = new EmptyItem();
 
   private final Item type;
   private final ItemStackTemplate handle;
@@ -81,5 +81,22 @@ public final class FabricItem implements ItemSnapshot {
 
   public static boolean isEmpty(ItemSnapshot item) {
     return EMPTY.equals(item);
+  }
+
+  private record EmptyItem() implements ItemSnapshot {
+    @Override
+    public Item type() {
+      return Item.AIR;
+    }
+
+    @Override
+    public int amount() {
+      return 0;
+    }
+
+    @Override
+    public <T> Optional<T> get(DataKey<T> key) {
+      return Optional.empty();
+    }
   }
 }

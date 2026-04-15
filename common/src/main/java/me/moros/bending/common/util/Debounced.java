@@ -21,14 +21,18 @@ package me.moros.bending.common.util;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-import me.moros.bending.api.util.Tasker;
+import me.moros.tasker.executor.AsyncExecutor;
+import me.moros.tasker.executor.SimpleAsyncExecutor;
 import org.jspecify.annotations.Nullable;
 
 public final class Debounced<R> {
+  private static final AsyncExecutor executor = new SimpleAsyncExecutor(Executors.newVirtualThreadPerTaskExecutor());
+
   private final Supplier<R> supplier;
   private final long delay;
   private final TimeUnit timeUnit;
@@ -56,7 +60,7 @@ public final class Debounced<R> {
     if (taskFuture != null) {
       taskFuture.cancel(false);
     }
-    CompletableFuture<R> newFuture = Tasker.async().submit(supplier, delay, timeUnit);
+    CompletableFuture<R> newFuture = executor.submit(supplier, delay, timeUnit);
     newFuture.thenAccept(future::complete);
     return newFuture;
   }

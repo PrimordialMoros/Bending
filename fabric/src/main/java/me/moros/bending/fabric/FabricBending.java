@@ -28,6 +28,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import me.moros.bending.api.addon.Addon;
 import me.moros.bending.api.game.Game;
 import me.moros.bending.api.platform.Platform;
+import me.moros.bending.api.protection.ProtectionCache;
+import me.moros.bending.api.registry.Registries;
+import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.Tasker;
 import me.moros.bending.api.util.functional.Suppliers;
 import me.moros.bending.common.AbstractBending;
@@ -71,10 +74,7 @@ final class FabricBending extends AbstractBending<ModContainer> {
 
   FabricBending(ModContainer container, Path path) {
     super(container, path, new Slf4jLogger(LoggerFactory.getLogger(container.getMetadata().getName())));
-
-    injectTasker(new FabricExecutor());
-
-    Tasker.async().repeat(FabricMetadata.INSTANCE::removeEmpty, 5, TimeUnit.MINUTES);
+    injectTasker(FabricExecutor::new);
 
     listeners = List.of(
       new BlockListener(this::game),
@@ -109,6 +109,8 @@ final class FabricBending extends AbstractBending<ModContainer> {
       phase = LoadPhase.LOADING;
     }
     if (phase == LoadPhase.LOADING) {
+      initTasker();
+      Tasker.async().repeat(FabricMetadata.INSTANCE::removeEmpty, 5, TimeUnit.MINUTES);
       ReflectionUtil.injectStatic(Platform.Holder.class, new FabricPlatform(server));
       load();
       phase = LoadPhase.LOADED;
@@ -118,12 +120,19 @@ final class FabricBending extends AbstractBending<ModContainer> {
   private void onDisable(boolean fullShutdown) {
     if (phase == LoadPhase.LOADED) {
       FabricMetadata.INSTANCE.cleanup();
-      if (fullShutdown) {
-        disable();
-      } else {
-        softDisable();
-      }
+      disable(fullShutdown);
+      manuallyCleanupUsers();
       phase = LoadPhase.LOADING;
+    }
+  }
+
+  // In 26.x, player quit event is called out of order (after cleanup, handled by dummy game impl)
+  private void manuallyCleanupUsers() {
+    List<User> users = Registries.BENDERS.players().toList();
+    for (User user : users) {
+      user.board().disableScoreboard();
+      Registries.BENDERS.invalidateKey(user.uuid());
+      ProtectionCache.INSTANCE.invalidate(user.uuid());
     }
   }
 

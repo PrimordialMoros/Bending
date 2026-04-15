@@ -65,7 +65,7 @@ final class PaperBending extends AbstractBending<BendingBootstrap> {
   }
 
   void onPluginEnable() {
-    injectTasker(new PaperExecutor(parent));
+    injectTasker(() -> new PaperExecutor(parent));
     String version = parent.getPluginMeta().getAPIVersion();
     ReflectionUtil.injectStatic(Platform.Holder.class, new BukkitPlatform(logger(), version));
     new ProtectionInitializer().init();
@@ -89,7 +89,7 @@ final class PaperBending extends AbstractBending<BendingBootstrap> {
   }
 
   void onPluginDisable() {
-    disable();
+    disable(true);
   }
 
   private void registerHooks(Server server) {
