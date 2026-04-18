@@ -40,7 +40,7 @@ import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.platform.particle.ParticleContext;
 import me.moros.bending.api.platform.world.World;
 import me.moros.bending.api.util.data.DataHolder;
-import me.moros.bending.paper.platform.BukkitDataHolder;
+import me.moros.bending.common.util.metadata.BendingMetadata;
 import me.moros.bending.paper.platform.PlatformAdapter;
 import me.moros.bending.paper.platform.block.LockableImpl;
 import me.moros.bending.paper.platform.particle.ParticleMapper;
@@ -84,7 +84,7 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
 
   @Override
   public DataHolder blockMetadata(int x, int y, int z) {
-    return new BukkitDataHolder(handle().getBlockAt(x, y, z));
+    return BendingMetadata.INSTANCE.metadata(key(), x, y, z);
   }
 
   @Override

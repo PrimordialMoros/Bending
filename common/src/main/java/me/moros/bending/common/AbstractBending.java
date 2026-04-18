@@ -25,12 +25,12 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import me.moros.bending.api.addon.Addon;
 import me.moros.bending.api.config.BendingProperties;
 import me.moros.bending.api.game.Game;
-import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.util.Tasker;
 import me.moros.bending.common.ability.AbilityInitializer;
 import me.moros.bending.common.config.BendingPropertiesImpl;
@@ -42,6 +42,7 @@ import me.moros.bending.common.locale.TranslationManager;
 import me.moros.bending.common.logging.Logger;
 import me.moros.bending.common.util.GameProviderUtil;
 import me.moros.bending.common.util.ReflectionUtil;
+import me.moros.bending.common.util.metadata.BendingMetadata;
 import me.moros.tasker.executor.AsyncExecutor;
 import me.moros.tasker.executor.SimpleAsyncExecutor;
 import me.moros.tasker.executor.SyncExecutor;
@@ -115,6 +116,7 @@ public abstract class AbstractBending<T> implements Bending {
     game = new GameImpl(this);
     GameProviderUtil.registerProvider(game);
     addonLoader.enableAll(game);
+    Tasker.async().repeat(BendingMetadata.INSTANCE::removeEmpty, 5, TimeUnit.MINUTES);
   }
 
   @Override
@@ -129,11 +131,11 @@ public abstract class AbstractBending<T> implements Bending {
       addonLoader.unloadAll();
       game.cleanup();
       game.eventBus().shutdown();
+      BendingMetadata.INSTANCE.clear();
       shutdownTasker();
       game.storage().close();
       GameProviderUtil.unregisterProvider();
       game = null;
-      Registries.BENDERS.clear();
     }
     if (fullShutdown) {
       configManager().close();

@@ -39,10 +39,10 @@ import me.moros.bending.common.ability.earth.EarthGlove;
 import me.moros.bending.common.ability.earth.MetalCable;
 import me.moros.bending.common.ability.earth.passive.Locksmithing;
 import me.moros.bending.common.util.Initializer;
+import me.moros.bending.common.util.metadata.BendingMetadata;
 import me.moros.bending.fabric.event.ServerEntityEvents;
 import me.moros.bending.fabric.event.ServerInventoryEvents;
 import me.moros.bending.fabric.event.ServerPlayerEvents;
-import me.moros.bending.fabric.platform.FabricMetadata;
 import me.moros.bending.fabric.platform.PlatformAdapter;
 import me.moros.bending.fabric.platform.item.ItemUtil;
 import me.moros.math.Vector3d;
@@ -117,7 +117,7 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
 
   private boolean onArrowHit(Projectile projectile, HitResult hitResult) {
     if (!disabledWorld(projectile) && projectile instanceof Arrow) {
-      var data = FabricMetadata.INSTANCE.metadata(projectile).get(MetalCable.CABLE_KEY);
+      var data = BendingMetadata.INSTANCE.metadata(projectile.getUUID()).get(MetalCable.CABLE_KEY);
       if (data.isPresent()) {
         MetalCable cable = data.get();
         if (hitResult instanceof BlockHitResult blockHit) {
@@ -281,7 +281,7 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
   }
 
   private boolean isNotGlove(Entity entity) {
-    return !FabricMetadata.INSTANCE.has(entity, EarthGlove.GLOVE_KEY);
+    return !BendingMetadata.INSTANCE.has(entity.getUUID(), EarthGlove.GLOVE_KEY);
   }
 
   private boolean onInventoryClick(ServerPlayer player, ItemStack stack) {
@@ -337,7 +337,7 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
     Vector3d origin = null;
     var sourceEntity = source.getEntity();
     if (sourceEntity != null) {
-      if (sourceEntity instanceof Arrow && FabricMetadata.INSTANCE.has(sourceEntity, MetalCable.CABLE_KEY)) {
+      if (sourceEntity instanceof Arrow && BendingMetadata.INSTANCE.has(sourceEntity.getUUID(), MetalCable.CABLE_KEY)) {
         return 0;
       } else if (ActionLimiter.isLimited(sourceEntity.getUUID(), ActionType.DAMAGE)) {
         return 0;
@@ -368,16 +368,15 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
     if (disabledWorld(entity) || entity instanceof ServerPlayer) {
       return;
     }
-    User user = Registries.BENDERS.get(uuid);
-    if (user != null) {
-      game().activationController().onUserDeconstruct(user);
-    }
+    Registries.BENDERS.getIfExists(uuid).ifPresent(game().activationController()::onUserDeconstruct);
   }
 
   private void onEntityUnload(Entity entity, ServerLevel level) {
     if (disabledWorld(entity) || entity instanceof ServerPlayer) { // Event mixin is at method head which also includes player entities
       return;
     }
-    Registries.BENDERS.getIfExists(entity.getUUID()).ifPresent(game().activationController()::onUserDeconstruct);
+    UUID uuid = entity.getUUID();
+    Registries.BENDERS.getIfExists(uuid).ifPresent(game().activationController()::onUserDeconstruct);
+    BendingMetadata.INSTANCE.cleanup(uuid);
   }
 }

@@ -75,7 +75,7 @@ public final class PlatformAdapter {
       entry(PersistentDataType.BYTE), entry(PersistentDataType.BYTE_ARRAY),
       entry(PersistentDataType.INTEGER), entry(PersistentDataType.INTEGER_ARRAY),
       entry(PersistentDataType.LONG), entry(PersistentDataType.LONG_ARRAY),
-      entry(PersistentDataType.TAG_CONTAINER), entry(PersistentDataType.TAG_CONTAINER_ARRAY)
+      entry(PersistentDataType.TAG_CONTAINER), entry(PersistentDataType.LIST.dataContainers())
     );
   }
 

@@ -25,7 +25,7 @@ tasks {
             into("META-INF")
             rename { licenseName }
         }
-        val excluded = setOf("error_prone_annotations", "gson", "geantyref", "option", "jspecify", "slf4j-api")
+        val excluded = setOf("error_prone_annotations", "geantyref", "jspecify", "slf4j-api")
         dependencies {
             exclude {
                 excluded.contains(it.moduleName)

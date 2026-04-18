@@ -45,6 +45,7 @@ import me.moros.bending.common.ability.earth.EarthGlove;
 import me.moros.bending.common.ability.earth.MetalCable;
 import me.moros.bending.common.ability.earth.passive.Locksmithing;
 import me.moros.bending.common.locale.Message;
+import me.moros.bending.common.util.metadata.BendingMetadata;
 import me.moros.bending.paper.platform.DamageUtil;
 import me.moros.bending.paper.platform.PlatformAdapter;
 import me.moros.bending.paper.platform.block.LockableImpl;
@@ -92,8 +93,10 @@ public record UserListener(Game game) implements Listener, BukkitListener {
     if (disabledWorld(event)) {
       return;
     }
-    if (event.getEntity() instanceof Arrow && event.getEntity().hasMetadata(MetalCable.CABLE_KEY.value())) {
-      MetalCable cable = (MetalCable) event.getEntity().getMetadata(MetalCable.CABLE_KEY.value()).getFirst().value();
+    if (event.getEntity() instanceof Arrow) {
+      MetalCable cable = BendingMetadata.INSTANCE.metadata(event.getEntity().getUniqueId())
+        .get(MetalCable.CABLE_KEY)
+        .orElse(null);
       if (cable != null) {
         var block = event.getHitBlock();
         if (block != null) {
@@ -188,9 +191,10 @@ public record UserListener(Game game) implements Listener, BukkitListener {
     if (disabledWorld(event)) {
       return;
     }
-    if (event.getDamager() instanceof Arrow && event.getDamager().hasMetadata(MetalCable.CABLE_KEY.value())) {
+    UUID uuid = event.getDamager().getUniqueId();
+    if (event.getDamager() instanceof Arrow && BendingMetadata.INSTANCE.has(uuid, MetalCable.CABLE_KEY)) {
       event.setCancelled(true);
-    } else if (ActionLimiter.isLimited(event.getDamager().getUniqueId(), ActionType.DAMAGE)) {
+    } else if (ActionLimiter.isLimited(uuid, ActionType.DAMAGE)) {
       event.setCancelled(true);
     }
   }
@@ -200,7 +204,9 @@ public record UserListener(Game game) implements Listener, BukkitListener {
     if (disabledWorld(event)) {
       return;
     }
-    if (event.getEntity().hasMetadata(EarthGlove.GLOVE_KEY.value()) || event.getTarget().hasMetadata(EarthGlove.GLOVE_KEY.value())) {
+    UUID uuid = event.getEntity().getUniqueId();
+    UUID uuid2 = event.getTarget().getUniqueId();
+    if (BendingMetadata.INSTANCE.has(uuid, EarthGlove.GLOVE_KEY) || BendingMetadata.INSTANCE.has(uuid2, EarthGlove.GLOVE_KEY)) {
       event.setCancelled(true);
     }
   }
@@ -309,6 +315,7 @@ public record UserListener(Game game) implements Listener, BukkitListener {
     }
     UUID uuid = event.getEntity().getUniqueId();
     Registries.BENDERS.getIfExists(uuid).ifPresent(game.activationController()::onUserDeconstruct);
+    BendingMetadata.INSTANCE.cleanup(uuid);
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
@@ -493,7 +500,7 @@ public record UserListener(Game game) implements Listener, BukkitListener {
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void onHopperItemPickup(InventoryPickupItemEvent event) {
     var item = event.getItem();
-    if (item.getItemStack().getType() == Material.STONE && item.hasMetadata(EarthGlove.GLOVE_KEY.value())) {
+    if (item.getItemStack().getType() == Material.STONE && BendingMetadata.INSTANCE.has(item.getUniqueId(), EarthGlove.GLOVE_KEY)) {
       event.setCancelled(true);
       event.getItem().remove();
     }

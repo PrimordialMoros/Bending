@@ -25,7 +25,7 @@ import java.util.function.UnaryOperator;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.api.util.data.DataKeyed;
-import me.moros.bending.fabric.platform.FabricMetadata;
+import me.moros.bending.common.util.metadata.BendingMetadata;
 import net.kyori.adventure.audience.Audience;
 import net.minecraft.world.entity.projectile.Projectile;
 import org.jspecify.annotations.Nullable;
@@ -84,17 +84,17 @@ public class FabricEntity implements Entity {
 
   @Override
   public <T> Optional<T> get(DataKey<T> key) {
-    return FabricMetadata.INSTANCE.metadata(handle()).get(key);
+    return BendingMetadata.INSTANCE.metadata(uuid()).get(key);
   }
 
   @Override
   public <T> void add(DataKey<T> key, T value) {
-    FabricMetadata.INSTANCE.metadata(handle()).add(key, value);
+    BendingMetadata.INSTANCE.metadata(uuid()).add(key, value);
   }
 
   @Override
   public <T> void remove(DataKey<T> key) {
-    FabricMetadata.INSTANCE.metadata(handle()).remove(key);
+    BendingMetadata.INSTANCE.metadata(uuid()).remove(key);
   }
 
   @Override

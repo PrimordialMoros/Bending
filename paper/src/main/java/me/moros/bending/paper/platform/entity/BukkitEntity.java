@@ -25,7 +25,7 @@ import java.util.function.UnaryOperator;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.util.data.DataKey;
 import me.moros.bending.api.util.data.DataKeyed;
-import me.moros.bending.paper.platform.BukkitDataHolder;
+import me.moros.bending.common.util.metadata.BendingMetadata;
 import net.kyori.adventure.audience.Audience;
 import org.bukkit.entity.Projectile;
 import org.jspecify.annotations.Nullable;
@@ -78,17 +78,17 @@ public class BukkitEntity implements Entity {
 
   @Override
   public <T> Optional<T> get(DataKey<T> key) {
-    return new BukkitDataHolder(handle()).get(key);
+    return BendingMetadata.INSTANCE.metadata(uuid()).get(key);
   }
 
   @Override
   public <T> void add(DataKey<T> key, T value) {
-    new BukkitDataHolder(handle()).add(key, value);
+    BendingMetadata.INSTANCE.metadata(uuid()).add(key, value);
   }
 
   @Override
   public <T> void remove(DataKey<T> key) {
-    new BukkitDataHolder(handle()).remove(key);
+    BendingMetadata.INSTANCE.metadata(uuid()).remove(key);
   }
 
   @Override

@@ -17,12 +17,11 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.fabric.platform;
+package me.moros.bending.common.util.metadata;
 
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 
 import me.moros.bending.api.util.data.DataContainer;
 import me.moros.bending.api.util.data.DataHolder;
@@ -30,72 +29,71 @@ import me.moros.bending.api.util.data.DataKey;
 import me.moros.math.Position;
 import me.moros.math.Vector3i;
 import net.kyori.adventure.key.Key;
-import net.minecraft.world.entity.Entity;
 
-public enum FabricMetadata {
+public enum BendingMetadata {
   INSTANCE;
 
-  private final Map<Key, Pair<Position, UUID>> worlds = new ConcurrentHashMap<>();
+  private final MetadataHolder<UUID> entityMetadata = new MetadataHolder<>(new ConcurrentHashMap<>());
+  private final Map<Key, MetadataHolder<Position>> worldMetadata = new ConcurrentHashMap<>();
 
-  private Pair<Position, UUID> worldData(Key key) {
-    return worlds.computeIfAbsent(key, u -> new Pair<>(new ConcurrentHashMap<>(), new ConcurrentHashMap<>()));
+  private MetadataHolder<Position> worldData(Key key) {
+    return worldMetadata.computeIfAbsent(key, u -> new MetadataHolder<>(new ConcurrentHashMap<>()));
   }
 
   private DataHolder blockData(Map<Position, DataContainer> dataMap, int x, int y, int z) {
     return dataMap.computeIfAbsent(Vector3i.of(x, y, z), p -> DataContainer.simple());
   }
 
-  private DataHolder entityData(Map<UUID, DataContainer> dataMap, UUID uuid) {
-    return dataMap.computeIfAbsent(uuid, id -> DataContainer.simple());
+  private DataHolder entityData(UUID uuid) {
+    return entityMetadata.data().computeIfAbsent(uuid, id -> DataContainer.simple());
   }
 
   public DataHolder metadata(Key world, int x, int y, int z) {
-    return blockData(worldData(world).map1(), x, y, z);
+    return blockData(worldData(world).data(), x, y, z);
   }
 
-  public DataHolder metadata(Key world, UUID uuid) {
-    return entityData(worldData(world).map2(), uuid);
-  }
-
-  public DataHolder metadata(Entity entity) {
-    return metadata(entity.level().dimension().identifier(), entity.getUUID());
+  public DataHolder metadata(UUID uuid) {
+    return entityData(uuid);
   }
 
   public boolean has(Key world, int x, int y, int z, DataKey<?> key) {
-    return has(world, key, p -> p.map1().get(Vector3i.of(x, y, z)));
-  }
-
-  public boolean has(Entity entity, DataKey<?> key) {
-    return has(entity.level().dimension().identifier(), key, p -> p.map2().get(entity.getUUID()));
-  }
-
-  private boolean has(Key worldKey, DataKey<?> key, Function<Pair<Position, UUID>, DataHolder> mapper) {
-    var pair = worlds.get(worldKey);
-    if (pair == null) {
+    var blockMetadata = worldMetadata.get(world);
+    if (blockMetadata == null) {
       return false;
     }
-    var dataHolder = mapper.apply(pair);
+    var dataHolder = blockMetadata.data().get(Vector3i.of(x, y, z));
+    return dataHolder != null && dataHolder.has(key);
+  }
+
+  public boolean has(UUID uuid, DataKey<?> key) {
+    var dataHolder = entityMetadata.data().get(uuid);
     return dataHolder != null && dataHolder.has(key);
   }
 
   // Cleanup empty data containers to avoid memory leaks
   public void removeEmpty() {
-    worlds.entrySet().removeIf(e -> e.getValue().cleanup());
+    entityMetadata.cleanup();
+    worldMetadata.entrySet().removeIf(e -> e.getValue().cleanup());
   }
 
-  public void cleanup() {
-    worlds.clear();
+  public void clear() {
+    removeEmpty();
+    entityMetadata.data().clear();
+    worldMetadata.clear();
+  }
+
+  public void cleanup(UUID uuid) {
+    entityMetadata.data().remove(uuid);
   }
 
   public void cleanup(Key world) {
-    worlds.remove(world);
+    worldMetadata.remove(world);
   }
 
-  private record Pair<V1, V2>(Map<V1, DataContainer> map1, Map<V2, DataContainer> map2) {
+  private record MetadataHolder<T>(Map<T, DataContainer> data) {
     private boolean cleanup() {
-      map1().entrySet().removeIf(e -> e.getValue().isEmpty());
-      map2().entrySet().removeIf(e -> e.getValue().isEmpty());
-      return map1.isEmpty() && map2.isEmpty();
+      data().entrySet().removeIf(e -> e.getValue().isEmpty());
+      return data().isEmpty();
     }
   }
 }
