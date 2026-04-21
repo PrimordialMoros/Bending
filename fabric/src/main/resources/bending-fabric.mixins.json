@@ -1,8 +1,8 @@
 {
   "required": true,
-  "minVersion": "0.8.5",
+  "minVersion": "0.8.7",
   "package": "me.moros.bending.fabric.mixin",
-  "compatibilityLevel": "JAVA_17",
+  "compatibilityLevel": "JAVA_25",
   "mixins": [
     "accessor.BlockBehaviourAccess",
     "accessor.ChunkMapAccess",
