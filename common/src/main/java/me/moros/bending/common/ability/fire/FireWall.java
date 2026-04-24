@@ -94,7 +94,7 @@ public class FireWall extends AbilityInstance {
     }
 
     direction = user.direction().withY(0).normalize();
-    bases = setupBases();
+    bases = setupBases(center);
     if (bases.isEmpty()) {
       return false;
     }
@@ -190,14 +190,12 @@ public class FireWall extends AbilityInstance {
     return null;
   }
 
-  private Collection<Vector3d> setupBases() {
-    oldLights = new ArrayList<>(lights.values());
-    lights.clear();
+  private Collection<Vector3d> setupBases(Vector3d origin) {
     double hw = userConfig.width / 2.0;
     Vector3d side = direction.cross(Vector3d.PLUS_J).normalize();
     Collection<Vector3d> possibleBases = new ArrayList<>();
     for (double i = -hw; i < hw; i += 0.9) {
-      Vector3d check = center.add(side.multiply(i));
+      Vector3d check = origin.add(side.multiply(i));
       double baseY = FastMath.floor(check.y()) + 0.25;
       possibleBases.add(check.withY(baseY));
     }
@@ -209,20 +207,36 @@ public class FireWall extends AbilityInstance {
       return;
     }
 
-    Vector3d currentPosition = center.add(direction);
-    Block check = user.world().blockAt(currentPosition);
-    if (!MaterialUtil.isTransparent(check) || !user.canBuild(check)) {
+    Vector3d newPosition = center.add(direction);
+    Collection<Vector3d> newBases = setupBases(newPosition);
+
+    if (!validateBases(newBases)) {
       return;
     }
-    center = currentPosition;
+
+    oldLights = new ArrayList<>(lights.values());
+    lights.clear();
+
+    center = newPosition;
+    bases = newBases;
     collider = collider.at(center);
-    bases = setupBases();
     distanceTravelled += direction.length();
 
     if (currentHeight < userConfig.moveMaxHeight) {
       double deltaHeight = (userConfig.moveMaxHeight - userConfig.height) / userConfig.moveRange;
       currentHeight += deltaHeight;
     }
+  }
+
+  private boolean validateBases(Collection<Vector3d> possibleBases) {
+    int validBases = 0;
+    for (Vector3d pos : possibleBases) {
+      Block block = user.world().blockAt(pos);
+      if (MaterialUtil.isTransparent(block) && user.canBuild(block)) {
+        validBases++;
+      }
+    }
+    return validBases >= FastMath.ceil(0.5 * possibleBases.size());
   }
 
   private boolean onEntityHit(Entity entity) {
