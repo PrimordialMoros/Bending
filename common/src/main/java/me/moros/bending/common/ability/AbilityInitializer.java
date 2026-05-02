@@ -61,6 +61,7 @@ import me.moros.bending.common.ability.fire.FireBlast;
 import me.moros.bending.common.ability.fire.FireBreath;
 import me.moros.bending.common.ability.fire.FireBurst;
 import me.moros.bending.common.ability.fire.FireJet;
+import me.moros.bending.common.ability.fire.FirePropagate;
 import me.moros.bending.common.ability.fire.FireShield;
 import me.moros.bending.common.ability.fire.FireWall;
 import me.moros.bending.common.ability.fire.FlameRush;
@@ -422,6 +423,9 @@ public final class AbilityInitializer implements Initializer {
         .add(fireShield, SNEAK, INTERACT_BLOCK, INTERACT_BLOCK, SNEAK_RELEASE)
       );
     abilities.add(fireWheel);
+
+    abilities.add(AbilityDescription.builder("FirePropagate", FirePropagate::new)
+      .element(FIRE).activation(FALL).canBind(false).hidden(true).build());
   }
 
   private void initAvatar() {

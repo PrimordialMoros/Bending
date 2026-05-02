@@ -38,7 +38,6 @@ import me.moros.bending.api.config.Configurable;
 import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.Modifiable;
 import me.moros.bending.api.platform.block.Block;
-import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.particle.ParticleBuilder;
 import me.moros.bending.api.platform.sound.SoundEffect;
@@ -210,7 +209,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
 
     public FireStream(Ray ray) {
       super(user, ray, userConfig.speed * factor, 0.8 + 0.5 * (factor - 1));
-      canCollide = BlockType::isLiquid;
+      canCollide = b -> b.isLiquid() || FirePropagate.canPropagate(b);
       offset = 0.25 + (factor - 1);
       particleSpeed = 0.02 * factor;
       amount = FastMath.ceil(6 * Math.pow(factor, 4));
@@ -245,6 +244,9 @@ public class FireBlast extends AbilityInstance implements Explosive {
 
     @Override
     public boolean onBlockHit(Block block) {
+      if (FirePropagate.create(user, block, FastMath.ceil(6 * userConfig.igniteRadius * factor))) {
+        return false;
+      }
       Vector3d reverse = ray.direction().negate();
       WorldUtil.tryLightBlock(block);
       Vector3d standing = user.location().add(0, 0.5, 0);
