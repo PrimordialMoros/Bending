@@ -58,6 +58,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ItemType;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffectType;
 import org.jspecify.annotations.Nullable;
@@ -84,7 +85,7 @@ public final class PlatformAdapter {
   }
 
   public static PotionEffectType toBukkitPotion(PotionEffect effect) {
-    return Objects.requireNonNull(Registry.POTION_EFFECT_TYPE.get(nsk(effect.key())));
+    return Objects.requireNonNull(Registry.POTION_EFFECT_TYPE.get(effect.key()));
   }
 
   public static org.bukkit.potion.PotionEffect toBukkitPotion(Potion p) {
@@ -105,24 +106,20 @@ public final class PlatformAdapter {
     };
   }
 
-  public static Item fromBukkitItem(Material material) {
-    var item = Item.registry().get(material.key());
-    if (item == null || !material.isItem()) {
-      throw new IllegalStateException(material.name() + " is not a valid item.");
-    }
-    return item;
+  public static Item fromBukkitItem(ItemType itemType) {
+    return Item.registry().getOrThrow(itemType.key());
   }
 
-  public static BlockType fromBukkitBlock(Material material) {
-    var blockType = BlockType.registry().get(material.key());
-    if (blockType == null || !material.isBlock()) {
-      throw new IllegalStateException(material.name() + " is not a valid block type.");
-    }
-    return blockType;
+  public static BlockType fromBukkitBlock(org.bukkit.block.BlockType blockType) {
+    return BlockType.registry().getOrThrow(blockType.key());
+  }
+
+  public static ItemType toBukkitItemType(Item item) {
+    return Registry.ITEM.getOrThrow(item.key());
   }
 
   public static Material toBukkitItemMaterial(Item item) {
-    var mat = Registry.MATERIAL.get(nsk(item.key()));
+    var mat = Registry.MATERIAL.get(item.key());
     if (mat == null || !mat.isItem()) {
       throw new IllegalStateException(item.key() + " is not a valid item.");
     }
@@ -130,7 +127,7 @@ public final class PlatformAdapter {
   }
 
   public static ItemStack toBukkitItem(Item item) {
-    return new ItemStack(toBukkitItemMaterial(item));
+    return toBukkitItemType(item).createItemStack();
   }
 
   public static ItemStack toBukkitItem(ItemSnapshot item) {

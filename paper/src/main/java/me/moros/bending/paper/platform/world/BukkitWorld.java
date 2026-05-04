@@ -143,7 +143,7 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
 
   @Override
   public <T> void spawnParticle(ParticleContext<T> context) {
-    var p = Registry.PARTICLE_TYPE.get(PlatformAdapter.nsk(context.particle().key()));
+    var p = Registry.PARTICLE_TYPE.get(context.particle().key());
     if (p != null) {
       var data = ParticleMapper.mapParticleData(context);
       handle().spawnParticle(p, context.position().x(), context.position().y(), context.position().z(), context.count(),
@@ -210,7 +210,7 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
 
   @Override
   public Entity createEntity(Position pos, EntityType type) {
-    var bukkitType = Registry.ENTITY_TYPE.get(PlatformAdapter.nsk(type.key()));
+    var bukkitType = Registry.ENTITY_TYPE.get(type.key());
     var entityType = bukkitType == null ? null : bukkitType.getEntityClass();
     return create(Objects.requireNonNull(entityType), pos);
   }

@@ -68,7 +68,7 @@ final class FabricRegistryInitializer implements RegistryInitializer {
 
   @Override
   public void initBlockTypeTagRegistry(Registry<Key, BlockType> registry, Function<Key, TagBuilder<BlockType, BlockTag>> builder) {
-    initTag(registry, BlockTag::builder, BuiltInRegistries.BLOCK);
+    initTag(registry, builder, BuiltInRegistries.BLOCK);
   }
 
   @Override

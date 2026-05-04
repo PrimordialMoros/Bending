@@ -38,7 +38,7 @@ public final class BukkitItem implements ItemSnapshot {
   private final int hashcode;
 
   public BukkitItem(ItemStack handle) {
-    this.type = PlatformAdapter.fromBukkitItem(handle.getType());
+    this.type = PlatformAdapter.fromBukkitItem(handle.getType().asItemType());
     this.handle = handle.clone();
     this.holderSupplier = Suppliers.lazy(() -> BukkitPersistentDataHolder.create(this.handle));
     this.hashcode = this.handle.hashCode();

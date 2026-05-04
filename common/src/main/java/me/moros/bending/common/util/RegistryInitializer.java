@@ -26,7 +26,9 @@ import me.moros.bending.api.platform.block.BlockProperties;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockTag;
 import me.moros.bending.api.platform.block.BlockType;
+import me.moros.bending.api.platform.entity.AttributeType;
 import me.moros.bending.api.platform.entity.EntityType;
+import me.moros.bending.api.platform.entity.EntityTypeTag;
 import me.moros.bending.api.platform.entity.player.GameMode;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemTag;
@@ -46,8 +48,8 @@ public interface RegistryInitializer extends Initializer {
   @Override
   default void init() {
     // Init defaults
-    var dummy = List.of(BlockType.AIR, BlockTag.DIRT, EntityType.PLAYER, GameMode.SURVIVAL, Item.AIR, ItemTag.DIRT,
-      Particle.FLAME, PotionEffect.INSTANT_HEALTH, Sound.BLOCK_FIRE_AMBIENT);
+    var dummy = List.of(BlockType.AIR, BlockTag.DIRT, AttributeType.ARMOR, EntityType.PLAYER, EntityTypeTag.UNDEAD,
+      GameMode.SURVIVAL, Item.AIR, ItemTag.DIRT, Particle.FLAME, PotionEffect.INSTANT_HEALTH, Sound.BLOCK_FIRE_AMBIENT);
     dummy.forEach(Keyed::key);
 
     // Init the simple registries

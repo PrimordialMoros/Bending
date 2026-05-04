@@ -19,11 +19,12 @@
 
 package me.moros.bending.paper.platform;
 
+import java.util.Objects;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import io.papermc.paper.registry.TypedKey;
 import me.moros.bending.api.platform.block.BlockProperties;
 import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockTag;
@@ -41,33 +42,27 @@ import me.moros.bending.api.registry.TagBuilder;
 import me.moros.bending.common.util.RegistryInitializer;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.Tag;
 import org.bukkit.block.data.BlockData;
 
 public final class BukkitRegistryInitializer implements RegistryInitializer {
   @Override
   public void initBlockTypeRegistry(Registry<Key, BlockType> registry, Registry<Key, BlockProperties> propertyRegistry,
                                     Registry<Key, BlockState> stateRegistry, Registry<Key, Item> itemRegistry) {
-    for (Material mat : org.bukkit.Registry.MATERIAL) {
-      if (mat.isBlock()) {
-        var key = mat.key();
-        var type = registry.getOrThrow(key);
-        var data = mat.createBlockData();
-        stateRegistry.register(PlatformAdapter.fromBukkitData(data));
-        propertyRegistry.register(mapProperties(type, data));
-        var item = Item.registry().get(key);
-        if (item != null) {
-          itemRegistry.register(item);
-        }
+    for (var mat : org.bukkit.Registry.BLOCK) {
+      var key = mat.key();
+      var type = registry.getOrThrow(key);
+      var data = mat.createBlockData();
+      stateRegistry.register(PlatformAdapter.fromBukkitData(data));
+      propertyRegistry.register(mapProperties(type, data));
+      if (mat.hasItemType()) {
+        itemRegistry.register(PlatformAdapter.fromBukkitItem(mat.getItemType()));
       }
     }
   }
 
   @Override
   public void initBlockTypeTagRegistry(Registry<Key, BlockType> registry, Function<Key, TagBuilder<BlockType, BlockTag>> builder) {
-    initTag(registry, builder, Bukkit.getTags(Tag.REGISTRY_BLOCKS, Material.class), Material::isBlock);
+    initTag(registry, builder, org.bukkit.Registry.BLOCK);
   }
 
   @Override
@@ -82,7 +77,7 @@ public final class BukkitRegistryInitializer implements RegistryInitializer {
 
   @Override
   public void initItemTagRegistry(Registry<Key, Item> registry, Function<Key, TagBuilder<Item, ItemTag>> builder) {
-    initTag(registry, builder, Bukkit.getTags(Tag.REGISTRY_ITEMS, Material.class), Material::isItem);
+    initTag(registry, builder, org.bukkit.Registry.ITEM);
   }
 
   @Override
@@ -116,14 +111,16 @@ public final class BukkitRegistryInitializer implements RegistryInitializer {
     }
   }
 
+
   private <V extends Keyed, T extends me.moros.bending.api.registry.Tag<V>, S extends org.bukkit.Keyed> void initTag(
-    Registry<Key, V> registry, Function<Key, TagBuilder<V, T>> builder, Iterable<Tag<S>> tags, Predicate<S> materialPredicate
+    Registry<Key, V> registry, Function<Key, TagBuilder<V, T>> builder, org.bukkit.Registry<S> defaultedRegistry
   ) {
-    for (var bukkitTag : tags) {
-      var data = bukkitTag.getValues().stream().filter(materialPredicate)
-        .map(mat -> registry.get(mat.key())).toList();
+    var tags = defaultedRegistry.getTags();
+    for (var entry : tags) {
+      var data = entry.values().stream().map(TypedKey::key).map(registry::get).filter(Objects::nonNull).toList();
       if (!data.isEmpty()) {
-        registry.getTagOrCreate(bukkitTag.key(), k -> builder.apply(k).add(data).build());
+        var tagKey = entry.tagKey().key();
+        registry.getTagOrCreate(tagKey, k -> builder.apply(k).add(data).build());
       }
     }
   }
