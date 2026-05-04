@@ -63,20 +63,28 @@ public class FirePropagate extends AbilityInstance {
     return false;
   }
 
-  private boolean activate(User user, Block origin, int spreadingEnergy) {
+  private boolean activate(User user, Collection<Block> origin, int spreadingEnergy) {
     this.user = user;
-    if (!canPropagate(origin.type())) {
-      return false;
-    }
-    cells.compute(origin, (_, c) -> {
-      if (c == null) {
-        c = new Cell(CELL_HEALTH, CELL_ENERGY);
+
+    boolean ignited = false;
+
+    for (Block block : origin) {
+      if (canPropagate(block.type())) {
+        ignited = true;
+        cells.compute(block, (_, c) -> {
+          if (c == null) {
+            c = new Cell(CELL_HEALTH, CELL_ENERGY);
+          }
+          c.ignite();
+          return c;
+        });
       }
-      c.ignite();
-      return c;
-    });
-    this.spreadingEnergy += spreadingEnergy;
-    return true;
+    }
+    if (ignited) {
+      this.spreadingEnergy += spreadingEnergy;
+      return true;
+    }
+    return false;
   }
 
   @Override
@@ -196,7 +204,7 @@ public class FirePropagate extends AbilityInstance {
     }
   }
 
-  public static boolean create(User user, Block origin, int spreadingEnergy) {
+  public static boolean create(User user, Collection<Block> origin, int spreadingEnergy) {
     if (ABILITY_DESC == null) {
       ABILITY_DESC = Objects.requireNonNull(Registries.ABILITIES.fromString("FirePropagate"));
     }

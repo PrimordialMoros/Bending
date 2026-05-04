@@ -244,7 +244,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
 
     @Override
     public boolean onBlockHit(Block block) {
-      if (FirePropagate.create(user, block, FastMath.ceil(6 * userConfig.igniteRadius * factor))) {
+      if (FirePropagate.create(user, List.of(block), FastMath.ceil(6 * userConfig.igniteRadius * factor))) {
         return false;
       }
       Vector3d reverse = ray.direction().negate();

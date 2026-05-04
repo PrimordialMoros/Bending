@@ -121,7 +121,7 @@ public class FireBreath extends AbilityInstance {
 
     public FireStream(Ray ray) {
       super(user, ray, 0.4, ORIGINAL_COLLISION_RADIUS);
-      canCollide = t -> t.isLiquid() || t == BlockType.SNOW;
+      canCollide = b -> b.isLiquid() || b == BlockType.SNOW || FirePropagate.canPropagate(b);
     }
 
     @Override
@@ -153,6 +153,9 @@ public class FireBreath extends AbilityInstance {
     public boolean onBlockHit(Block block) {
       if (WorldUtil.tryMelt(user, block)) {
         return true;
+      }
+      if (FirePropagate.create(user, List.of(block), 3)) {
+        return false;
       }
       Block above = block.offset(Direction.UP);
       if (MaterialUtil.isIgnitable(above) && user.canBuild(above)) {

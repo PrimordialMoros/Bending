@@ -41,7 +41,6 @@ import me.moros.bending.api.config.Configurable;
 import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.Modifiable;
 import me.moros.bending.api.platform.block.Block;
-import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.particle.ParticleBuilder;
 import me.moros.bending.api.platform.sound.SoundEffect;
@@ -54,6 +53,7 @@ import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
 import me.moros.bending.api.util.functional.SwappedSlotsRemovalPolicy;
 import me.moros.bending.api.util.material.MaterialUtil;
+import me.moros.math.FastMath;
 import me.moros.math.Vector3d;
 
 public class FireBurst extends AbilityInstance {
@@ -154,7 +154,7 @@ public class FireBurst extends AbilityInstance {
 
     public FireStream(Ray ray) {
       super(user, ray, userConfig.speed, 1);
-      canCollide = BlockType::isLiquid;
+      canCollide = b -> b.isLiquid() || FirePropagate.canPropagate(b);
     }
 
     @Override
@@ -186,9 +186,12 @@ public class FireBurst extends AbilityInstance {
 
     @Override
     public boolean onBlockHit(Block block) {
+      double igniteRadius = 1.5;
+      if (FirePropagate.create(user, List.of(block), FastMath.ceil(3 * igniteRadius))) {
+        return false;
+      }
       Vector3d reverse = ray.direction().negate();
       WorldUtil.tryLightBlock(block);
-      double igniteRadius = 1.5;
       Vector3d standing = user.location().add(0, 0.5, 0);
       for (Block b : user.world().nearbyBlocks(collider().position(), igniteRadius)) {
         if (standing.distanceSq(b.center()) < 4 || !user.canBuild(b)) {

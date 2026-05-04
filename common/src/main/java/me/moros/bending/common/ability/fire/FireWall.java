@@ -22,8 +22,10 @@ package me.moros.bending.common.ability.fire;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -148,11 +150,13 @@ public class FireWall extends AbilityInstance {
   }
 
   private void renderWall() {
+    Set<Block> wallBlocks = new HashSet<>();
     for (Vector3d base : bases) {
       for (double h = 0; h <= currentHeight; h += 0.8) {
         Vector3d pos = base.add(0, h, 0);
         Block block = user.world().blockAt(pos);
         if (MaterialUtil.isTransparent(block)) {
+          wallBlocks.add(block);
           TempLight.builder(ticks).rate(1).duration(userConfig.duration).build(block)
             .map(TempLight::lock).ifPresent(l -> lights.put(block, l));
           if (h == 0) {
@@ -172,6 +176,7 @@ public class FireWall extends AbilityInstance {
         }
       }
     }
+    FirePropagate.create(user, wallBlocks, 5);
     cleanupLight(oldLights);
   }
 

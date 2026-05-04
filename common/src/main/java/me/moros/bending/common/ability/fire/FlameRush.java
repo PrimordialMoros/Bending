@@ -39,7 +39,6 @@ import me.moros.bending.api.config.Configurable;
 import me.moros.bending.api.config.attribute.Attribute;
 import me.moros.bending.api.config.attribute.Modifiable;
 import me.moros.bending.api.platform.block.Block;
-import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.particle.Particle;
 import me.moros.bending.api.platform.particle.ParticleBuilder;
@@ -177,7 +176,7 @@ public class FlameRush extends AbilityInstance {
     public FireStream(Ray ray, double factor) {
       super(user, ray, userConfig.speed / 3, ORIGINAL_COLLISION_RADIUS);
       this.factor = factor;
-      canCollide = BlockType::isLiquid;
+      canCollide = b -> b.isLiquid() || FirePropagate.canPropagate(b);
       steps = 3;
       streamDirection = dir;
     }
@@ -227,6 +226,9 @@ public class FlameRush extends AbilityInstance {
 
     @Override
     public boolean onBlockHit(Block block) {
+      if (FirePropagate.create(user, List.of(block), FastMath.ceil(8 * factor))) {
+        return false;
+      }
       FragileStructure.tryDamageStructure(block, FastMath.round(8 * factor), Ray.of(collider().position(), streamDirection));
       return true;
     }
