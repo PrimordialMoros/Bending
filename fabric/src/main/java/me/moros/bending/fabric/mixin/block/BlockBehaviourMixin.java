@@ -34,7 +34,7 @@ public abstract class BlockBehaviourMixin {
     method = "onExplosionHit",
     at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;dropFromExplosion(Lnet/minecraft/world/level/Explosion;)Z")
   )
-  private boolean bending$canDropFromExplosion(boolean original, @Local(argsOnly = true) ServerLevel serverLevel, @Local(argsOnly = true) BlockPos pos) {
-    return original && ServerBlockEvents.BLOCK_DROP_LOOT.invoker().onDropLoot(serverLevel, pos);
+  private boolean bending$canDropFromExplosion(boolean original, @Local(argsOnly = true) ServerLevel level, @Local(argsOnly = true) BlockPos pos) {
+    return original && ServerBlockEvents.BLOCK_DROP_LOOT.invoker().onDropLoot(level, pos);
   }
 }

@@ -40,8 +40,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(value = LivingEntity.class, priority = 900)
 public abstract class LivingEntityMixin extends EntityMixin {
   @ModifyVariable(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isSleeping()Z"), ordinal = 0, argsOnly = true)
-  private float bending$onHurt(float originalValue, ServerLevel serverLevel, DamageSource source, float amount) {
-    return (float) ServerEntityEvents.DAMAGE.invoker().onDamage((LivingEntity) (Object) this, source, originalValue);
+  private float bending$onHurt(float damage, ServerLevel level, DamageSource source) {
+    return (float) ServerEntityEvents.DAMAGE.invoker().onDamage((LivingEntity) (Object) this, source, damage);
   }
 
   @Inject(method = "createItemStackToDrop",

@@ -50,7 +50,7 @@ public abstract class ServerGamePacketListenerImplMixin {
   public ServerPlayer player;
 
   @Shadow
-  public abstract void teleport(PositionMoveRotation positionMoveRotation, Set<Relative> relativeArguments);
+  public abstract void teleport(PositionMoveRotation destination, Set<Relative> relatives);
 
   @Shadow public abstract boolean hasClientLoaded();
 

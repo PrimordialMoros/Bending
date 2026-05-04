@@ -33,8 +33,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(MultifaceSpreader.DefaultSpreaderConfig.class)
 public abstract class SpreaderConfigMixin {
   @Inject(method = "canSpreadInto", at = @At(value = "HEAD"), cancellable = true)
-  private void bending$canSpreadInto(BlockGetter blockGetter, BlockPos blockPos, SpreadPos spreadPos, CallbackInfoReturnable<Boolean> cir) {
-    if (blockGetter instanceof ServerLevel level && !ServerBlockEvents.SPREAD.invoker().onSpread(level, blockPos, spreadPos.pos())) {
+  private void bending$canSpreadInto(BlockGetter level, BlockPos sourcePos, SpreadPos spreadPos, CallbackInfoReturnable<Boolean> cir) {
+    if (level instanceof ServerLevel serverLevel && !ServerBlockEvents.SPREAD.invoker().onSpread(serverLevel, sourcePos, spreadPos.pos())) {
       cir.setReturnValue(false);
     }
   }

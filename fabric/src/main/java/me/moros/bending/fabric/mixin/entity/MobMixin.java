@@ -35,11 +35,11 @@ public abstract class MobMixin extends LivingEntityMixin {
   private LivingEntity target;
 
   @Inject(method = "setTarget", at = @At("HEAD"), cancellable = true)
-  private void bending$onSetTarget(@Nullable LivingEntity livingEntity, CallbackInfo ci) {
-    if (this.level().isClientSide() || livingEntity == null || this.target == livingEntity) {
+  private void bending$onSetTarget(@Nullable LivingEntity target, CallbackInfo ci) {
+    if (this.level().isClientSide() || target == null || this.target == target) {
       return;
     }
-    if (!ServerEntityEvents.TARGET.invoker().onEntityTarget((Mob) (Object) this, livingEntity)) {
+    if (!ServerEntityEvents.TARGET.invoker().onEntityTarget((Mob) (Object) this, target)) {
       ci.cancel();
     }
   }

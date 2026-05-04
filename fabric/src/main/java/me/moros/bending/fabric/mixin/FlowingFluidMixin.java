@@ -35,9 +35,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(FlowingFluid.class)
 public class FlowingFluidMixin {
   @Inject(method = "canMaybePassThrough", at = @At("RETURN"), cancellable = true)
-  private void applyFluidFlowEvent(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, Direction direction, BlockPos blockPos2, BlockState blockState2, FluidState fluidState, CallbackInfoReturnable<Boolean> cir) {
-    if (blockGetter instanceof ServerLevel level) {
-      if (!ServerBlockEvents.SPREAD.invoker().onSpread(level, blockPos, blockPos2)) {
+  private void applyFluidFlowEvent(BlockGetter level, BlockPos sourcePos, BlockState sourceState, Direction direction, BlockPos testPos, BlockState testState, FluidState testFluidState, CallbackInfoReturnable<Boolean> cir) {
+    if (level instanceof ServerLevel serverLevel) {
+      if (!ServerBlockEvents.SPREAD.invoker().onSpread(serverLevel, sourcePos, testPos)) {
         cir.setReturnValue(false);
       }
     }

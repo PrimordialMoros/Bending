@@ -34,8 +34,8 @@ public abstract class HopperBlockEntityMixin {
     method = "addItem(Lnet/minecraft/world/Container;Lnet/minecraft/world/entity/item/ItemEntity;)Z",
     at = @At("HEAD"), cancellable = true
   )
-  private static void bending$onAddItem(Container container, ItemEntity itemEntity, CallbackInfoReturnable<Boolean> ci) {
-    if (!ServerInventoryEvents.HOPPER.invoker().onItemPull(container, itemEntity)) {
+  private static void bending$onAddItem(Container container, ItemEntity entity, CallbackInfoReturnable<Boolean> ci) {
+    if (!ServerInventoryEvents.HOPPER.invoker().onItemPull(container, entity)) {
       ci.setReturnValue(false);
     }
   }

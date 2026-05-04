@@ -41,14 +41,14 @@ public abstract class PistonBaseBlockMixin {
     target = "Lnet/minecraft/world/level/block/piston/PistonStructureResolver;getToDestroy()Ljava/util/List;"),
     cancellable = true
   )
-  private void bending$onMoveBlocks(Level level, BlockPos blockPos, Direction direction, boolean extending,
-                                    CallbackInfoReturnable<Boolean> cir, @Local PistonStructureResolver helper) {
+  private void bending$onMoveBlocks(Level level, BlockPos pistonPos, Direction direction, boolean extending,
+                                    CallbackInfoReturnable<Boolean> cir, @Local PistonStructureResolver resolver) {
     if (level.isClientSide()) {
       return;
     }
-    List<BlockPos> toPush = helper.getToPush();
-    List<BlockPos> toDestroy = helper.getToDestroy();
-    if (!ServerBlockEvents.PISTON.invoker().onPistonMove((ServerLevel) level, blockPos, toPush, toDestroy)) {
+    List<BlockPos> toPush = resolver.getToPush();
+    List<BlockPos> toDestroy = resolver.getToDestroy();
+    if (!ServerBlockEvents.PISTON.invoker().onPistonMove((ServerLevel) level, pistonPos, toPush, toDestroy)) {
       for (BlockPos b : toDestroy) {
         level.sendBlockUpdated(b, Blocks.AIR.defaultBlockState(), level.getBlockState(b), 3);
       }

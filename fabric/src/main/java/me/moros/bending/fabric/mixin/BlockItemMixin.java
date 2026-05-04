@@ -32,10 +32,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(BlockItem.class)
 public abstract class BlockItemMixin {
   @Inject(method = "canPlace", at = @At("HEAD"), cancellable = true)
-  private void bending$canPlace(BlockPlaceContext context, BlockState state, CallbackInfoReturnable<Boolean> cir) {
+  private void bending$canPlace(BlockPlaceContext context, BlockState stateForPlacement, CallbackInfoReturnable<Boolean> cir) {
     if (context.getPlayer() instanceof ServerPlayer player) {
       var pos = context.getClickedPos();
-      if (!ServerPlayerEvents.PLACE_BLOCK.invoker().onPlace(player, pos, state)) {
+      if (!ServerPlayerEvents.PLACE_BLOCK.invoker().onPlace(player, pos, stateForPlacement)) {
         cir.setReturnValue(false);
       }
     }

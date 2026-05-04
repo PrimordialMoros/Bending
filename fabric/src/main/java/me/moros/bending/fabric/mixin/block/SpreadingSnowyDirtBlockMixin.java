@@ -35,8 +35,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(SpreadingSnowyBlock.class)
 public abstract class SpreadingSnowyDirtBlockMixin {
   @Inject(method = "canPropagate", at = @At(value = "HEAD"), cancellable = true)
-  private static void bending$canPropagate(BlockState blockState, LevelReader levelReader, BlockPos blockPos, CallbackInfoReturnable<Boolean> cir) {
-    if (levelReader instanceof ServerLevel level && !ServerBlockEvents.CHANGE.invoker().onChange(level, blockPos)) {
+  private static void bending$canPropagate(BlockState state, LevelReader level, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+    if (level instanceof ServerLevel serverLevel && !ServerBlockEvents.CHANGE.invoker().onChange(serverLevel, pos)) {
       cir.setReturnValue(false);
     }
   }
