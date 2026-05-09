@@ -43,7 +43,7 @@ flyway-pgsql = { module = "org.flywaydb:flyway-database-postgresql", version.ref
 flyway-hsqldb = { module = "org.flywaydb:flyway-database-hsqldb", version.ref = "flyway" }
 eventbus = { module = "com.sasorio:event-api", version = "1.0.0" }
 
-junit-bom = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit-platform = { module = "org.junit.platform:junit-platform-launcher" }
 
@@ -111,7 +111,6 @@ drivers-local = ["h2", "hsql"]
 drivers-remote = ["mysql", "mariadb", "postgresql"]
 drivers-nonstandard = ["mariadb", "postgresql", "h2", "hsql"]
 flyway = ["flyway-core", "flyway-mysql", "flyway-pgsql", "flyway-hsqldb"]
-junit = ["junit-bom", "junit-jupiter"]
 
 [plugins]
 jmh = { id = "me.champeau.jmh", version = "0.7.3" }

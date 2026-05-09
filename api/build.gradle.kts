@@ -10,7 +10,8 @@ dependencies {
     api(libs.tasker.core)
     compileOnlyApi(libs.adventure.api)
     compileOnly(libs.caffeine)
-    testImplementation(libs.bundles.junit)
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
     testImplementation(libs.adventure.api)
     testRuntimeOnly(libs.junit.platform)
 }

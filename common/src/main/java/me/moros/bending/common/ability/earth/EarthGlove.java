@@ -61,6 +61,8 @@ public class EarthGlove extends AbilityInstance {
 
   private enum Side {RIGHT, LEFT}
 
+  private enum State {ADVANCING, RETURNING, SHATTER}
+
   private static final DataKey<Side> KEY = KeyUtil.data("glove-side", Side.class);
   private static final double GLOVE_SPEED = 1.2;
   private static final double GLOVE_GRABBED_SPEED = 0.6;
@@ -68,14 +70,13 @@ public class EarthGlove extends AbilityInstance {
   private Config userConfig;
   private RemovalPolicy removalPolicy;
 
+  private State state = State.ADVANCING;
   private Entity glove;
   private Vector3d location;
   private Vector3d lastVelocity;
-  private LivingEntity grabbedTarget;
+  private Grab grab;
 
   private boolean isMetal = false;
-  private boolean returning = false;
-  private boolean grabbed = false;
 
   public EarthGlove(AbilityDescription desc) {
     super(desc);
@@ -101,6 +102,7 @@ public class EarthGlove extends AbilityInstance {
         .add(Policies.UNDER_LAVA)
         .add(SwappedSlotsRemovalPolicy.of(description()))
         .add(OutOfRangeRemovalPolicy.of(userConfig.range + 5, () -> location))
+        .add((u, d) -> !glove.valid())
         .build();
       user.addCooldown(description(), userConfig.cooldown);
       return true;
@@ -120,93 +122,76 @@ public class EarthGlove extends AbilityInstance {
       return UpdateResult.REMOVE;
     }
 
-    if (glove == null || !glove.valid()) {
+    if (!user.canBuild(glove.block())) {
       return UpdateResult.REMOVE;
     }
 
     location = glove.location();
     if (location.distanceSq(user.eyeLocation()) > userConfig.range * userConfig.range) {
-      returning = true;
+      state = State.RETURNING;
     }
 
-    if (!user.canBuild(glove.block())) {
-      shatterGlove();
-      return UpdateResult.REMOVE;
-    }
     double factor = isMetal ? BendingProperties.instance().metalModifier() : 1;
-    if (returning) {
-      if (!user.sneaking()) {
-        shatterGlove();
-        return UpdateResult.REMOVE;
-      }
-      Vector3d returnLocation = user.eyeLocation().add(user.direction().multiply(isMetal ? 5 : 1.5));
-      if (location.distanceSq(returnLocation) < 1) {
-        if (grabbed && grabbedTarget != null) {
-          grabbedTarget.applyVelocity(this, Vector3d.ZERO);
-        }
-        return UpdateResult.REMOVE;
-      }
-      if (grabbed) {
-        if (!isValidTarget()) {
-          shatterGlove();
+
+    switch (state) {
+      case ADVANCING -> {
+        double velocityLimit = (GLOVE_SPEED * factor) - 0.2;
+        Vector3d gloveVelocity = glove.velocity();
+        boolean onGround = glove.isOnGround();
+        if (onGround || lastVelocity.angle(gloveVelocity) > Math.PI / 6 || gloveVelocity.lengthSq() < velocityLimit * velocityLimit) {
+          if (onGround) {
+            glove.velocity(Vector3d.ZERO);
+          }
           return UpdateResult.REMOVE;
         }
-        Vector3d dir = returnLocation.subtract(grabbedTarget.location()).normalize().multiply(GLOVE_GRABBED_SPEED);
-        grabbedTarget.applyVelocity(this, dir);
-        glove.teleport(grabbedTarget.eyeLocation().subtract(0, grabbedTarget.height() / 2, 0));
-        return UpdateResult.CONTINUE;
-      } else {
-        Vector3d dir = returnLocation.subtract(location).normalize().multiply(GLOVE_SPEED * factor);
-        updateGloveVelocity(dir);
-      }
-    } else {
-      double velocityLimit = (grabbed ? GLOVE_GRABBED_SPEED : GLOVE_SPEED * factor) - 0.2;
-      Vector3d gloveVelocity = glove.velocity();
-      boolean onGround = glove.isOnGround();
-      if (onGround || lastVelocity.angle(gloveVelocity) > Math.PI / 6 || gloveVelocity.lengthSq() < velocityLimit * velocityLimit) {
-        if (onGround) {
-          glove.velocity(Vector3d.ZERO);
+        updateGloveVelocity(lastVelocity.normalize().multiply(GLOVE_SPEED * factor));
+        boolean sneaking = user.sneaking();
+        boolean collided = CollisionUtil.handle(user, Sphere.of(location, 0.8), e -> onEntityHit(e, sneaking), true, false, sneaking);
+        if (collided && state == State.ADVANCING) {
+          return UpdateResult.REMOVE;
         }
-        shatterGlove();
-        return UpdateResult.REMOVE;
       }
-
-      updateGloveVelocity(lastVelocity.normalize().multiply(GLOVE_SPEED * factor));
-      boolean sneaking = user.sneaking();
-      boolean collided = CollisionUtil.handle(user, Sphere.of(location, 0.8), this::onEntityHit, true, false, sneaking);
-      if (collided && !grabbed) {
+      case RETURNING -> {
+        if (!user.sneaking()) {
+          return UpdateResult.REMOVE;
+        }
+        Vector3d returnLocation = user.eyeLocation().add(user.direction().multiply(isMetal ? 5 : 1.5));
+        if (location.distanceSq(returnLocation) < 1) {
+          glove.applyVelocity(this, Vector3d.ZERO);
+          if (grab != null) {
+            grab.entity.applyVelocity(this, Vector3d.ZERO);
+          }
+          return UpdateResult.REMOVE;
+        }
+        if (grab == null) {
+          Vector3d dir = returnLocation.subtract(location).normalize().multiply(GLOVE_SPEED * factor);
+          glove.applyVelocity(this, dir);
+        } else {
+          return grab.update(returnLocation);
+        }
+      }
+      case SHATTER -> {
         return UpdateResult.REMOVE;
       }
     }
     return UpdateResult.CONTINUE;
   }
 
-  private boolean isValidTarget() {
-    if (grabbedTarget == null || !grabbedTarget.valid()) {
-      return false;
-    }
-    return grabbedTarget.world().equals(user.world());
-  }
-
-  private boolean onEntityHit(Entity entity) {
-    if (user.sneaking()) {
+  private boolean onEntityHit(Entity entity, boolean sneaking) {
+    if (sneaking) {
       return grabTarget((LivingEntity) entity);
     }
     double damage = isMetal ? BendingProperties.instance().metalModifier(userConfig.damage) : userConfig.damage;
     entity.damage(damage, user, description());
-    shatterGlove();
-    return false;
+    return true;
   }
 
   private boolean grabTarget(LivingEntity entity) {
-    if (grabbed || grabbedTarget != null) {
+    if (grab != null) {
       return false;
     }
-    returning = true;
-    grabbed = true;
-    grabbedTarget = entity;
-    glove.teleport(grabbedTarget.eyeLocation().subtract(0, grabbedTarget.height() / 2, 0));
-    grabbedTarget.setProperty(EntityProperties.FALL_DISTANCE, 0D);
+    grab = new Grab(entity);
+    state = State.RETURNING;
     if (isMetal) {
       removalPolicy = Policies.builder()
         .add(Policies.UNDER_WATER)
@@ -214,6 +199,7 @@ public class EarthGlove extends AbilityInstance {
         .add(SwappedSlotsRemovalPolicy.of(description()))
         .add(OutOfRangeRemovalPolicy.of(userConfig.range + 5, () -> location))
         .add(ExpireRemovalPolicy.of(userConfig.grabDuration))
+        .add((u, d) -> !glove.valid())
         .build();
     }
     return true;
@@ -257,28 +243,17 @@ public class EarthGlove extends AbilityInstance {
 
   @Override
   public void onDestroy() {
-    if (glove != null) {
-      if (isMetal) {
-        glove.setProperty(EntityProperties.ALLOW_PICKUP, true);
-      } else {
-        glove.remove();
-      }
+    if (isMetal) {
+      glove.setProperty(EntityProperties.ALLOW_PICKUP, true);
+    } else {
+      BlockType.STONE.asParticle(location).count(6).offset(0.1).spawn(user.world());
+      glove.remove();
     }
   }
 
   @Override
   public Collection<Collider> colliders() {
-    return (glove == null || returning) ? List.of() : List.of(Sphere.of(location, 0.8));
-  }
-
-  public void shatterGlove() {
-    if (!glove.valid()) {
-      return;
-    }
-    if (!isMetal) {
-      BlockType.STONE.asParticle(location).count(6).offset(0.1).spawn(user.world());
-    }
-    onDestroy();
+    return List.of(Sphere.of(location, 0.8));
   }
 
   private static void tryDestroy(User user) {
@@ -288,11 +263,37 @@ public class EarthGlove extends AbilityInstance {
       if (entity.type() == EntityType.ITEM && entity.location().subtract(eyeLoc).angle(dir) < Math.PI / 3) {
         EarthGlove ability = entity.get(GLOVE_KEY).orElse(null);
         if (ability != null && !user.equals(ability.user())) {
-          ability.shatterGlove();
+          ability.state = State.SHATTER;
         }
       }
       return true;
     }, false, false);
+  }
+
+  private final class Grab {
+    private final LivingEntity entity;
+
+    private Grab(LivingEntity entity) {
+      this.entity = entity;
+      this.entity.setProperty(EntityProperties.FALL_DISTANCE, 0D);
+      glove.teleport(entity.center());
+    }
+
+    private UpdateResult update(Vector3d returnLocation) {
+      if (!isValidTarget()) {
+        return UpdateResult.REMOVE;
+      }
+      Vector3d center = entity.center();
+      glove.teleport(center);
+      Vector3d dir = returnLocation.subtract(center).normalize().multiply(GLOVE_GRABBED_SPEED);
+      entity.applyVelocity(EarthGlove.this, dir);
+      glove.applyVelocity(EarthGlove.this, dir);
+      return UpdateResult.CONTINUE;
+    }
+
+    private boolean isValidTarget() {
+      return entity.valid() && entity.world().equals(user.world());
+    }
   }
 
   private static final class Config implements Configurable {
