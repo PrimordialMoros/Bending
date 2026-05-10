@@ -110,7 +110,10 @@ public class FirePropagate extends AbilityInstance {
           burning.add(block);
           createNeighbourCells(block);
         }
-        case REMOVE -> toRemove.add(block);
+        case REMOVE -> {
+          toRemove.add(block);
+          onRemove(block);
+        }
       }
     }
 
@@ -132,25 +135,8 @@ public class FirePropagate extends AbilityInstance {
       }
     }
     pendingDamage.values().forEach(CellDamage::applyDamage);
-
-    for (Block b : toRemove) {
-      cells.remove(b);
-      onRemove(b);
-    }
+    cells.keySet().removeAll(toRemove);
     return cells.isEmpty() ? UpdateResult.REMOVE : UpdateResult.CONTINUE;
-  }
-
-  @Override
-  public Collection<Collider> colliders() {
-    if (cells.isEmpty()) {
-      return List.of();
-    }
-    return cells.keySet().stream().<Collider>map(AABB.BLOCK_BOUNDS::at).toList();
-  }
-
-  @Override
-  public void onCollision(Collision collision) {
-    super.onCollision(collision);
   }
 
   @Override

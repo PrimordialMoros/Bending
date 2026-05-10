@@ -70,7 +70,7 @@ public class EventBusImpl implements EventBus {
 
   @Override
   public void shutdown() {
-    eventRegistry.unsubscribeIf(x -> true);
+    eventRegistry.unsubscribeIf(_ -> true);
     this.closed = true;
   }
 
@@ -89,6 +89,11 @@ public class EventBusImpl implements EventBus {
     }
     eventBus.post(event);
     return !(event instanceof Cancellable c) || !c.cancelled();
+  }
+
+  private <T extends BendingEvent> T createAndPost(T event) {
+    post(event);
+    return event;
   }
 
   @Override
@@ -145,36 +150,26 @@ public class EventBusImpl implements EventBus {
 
   @Override
   public TickEffectEvent postTickEffectEvent(User source, Entity target, int duration, BendingEffect type) {
-    TickEffectEvent event = new TickEffectEventImpl(source, target, duration, type);
-    post(event);
-    return event;
+    return createAndPost(new TickEffectEventImpl(source, target, duration, type));
   }
 
   @Override
   public BendingDamageEvent postAbilityDamageEvent(User source, AbilityDescription desc, LivingEntity target, double damage) {
-    BendingDamageEvent event = new BendingDamageEventImpl(source, desc, target, damage);
-    post(event);
-    return event;
+    return createAndPost(new BendingDamageEventImpl(source, desc, target, damage));
   }
 
   @Override
   public BendingExplosionEvent postExplosionEvent(User source, AbilityDescription desc, Vector3d center, Collection<Block> blocks) {
-    BendingExplosionEvent event = new BendingExplosionEventImpl(source, desc, center, blocks);
-    post(event);
-    return event;
+    return createAndPost(new BendingExplosionEventImpl(source, desc, center, blocks));
   }
 
   @Override
   public ActionLimitEvent postActionLimitEvent(User source, LivingEntity target, long duration) {
-    ActionLimitEvent event = new ActionLimitEventImpl(source, target, duration);
-    post(event);
-    return event;
+    return createAndPost(new ActionLimitEventImpl(source, target, duration));
   }
 
   @Override
   public VelocityEvent postVelocityEvent(User source, LivingEntity target, AbilityDescription desc, Vector3d velocity) {
-    VelocityEventImpl event = new VelocityEventImpl(source, target, desc, velocity);
-    post(event);
-    return event;
+    return createAndPost(new VelocityEventImpl(source, target, desc, velocity));
   }
 }
