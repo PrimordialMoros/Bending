@@ -59,7 +59,6 @@ public class EarthCling extends AbilityInstance {
     }
     if (EntityUtil.isAgainstWall(user, b -> EarthMaterials.isEarthbendable(user, b) && !b.type().isLiquid())) {
       EntityUtil.tryAddPotion(user, PotionEffect.SLOW_FALLING, 10, 0);
-      //noinspection ConstantConditions
       if (!user.onCooldown(user.selectedAbility())) {
         user.applyVelocity(this, Vector3d.ZERO);
         user.setProperty(EntityProperties.FALL_DISTANCE, 0D);

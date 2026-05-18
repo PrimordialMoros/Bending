@@ -19,12 +19,12 @@
 
 package me.moros.bending.fabric.platform.entity;
 
-import me.lucko.fabric.api.permissions.v0.Permissions;
 import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.PlayerInventory;
 import me.moros.bending.fabric.platform.item.FabricPlayerInventory;
 import net.kyori.adventure.audience.Audience;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 
 public class FabricPlayer extends FabricLivingEntity implements Player {
@@ -54,7 +54,8 @@ public class FabricPlayer extends FabricLivingEntity implements Player {
 
   @Override
   public boolean hasPermission(String permission) {
-    return Permissions.check(handle(), permission, handle().level().getServer().operatorUserPermissions().level());
+    Identifier permissionId = Identifier.bySeparator(permission, '.');
+    return handle().checkPermission(permissionId, handle().level().getServer().operatorUserPermissions().level());
   }
 
   @Override
