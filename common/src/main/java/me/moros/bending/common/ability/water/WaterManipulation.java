@@ -122,19 +122,13 @@ public class WaterManipulation extends AbilityInstance {
     if (removalPolicy.test(user, description())) {
       return UpdateResult.REMOVE;
     }
-    return manip == null ? states.update() : manip.update();
-  }
-
-  private void renderTrail(@Nullable Block block, int level) {
-    if (block == null) {
-      return;
-    }
-    if (MaterialUtil.isTransparentOrWater(block)) {
-      WorldUtil.tryBreakPlant(block);
-      if (!MaterialUtil.isWater(block)) {
-        TempBlock.builder(MaterialUtil.waterData(level)).build(block);
+    if (manip != null) {
+      if (manip.compact >= Manip.MAX_COMPACT) {
+        return UpdateResult.REMOVE;
       }
+      return manip.update();
     }
+    return states.update();
   }
 
   private void launch() {
@@ -178,6 +172,7 @@ public class WaterManipulation extends AbilityInstance {
         if (user.world().blockAt(center).equals(rayTraced)) {
           user.game().abilityManager(user.worldKey()).changeOwner(manip, user);
           manip.manip.redirect();
+          manip.manip.compact();
         }
       }
     }
@@ -203,9 +198,14 @@ public class WaterManipulation extends AbilityInstance {
   }
 
   private class Manip extends BlockShot {
+    private static final int MAX_COMPACT = 5;
+
+    private int compact;
+
     public Manip(Block block) {
       super(user, block, isIce ? block.type() : BlockType.WATER, userConfig.range, isIce ? 16 : 20);
       allowUnderWater = true;
+      this.compact = 0;
     }
 
     @Override
@@ -226,26 +226,48 @@ public class WaterManipulation extends AbilityInstance {
             clean(trail.removeLast());
           }
           trail.addFirst(trail1);
-          renderTrail(trail1, 7);
-          renderTrail(trail.peekLast(), 6);
+          renderTrail(trail1, 7 - compact);
+          renderTrail(trail.peekLast(), 6 - compact);
         }
       }
     }
 
     @Override
     public boolean onEntityHit(Entity entity) {
+      double factor = 1;
       if (isIce) {
         BendingEffect.FROST_TICK.apply(user, entity, userConfig.freezeTicks);
+      } else {
+        factor += 0.2 * compact;
       }
-      entity.damage(userConfig.damage, user, description());
-      entity.applyVelocity(WaterManipulation.this, direction.multiply(0.5));
+      entity.damage(userConfig.damage * factor, user, description());
+      entity.applyVelocity(WaterManipulation.this, direction.multiply(0.5 * factor));
       return true;
     }
 
     @Override
     public boolean onBlockHit(Block block) {
-      FragileStructure.tryDamageStructure(block, 3, Ray.of(center(), direction));
+      FragileStructure.tryDamageStructure(block, 3 + compact, Ray.of(center(), direction));
       return true;
+    }
+
+    private void renderTrail(@Nullable Block block, int level) {
+      if (block == null) {
+        return;
+      }
+      if (MaterialUtil.isTransparentOrWater(block)) {
+        WorldUtil.tryBreakPlant(block);
+        if (!MaterialUtil.isWater(block)) {
+          TempBlock.builder(MaterialUtil.waterData(level)).build(block);
+        }
+      }
+    }
+
+    private void compact() {
+      if (!isIce && compact < MAX_COMPACT) {
+        compact++;
+        state = MaterialUtil.waterData(8 - compact);
+      }
     }
   }
 

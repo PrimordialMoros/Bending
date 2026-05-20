@@ -27,6 +27,7 @@ import me.moros.bending.api.collision.CollisionUtil;
 import me.moros.bending.api.collision.geometry.AABB;
 import me.moros.bending.api.platform.Direction;
 import me.moros.bending.api.platform.block.Block;
+import me.moros.bending.api.platform.block.BlockState;
 import me.moros.bending.api.platform.block.BlockType;
 import me.moros.bending.api.platform.particle.ParticleBuilder;
 import me.moros.bending.api.platform.world.WorldUtil;
@@ -39,6 +40,10 @@ import me.moros.math.Vector3i;
 import me.moros.math.VectorUtil;
 import org.jspecify.annotations.Nullable;
 
+/**
+ * The maximum speed is 20 and represents movement of 1 block per tick.
+ * We multiply speed steps by 100 to allow enough control over speed while ensuring accuracy.
+ */
 public abstract class BlockShot implements Updatable, SimpleAbility {
   private User user;
 
@@ -51,7 +56,7 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
   protected Predicate<Block> diagonalsPredicate = b -> !MaterialUtil.isTransparentOrWater(b);
   protected Vector3d target;
   protected Vector3d direction;
-  protected BlockType type;
+  protected BlockState state;
 
   private boolean settingUp;
   private int buffer;
@@ -60,13 +65,13 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
   protected boolean allowUnderWater = false;
   protected final double range;
 
-  /**
-   * The maximum speed is 20 and represents movement of 1 block per tick.
-   * We multiply speed steps by 100 to allow enough control over speed while ensuring accuracy.
-   */
   protected BlockShot(User user, Block block, BlockType type, double range, int speed) {
+    this(user, block, type.defaultState(), range, speed);
+  }
+
+  protected BlockShot(User user, Block block, BlockState state, double range, int speed) {
     this.user = user;
-    this.type = type;
+    this.state = state;
     this.location = block.center();
     this.collider = AABB.EXPANDED_BLOCK_BOUNDS.at(location.floor());
     this.range = range;
@@ -138,12 +143,12 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
     }
     if (MaterialUtil.isTransparent(current) || (MaterialUtil.isWater(current) && allowUnderWater)) {
       WorldUtil.tryBreakPlant(current);
-      if (type == BlockType.WATER && MaterialUtil.isWater(current)) {
+      if (state.type() == BlockType.WATER && MaterialUtil.isWater(current)) {
         ParticleBuilder.bubble(current).spawn(user.world());
         tempBlock = null;
       } else {
         tempBlock = current;
-        TempBlock.builder(type).build(current);
+        TempBlock.builder(state).build(current);
       }
       postRender(center());
     } else {
@@ -185,10 +190,10 @@ public abstract class BlockShot implements Updatable, SimpleAbility {
   }
 
   public boolean isValid(Block block) {
-    if (type == BlockType.WATER) {
+    if (state.type() == BlockType.WATER) {
       return MaterialUtil.isWater(block);
     }
-    return type == block.type();
+    return state.type() == block.type();
   }
 
   public void clean() {
