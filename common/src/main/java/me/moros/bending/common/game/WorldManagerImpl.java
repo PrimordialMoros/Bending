@@ -102,11 +102,11 @@ public final class WorldManagerImpl implements WorldManager {
 
   @Override
   public void onUserChangeWorld(UUID uuid, Key oldWorld, Key newWorld) {
-    if (isEnabled(newWorld)) {
-      User user = Registries.BENDERS.get(uuid);
-      if (user != null) {
-        user.board().updateAll();
-        instance(oldWorld).destroyUserInstances(user);
+    User user = Registries.BENDERS.get(uuid);
+    if (user != null) {
+      user.board().updateAll();
+      instance(oldWorld).destroyUserInstances(user);
+      if (isEnabled(newWorld)) {
         instance(newWorld).createPassives(user);
       }
     }
