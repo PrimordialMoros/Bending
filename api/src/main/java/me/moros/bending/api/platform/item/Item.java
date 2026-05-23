@@ -19,8 +19,10 @@
 
 package me.moros.bending.api.platform.item;
 
+import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.particle.Particle;
 import me.moros.bending.api.platform.particle.ParticleBuilder;
+import me.moros.bending.api.platform.particle.ParticleOptions;
 import me.moros.bending.api.registry.Registry;
 import me.moros.math.Position;
 import net.kyori.adventure.key.Key;
@@ -31,7 +33,7 @@ public sealed interface Item extends Keyed, Items permits ItemImpl {
     return ItemImpl.REGISTRY;
   }
 
-  default ParticleBuilder<Item> asParticle(Position center) {
-    return Particle.ITEM.builder(this, center);
+  default ParticleBuilder asParticle(Position center) {
+    return Particle.ITEM.builder(center).option(ParticleOptions.ITEM_SNAPSHOT, Platform.instance().factory().itemBuilder(this).build());
   }
 }

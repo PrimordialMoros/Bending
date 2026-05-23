@@ -142,7 +142,7 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
   }
 
   @Override
-  public <T> void spawnParticle(ParticleContext<T> context) {
+  public void spawnParticle(ParticleContext context) {
     var p = Registry.PARTICLE_TYPE.get(context.particle().key());
     if (p != null) {
       var data = ParticleMapper.mapParticleData(context);

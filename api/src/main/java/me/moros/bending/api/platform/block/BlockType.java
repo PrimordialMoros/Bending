@@ -43,15 +43,23 @@ public sealed interface BlockType extends BlockProperties, BlockTypes permits Bl
 
   Optional<Item> asItem();
 
-  default ParticleBuilder<BlockState> asParticle(Position center) {
+  default ParticleBuilder asParticle(Position center) {
     return defaultState().asParticle(center);
   }
 
-  default ParticleBuilder<BlockState> asFallingParticle(Position center) {
+  default ParticleBuilder asFallingParticle(Position center) {
     return defaultState().asFallingParticle(center);
   }
 
-  default ParticleBuilder<BlockState> asMarkerParticle(Position center) {
+  default ParticleBuilder asMarkerParticle(Position center) {
     return defaultState().asMarkerParticle(center);
+  }
+
+  default ParticleBuilder asDustPilarParticle(Position center) {
+    return defaultState().asDustPilarParticle(center);
+  }
+
+  default ParticleBuilder asBlockCrumbleParticle(Position center) {
+    return defaultState().asBlockCrumbleParticle(center);
   }
 }

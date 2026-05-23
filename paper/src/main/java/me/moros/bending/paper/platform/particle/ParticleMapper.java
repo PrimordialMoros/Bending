@@ -19,34 +19,95 @@
 
 package me.moros.bending.paper.platform.particle;
 
-import me.moros.bending.api.platform.block.BlockState;
-import me.moros.bending.api.platform.item.Item;
+import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.platform.particle.Particle;
 import me.moros.bending.api.platform.particle.ParticleContext;
-import me.moros.bending.api.platform.particle.ParticleDustData;
-import me.moros.bending.api.platform.particle.ParticleDustData.Transitive;
+import me.moros.bending.api.platform.particle.ParticleOptions;
+import me.moros.bending.api.platform.particle.option.BlockPositionSource;
+import me.moros.bending.api.platform.particle.option.EntityPositionSource;
+import me.moros.bending.api.platform.particle.option.PositionSource;
 import me.moros.bending.paper.platform.PlatformAdapter;
+import me.moros.math.FastMath;
+import me.moros.math.Position;
+import me.moros.math.Vector3d;
+import net.kyori.adventure.util.RGBLike;
 import org.bukkit.Color;
+import org.bukkit.Location;
 import org.bukkit.Particle.DustOptions;
 import org.bukkit.Particle.DustTransition;
+import org.bukkit.Particle.Trail;
+import org.bukkit.Vibration;
+import org.bukkit.Vibration.Destination;
+import org.bukkit.entity.Entity;
 import org.jspecify.annotations.Nullable;
 
 public final class ParticleMapper {
-  public static <T> @Nullable Object mapParticleData(ParticleContext<T> context) {
+  private static final Color TRAIL_COLOR = Color.fromARGB(16545810);
+
+  public static @Nullable Object mapParticleData(ParticleContext context) {
     var p = context.particle();
-    var data = context.data();
-    if ((p == Particle.BLOCK || p == Particle.FALLING_DUST || p == Particle.BLOCK_MARKER) && data instanceof BlockState state) {
-      return PlatformAdapter.toBukkitData(state);
-    } else if (p == Particle.ITEM && data instanceof Item item) {
+    if (p == Particle.BLOCK ||
+      p == Particle.BLOCK_MARKER ||
+      p == Particle.FALLING_DUST ||
+      p == Particle.DUST_PILLAR ||
+      p == Particle.BLOCK_CRUMBLE) {
+      return context.option(ParticleOptions.BLOCK_STATE).map(PlatformAdapter::toBukkitData).orElseThrow();
+    } else if (p == Particle.DUST) {
+      RGBLike color = context.option(ParticleOptions.COLOR).orElseThrow();
+      double scale = context.option(ParticleOptions.SCALE).orElse(1D);
+      return new DustOptions(fromColor(color), (float) scale);
+    } else if (p == Particle.DUST_COLOR_TRANSITION) {
+      RGBLike color = context.option(ParticleOptions.COLOR).orElseThrow();
+      RGBLike toColor = context.option(ParticleOptions.TO_COLOR).orElseThrow();
+      double scale = context.option(ParticleOptions.SCALE).orElse(1D);
+      return new DustTransition(fromColor(color), fromColor(toColor), (float) scale);
+    } else if (p == Particle.ITEM) {
+      ItemSnapshot item = context.option(ParticleOptions.ITEM_SNAPSHOT).orElseThrow();
       return PlatformAdapter.toBukkitItem(item);
-    } else if (p == Particle.DUST && data instanceof ParticleDustData dust) {
-      return new DustOptions(Color.fromRGB(dust.red(), dust.green(), dust.blue()), dust.size());
-    } else if (p == Particle.DUST_COLOR_TRANSITION && data instanceof Transitive dust) {
-      var from = Color.fromRGB(dust.red(), dust.green(), dust.blue());
-      var to = Color.fromRGB(dust.toRed(), dust.toGreen(), dust.toBlue());
-      return new DustTransition(from, to, dust.size());
-    } /*else if (p == Particle.VIBRATION && data instanceof Vibration v) { // TODO Add?
-    }*/
+    } else if (p == Particle.SCULK_CHARGE) {
+      double roll = context.option(ParticleOptions.ROLL).orElse(0D);
+      return (float) roll;
+    } else if (p == Particle.SHRIEK) {
+      int delay = context.option(ParticleOptions.DELAY).orElse(20);
+      return delay;
+    } else if (p == Particle.VIBRATION) {
+      PositionSource source = context.option(ParticleOptions.DESTINATION).orElseThrow();
+      int delay = context.option(ParticleOptions.TRAVEL_TIME).orElse(20);
+      Vector3d pos = source.position().orElse(context.position().toVector3d());
+      Destination destination = switch (source) {
+        case BlockPositionSource _ -> {
+          Location loc = toLocation(pos);
+          yield new Vibration.Destination.BlockDestination(loc);
+        }
+        case EntityPositionSource entitySource -> {
+          Entity entity = entitySource.entity().map(PlatformAdapter::toBukkitEntity).orElseThrow();
+          yield new Vibration.Destination.EntityDestination(entity);
+        }
+      };
+      return new Vibration(destination, delay);
+    } else if (p == Particle.ENTITY_EFFECT) {
+      RGBLike color = context.option(ParticleOptions.COLOR).orElseThrow();
+      double opacity = context.option(ParticleOptions.OPACITY).orElseThrow();
+      return fromColor(opacity, color);
+    } else if (p == Particle.TRAIL) {
+      Vector3d dest = context.option(ParticleOptions.TARGET).orElseGet(() -> context.position().toVector3d());
+      Color color = context.option(ParticleOptions.COLOR).map(ParticleMapper::fromColor).orElse(TRAIL_COLOR);
+      int duration = context.option(ParticleOptions.TRAVEL_TIME).orElse(20);
+      return new Trail(toLocation(dest), color, duration);
+    }
     return null;
+  }
+
+  private static Location toLocation(Position position) {
+    return new Location(null, position.x(), position.y(), position.z());
+  }
+
+  private static Color fromColor(RGBLike rgbLike) {
+    return Color.fromRGB(rgbLike.red(), rgbLike.green(), rgbLike.blue());
+  }
+
+  private static Color fromColor(double opacity, RGBLike rgbLike) {
+    int alpha = FastMath.floor(opacity * 255);
+    return Color.fromARGB(alpha, rgbLike.red(), rgbLike.green(), rgbLike.blue());
   }
 }

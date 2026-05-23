@@ -59,6 +59,11 @@ public final class BukkitItem implements ItemSnapshot {
   }
 
   @Override
+  public boolean isEmpty() {
+    return handle.isEmpty();
+  }
+
+  @Override
   public <T> Optional<T> get(DataKey<T> key) {
     return holderSupplier.get().get(key);
   }

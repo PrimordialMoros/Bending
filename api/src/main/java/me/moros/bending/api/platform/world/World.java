@@ -56,7 +56,7 @@ public interface World extends Keyed, ForwardingAudience, BlockGetter, BlockSett
     return maxHeight() - minHeight();
   }
 
-  <T> void spawnParticle(ParticleContext<T> context);
+  void spawnParticle(ParticleContext context);
 
   /**
    * Perform a raytrace for blocks and return the result.

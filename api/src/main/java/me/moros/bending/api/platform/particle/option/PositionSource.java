@@ -17,25 +17,30 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.platform.particle;
+package me.moros.bending.api.platform.particle.option;
 
+import java.lang.ref.WeakReference;
+import java.util.Objects;
 import java.util.Optional;
 
+import me.moros.bending.api.platform.entity.Entity;
 import me.moros.math.Position;
+import me.moros.math.Vector3d;
 
-record ParticleContextImpl(Particle particle, Position position, double extra,
-                           ParticleOptionHolder options) implements ParticleContext {
-  @Override
-  public Object data() {
-    return null;
+public sealed interface PositionSource permits BlockPositionSource, EntityPositionSource {
+  Optional<Vector3d> position();
+
+  static PositionSource block(Position position) {
+    Objects.requireNonNull(position);
+    return new BlockPositionSourceImpl(Vector3d.of(position.blockX(), position.blockY(), position.blockZ()));
   }
 
-  @Override
-  public <V> Optional<V> option(ParticleOption<V> option) {
-    V value = options.get(option);
-    if (value == null) {
-      value = ParticleOptionHolder.immutableDefaults(particle).get(option);
-    }
-    return Optional.ofNullable(value);
+  static PositionSource entity(Entity entity) {
+    return entity(entity, 0);
+  }
+
+  static PositionSource entity(Entity entity, double yOffset) {
+    Objects.requireNonNull(entity);
+    return new EntityPositionSourceImpl(new WeakReference<>(entity), yOffset);
   }
 }

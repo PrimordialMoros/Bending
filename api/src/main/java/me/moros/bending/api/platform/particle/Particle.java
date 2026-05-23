@@ -34,7 +34,7 @@ public sealed interface Particle extends Keyed, Particles permits ParticleImpl {
    * @param pos the location to spawn the particles in
    * @return a new builder instance
    */
-  default ParticleBuilder<Void> builder(Position pos) {
+  default ParticleBuilder builder(Position pos) {
     return ParticleBuilder.of(this, pos);
   }
 
@@ -43,7 +43,8 @@ public sealed interface Particle extends Keyed, Particles permits ParticleImpl {
    * @param pos the location to spawn the particles in
    * @return a new builder instance
    */
-  default <T> ParticleBuilder<T> builder(T data, Position pos) {
-    return ParticleBuilder.of(this, data, pos);
+  @Deprecated(forRemoval = true)
+  default ParticleBuilder builder(Object data, Position pos) {
+    return ParticleBuilder.of(this, pos);
   }
 }

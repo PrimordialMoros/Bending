@@ -55,6 +55,11 @@ public final class FabricItem implements ItemSnapshot {
   }
 
   @Override
+  public boolean isEmpty() {
+    return false;
+  }
+
+  @Override
   public <T> Optional<T> get(DataKey<T> key) {
     return Metadata.isPersistent(key) ? Optional.ofNullable(ItemUtil.getKey(handle, key)) : Optional.empty();
   }
@@ -92,6 +97,11 @@ public final class FabricItem implements ItemSnapshot {
     @Override
     public int amount() {
       return 0;
+    }
+
+    @Override
+    public boolean isEmpty() {
+      return true;
     }
 
     @Override

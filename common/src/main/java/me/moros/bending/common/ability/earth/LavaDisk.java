@@ -226,7 +226,7 @@ public class LavaDisk extends AbilityInstance {
     double sin = Math.sin(-angle);
     int offset = 0;
     int index = 0;
-    float size = 0.8F;
+    double size = 0.8;
     for (int i = 1; i <= 8; i++) {
       for (int j = 0; j <= 288; j += 72) {
         int rotAngle = rotationAngle + j + offset;
@@ -240,7 +240,7 @@ public class LavaDisk extends AbilityInstance {
       }
       offset += 4;
       index = Math.min(colors.length - 1, ++index);
-      size -= 0.05F;
+      size -= 0.05;
     }
   }
 

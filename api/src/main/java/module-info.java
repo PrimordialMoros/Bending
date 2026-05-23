@@ -25,6 +25,7 @@ module me.moros.bending {
   exports me.moros.bending.api.platform.entity.player;
   exports me.moros.bending.api.platform.item;
   exports me.moros.bending.api.platform.particle;
+  exports me.moros.bending.api.platform.particle.option;
   exports me.moros.bending.api.platform.potion;
   exports me.moros.bending.api.platform.property;
   exports me.moros.bending.api.platform.sound;

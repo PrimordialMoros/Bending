@@ -21,7 +21,6 @@ package me.moros.bending.api.platform.particle;
 
 import java.util.Objects;
 
-import me.moros.bending.api.platform.particle.ParticleDustData.Transitive;
 import me.moros.bending.api.platform.world.World;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.FeaturePermissions;
@@ -30,26 +29,23 @@ import me.moros.math.Vector3d;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.util.RGBLike;
-import org.jspecify.annotations.Nullable;
 
 /**
  * Utility class to provide create and render {@link Particle} with a fluent builder.
  * You should prefer this over using a custom ParticleBuilder to ensure uniform rendering across different abilities.
  */
-public final class ParticleBuilder<T> {
+public final class ParticleBuilder {
   private static final RGBLike AIR = fromHex("#EEEEEE");
 
   private final Particle particle;
-  private final T data;
   private final Position position;
-  private Position offset = Vector3d.ZERO;
-  private int count = 1;
+  private final ParticleOptionHolder.Builder options;
   private double extra = 0;
 
-  private ParticleBuilder(Particle particle, @Nullable T data, Position position) {
+  private ParticleBuilder(Particle particle, Position position) {
     this.particle = particle;
-    this.position = Objects.requireNonNull(position);
-    this.data = data;
+    this.position = position;
+    this.options = ParticleOptionHolder.emptyMutable();
   }
 
   /**
@@ -57,9 +53,8 @@ public final class ParticleBuilder<T> {
    * @param count the amount
    * @return the modified builder
    */
-  public ParticleBuilder<T> count(int count) {
-    this.count = Math.max(0, count);
-    return this;
+  public ParticleBuilder count(int count) {
+    return option(ParticleOptions.QUANTITY, count);
   }
 
   /**
@@ -67,9 +62,8 @@ public final class ParticleBuilder<T> {
    * @param offset vector with 3 offset components
    * @return the modified builder
    */
-  public ParticleBuilder<T> offset(Position offset) {
-    this.offset = Objects.requireNonNull(offset);
-    return this;
+  public ParticleBuilder offset(Position offset) {
+    return option(ParticleOptions.OFFSET, offset.toVector3d());
   }
 
   /**
@@ -77,7 +71,7 @@ public final class ParticleBuilder<T> {
    * @param offset the offset to use for all components
    * @return the modified builder
    */
-  public ParticleBuilder<T> offset(double offset) {
+  public ParticleBuilder offset(double offset) {
     return offset(offset, offset, offset);
   }
 
@@ -88,7 +82,7 @@ public final class ParticleBuilder<T> {
    * @param offsetZ the offset in the z component
    * @return the modified builder
    */
-  public ParticleBuilder<T> offset(double offsetX, double offsetY, double offsetZ) {
+  public ParticleBuilder offset(double offsetX, double offsetY, double offsetZ) {
     return offset(Vector3d.of(offsetX, offsetY, offsetZ));
   }
 
@@ -97,16 +91,28 @@ public final class ParticleBuilder<T> {
    * @param extra the extra value to use
    * @return the modified builder
    */
-  public ParticleBuilder<T> extra(double extra) {
+  public ParticleBuilder extra(double extra) {
     this.extra = extra;
+    return this;
+  }
+
+  /**
+   * Add an option for this particle.
+   * @param option the particle option
+   * @param value the value
+   * @param <V> the type of particle option and value
+   * @return the modified builder
+   */
+  public <V> ParticleBuilder option(ParticleOption<V> option, V value) throws IllegalArgumentException {
+    this.options.put(option, value);
     return this;
   }
 
   /**
    * Build a particle context from this builder.
    */
-  public ParticleContext<T> build() {
-    return new ParticleContextImpl<>(particle, position, offset, count, extra, data);
+  public ParticleContext build() {
+    return new ParticleContextImpl(particle, position, extra, options.build());
   }
 
   /**
@@ -122,8 +128,10 @@ public final class ParticleBuilder<T> {
    * @param center the location to spawn the particles in
    * @return a new builder instance
    */
-  public static ParticleBuilder<ParticleDustData> air(Position center) {
-    return rgb(center, AIR, 1.8F);
+  public static ParticleBuilder air(Position center) {
+    return of(Particle.DUST, center)
+      .option(ParticleOptions.COLOR, AIR)
+      .option(ParticleOptions.SCALE, 1.8);
   }
 
   /**
@@ -131,7 +139,7 @@ public final class ParticleBuilder<T> {
    * @param center the block location to spawn the particles in
    * @return a new builder instance
    */
-  public static ParticleBuilder<Void> bubble(Position center) {
+  public static ParticleBuilder bubble(Position center) {
     return Particle.BUBBLE.builder(center.center()).count(3).offset(0.25);
   }
 
@@ -142,7 +150,7 @@ public final class ParticleBuilder<T> {
    * @param center the location to spawn the particles in
    * @return a new builder instance
    */
-  public static ParticleBuilder<Void> fire(User user, Position center) {
+  public static ParticleBuilder fire(User user, Position center) {
     Particle effect = user.hasPermission(FeaturePermissions.BLUE_FIRE) ? Particle.SOUL_FIRE_FLAME : Particle.FLAME;
     return effect.builder(center);
   }
@@ -153,8 +161,9 @@ public final class ParticleBuilder<T> {
    * @param hexVal the rgb color in hex format
    * @return a new builder instance
    */
-  public static ParticleBuilder<ParticleDustData> rgb(Position center, String hexVal) {
-    return rgb(center, hexVal, 1);
+  public static ParticleBuilder rgb(Position center, String hexVal) {
+    return of(Particle.DUST, center)
+      .option(ParticleOptions.COLOR, fromHex(hexVal));
   }
 
   /**
@@ -163,8 +172,10 @@ public final class ParticleBuilder<T> {
    * @param color the rgb color
    * @return a new builder instance
    */
-  public static ParticleBuilder<ParticleDustData> rgb(Position center, RGBLike color) {
-    return rgb(center, color, 1);
+  @Deprecated(forRemoval = true)
+  public static ParticleBuilder rgb(Position center, RGBLike color) {
+    return of(Particle.DUST, center)
+      .option(ParticleOptions.COLOR, color);
   }
 
   /**
@@ -175,8 +186,23 @@ public final class ParticleBuilder<T> {
    * @param size the particle size
    * @return a new builder instance
    */
-  public static ParticleBuilder<ParticleDustData> rgb(Position center, String hexVal, float size) {
-    return rgb(center, fromHex(hexVal), size);
+  @Deprecated(forRemoval = true)
+  public static ParticleBuilder rgb(Position center, String hexVal, float size) {
+    return rgb(center, hexVal)
+      .option(ParticleOptions.SCALE, (double) size);
+  }
+
+  /**
+   * Create a new {@link Particle#DUST} particle builder with the specified rgb color and size.
+   * <p>Note: Particle size also affects particle lifetime.
+   * @param center the location to spawn the particles in
+   * @param hexVal the rgb color in hex format
+   * @param size the particle size
+   * @return a new builder instance
+   */
+  public static ParticleBuilder rgb(Position center, String hexVal, double size) {
+    return rgb(center, hexVal)
+      .option(ParticleOptions.SCALE, size);
   }
 
   /**
@@ -187,8 +213,10 @@ public final class ParticleBuilder<T> {
    * @param size the particle size
    * @return a new builder instance
    */
-  public static ParticleBuilder<ParticleDustData> rgb(Position center, RGBLike color, float size) {
-    return of(Particle.DUST, ParticleDustData.simple(color, size), center);
+  @Deprecated(forRemoval = true)
+  public static ParticleBuilder rgb(Position center, RGBLike color, float size) {
+    return rgb(center, color)
+      .option(ParticleOptions.SCALE, (double) size);
   }
 
   /**
@@ -198,7 +226,8 @@ public final class ParticleBuilder<T> {
    * @param toHexVal the target rgb color in hex format
    * @return a new builder instance
    */
-  public static ParticleBuilder<Transitive> rgb(Position center, String fromHexVal, String toHexVal) {
+  @Deprecated(forRemoval = true)
+  public static ParticleBuilder rgb(Position center, String fromHexVal, String toHexVal) {
     return rgb(center, fromHexVal, toHexVal, 1);
   }
 
@@ -209,7 +238,8 @@ public final class ParticleBuilder<T> {
    * @param to the target rgb color
    * @return a new builder instance
    */
-  public static ParticleBuilder<Transitive> rgb(Position center, RGBLike from, RGBLike to) {
+  @Deprecated(forRemoval = true)
+  public static ParticleBuilder rgb(Position center, RGBLike from, RGBLike to) {
     return rgb(center, from, to, 1);
   }
 
@@ -222,7 +252,8 @@ public final class ParticleBuilder<T> {
    * @param size the particle size
    * @return a new builder instance
    */
-  public static ParticleBuilder<Transitive> rgb(Position center, String fromHexVal, String toHexVal, float size) {
+  @Deprecated(forRemoval = true)
+  public static ParticleBuilder rgb(Position center, String fromHexVal, String toHexVal, float size) {
     return rgb(center, fromHex(fromHexVal), fromHex(toHexVal), size);
   }
 
@@ -235,16 +266,23 @@ public final class ParticleBuilder<T> {
    * @param size the particle size
    * @return a new builder instance
    */
-  public static ParticleBuilder<Transitive> rgb(Position center, RGBLike from, RGBLike to, float size) {
-    return of(Particle.DUST_COLOR_TRANSITION, ParticleDustData.transitive(from, to, size), center);
+  @Deprecated(forRemoval = true)
+  public static ParticleBuilder rgb(Position center, RGBLike from, RGBLike to, float size) {
+    return of(Particle.DUST_COLOR_TRANSITION, center)
+      .option(ParticleOptions.COLOR, from)
+      .option(ParticleOptions.TO_COLOR, to)
+      .option(ParticleOptions.SCALE, (double) size);
   }
 
-  static ParticleBuilder<Void> of(Particle effect, Position center) {
-    return new ParticleBuilder<>(effect, null, center);
+  static ParticleBuilder of(Particle effect, Position center) {
+    Objects.requireNonNull(effect);
+    Objects.requireNonNull(center);
+    return new ParticleBuilder(effect, center);
   }
 
-  static <T> ParticleBuilder<T> of(Particle effect, T data, Position center) {
-    return new ParticleBuilder<>(effect, data, center);
+  @Deprecated(forRemoval = true)
+  static <T> ParticleBuilder of(Particle effect, T data, Position center) {
+    return of(effect, center);
   }
 
   private static RGBLike fromHex(String hexValue) {

@@ -21,6 +21,7 @@ package me.moros.bending.api.platform.block;
 
 import me.moros.bending.api.platform.particle.Particle;
 import me.moros.bending.api.platform.particle.ParticleBuilder;
+import me.moros.bending.api.platform.particle.ParticleOptions;
 import me.moros.bending.api.platform.property.Property;
 import me.moros.bending.api.platform.property.PropertyHolder;
 import me.moros.math.Position;
@@ -37,16 +38,24 @@ public interface BlockState extends Keyed, PropertyHolder {
 
   boolean matches(BlockState other);
 
-  default ParticleBuilder<BlockState> asParticle(Position center) {
-    return Particle.BLOCK.builder(this, center);
+  default ParticleBuilder asParticle(Position center) {
+    return Particle.BLOCK.builder(center).option(ParticleOptions.BLOCK_STATE, this);
   }
 
-  default ParticleBuilder<BlockState> asFallingParticle(Position center) {
-    return Particle.FALLING_DUST.builder(this, center);
+  default ParticleBuilder asFallingParticle(Position center) {
+    return Particle.FALLING_DUST.builder(center).option(ParticleOptions.BLOCK_STATE, this);
   }
 
-  default ParticleBuilder<BlockState> asMarkerParticle(Position center) {
-    return Particle.BLOCK_MARKER.builder(this, center);
+  default ParticleBuilder asMarkerParticle(Position center) {
+    return Particle.BLOCK_MARKER.builder(center).option(ParticleOptions.BLOCK_STATE, this);
+  }
+
+  default ParticleBuilder asDustPilarParticle(Position center) {
+    return Particle.DUST_PILLAR.builder(center).option(ParticleOptions.BLOCK_STATE, this);
+  }
+
+  default ParticleBuilder asBlockCrumbleParticle(Position center) {
+    return Particle.BLOCK_CRUMBLE.builder(center).option(ParticleOptions.BLOCK_STATE, this);
   }
 
   <V extends Comparable<V>> BlockState withProperty(Property<V> property, V value);

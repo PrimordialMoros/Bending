@@ -19,9 +19,18 @@
 
 package me.moros.bending.api.platform.particle;
 
-@Deprecated(forRemoval = true)
-record ParticleDustDataImpl(int red, int green, int blue, float size) implements ParticleDustData {
-  record TransitiveDataImpl(int red, int green, int blue, int toRed, int toGreen, int toBlue,
-                            float size) implements Transitive {
+import java.util.function.Function;
+
+import net.kyori.adventure.key.Key;
+import org.jspecify.annotations.Nullable;
+
+record ParticleOptionImpl<V>(Key key, Class<? extends V> valueType,
+                             @Nullable Function<V, String> validator) implements ParticleOption<V> {
+  ParticleOptionImpl(Key key, Class<? extends V> valueType) {
+    this(key, valueType, null);
+  }
+
+  public @Nullable String validateValue(V value) {
+    return validator != null ? validator.apply(value) : null;
   }
 }

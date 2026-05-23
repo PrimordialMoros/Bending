@@ -17,11 +17,22 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.platform.particle;
+package me.moros.bending.api.platform.particle.option;
 
-@Deprecated(forRemoval = true)
-record ParticleDustDataImpl(int red, int green, int blue, float size) implements ParticleDustData {
-  record TransitiveDataImpl(int red, int green, int blue, int toRed, int toGreen, int toBlue,
-                            float size) implements Transitive {
+import java.lang.ref.WeakReference;
+import java.util.Optional;
+
+import me.moros.bending.api.platform.entity.Entity;
+import me.moros.math.Vector3d;
+
+record EntityPositionSourceImpl(WeakReference<Entity> entityRef, double yOffset) implements EntityPositionSource {
+  @Override
+  public Optional<Entity> entity() {
+    return Optional.ofNullable(entityRef.get());
+  }
+
+  @Override
+  public Optional<Vector3d> position() {
+    return entity().map(e -> e.location().add(0, yOffset, 0));
   }
 }

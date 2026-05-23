@@ -23,9 +23,11 @@ import me.moros.bending.api.platform.particle.ParticleDustData.Transitive;
 import me.moros.bending.api.platform.particle.ParticleDustDataImpl.TransitiveDataImpl;
 import net.kyori.adventure.util.RGBLike;
 
+@Deprecated(forRemoval = true)
 public sealed interface ParticleDustData extends RGBLike permits Transitive, ParticleDustDataImpl {
   float size();
 
+  @Deprecated(forRemoval = true)
   sealed interface Transitive extends ParticleDustData permits ParticleDustDataImpl.TransitiveDataImpl {
     int toRed();
 
@@ -34,10 +36,12 @@ public sealed interface ParticleDustData extends RGBLike permits Transitive, Par
     int toBlue();
   }
 
+  @Deprecated(forRemoval = true)
   static ParticleDustData simple(RGBLike rgb, float size) {
     return new ParticleDustDataImpl(rgb.red(), rgb.green(), rgb.blue(), size);
   }
 
+  @Deprecated(forRemoval = true)
   static Transitive transitive(RGBLike from, RGBLike to, float size) {
     return new TransitiveDataImpl(from.red(), from.green(), from.blue(), to.red(), to.green(), to.blue(), size);
   }

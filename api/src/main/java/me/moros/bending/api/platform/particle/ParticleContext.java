@@ -19,18 +19,27 @@
 
 package me.moros.bending.api.platform.particle;
 
+import java.util.Optional;
+
 import me.moros.math.Position;
 
-public interface ParticleContext<T> {
+public sealed interface ParticleContext permits ParticleContextImpl {
   Particle particle();
 
   Position position();
 
-  Position offset();
+  default Position offset() {
+    return option(ParticleOptions.OFFSET).orElseThrow();
+  }
 
-  int count();
+  default int count() {
+    return option(ParticleOptions.QUANTITY).orElseThrow();
+  }
 
   double extra();
 
-  T data();
+  @Deprecated(forRemoval = true)
+  Object data();
+
+  <V> Optional<V> option(ParticleOption<V> option);
 }

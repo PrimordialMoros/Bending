@@ -33,6 +33,8 @@ public interface ItemSnapshot extends DataHolder {
 
   int amount();
 
+  boolean isEmpty();
+
   @Override
   default <T> void add(DataKey<T> key, T value) {
   }

@@ -17,11 +17,15 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.api.platform.particle;
+package me.moros.bending.api.platform.particle.option;
 
-@Deprecated(forRemoval = true)
-record ParticleDustDataImpl(int red, int green, int blue, float size) implements ParticleDustData {
-  record TransitiveDataImpl(int red, int green, int blue, int toRed, int toGreen, int toBlue,
-                            float size) implements Transitive {
+import java.util.Optional;
+
+import me.moros.math.Vector3d;
+
+record BlockPositionSourceImpl(Vector3d pos) implements BlockPositionSource {
+  @Override
+  public Optional<Vector3d> position() {
+    return Optional.of(pos);
   }
 }

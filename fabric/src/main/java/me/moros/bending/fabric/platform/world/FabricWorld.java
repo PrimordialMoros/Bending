@@ -154,7 +154,7 @@ public record FabricWorld(ServerLevel handle) implements World {
   }
 
   @Override
-  public <T> void spawnParticle(ParticleContext<T> context) {
+  public void spawnParticle(ParticleContext context) {
     var options = ParticleMapper.mapParticleOptions(context);
     if (options != null) {
       handle().sendParticles(options, context.position().x(), context.position().y(), context.position().z(),

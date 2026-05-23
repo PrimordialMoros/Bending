@@ -19,9 +19,8 @@
 
 package me.moros.bending.api.platform.particle;
 
-@Deprecated(forRemoval = true)
-record ParticleDustDataImpl(int red, int green, int blue, float size) implements ParticleDustData {
-  record TransitiveDataImpl(int red, int green, int blue, int toRed, int toGreen, int toBlue,
-                            float size) implements Transitive {
-  }
+import net.kyori.adventure.key.Keyed;
+
+public sealed interface ParticleOption<V> extends Keyed permits ParticleOptionImpl {
+  Class<? extends V> valueType();
 }
