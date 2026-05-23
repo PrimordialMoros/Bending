@@ -161,13 +161,13 @@ public class FireWall extends AbilityInstance {
             .map(TempLight::lock).ifPresent(l -> lights.put(block, l));
           if (h == 0) {
             ParticleBuilder.fire(user, pos).count(6).offset(0.5, 0.25, 0.5)
-              .extra(0.01).spawn(user.world());
+              .speed(0.01).spawn(user.world());
           } else {
             double speed = 1 - (h / (2 * currentHeight));
             for (int i = 0; i < 2; i++) {
               Vector3d center = VectorUtil.gaussianOffset(pos, 0.4);
               ParticleBuilder.fire(user, center).count(0).offset(0, 1, 0)
-                .extra(0.07 * speed).spawn(user.world());
+                .speed(0.07 * speed).spawn(user.world());
             }
           }
           if (ThreadLocalRandom.current().nextInt(15) == 0) {

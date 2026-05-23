@@ -219,7 +219,7 @@ public class FireBlast extends AbilityInstance implements Explosive {
 
     @Override
     public void render(Vector3d location) {
-      ParticleBuilder.fire(user, location).count(amount).offset(offset).extra(particleSpeed).spawn(user.world());
+      ParticleBuilder.fire(user, location).count(amount).offset(offset).speed(particleSpeed).spawn(user.world());
       TempLight.builder(++ticks).build(user.world().blockAt(location));
     }
 

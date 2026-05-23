@@ -146,8 +146,9 @@ public record BukkitWorld(org.bukkit.World handle) implements World {
     var p = Registry.PARTICLE_TYPE.get(context.particle().key());
     if (p != null) {
       var data = ParticleMapper.mapParticleData(context);
-      handle().spawnParticle(p, context.position().x(), context.position().y(), context.position().z(), context.count(),
-        context.offset().x(), context.offset().y(), context.offset().z(), context.extra(), data, true);
+      handle().spawnParticle(p, context.position().x(), context.position().y(), context.position().z(),
+        context.count(), context.offset().x(), context.offset().y(), context.offset().z(), context.speed(),
+        data, true);
     }
   }
 

@@ -40,7 +40,6 @@ public final class ParticleBuilder {
   private final Particle particle;
   private final Position position;
   private final ParticleOptionHolder.Builder options;
-  private double extra = 0;
 
   private ParticleBuilder(Particle particle, Position position) {
     this.particle = particle;
@@ -91,9 +90,18 @@ public final class ParticleBuilder {
    * @param extra the extra value to use
    * @return the modified builder
    */
+  @Deprecated(forRemoval = true)
   public ParticleBuilder extra(double extra) {
-    this.extra = extra;
-    return this;
+    return speed(extra);
+  }
+
+  /**
+   * Set the speed value for particles.
+   * @param speed the speed value to use
+   * @return the modified builder
+   */
+  public ParticleBuilder speed(double speed) {
+    return option(ParticleOptions.SPEED, speed);
   }
 
   /**
@@ -112,7 +120,7 @@ public final class ParticleBuilder {
    * Build a particle context from this builder.
    */
   public ParticleContext build() {
-    return new ParticleContextImpl(particle, position, extra, options.build());
+    return new ParticleContextImpl(particle, position, options.build());
   }
 
   /**

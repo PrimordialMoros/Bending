@@ -324,8 +324,8 @@ public class EarthShot extends AbilityInstance implements Explosive {
     }
     exploded = true;
     Vector3d center = projectile.center();
-    Particle.SMOKE.builder(center).count(12).offset(1).extra(0.05).spawn(user.world());
-    Particle.FIREWORK.builder(center).count(8).offset(1).extra(0.07).spawn(user.world());
+    Particle.SMOKE.builder(center).count(12).offset(1).speed(0.05).spawn(user.world());
+    Particle.FIREWORK.builder(center).count(8).offset(1).speed(0.07).spawn(user.world());
     BendingExplosion.builder()
       .size(userConfig.explosionRadius)
       .damage(damage)

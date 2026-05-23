@@ -282,7 +282,7 @@ public class WaterGimbal extends AbilityInstance {
 
     @Override
     protected void renderHead(Block block) {
-      Particle.ITEM_SNOWBALL.builder(block.center()).count(6).offset(0.25).extra(0.05).spawn(user.world());
+      Particle.ITEM_SNOWBALL.builder(block.center()).count(6).offset(0.25).speed(0.05).spawn(user.world());
       if (!MaterialUtil.isWater(block)) {
         TempBlock.water().build(block);
       }

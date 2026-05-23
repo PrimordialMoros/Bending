@@ -131,9 +131,9 @@ public class Combustion extends AbilityInstance implements Explosive {
       return;
     }
     exploded = true;
-    Particle.FLAME.builder(center).extra(0.2).count(20).offset(1).spawn(user.world());
-    Particle.LARGE_SMOKE.builder(center).extra(0.2).count(20).offset(1).spawn(user.world());
-    Particle.FIREWORK.builder(center).extra(0.2).count(20).offset(1).spawn(user.world());
+    Particle.FLAME.builder(center).speed(0.2).count(20).offset(1).spawn(user.world());
+    Particle.LARGE_SMOKE.builder(center).speed(0.2).count(20).offset(1).spawn(user.world());
+    Particle.FIREWORK.builder(center).speed(0.2).count(20).offset(1).spawn(user.world());
 
     Ray ray = Ray.of(center, user.direction());
     FragileStructure.tryDamageStructure(user.world().nearbyBlocks(center, size), 0, ray);
@@ -167,7 +167,7 @@ public class Combustion extends AbilityInstance implements Explosive {
     public void render(Vector3d location) {
       renderRing(location);
       Particle.SMOKE.builder(location).spawn(user.world());
-      Particle.WAX_OFF.builder(location).extra(0.005).spawn(user.world());
+      Particle.WAX_OFF.builder(location).speed(0.005).spawn(user.world());
     }
 
     @Override
@@ -185,7 +185,7 @@ public class Combustion extends AbilityInstance implements Explosive {
         double radius = ThreadLocalRandom.current().nextDouble(3, 6);
         VectorUtil.circle(Vector3d.ONE, user.direction(), 20).forEach(v ->
           Particle.WAX_OFF.builder(location.add(v.multiply(0.2)))
-            .count(0).offset(v.multiply(radius)).extra(0.9).spawn(user.world())
+            .count(0).offset(v.multiply(radius)).speed(0.9).spawn(user.world())
         );
       }
     }

@@ -132,8 +132,8 @@ public class FrostBreath extends AbilityInstance {
       collisionRadius = ORIGINAL_COLLISION_RADIUS + offset;
       int count = FastMath.ceil(0.35 * distanceTravelled);
       int iceCount = FastMath.ceil(0.25 * distanceTravelled);
-      Particle.SNOWFLAKE.builder(location).count(count).offset(offset).extra(0.02).spawn(user.world());
-      BlockType.PACKED_ICE.asParticle(location).count(iceCount).offset(offset).extra(0.02).spawn(user.world());
+      Particle.SNOWFLAKE.builder(location).count(count).offset(offset).speed(0.02).spawn(user.world());
+      BlockType.PACKED_ICE.asParticle(location).count(iceCount).offset(offset).speed(0.02).spawn(user.world());
     }
 
     @Override

@@ -23,13 +23,8 @@ import java.util.Optional;
 
 import me.moros.math.Position;
 
-record ParticleContextImpl(Particle particle, Position position, double extra,
+record ParticleContextImpl(Particle particle, Position position,
                            ParticleOptionHolder options) implements ParticleContext {
-  @Override
-  public Object data() {
-    return null;
-  }
-
   @Override
   public <V> Optional<V> option(ParticleOption<V> option) {
     V value = options.get(option);

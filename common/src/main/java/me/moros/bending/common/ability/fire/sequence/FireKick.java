@@ -108,7 +108,7 @@ public class FireKick extends AbilityInstance {
 
     @Override
     public void render(Vector3d location) {
-      ParticleBuilder.fire(user, location).count(4).offset(0.15).extra(0.01).spawn(user.world());
+      ParticleBuilder.fire(user, location).count(4).offset(0.15).speed(0.01).spawn(user.world());
       TempLight.builder(++ticks).build(user.world().blockAt(location));
     }
 

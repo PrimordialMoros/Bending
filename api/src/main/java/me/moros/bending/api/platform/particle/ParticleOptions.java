@@ -62,6 +62,8 @@ public final class ParticleOptions {
 
   public static final ParticleOption<Integer> TRAVEL_TIME = create("travel_time", Integer.class);
 
+  public static final ParticleOption<Double> SPEED = create("speed", Double.class);
+
   private static <V> ParticleOption<V> create(String key, Class<? extends V> valueType) {
     return new ParticleOptionImpl<>(KeyUtil.simple(key), valueType);
   }

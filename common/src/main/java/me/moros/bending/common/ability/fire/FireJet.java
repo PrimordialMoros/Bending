@@ -113,7 +113,7 @@ public class FireJet extends AbilityInstance {
   private void jetBlastAnimation() {
     Vector3d center = user.location().add(0, 0.2, 0);
     VectorUtil.circle(Vector3d.PLUS_I, Vector3d.PLUS_J, 36).forEach(v ->
-      ParticleBuilder.fire(user, center.add(v.multiply(0.5))).count(0).offset(v).extra(0.09).spawn(user.world())
+      ParticleBuilder.fire(user, center.add(v.multiply(0.5))).count(0).offset(v).speed(0.09).spawn(user.world())
     );
     LOUD_EXPLOSION.play(user.world(), user.location());
   }
@@ -137,7 +137,7 @@ public class FireJet extends AbilityInstance {
     for (int i = 0; i < amount; i++) {
       Vector3d center = VectorUtil.gaussianOffset(user.location(), offset);
       Vector3d v = target.subtract(center);
-      ParticleBuilder.fire(user, center).count(0).offset(v).extra(particleSpeed).spawn(user.world());
+      ParticleBuilder.fire(user, center).count(0).offset(v).speed(particleSpeed).spawn(user.world());
     }
     TempLight.builder(++ticks).build(user.block());
     if (ThreadLocalRandom.current().nextBoolean()) {

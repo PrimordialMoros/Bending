@@ -161,7 +161,7 @@ public class FireBurst extends AbilityInstance {
     public void render(Vector3d location) {
       long time = System.currentTimeMillis();
       if (time >= nextRenderTime) {
-        ParticleBuilder.fire(user, location).offset(0.2).extra(0.01).spawn(user.world());
+        ParticleBuilder.fire(user, location).offset(0.2).speed(0.01).spawn(user.world());
         nextRenderTime = time + 75;
       }
       TempLight.builder(++ticks).build(user.world().blockAt(location));

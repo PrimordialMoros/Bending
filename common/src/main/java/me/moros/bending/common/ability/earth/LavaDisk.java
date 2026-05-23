@@ -170,8 +170,8 @@ public class LavaDisk extends AbilityInstance {
 
   @Override
   public void onDestroy() {
-    BlockType.MAGMA_BLOCK.asParticle(location).count(16).offset(0.1).extra(0.01).spawn(user.world());
-    Particle.LAVA.builder(location).count(2).offset(0.1).extra(0.01).spawn(user.world());
+    BlockType.MAGMA_BLOCK.asParticle(location).count(16).offset(0.1).speed(0.01).spawn(user.world());
+    Particle.LAVA.builder(location).count(2).offset(0.1).speed(0.01).spawn(user.world());
     Sound.BLOCK_STONE_BREAK.asEffect(1, 1.5F).play(user.world(), location);
     user.addCooldown(description(), userConfig.cooldown);
   }
@@ -183,7 +183,7 @@ public class LavaDisk extends AbilityInstance {
 
   private boolean damageEntity(Entity entity, double damage) {
     if (affectedEntities.add(entity.uuid())) {
-      Particle.LAVA.builder(entity.center()).count(4).offset(0.5).extra(0.1).spawn(user.world());
+      Particle.LAVA.builder(entity.center()).count(4).offset(0.5).speed(0.1).spawn(user.world());
       BendingEffect.FIRE_TICK.apply(user, entity);
       entity.damage(damage, user, description());
       currentPower -= userConfig.powerDiminishPerEntity;
@@ -210,7 +210,7 @@ public class LavaDisk extends AbilityInstance {
       currentPower -= block.type().hardness();
       TempBlock.air().duration(BendingProperties.instance().earthRevertTime()).build(block);
       Vector3d center = block.center();
-      Particle.LAVA.builder(center).offset(0.5).extra(0.05).spawn(user.world());
+      Particle.LAVA.builder(center).offset(0.5).speed(0.05).spawn(user.world());
       if (ThreadLocalRandom.current().nextInt(4) == 0) {
         Sound.BLOCK_GRINDSTONE_USE.asEffect(0.3F, 0.3F).play(block);
       }

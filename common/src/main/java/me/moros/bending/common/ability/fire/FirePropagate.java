@@ -174,7 +174,7 @@ public class FirePropagate extends AbilityInstance {
     for (int i = 0; i < 4; i++) {
       Vector3d pos = VectorUtil.gaussianOffset(from.center(), 0.25);
       Vector3d dir = to.center().subtract(pos).normalize();
-      Particle.FLAME.builder(pos).count(0).offset(dir).extra(0.04).spawn(from.world());
+      Particle.FLAME.builder(pos).count(0).offset(dir).speed(0.04).spawn(from.world());
     }
     if (ThreadLocalRandom.current().nextInt(7) == 0) {
       SoundEffect.FIRE.play(to);

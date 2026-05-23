@@ -105,7 +105,7 @@ public class FireSpin extends AbilityInstance {
 
     @Override
     public void render(Vector3d location) {
-      ParticleBuilder.fire(user, location).extra(0.01).spawn(user.world());
+      ParticleBuilder.fire(user, location).speed(0.01).spawn(user.world());
       TempLight.builder(++ticks).build(user.world().blockAt(location));
     }
 

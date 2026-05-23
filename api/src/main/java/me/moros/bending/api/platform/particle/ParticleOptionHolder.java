@@ -40,7 +40,7 @@ record ParticleOptionHolder(Map<ParticleOption<?>, Object> data) {
   }
 
   static ParticleOptionHolder.Builder emptyMutable() {
-    return new Builder(new HashMap<>(5));
+    return new Builder(new HashMap<>(6));
   }
 
   static ParticleOptionHolder immutableDefaults(Particle particle) {
@@ -66,6 +66,7 @@ record ParticleOptionHolder(Map<ParticleOption<?>, Object> data) {
 
     builder.put(ParticleOptions.OFFSET, Vector3d.ZERO);
     builder.put(ParticleOptions.QUANTITY, 1);
+    builder.put(ParticleOptions.SPEED, 0D);
 
     if (particle == Particle.BLOCK ||
       particle == Particle.BLOCK_MARKER ||

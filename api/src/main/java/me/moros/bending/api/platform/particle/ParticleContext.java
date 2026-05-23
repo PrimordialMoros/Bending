@@ -28,18 +28,27 @@ public sealed interface ParticleContext permits ParticleContextImpl {
 
   Position position();
 
+  <V> Optional<V> option(ParticleOption<V> option);
+
   default Position offset() {
-    return option(ParticleOptions.OFFSET).orElseThrow();
+    return option(ParticleOptions.OFFSET).orElseThrow(); // handled by defaults
   }
 
   default int count() {
-    return option(ParticleOptions.QUANTITY).orElseThrow();
+    return option(ParticleOptions.QUANTITY).orElseThrow(); // handled by defaults
   }
 
-  double extra();
+  default double speed() {
+    return option(ParticleOptions.SPEED).orElseThrow(); // handled by defaults
+  }
 
   @Deprecated(forRemoval = true)
-  Object data();
+  default double extra() {
+    return speed();
+  }
 
-  <V> Optional<V> option(ParticleOption<V> option);
+  @Deprecated(forRemoval = true)
+  default Object data() {
+    return null;
+  }
 }

@@ -109,7 +109,7 @@ public class FireWheel extends AbilityInstance {
     public void render(Vector3d location) {
       Vector3d rotateAxis = Vector3d.PLUS_J.cross(this.ray.direction());
       VectorUtil.circle(this.ray.direction().multiply(this.radius), rotateAxis, 36).forEach(v ->
-        ParticleBuilder.fire(user, location.add(v)).extra(0.01).spawn(user.world())
+        ParticleBuilder.fire(user, location.add(v)).speed(0.01).spawn(user.world())
       );
     }
 
