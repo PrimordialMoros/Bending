@@ -44,7 +44,7 @@ import me.moros.bending.api.user.User;
 import me.moros.bending.common.logging.Logger;
 import me.moros.bending.paper.adapter.AdapterLoader;
 import me.moros.bending.paper.gui.BoardImpl;
-import me.moros.bending.paper.gui.ElementMenu;
+import me.moros.bending.paper.gui.ElementDialog;
 import me.moros.bending.paper.platform.item.BukkitItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -98,7 +98,7 @@ public class BukkitPlatform implements Platform, PlatformFactory {
   @Override
   public Optional<ElementGui> buildMenu(ElementHandler handler, User user) {
     if (user instanceof Player player) {
-      return Optional.of(ElementMenu.createMenu(handler, player));
+      return Optional.of(ElementDialog.createMenu(handler, player));
     }
     return Optional.empty();
   }

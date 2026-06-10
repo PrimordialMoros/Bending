@@ -41,7 +41,7 @@ import me.moros.bending.api.platform.item.ItemSnapshot;
 import me.moros.bending.api.user.User;
 import me.moros.bending.fabric.adapter.NativeAdapterImpl;
 import me.moros.bending.fabric.gui.BoardImpl;
-import me.moros.bending.fabric.gui.ElementMenu;
+import me.moros.bending.fabric.gui.ElementDialog;
 import me.moros.bending.fabric.platform.item.FabricItemBuilder;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags;
 import net.fabricmc.fabric.api.tag.convention.v2.TagUtil;
@@ -101,7 +101,7 @@ public class FabricPlatform implements Platform, PlatformFactory {
   @Override
   public Optional<ElementGui> buildMenu(ElementHandler handler, User user) {
     if (user instanceof Player player) {
-      return Optional.of(ElementMenu.createMenu(handler, player));
+      return Optional.of(ElementDialog.createMenu(handler, player));
     }
     return Optional.empty();
   }

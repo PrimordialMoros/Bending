@@ -28,6 +28,7 @@
     "entity.ProjectileMixin",
     "BlockItemMixin",
     "FlowingFluidMixin",
+    "ServerCommonPacketListenerImplMixin",
     "ServerGamePacketListenerImplMixin",
     "ServerPlayerGameModeMixin",
     "SlotMixin",

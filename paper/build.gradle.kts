@@ -22,7 +22,6 @@ dependencies {
     implementation(libs.bstats.bukkit)
     implementation(libs.cloud.minecraft)
     implementation(libs.cloud.paper)
-    implementation(libs.inventory.framework)
     runtimeDownload(libs.caffeine)
     runtimeDownload(libs.hikari)
     runtimeDownload(libs.jdbi)
@@ -42,10 +41,8 @@ tasks {
         minecraftVersion(libs.versions.minecraft.get())
     }
     shadowJar {
-        exclude("fonts/") // We aren't using any fonts from IF
         dependencies {
             reloc("org.incendo.cloud", "cloud")
-            reloc("com.github.stefvanschie.inventoryframework", "inventoryframework")
         }
     }
     named<Copy>("processResources") {

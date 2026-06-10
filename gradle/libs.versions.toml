@@ -81,11 +81,9 @@ fabric-minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" 
 fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
 fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
 fabric-placeholder = { module = "eu.pb4:placeholder-api", version = "3.0.0+26.1" }
-sgui = { module = "eu.pb4:sgui", version = "2.0.0+26.1" }
 fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.7.0" }
 
 # Bukkit
-inventory-framework = { module = "com.github.stefvanschie.inventoryframework:IF", version = "0.10.19-dev" }
 grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.7" }
 towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.103.0.2" }
 bolt = { module = "org.popcraft:bolt-bukkit", version = "1.2.86" }
