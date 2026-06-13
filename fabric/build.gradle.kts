@@ -18,8 +18,6 @@ dependencies {
     implementation(libs.fabric.api)
     implementation(libs.fabric.placeholder)
 
-    implementation(libs.fabric.permissions)
-    include(libs.fabric.permissions)
     implementation(libs.adventure.fabric)
     include(libs.adventure.fabric)
     implementation(libs.cloud.fabric)

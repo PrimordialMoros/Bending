@@ -25,11 +25,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import me.lucko.fabric.api.permissions.v0.PermissionCheckEvent;
+import com.mojang.serialization.Codec;
+import me.moros.bending.api.util.KeyUtil;
 import me.moros.bending.common.util.PermissionInitializer;
 import net.fabricmc.fabric.api.event.Event;
-import net.fabricmc.fabric.api.util.TriState;
-import net.minecraft.commands.SharedSuggestionProvider;
+import net.fabricmc.fabric.api.permission.v1.PermissionContext;
+import net.fabricmc.fabric.api.permission.v1.PermissionEvents;
+import net.fabricmc.fabric.api.permission.v1.PermissionNode;
+import net.kyori.adventure.util.TriState;
 import net.minecraft.resources.Identifier;
 
 public class FabricPermissionInitializer extends PermissionInitializer {
@@ -37,22 +40,22 @@ public class FabricPermissionInitializer extends PermissionInitializer {
 
   public FabricPermissionInitializer() {
     var fallback = Identifier.fromNamespaceAndPath("bending", "fallback");
-    PermissionCheckEvent.EVENT.register(fallback, this::onPermissionCheck);
-    PermissionCheckEvent.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, fallback);
+    PermissionEvents.ON_REQUEST.register(fallback, this::onPermissionCheck);
+    PermissionEvents.ON_REQUEST.addPhaseOrdering(Event.DEFAULT_PHASE, fallback);
   }
 
-  private TriState onPermissionCheck(SharedSuggestionProvider source, String permission) {
-    return defaultPermissions.getOrDefault(permission, TriState.DEFAULT);
+  private <T> T onPermissionCheck(PermissionContext ctx, PermissionNode<T> node) {
+    if (node.codec() == Codec.BOOL) {
+      String permissionString = KeyUtil.concat(node.key());
+      //noinspection unchecked
+      return (T) defaultPermissions.getOrDefault(permissionString, TriState.NOT_SET).toBoolean();
+    }
+    return null;
   }
 
   @Override
-  protected void registerDefault(String node, Collection<String> children, net.kyori.adventure.util.TriState def) {
-    var permDef = switch (def) {
-      case TRUE -> TriState.TRUE;
-      case NOT_SET -> TriState.DEFAULT;
-      case FALSE -> TriState.FALSE;
-    };
-    var map = children.stream().collect(Collectors.toMap(Function.identity(), v -> permDef));
+  protected void registerDefault(String node, Collection<String> children, TriState def) {
+    var map = children.stream().collect(Collectors.toMap(Function.identity(), v -> def));
     defaultPermissions.putAll(map);
   }
 }
