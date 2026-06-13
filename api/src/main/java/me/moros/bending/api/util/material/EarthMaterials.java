@@ -53,11 +53,12 @@ public final class EarthMaterials {
       .add(BlockTag.COAL_ORES).add(BlockTag.IRON_ORES).add(BlockTag.GOLD_ORES).add(BlockTag.COPPER_ORES)
       .add(BlockTag.REDSTONE_ORES).add(BlockTag.LAPIS_ORES).add(BlockTag.DIAMOND_ORES).add(BlockTag.EMERALD_ORES)
       .add(BlockType.NETHER_QUARTZ_ORE)
-      .add(BlockTag.CONCRETE_POWDER).contains("concrete")
+      .add(BlockTag.CONCRETE_POWDERS).add(BlockTag.CONCRETE)
       .add(BlockType.DIRT_PATH, BlockType.GRAVEL, BlockType.CLAY, BlockType.COBBLESTONE, BlockType.MOSSY_COBBLESTONE,
         BlockType.COBBLESTONE_STAIRS, BlockType.MOSSY_COBBLESTONE_STAIRS, BlockType.STONE_BRICK_STAIRS,
         BlockType.CALCITE, BlockType.SMOOTH_BASALT, BlockType.AMETHYST_BLOCK, BlockType.QUARTZ_BLOCK,
         BlockType.POLISHED_GRANITE, BlockType.POLISHED_DIORITE, BlockType.POLISHED_ANDESITE)
+      .add(BlockType.CINNABAR, BlockType.SULFUR, BlockType.POTENT_SULFUR)
       .buildAndRegister();
 
     BlockTag.builder(SAND_BENDABLE.key())
