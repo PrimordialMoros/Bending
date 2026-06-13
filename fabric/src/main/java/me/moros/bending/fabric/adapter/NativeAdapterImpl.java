@@ -23,7 +23,6 @@ import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.world.World;
 import me.moros.bending.common.adapter.AbstractNativeAdapter;
-import me.moros.bending.fabric.mixin.accessor.EntityAccess;
 import me.moros.bending.fabric.platform.PlatformAdapter;
 import net.kyori.adventure.platform.modcommon.MinecraftServerAudiences;
 import net.kyori.adventure.text.Component;
@@ -63,10 +62,5 @@ public final class NativeAdapterImpl extends AbstractNativeAdapter {
   @Override
   protected net.minecraft.network.chat.Component adapt(Component component) {
     return audiences.asNative(component);
-  }
-
-  @Override
-  protected int nextEntityId() {
-    return EntityAccess.bending$idCounter().incrementAndGet();
   }
 }

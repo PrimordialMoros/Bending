@@ -66,9 +66,4 @@ final class NativeAdapterImpl extends AbstractNativeAdapter {
   protected Component adapt(net.kyori.adventure.text.Component component) {
     return PaperAdventure.asVanilla(component);
   }
-
-  @Override
-  protected int nextEntityId() {
-    return net.minecraft.world.entity.Entity.nextEntityId();
-  }
 }

@@ -29,6 +29,7 @@ import me.moros.bending.common.adapter.EntityMeta.EntityStatus;
 import me.moros.math.Position;
 import me.moros.math.Quaternion;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -41,12 +42,12 @@ final class DisplayUtil {
     return switch (properties) {
       case BlockDisplay display -> {
         builder.setRaw(EntityMeta.BLOCK_STATE_ID, packetUtil.adapt(display.data()));
-        yield EntityType.BLOCK_DISPLAY;
+        yield EntityTypes.BLOCK_DISPLAY;
       }
       case ItemDisplay display -> {
         builder.setRaw(EntityMeta.DISPLAYED_ITEM, packetUtil.adapt(display.data()));
         builder.setRaw(EntityMeta.DISPLAY_TYPE, display.displayType().getId());
-        yield EntityType.ITEM_DISPLAY;
+        yield EntityTypes.ITEM_DISPLAY;
       }
       case TextDisplay display -> {
         builder.setRaw(EntityMeta.TEXT, packetUtil.adapt(display.data()));
@@ -54,7 +55,7 @@ final class DisplayUtil {
         builder.setRaw(EntityMeta.BACKGROUND_COLOR, display.backgroundColor());
         builder.setRaw(EntityMeta.OPACITY, display.opacity());
         builder.setRaw(EntityMeta.TEXT_FLAGS, DisplayUtil.packTextDisplayFlagsIntoByte(display.textFlags()));
-        yield EntityType.TEXT_DISPLAY;
+        yield EntityTypes.TEXT_DISPLAY;
       }
     };
   }

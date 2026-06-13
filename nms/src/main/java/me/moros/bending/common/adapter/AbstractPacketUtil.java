@@ -40,8 +40,8 @@ import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementType;
-import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.advancements.criterion.ImpossibleTrigger;
+import net.minecraft.advancements.triggers.CriteriaTriggers;
+import net.minecraft.advancements.triggers.ImpossibleTrigger;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.Packet;
@@ -59,6 +59,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.PositionMoveRotation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
@@ -86,7 +87,9 @@ public abstract class AbstractPacketUtil implements PacketUtil {
 
   protected abstract net.minecraft.network.chat.Component adapt(Component component);
 
-  protected abstract int nextEntityId();
+  protected int nextEntityId(ServerLevel level) {
+    return level.getNextEntityId();
+  }
 
   @Override
   public ClientboundPacket createNotification(Item item, Component title) {
@@ -104,11 +107,11 @@ public abstract class AbstractPacketUtil implements PacketUtil {
   }
 
   @Override
-  public ClientboundPacket createFallingBlock(Position center, me.moros.bending.api.platform.block.BlockState state, Vector3d velocity, boolean gravity) {
-    final int id = nextEntityId();
+  public ClientboundPacket createFallingBlock(Position center, me.moros.bending.api.platform.block.BlockState state, Vector3d velocity, boolean gravity, World world) {
+    final int id = nextEntityId(adapt(world));
     Collection<Packet<? super ClientGamePacketListener>> packets = new ArrayList<>();
     final int blockDataId = net.minecraft.world.level.block.Block.getId(adapt(state));
-    packets.add(createEntity(id, center, EntityType.FALLING_BLOCK, blockDataId));
+    packets.add(createEntity(id, center, EntityTypes.FALLING_BLOCK, blockDataId));
     if (!gravity) {
       packets.add(new EntityDataBuilder(id).noGravity().build());
     }
@@ -119,8 +122,8 @@ public abstract class AbstractPacketUtil implements PacketUtil {
   }
 
   @Override
-  public ClientboundPacket createDisplayEntity(Position center, Display<?> properties) {
-    final int id = nextEntityId();
+  public ClientboundPacket createDisplayEntity(Position center, Display<?> properties, World world) {
+    final int id = nextEntityId(adapt(world));
     var builder = new EntityDataBuilder(id);
     var type = DisplayUtil.mapProperties(this, builder, properties);
     return wrap(id, new ClientboundBundlePacket(List.of(createEntity(id, center, type, 0), builder.build())));
