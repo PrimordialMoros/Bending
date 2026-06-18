@@ -46,11 +46,11 @@ import net.minecraft.network.protocol.game.ClientboundResetScorePacket;
 import net.minecraft.network.protocol.game.ClientboundSetDisplayObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket;
+import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket.Parameters;
 import net.minecraft.network.protocol.game.ClientboundSetScorePacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.scores.DisplaySlot;
-import net.minecraft.world.scores.Team;
 import net.minecraft.world.scores.Team.CollisionRule;
 import net.minecraft.world.scores.Team.Visibility;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria.RenderType;
@@ -264,13 +264,17 @@ public abstract class Sidebar implements Board {
     buf.writeByte(action.method);
 
     if (action != TeamAction.REMOVE) {
-      ComponentSerialization.TRUSTED_STREAM_CODEC.encode(buf, net.minecraft.network.chat.Component.literal(String.valueOf(score)));
-      buf.writeByte(0x00); // flags
-      Team.Visibility.STREAM_CODEC.encode(buf, Visibility.ALWAYS);
-      Team.CollisionRule.STREAM_CODEC.encode(buf, CollisionRule.ALWAYS);
-      buf.writeEnum(ChatFormatting.RESET);
-      ComponentSerialization.TRUSTED_STREAM_CODEC.encode(buf, toNative(scoreEntry.prefix()));
-      ComponentSerialization.TRUSTED_STREAM_CODEC.encode(buf, toNative(scoreEntry.suffix()));
+      byte optionFlags = 0x00;
+      Parameters parameters = new Parameters(
+        net.minecraft.network.chat.Component.literal(String.valueOf(score)),
+        toNative(scoreEntry.prefix()),
+        toNative(scoreEntry.suffix()),
+        Visibility.ALWAYS,
+        CollisionRule.ALWAYS,
+        Optional.empty(),
+        optionFlags
+      );
+      Parameters.STREAM_CODEC.encode(buf, parameters);
       if (action == TeamAction.CREATE) {
         buf.writeCollection(List.of(generateInvisibleLegacyString(score)), FriendlyByteBuf::writeUtf);
       }

@@ -69,9 +69,10 @@ public interface PacketUtil {
    * @param state the data to use for the falling block
    * @param velocity the initial velocity for the entity
    * @param gravity whether the entity will have gravity enabled
+   * @param world the world to use
    * @return the constructed packet
    */
-  default ClientboundPacket createFallingBlock(Position center, BlockState state, Vector3d velocity, boolean gravity) {
+  default ClientboundPacket createFallingBlock(Position center, BlockState state, Vector3d velocity, boolean gravity, World world) {
     return DummyPacket.INSTANCE;
   }
 
@@ -79,9 +80,10 @@ public interface PacketUtil {
    * Create a packet display entity.
    * @param center the spawn location
    * @param properties the properties to use for the display entity
+   * @param world the world to use
    * @return the constructed packet
    */
-  default ClientboundPacket createDisplayEntity(Position center, Display<?> properties) {
+  default ClientboundPacket createDisplayEntity(Position center, Display<?> properties, World world) {
     return DummyPacket.INSTANCE;
   }
 

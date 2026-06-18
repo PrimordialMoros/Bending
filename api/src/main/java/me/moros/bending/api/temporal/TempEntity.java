@@ -81,7 +81,7 @@ public class TempEntity extends Temporary {
 
     @Override
     public TempEntity build(World world, Vector3d center) {
-      var packet = Platform.instance().nativeAdapter().createFallingBlock(center, data, velocity, gravity);
+      var packet = Platform.instance().nativeAdapter().createFallingBlock(center, data, velocity, gravity, world);
       if (packet.id() > 0) {
         if (viewers.isEmpty()) {
           packet.broadcast(world, center);

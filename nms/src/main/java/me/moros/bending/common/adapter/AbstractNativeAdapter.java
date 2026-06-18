@@ -29,7 +29,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LightningRodBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -61,8 +60,8 @@ public abstract class AbstractNativeAdapter extends AbstractPacketUtil implement
     ServerLevel level = adapt(block.world());
     BlockPos pos = new BlockPos(block.blockX(), block.blockY(), block.blockZ());
     BlockState data = level.getBlockState(pos);
-    if (data.is(Blocks.LIGHTNING_ROD)) {
-      ((LightningRodBlock) data.getBlock()).onLightningStrike(data, adapt(block.world()), pos);
+    if (data.getBlock() instanceof LightningRodBlock lightningRodBlock) {
+      lightningRodBlock.onLightningStrike(data, adapt(block.world()), pos);
       return true;
     }
     return false;

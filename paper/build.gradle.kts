@@ -22,7 +22,6 @@ dependencies {
     implementation(libs.bstats.bukkit)
     implementation(libs.cloud.minecraft)
     implementation(libs.cloud.paper)
-    implementation(libs.inventory.framework)
     runtimeDownload(libs.caffeine)
     runtimeDownload(libs.hikari)
     runtimeDownload(libs.jdbi)
@@ -32,7 +31,12 @@ dependencies {
     compileOnly(libs.grief.prevention)
     compileOnly(libs.towny)
     compileOnly(libs.bolt)
-    compileOnly(libs.worldguard)
+    compileOnly(libs.worldguard) {
+        // TODO remove exclusions when worldguard updates constraints
+        exclude(module = "gson")
+        exclude(module = "guava")
+        exclude(module = "fastutil")
+    }
     compileOnly(libs.papi)
     paperweight.paperDevBundle(libs.versions.paper.api)
 }
@@ -42,10 +46,8 @@ tasks {
         minecraftVersion(libs.versions.minecraft.get())
     }
     shadowJar {
-        exclude("fonts/") // We aren't using any fonts from IF
         dependencies {
             reloc("org.incendo.cloud", "cloud")
-            reloc("com.github.stefvanschie.inventoryframework", "inventoryframework")
         }
     }
     named<Copy>("processResources") {

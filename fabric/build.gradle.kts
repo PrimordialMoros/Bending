@@ -11,7 +11,7 @@ repositories {
         mavenContent { includeGroup("eu.pb4") }
     }
     maven("https://repo.moros.me/snapshots/") {
-        mavenContent { includeGroup("net.kyori") }
+        mavenContent { includeGroup("org.incendo") }
     }
 }
 
@@ -21,10 +21,6 @@ dependencies {
     implementation(libs.fabric.api)
     implementation(libs.fabric.placeholder)
 
-    implementation(libs.fabric.permissions)
-    include(libs.fabric.permissions)
-    implementation(libs.sgui)
-    include(libs.sgui)
     implementation(libs.adventure.fabric)
     include(libs.adventure.fabric)
     implementation(libs.cloud.fabric)

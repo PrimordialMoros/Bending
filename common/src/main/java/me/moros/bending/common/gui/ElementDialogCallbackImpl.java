@@ -17,17 +17,9 @@
  * along with Bending. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.moros.bending.fabric.mixin.accessor;
+package me.moros.bending.common.gui;
 
-import net.minecraft.world.entity.Entity;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import me.moros.bending.api.ability.element.Element;
 
-@Mixin(Entity.class)
-public interface EntityAccess {
-  @Invoker("setSharedFlag")
-  void bending$setSharedFlag(int flag, boolean value);
-
-  @Invoker("getFireImmuneTicks")
-  int bending$maxFireTicks();
+record ElementDialogCallbackImpl(Element element) implements ElementDialogCallback {
 }

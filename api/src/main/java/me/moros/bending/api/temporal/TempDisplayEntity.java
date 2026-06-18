@@ -125,7 +125,7 @@ public class TempDisplayEntity extends Temporary {
         data.positionInterpolationDuration(1);
       }
       var properties = data.build();
-      var packet = Platform.instance().nativeAdapter().createDisplayEntity(center, properties);
+      var packet = Platform.instance().nativeAdapter().createDisplayEntity(center, properties, world);
       var id = packet.id();
       if (id <= 0) {
         return null;
