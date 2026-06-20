@@ -5,6 +5,7 @@ plugins {
 
 tasks {
     shadowJar {
+        archiveClassifier = ""
         mergeServiceFiles()
         filesMatching("META-INF/services/**") {
             duplicatesStrategy = DuplicatesStrategy.INCLUDE

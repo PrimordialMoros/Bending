@@ -90,7 +90,7 @@ public interface Message {
   Args1<Component> MODIFIER_CLEAR = name -> translatable("bending.command.modifier.clear", SUCCESS)
     .arguments(name);
 
-  Args0 ATTRIBUTE_DESC = () -> translatable("bending.command.modifier.attribute.description");
+  Args0 ATTRIBUTE_DESC = () -> translatable("bending.command.attribute.description");
   Args1<Component> ATTRIBUTE_LIST_HEADER = name -> translatable("bending.command.attribute.list.header", HEADER)
     .arguments(name);
   Args1<Component> ATTRIBUTE_LIST_EMPTY = name -> translatable("bending.command.attribute.list.empty", WARN)
