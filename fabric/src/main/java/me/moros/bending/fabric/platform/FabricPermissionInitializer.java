@@ -26,6 +26,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.mojang.serialization.Codec;
+import me.lucko.fabric.api.permissions.v0.PermissionCheckEvent;
 import me.moros.bending.api.util.KeyUtil;
 import me.moros.bending.common.util.PermissionInitializer;
 import net.fabricmc.fabric.api.event.Event;
@@ -33,6 +34,7 @@ import net.fabricmc.fabric.api.permission.v1.PermissionContext;
 import net.fabricmc.fabric.api.permission.v1.PermissionEvents;
 import net.fabricmc.fabric.api.permission.v1.PermissionNode;
 import net.kyori.adventure.util.TriState;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.resources.Identifier;
 
 public class FabricPermissionInitializer extends PermissionInitializer {
@@ -40,8 +42,14 @@ public class FabricPermissionInitializer extends PermissionInitializer {
 
   public FabricPermissionInitializer() {
     var fallback = Identifier.fromNamespaceAndPath("bending", "fallback");
+    PermissionCheckEvent.EVENT.register(fallback, this::onPermissionCheckOld);
+    PermissionCheckEvent.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, fallback);
     PermissionEvents.ON_REQUEST.register(fallback, this::onPermissionCheck);
     PermissionEvents.ON_REQUEST.addPhaseOrdering(Event.DEFAULT_PHASE, fallback);
+  }
+
+  private net.fabricmc.fabric.api.util.TriState onPermissionCheckOld(SharedSuggestionProvider source, String permission) {
+    return convert(defaultPermissions.getOrDefault(permission, TriState.NOT_SET));
   }
 
   private <T> T onPermissionCheck(PermissionContext ctx, PermissionNode<T> node) {
@@ -57,5 +65,13 @@ public class FabricPermissionInitializer extends PermissionInitializer {
   protected void registerDefault(String node, Collection<String> children, TriState def) {
     var map = children.stream().collect(Collectors.toMap(Function.identity(), v -> def));
     defaultPermissions.putAll(map);
+  }
+
+  private static net.fabricmc.fabric.api.util.TriState convert(TriState state) {
+    return switch (state) {
+      case TRUE -> net.fabricmc.fabric.api.util.TriState.TRUE;
+      case FALSE -> net.fabricmc.fabric.api.util.TriState.FALSE;
+      case NOT_SET -> net.fabricmc.fabric.api.util.TriState.DEFAULT;
+    };
   }
 }
