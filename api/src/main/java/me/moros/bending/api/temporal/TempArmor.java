@@ -152,7 +152,7 @@ public final class TempArmor extends Temporary {
     private ItemSnapshot createArmorItem(Item type) {
       return Platform.instance().factory().itemBuilder(type)
         .name(Component.text("Bending Armor")).lore(List.of(Component.text("Temporary")))
-        .unbreakable(true).meta(Metadata.ARMOR_KEY, true).build();
+        .boundArmor().meta(Metadata.ARMOR_KEY, true).build();
     }
   }
 }

@@ -32,20 +32,26 @@ import net.kyori.adventure.platform.modcommon.MinecraftServerAudiences;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Unit;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.item.component.TooltipDisplay;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 
 public class FabricItemBuilder implements ItemBuilder {
   private final ItemStack itemStack;
   private final DataComponentPatch.Builder patchBuilder;
   private final Map<DataKey<?>, Object> meta = new HashMap<>();
+  private final MinecraftServer server;
   private final MinecraftServerAudiences adapter;
 
   public FabricItemBuilder(ItemStack itemStack, MinecraftServer server) {
     this.itemStack = itemStack;
     this.patchBuilder = DataComponentPatch.builder();
+    this.server = server;
     this.adapter = MinecraftServerAudiences.of(server);
   }
 
@@ -74,6 +80,21 @@ public class FabricItemBuilder implements ItemBuilder {
     } else {
       patchBuilder.remove(DataComponents.UNBREAKABLE);
     }
+    return this;
+  }
+
+  @Override
+  public ItemBuilder boundArmor() {
+    patchBuilder.set(DataComponents.UNBREAKABLE, Unit.INSTANCE);
+    var bindingCurse = server.registryAccess()
+      .lookupOrThrow(Registries.ENCHANTMENT)
+      .getOrThrow(Enchantments.BINDING_CURSE);
+    ItemEnchantments.Mutable enchantments = new ItemEnchantments.Mutable(ItemEnchantments.EMPTY);
+    enchantments.set(bindingCurse, 1);
+    patchBuilder.set(DataComponents.ENCHANTMENTS, enchantments.toImmutable());
+    patchBuilder.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, false);
+    patchBuilder.set(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.DEFAULT
+      .withHidden(DataComponents.ENCHANTMENTS, true));
     return this;
   }
 

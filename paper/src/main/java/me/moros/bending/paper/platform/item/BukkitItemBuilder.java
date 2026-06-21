@@ -24,7 +24,9 @@ import java.util.List;
 import java.util.Map;
 
 import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.ItemEnchantments;
 import io.papermc.paper.datacomponent.item.ItemLore;
+import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import me.moros.bending.api.locale.Translation;
 import me.moros.bending.api.platform.item.ItemBuilder;
 import me.moros.bending.api.platform.item.ItemSnapshot;
@@ -33,6 +35,7 @@ import me.moros.bending.api.util.metadata.Metadata;
 import me.moros.bending.paper.platform.PlatformAdapter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.translation.GlobalTranslator;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.jspecify.annotations.Nullable;
@@ -77,6 +80,17 @@ public class BukkitItemBuilder implements ItemBuilder {
     } else {
       stack.unsetData(DataComponentTypes.UNBREAKABLE);
     }
+    return this;
+  }
+
+  @Override
+  public ItemBuilder boundArmor() {
+    stack.setData(DataComponentTypes.UNBREAKABLE);
+    stack.setData(DataComponentTypes.ENCHANTMENTS, ItemEnchantments.itemEnchantments()
+      .add(Enchantment.BINDING_CURSE, 1));
+    stack.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, false);
+    stack.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay()
+      .addHiddenComponents(DataComponentTypes.ENCHANTMENTS));
     return this;
   }
 
