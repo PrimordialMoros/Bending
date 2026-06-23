@@ -316,7 +316,7 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
 
   private Collection<ItemStack> onDropLoot(LivingEntity entity, Collection<ItemStack> loot) {
     if (!disabledWorld(entity)) {
-      loot.removeIf(i -> ItemUtil.getKey(i, Metadata.ARMOR_KEY));
+      loot.removeIf(i -> ItemUtil.getKey(i, Metadata.ARMOR_KEY) != null);
     }
     return loot;
   }
