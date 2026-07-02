@@ -37,14 +37,4 @@ public sealed interface Particle extends Keyed, Particles permits ParticleImpl {
   default ParticleBuilder builder(Position pos) {
     return ParticleBuilder.of(this, pos);
   }
-
-  /**
-   * Create a new particle builder for this particle type.
-   * @param pos the location to spawn the particles in
-   * @return a new builder instance
-   */
-  @Deprecated(forRemoval = true)
-  default ParticleBuilder builder(Object data, Position pos) {
-    return ParticleBuilder.of(this, pos);
-  }
 }

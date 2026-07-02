@@ -2,12 +2,6 @@ plugins {
     id("bending.base-conventions")
 }
 
-repositories {
-    maven("https://repo.moros.me/snapshots/") {
-        mavenContent { includeGroup("org.incendo") }
-    }
-}
-
 dependencies {
     api(projects.bendingApi)
     api(libs.storage)

@@ -74,16 +74,6 @@ public class FabricItemBuilder implements ItemBuilder {
   }
 
   @Override
-  public ItemBuilder unbreakable(boolean unbreakable) {
-    if (unbreakable) {
-      patchBuilder.set(DataComponents.UNBREAKABLE, Unit.INSTANCE);
-    } else {
-      patchBuilder.remove(DataComponents.UNBREAKABLE);
-    }
-    return this;
-  }
-
-  @Override
   public ItemBuilder boundArmor() {
     patchBuilder.set(DataComponents.UNBREAKABLE, Unit.INSTANCE);
     var bindingCurse = server.registryAccess()

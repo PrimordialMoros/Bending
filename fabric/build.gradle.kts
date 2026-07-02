@@ -10,9 +10,6 @@ repositories {
     maven("https://maven.nucleoid.xyz/") {
         mavenContent { includeGroup("eu.pb4") }
     }
-    maven("https://repo.moros.me/snapshots/") {
-        mavenContent { includeGroup("org.incendo") }
-    }
 }
 
 dependencies {

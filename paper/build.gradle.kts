@@ -11,7 +11,6 @@ repositories {
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/") // PAPI
     maven("https://repo.codemc.io/repository/maven-public/") // Bolt
     maven("https://repo.glaremasters.me/repository/towny/") // Towny
-    maven("https://repo.moros.me/snapshots/")
     maven("https://jitpack.io/") // GriefPrevention
 }
 

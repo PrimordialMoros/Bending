@@ -31,9 +31,6 @@ public interface ItemBuilder {
 
   <T> ItemBuilder meta(DataKey<T> key, T value);
 
-  @Deprecated(forRemoval = true)
-  ItemBuilder unbreakable(boolean unbreakable);
-
   ItemBuilder boundArmor();
 
   default ItemSnapshot build() {

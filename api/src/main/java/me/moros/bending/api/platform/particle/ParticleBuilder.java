@@ -86,16 +86,6 @@ public final class ParticleBuilder {
   }
 
   /**
-   * Set the extra value for particles, usually denotes speed.
-   * @param extra the extra value to use
-   * @return the modified builder
-   */
-  @Deprecated(forRemoval = true)
-  public ParticleBuilder extra(double extra) {
-    return speed(extra);
-  }
-
-  /**
    * Set the speed value for particles.
    * @param speed the speed value to use
    * @return the modified builder
@@ -175,32 +165,6 @@ public final class ParticleBuilder {
   }
 
   /**
-   * Create a new {@link Particle#DUST} particle builder with the specified rgb color.
-   * @param center the location to spawn the particles in
-   * @param color the rgb color
-   * @return a new builder instance
-   */
-  @Deprecated(forRemoval = true)
-  public static ParticleBuilder rgb(Position center, RGBLike color) {
-    return of(Particle.DUST, center)
-      .option(ParticleOptions.COLOR, color);
-  }
-
-  /**
-   * Create a new {@link Particle#DUST} particle builder with the specified rgb color and size.
-   * <p>Note: Particle size also affects particle lifetime.
-   * @param center the location to spawn the particles in
-   * @param hexVal the rgb color in hex format
-   * @param size the particle size
-   * @return a new builder instance
-   */
-  @Deprecated(forRemoval = true)
-  public static ParticleBuilder rgb(Position center, String hexVal, float size) {
-    return rgb(center, hexVal)
-      .option(ParticleOptions.SCALE, (double) size);
-  }
-
-  /**
    * Create a new {@link Particle#DUST} particle builder with the specified rgb color and size.
    * <p>Note: Particle size also affects particle lifetime.
    * @param center the location to spawn the particles in
@@ -213,84 +177,10 @@ public final class ParticleBuilder {
       .option(ParticleOptions.SCALE, size);
   }
 
-  /**
-   * Create a new {@link Particle#DUST} particle builder with the specified rgb color and size.
-   * <p>Note: Particle size also affects particle lifetime.
-   * @param center the location to spawn the particles in
-   * @param color the rgb color
-   * @param size the particle size
-   * @return a new builder instance
-   */
-  @Deprecated(forRemoval = true)
-  public static ParticleBuilder rgb(Position center, RGBLike color, float size) {
-    return rgb(center, color)
-      .option(ParticleOptions.SCALE, (double) size);
-  }
-
-  /**
-   * Create a new {@link Particle#DUST_COLOR_TRANSITION} particle builder with the specified rgb color.
-   * @param center the location to spawn the particles in
-   * @param fromHexVal the starting rgb color in hex format
-   * @param toHexVal the target rgb color in hex format
-   * @return a new builder instance
-   */
-  @Deprecated(forRemoval = true)
-  public static ParticleBuilder rgb(Position center, String fromHexVal, String toHexVal) {
-    return rgb(center, fromHexVal, toHexVal, 1);
-  }
-
-  /**
-   * Create a new {@link Particle#DUST_COLOR_TRANSITION} particle builder with the specified rgb color.
-   * @param center the location to spawn the particles in
-   * @param from the starting rgb color
-   * @param to the target rgb color
-   * @return a new builder instance
-   */
-  @Deprecated(forRemoval = true)
-  public static ParticleBuilder rgb(Position center, RGBLike from, RGBLike to) {
-    return rgb(center, from, to, 1);
-  }
-
-  /**
-   * Create a new {@link Particle#DUST_COLOR_TRANSITION} particle builder with the specified rgb color and size.
-   * <p>Note: Particle size also affects particle lifetime.
-   * @param center the location to spawn the particles in
-   * @param fromHexVal the starting rgb color in hex format
-   * @param toHexVal the target rgb color in hex format
-   * @param size the particle size
-   * @return a new builder instance
-   */
-  @Deprecated(forRemoval = true)
-  public static ParticleBuilder rgb(Position center, String fromHexVal, String toHexVal, float size) {
-    return rgb(center, fromHex(fromHexVal), fromHex(toHexVal), size);
-  }
-
-  /**
-   * Create a new {@link Particle#DUST_COLOR_TRANSITION} particle builder with the specified rgb colors and size.
-   * <p>Note: Particle size also affects particle lifetime.
-   * @param center the location to spawn the particles in
-   * @param from the starting rgb color
-   * @param to the target rgb color
-   * @param size the particle size
-   * @return a new builder instance
-   */
-  @Deprecated(forRemoval = true)
-  public static ParticleBuilder rgb(Position center, RGBLike from, RGBLike to, float size) {
-    return of(Particle.DUST_COLOR_TRANSITION, center)
-      .option(ParticleOptions.COLOR, from)
-      .option(ParticleOptions.TO_COLOR, to)
-      .option(ParticleOptions.SCALE, (double) size);
-  }
-
   static ParticleBuilder of(Particle effect, Position center) {
     Objects.requireNonNull(effect);
     Objects.requireNonNull(center);
     return new ParticleBuilder(effect, center);
-  }
-
-  @Deprecated(forRemoval = true)
-  static <T> ParticleBuilder of(Particle effect, T data, Position center) {
-    return of(effect, center);
   }
 
   private static RGBLike fromHex(String hexValue) {

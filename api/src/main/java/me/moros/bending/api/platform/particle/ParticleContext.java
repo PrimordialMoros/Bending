@@ -41,14 +41,4 @@ public sealed interface ParticleContext permits ParticleContextImpl {
   default double speed() {
     return option(ParticleOptions.SPEED).orElseThrow(); // handled by defaults
   }
-
-  @Deprecated(forRemoval = true)
-  default double extra() {
-    return speed();
-  }
-
-  @Deprecated(forRemoval = true)
-  default Object data() {
-    return null;
-  }
 }

@@ -74,16 +74,6 @@ public class BukkitItemBuilder implements ItemBuilder {
   }
 
   @Override
-  public ItemBuilder unbreakable(boolean unbreakable) {
-    if (unbreakable) {
-      stack.setData(DataComponentTypes.UNBREAKABLE);
-    } else {
-      stack.unsetData(DataComponentTypes.UNBREAKABLE);
-    }
-    return this;
-  }
-
-  @Override
   public ItemBuilder boundArmor() {
     stack.setData(DataComponentTypes.UNBREAKABLE);
     stack.setData(DataComponentTypes.ENCHANTMENTS, ItemEnchantments.itemEnchantments()
