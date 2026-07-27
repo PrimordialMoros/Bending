@@ -56,7 +56,8 @@ public final class EarthMaterials {
       .add(BlockTag.CONCRETE_POWDERS).add(BlockTag.CONCRETE)
       .add(BlockType.DIRT_PATH, BlockType.GRAVEL, BlockType.CLAY, BlockType.COBBLESTONE, BlockType.MOSSY_COBBLESTONE,
         BlockType.COBBLESTONE_STAIRS, BlockType.MOSSY_COBBLESTONE_STAIRS, BlockType.STONE_BRICK_STAIRS,
-        BlockType.CALCITE, BlockType.SMOOTH_BASALT, BlockType.AMETHYST_BLOCK, BlockType.QUARTZ_BLOCK,
+        BlockType.CRIMSON_NYLIUM, BlockType.WARPED_NYLIUM, BlockType.SMOOTH_BASALT,
+        BlockType.CALCITE, BlockType.AMETHYST_BLOCK, BlockType.QUARTZ_BLOCK,
         BlockType.POLISHED_GRANITE, BlockType.POLISHED_DIORITE, BlockType.POLISHED_ANDESITE)
       .add(BlockType.CINNABAR, BlockType.SULFUR, BlockType.POTENT_SULFUR)
       .buildAndRegister();
