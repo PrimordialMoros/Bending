@@ -57,15 +57,13 @@ tasks {
         from(zipTree(jar.flatMap { it.archiveFile }))
         configurations = listOf(project.configurations.shadow.get())
         archiveFileName = "${project.name}-mc${libs.versions.minecraft.get()}-${project.version}.jar"
-        dependencies {
-            reloc("com.github.benmanes.caffeine", "caffeine")
-            reloc("com.zaxxer.hikari", "hikari")
-            reloc("org.jdbi", "jdbi")
-            reloc("org.h2", "h2")
-            reloc("org.flyway", "flyway")
-            reloc("com.fasterxml.jackson", "jackson")
-            reloc("tools.jackson", "jackson")
-        }
+        reloc("com.github.benmanes.caffeine", "caffeine")
+        reloc("com.zaxxer.hikari", "hikari")
+        reloc("org.jdbi", "jdbi")
+        reloc("org.h2", "h2")
+        reloc("org.flyway", "flyway")
+        reloc("com.fasterxml.jackson", "jackson")
+        reloc("tools.jackson", "jackson")
     }
     named<Copy>("processResources") {
         expandProperties(

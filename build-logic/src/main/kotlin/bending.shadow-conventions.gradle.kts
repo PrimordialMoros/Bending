@@ -20,9 +20,9 @@ tasks {
             exclude {
                 excluded.contains(it.moduleName)
             }
-            reloc("org.bstats", "bstats")
-            reloc("com.sasorio.event", "eventbus")
-            reloc("me.moros.storage", "storage")
         }
+        reloc("org.bstats", "bstats")
+        reloc("com.sasorio.event", "eventbus")
+        reloc("me.moros.storage", "storage")
     }
 }

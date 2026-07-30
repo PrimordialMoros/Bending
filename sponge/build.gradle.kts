@@ -34,12 +34,10 @@ dependencies {
 tasks {
     shadowJar {
         archiveBaseName = "${project.name}-mc${libs.versions.minecraft.get()}"
-        dependencies {
-            reloc("org.incendo.cloud", "cloud")
-            reloc("org.h2", "h2")
-            reloc("org.flyway", "flyway")
-            reloc("com.fasterxml.jackson", "jackson")
-        }
+        reloc("org.incendo.cloud", "cloud")
+        reloc("org.h2", "h2")
+        reloc("org.flyway", "flyway")
+        reloc("com.fasterxml.jackson", "jackson")
         manifest.attributes["MixinConfigs"] = "bending-sponge.mixins.json"
     }
     named<Copy>("processResources") {
