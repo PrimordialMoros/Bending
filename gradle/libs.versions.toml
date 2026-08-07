@@ -19,7 +19,7 @@ fabric-loader = "0.19.3"
 shadow = "9.6.1"
 flyway = "12.11.0"
 junit = "6.1.3"
-jspecify = "1.0.1"
+jspecify = "1.0.0"
 moddevgradle = "2.0.143"
 neoform = "26.2-1"
 
