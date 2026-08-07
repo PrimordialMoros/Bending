@@ -3,7 +3,7 @@ storage = "4.0.0"
 math = "4.0.0"
 tasker = "2.1.0"
 adventure = "5.2.0"
-adventure-fabric = "7.1.0"
+adventure-fabric = "7.1.1"
 configurate = "4.2.0"
 cloud = "2.1.0"
 cloud-minecraft = "2.0.0"
@@ -13,14 +13,14 @@ sponge-api = "17.0.0"
 sponge-common = "1.21.10-17.0.1-SNAPSHOT"
 paper-api = "26.2.build.+"
 minecraft = "26.2"
-fabric-loom = "1.17.13"
-fabric-api = "0.152.1+26.2"
+fabric-loom = "1.17.19"
+fabric-api = "0.156.0+26.2"
 fabric-loader = "0.19.3"
-shadow = "9.4.2"
-flyway = "12.8.1"
-junit = "6.1.0"
+shadow = "9.6.1"
+flyway = "12.11.0"
+junit = "6.1.3"
 jspecify = "1.0.0"
-moddevgradle = "2.0.141"
+moddevgradle = "2.0.143"
 neoform = "26.2-1"
 
 [libraries]
@@ -35,7 +35,7 @@ tasker-fabric = { module = "me.moros:tasker-fabric", version.ref = "tasker" }
 
 javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.4" }
-jdbi = { module = "org.jdbi:jdbi3-core", version = "3.53.0" }
+jdbi = { module = "org.jdbi:jdbi3-core", version = "3.54.0" }
 hikari = { module = "com.zaxxer:HikariCP", version = "7.1.0" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-mysql = { module = "org.flywaydb:flyway-mysql", version.ref = "flyway" }
@@ -71,8 +71,8 @@ cloud-sponge = { module = "org.incendo:cloud-sponge", version.ref = "cloud-minec
 
 # Databases
 mysql = { module = "com.mysql:mysql-connector-j", version = "9.7.0" }
-mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.5.8" }
-postgresql = { module = "org.postgresql:postgresql", version = "42.7.11" }
+mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.5.10" }
+postgresql = { module = "org.postgresql:postgresql", version = "42.7.13" }
 h2 = { module = "com.h2database:h2", version = "2.4.240" }
 hsql = { module = "org.hsqldb:hsqldb", version = "2.7.4" }
 
@@ -85,10 +85,10 @@ fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.
 
 # Bukkit
 grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.7" }
-towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.103.0.2" }
+towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.103.1.1" }
 bolt = { module = "org.popcraft:bolt-bukkit", version = "1.2.86" }
-worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.17" }
-papi = { module = "me.clip:placeholderapi", version = "2.12.2" }
+worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.18" }
+papi = { module = "me.clip:placeholderapi", version = "2.12.3" }
 
 # Sponge
 sponge-api = { module = "org.spongepowered:spongeapi", version.ref = "sponge-api" }
@@ -97,7 +97,7 @@ sponge-mixin = { module = "org.spongepowered:mixin", version = "0.8.7" }
 
 # Plugins for build-logic
 shadow = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "shadow" }
-maven-publish = { module = "com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin", version = "0.36.0" }
+maven-publish = { module = "com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin", version = "0.37.0" }
 moddevgradle = { module = "net.neoforged:moddev-gradle", version.ref = "moddevgradle" }
 minotaur = { module = "com.modrinth.minotaur:Minotaur", version = "2.9.0" }
 
