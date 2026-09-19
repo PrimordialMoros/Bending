@@ -24,7 +24,6 @@ import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -35,9 +34,9 @@ public final class ServerPlayerEvents {
   private ServerPlayerEvents() {
   }
 
-  public static final Event<Interact> INTERACT = EventFactory.createArrayBacked(Interact.class, callbacks -> (player, hand) -> {
+  public static final Event<Punch> INTERACT = EventFactory.createArrayBacked(Punch.class, callbacks -> (player) -> {
     for (var callback : callbacks) {
-      var result = callback.onInteract(player, hand);
+      var result = callback.onPunch(player);
       if (result != InteractionResult.PASS) {
         return result;
       }
@@ -103,8 +102,8 @@ public final class ServerPlayerEvents {
   });
 
   @FunctionalInterface
-  public interface Interact {
-    InteractionResult onInteract(ServerPlayer player, InteractionHand hand);
+  public interface Punch {
+    InteractionResult onPunch(ServerPlayer player);
   }
 
   @FunctionalInterface

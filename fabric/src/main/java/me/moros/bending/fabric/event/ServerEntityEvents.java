@@ -56,7 +56,6 @@ public final class ServerEntityEvents {
     return value;
   });
 
-  // TODO mixin for entities and vehicle passengers?
   public static final Event<EntityMove> ENTITY_MOVE = EventFactory.createArrayBacked(EntityMove.class, callbacks -> (entity, from, to) -> {
     for (var callback : callbacks) {
       if (!callback.onMove(entity, from, to)) {

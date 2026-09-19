@@ -34,6 +34,7 @@ import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.PlatformFactory;
 import me.moros.bending.api.platform.PlatformType;
 import me.moros.bending.api.platform.block.Block;
+import me.moros.bending.api.platform.block.BlockTag;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemBuilder;
@@ -43,8 +44,6 @@ import me.moros.bending.fabric.adapter.NativeAdapterImpl;
 import me.moros.bending.fabric.gui.BoardImpl;
 import me.moros.bending.fabric.gui.ElementDialog;
 import me.moros.bending.fabric.platform.item.FabricItemBuilder;
-import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags;
-import net.fabricmc.fabric.api.tag.convention.v2.TagUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.MinecraftServer;
@@ -124,10 +123,10 @@ public class FabricPlatform implements Platform, PlatformFactory {
 
   @Override
   public Collection<ItemSnapshot> calculateOptimalOreDrops(Block block) {
-    var level = PlatformAdapter.toFabricWorld(block.world());
-    var pos = new BlockPos(block.blockX(), block.blockY(), block.blockZ());
-    var state = level.getBlockState(pos);
-    if (TagUtil.isIn(server.registryAccess(), ConventionalBlockTags.ORES, state.getBlock())) {
+    if (BlockTag.ORES.isTagged(block)) {
+      var level = PlatformAdapter.toFabricWorld(block.world());
+      var pos = new BlockPos(block.blockX(), block.blockY(), block.blockZ());
+      var state = level.getBlockState(pos);
       var item = new ItemStack(Items.DIAMOND_PICKAXE);
       var fortune = server.registryAccess()
         .lookupOrThrow(Registries.ENCHANTMENT)

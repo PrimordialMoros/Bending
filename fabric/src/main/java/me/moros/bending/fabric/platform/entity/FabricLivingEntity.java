@@ -125,7 +125,7 @@ public class FabricLivingEntity extends FabricEntity implements LivingEntity {
     arrow.shoot(direction.x(), direction.y(), direction.z(), (float) power, 0);
     arrow.setOwner(handle());
     arrow.setNoGravity(true);
-    arrow.setInvulnerable(true);
+    arrow.setPermanentlyInvulnerable(true);
     arrow.pickup = Pickup.DISALLOWED;
     w.addFreshEntity(arrow);
     return PlatformAdapter.fromFabricEntity(arrow);

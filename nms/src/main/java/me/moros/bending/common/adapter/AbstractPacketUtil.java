@@ -54,6 +54,7 @@ import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
+import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket.PositionedAdvancement;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -150,13 +151,14 @@ public abstract class AbstractPacketUtil implements PacketUtil {
     AdvancementType type = AdvancementType.TASK;
     var criterion = CriteriaTriggers.IMPOSSIBLE.createCriterion(new ImpossibleTrigger.TriggerInstance());
     var advancement = new Advancement.Builder()
-      .display(icon, nmsTitle, nmsDesc, null, type, true, false, true)
+      .display(icon, nmsTitle, nmsDesc, type, true, false, true)
       .addCriterion(criteriaId, criterion).build(ADVANCEMENT_KEY);
     AdvancementProgress progress = new AdvancementProgress();
     progress.update(AdvancementRequirements.allOf(List.of(criteriaId)));
     progress.grantProgress(criteriaId);
     var progressMap = Map.of(ADVANCEMENT_KEY, progress);
-    return new ClientboundUpdateAdvancementsPacket(false, List.of(advancement), Set.of(), progressMap, true);
+    var advList = List.of(new PositionedAdvancement(advancement, 0, 0));
+    return new ClientboundUpdateAdvancementsPacket(false, advList, Set.of(), progressMap, true);
   }
 
   protected ClientboundUpdateAdvancementsPacket clearNotification() {

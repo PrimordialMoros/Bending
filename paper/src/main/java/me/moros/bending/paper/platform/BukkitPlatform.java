@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import com.destroystokyo.paper.MaterialTags;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import me.moros.bending.api.ability.element.ElementHandler;
@@ -36,6 +35,7 @@ import me.moros.bending.api.platform.Platform;
 import me.moros.bending.api.platform.PlatformFactory;
 import me.moros.bending.api.platform.PlatformType;
 import me.moros.bending.api.platform.block.Block;
+import me.moros.bending.api.platform.block.BlockTag;
 import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.item.ItemBuilder;
@@ -121,13 +121,12 @@ public class BukkitPlatform implements Platform, PlatformFactory {
 
   @Override
   public Collection<ItemSnapshot> calculateOptimalOreDrops(Block block) {
-    var world = PlatformAdapter.toBukkitWorld(block.world());
-    var blockState = world.getBlockState(block.blockX(), block.blockY(), block.blockZ());
-    if (MaterialTags.ORES.isTagged(blockState)) {
+    if (BlockTag.ORES.isTagged(block)) {
+      var world = PlatformAdapter.toBukkitWorld(block.world());
+      var blockState = world.getBlockState(block.blockX(), block.blockY(), block.blockZ());
       var item = ItemStack.of(Material.DIAMOND_PICKAXE);
       item.addEnchantment(Enchantment.FORTUNE, 2);
-      return blockState.getDrops(item).stream()
-        .map(PlatformAdapter::fromBukkitItem).toList();
+      return blockState.getDrops(item).stream().map(PlatformAdapter::fromBukkitItem).toList();
     }
     return List.of();
   }

@@ -27,6 +27,7 @@ import java.util.SequencedCollection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.ObjIntConsumer;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import me.moros.bending.api.ability.AbilityDescription;
 import me.moros.bending.api.gui.Board;
@@ -39,6 +40,8 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.numbers.BlankFormat;
 import net.minecraft.network.chat.numbers.NumberFormatTypes;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
@@ -59,6 +62,9 @@ import org.jspecify.annotations.Nullable;
 import static net.kyori.adventure.text.format.TextDecoration.STRIKETHROUGH;
 
 public abstract class Sidebar implements Board {
+  private static final StreamCodec<ByteBuf, List<String>> STRING_LIST_CODEC = ByteBufCodecs.STRING_UTF8
+    .apply(ByteBufCodecs.list());
+
   private static final Component ACTIVE = Component.text("> ");
   private static final Component INACTIVE = Component.text("> ", NamedTextColor.DARK_GRAY);
   private static final Component SEP = Component.text(" -------------- ");
@@ -276,7 +282,7 @@ public abstract class Sidebar implements Board {
       );
       Parameters.STREAM_CODEC.encode(buf, parameters);
       if (action == TeamAction.CREATE) {
-        buf.writeCollection(List.of(generateInvisibleLegacyString(score)), FriendlyByteBuf::writeUtf);
+        STRING_LIST_CODEC.encode(buf, List.of(generateInvisibleLegacyString(score)));
       }
     }
     return ClientboundSetPlayerTeamPacket.STREAM_CODEC.decode(buf);

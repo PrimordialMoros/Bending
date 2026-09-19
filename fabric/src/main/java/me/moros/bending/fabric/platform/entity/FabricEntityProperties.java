@@ -100,8 +100,8 @@ final class FabricEntityProperties {
         .get(e -> !e.isNoGravity())
         .set((e, v) -> e.setNoGravity(!v)))
       .create(EntityProperties.INVULNERABLE, Entity.class, b -> b
-        .get(Entity::isInvulnerable)
-        .set(Entity::setInvulnerable))
+        .get(Entity::isPermanentlyInvulnerable)
+        .set(Entity::setPermanentlyInvulnerable))
       .create(EntityProperties.IN_WATER, Entity.class, b -> b
         .get(Entity::isInWater))
       .create(EntityProperties.IN_LAVA, Entity.class, b -> b
@@ -160,7 +160,7 @@ final class FabricEntityProperties {
         })
         .set((e, v) -> {
           e.setDeltaMovement(v.x(), v.y(), v.z());
-          e.hurtMarked = true;
+          e.syncVelocity = true;
         }))
       .create(EntityProperties.WORLD, Entity.class, b -> b
         .get(e -> new FabricWorld((ServerLevel) e.level())))

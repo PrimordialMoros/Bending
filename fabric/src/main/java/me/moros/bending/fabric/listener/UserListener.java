@@ -99,7 +99,7 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
     ServerEntityEvents.DROP_LOOT.register(this::onDropLoot);
     ServerPlayerEvents.ACCESS_LOCK.register(this::onAccessLock);
     ServerEntityEvents.DAMAGE.register(this::onEntityDamage);
-    ServerLivingEntityEvents.ALLOW_DAMAGE.register(this::onEntityAllowDamage);
+    ServerLivingEntityEvents.AFTER_DAMAGE.register(this::onEntityDamage);
     ServerLivingEntityEvents.AFTER_DEATH.register(this::onUserDeath);
     net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents.ENTITY_UNLOAD.register(this::onEntityUnload);
   }
@@ -148,8 +148,8 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
     return true;
   }
 
-  private InteractionResult onLeftClickAir(ServerPlayer player, InteractionHand hand) {
-    return onUserSwing(player, hand);
+  private InteractionResult onLeftClickAir(ServerPlayer player) {
+    return onUserSwing(player, InteractionHand.MAIN_HAND);
   }
 
   private InteractionResult onLeftClickBlock(Player playerEntity, Level world, InteractionHand hand, BlockPos blockPos, Direction direction) {
@@ -348,17 +348,11 @@ public record UserListener(Supplier<Game> gameSupplier) implements FabricListene
     return game().activationController().onEntityDamage(livingEntity, cause, damage, origin);
   }
 
-  private boolean onEntityAllowDamage(LivingEntity entity, DamageSource source, float damage) {
-    if (damage <= 0) {
-      return false;
+  private void onEntityDamage(LivingEntity entity, DamageSource source, float baseDamageTaken, float damageTaken, boolean blocked) {
+    if (disabledWorld(entity)) {
+      return;
     }
-    if (!disabledWorld(entity)) {
-      User user = Registries.BENDERS.get(entity.getUUID());
-      if (user != null) {
-        game().activationController().onUserDamage(user);
-      }
-    }
-    return true;
+    Registries.BENDERS.getIfExists(entity.getUUID()).ifPresent(game().activationController()::onUserDamage);
   }
 
   private void onUserDeath(LivingEntity entity, DamageSource damageSource) {

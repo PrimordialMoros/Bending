@@ -70,15 +70,18 @@ public abstract class AbstractNativeAdapter extends AbstractPacketUtil implement
   @Override
   public boolean damage(BendingDamageEvent event) {
     var target = adapt(event.target());
-    int capturedInvulnerableTime = target.invulnerableTime;
-    target.invulnerableTime = 0;
+    if (target.isInvulnerable()) {
+      return false;
+    }
+    int capturedInvulnerableTime = target.getInvulnerableTime();
+    target.setInvulnerableTime(0);
     Component deathMsg = translatable(event.ability().translationKey() + ".death",
       "bending.ability.generic.death")
       .arguments(event.target().name(), event.user().name(), event.ability().displayName());
     var bendingSource = DamageSource.of(event.user().name(), event.ability());
     var damageSource = new AbilityDamageSource(adapt(event.user()), adapt(deathMsg), bendingSource);
     boolean result = target.hurtServer((ServerLevel) target.level(), damageSource, (float) event.damage());
-    target.invulnerableTime = capturedInvulnerableTime;
+    target.setInvulnerableTime(capturedInvulnerableTime);
     return result;
   }
 }

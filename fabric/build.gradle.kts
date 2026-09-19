@@ -80,6 +80,7 @@ bendingPlatform {
 modrinth {
     versionName = "fabric-$version"
     gameVersions.add(libs.versions.minecraft)
+    environment = "server_only"
     dependencies {
         required.project("fabric-api")
         optional.project("placeholder-api")
