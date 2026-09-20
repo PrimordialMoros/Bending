@@ -23,6 +23,7 @@ import java.util.function.Consumer;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Cancellable;
 import me.moros.bending.fabric.event.ServerEntityEvents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
@@ -40,8 +41,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(value = LivingEntity.class, priority = 900)
 public abstract class LivingEntityMixin extends EntityMixin {
   @ModifyVariable(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isSleeping()Z"), ordinal = 0, argsOnly = true)
-  private float bending$onHurt(float damage, ServerLevel level, DamageSource source) {
-    return (float) ServerEntityEvents.DAMAGE.invoker().onDamage((LivingEntity) (Object) this, source, damage);
+  private float bending$onHurt(float damage, ServerLevel level, DamageSource source, @Cancellable CallbackInfoReturnable<Boolean> cir) {
+    double newDamage = ServerEntityEvents.DAMAGE.invoker().onDamage((LivingEntity) (Object) this, source, damage);
+    if (newDamage <= 0) {
+      cir.setReturnValue(false);
+    }
+    return (float) newDamage;
   }
 
   @Inject(method = "createItemStackToDrop",
