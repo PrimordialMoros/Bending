@@ -19,8 +19,10 @@
 
 package me.moros.bending.fabric.mixin;
 
-import java.util.Set;
-
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Cancellable;
+import com.llamalad7.mixinextras.sugar.Local;
 import me.moros.bending.fabric.event.ServerEntityEvents;
 import me.moros.bending.fabric.event.ServerPlayerEvents;
 import me.moros.math.Vector3d;
@@ -29,23 +31,15 @@ import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket.Action
 import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
 import net.minecraft.network.protocol.game.ServerboundPunchPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.PositionMoveRotation;
-import net.minecraft.world.entity.Relative;
-import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ServerGamePacketListenerImpl.class)
 public abstract class ServerGamePacketListenerImplMixin {
@@ -53,9 +47,10 @@ public abstract class ServerGamePacketListenerImplMixin {
   public ServerPlayer player;
 
   @Shadow
-  public abstract void teleport(PositionMoveRotation destination, Set<Relative> relatives);
+  public abstract void teleport(double x, double y, double z, float yRot, float xRot);
 
-  @Shadow public abstract boolean hasClientLoaded();
+  @Shadow
+  public abstract boolean hasClientLoaded();
 
   @Inject(method = "handlePunch", at = @At(value = "INVOKE",
     target = "Lnet/minecraft/server/level/ServerPlayer;resetLastActionTime()V"), cancellable = true)
@@ -105,16 +100,25 @@ public abstract class ServerGamePacketListenerImplMixin {
     ServerPlayerEvents.CHANGE_SLOT.invoker().onHeldSlotChange(this.player, oldSlot, newSlot);
   }
 
-  @Inject(method = "isEntityCollidingWithAnythingNew", at = @At(value = "HEAD"), cancellable = true)
-  private void bending$isEntityCollidingWithAnythingNew(LevelReader level, Entity entity, AABB oldAABB,
-                                                        double newX, double newY, double newZ,
-                                                        CallbackInfoReturnable<Boolean> cir) {
-    if (level instanceof ServerLevel && entity instanceof LivingEntity livingEntity) {
-      var from = Vector3d.of(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
-      var to = Vector3d.of(newX, newY, newZ);
-      if (!ServerEntityEvents.ENTITY_MOVE.invoker().onMove(livingEntity, from, to)) {
-        cir.setReturnValue(true);
+  @WrapOperation(
+    method = "handlePlayerPositionChange",
+    at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;absSnapTo(DDDFF)V", ordinal = 1)
+  )
+  private void bending$onAbsSnapTo(ServerPlayer player, double targetX, double targetY, double targetZ, float targetYRot, float targetXRot, Operation<Void> original,
+                                   @Local(argsOnly = true, name = "isOnGround") boolean isOnGround,
+                                   @Local(name = "startX") double startX, @Local(name = "startY") double startY, @Local(name = "startZ") double startZ,
+                                   @Cancellable CallbackInfo ci) {
+    if (!ci.isCancelled()) {
+      var from = Vector3d.of(startX, startY, startZ);
+      var to = Vector3d.of(targetX, targetY, targetZ);
+      if (!ServerEntityEvents.ENTITY_MOVE.invoker().onMove(player, from, to)) {
+        this.teleport(startX, startY, startZ, targetYRot, targetXRot);
+        this.player.doCheckFallDamage(this.player.getX() - startX, this.player.getY() - startY, this.player.getZ() - startZ, isOnGround);
+        this.player.removeLatestMovementRecording();
+        ci.cancel();
+        return;
       }
     }
+    original.call(player, targetX, targetY, targetZ, targetYRot, targetXRot);
   }
 }
