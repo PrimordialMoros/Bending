@@ -53,6 +53,7 @@ import me.moros.bending.api.platform.entity.Entity;
 import me.moros.bending.api.platform.entity.EntityProperties;
 import me.moros.bending.api.platform.entity.EntityType;
 import me.moros.bending.api.platform.entity.LivingEntity;
+import me.moros.bending.api.platform.entity.player.Player;
 import me.moros.bending.api.platform.item.InventoryUtil;
 import me.moros.bending.api.platform.particle.Particle;
 import me.moros.bending.api.platform.particle.ParticleBuilder;
@@ -62,6 +63,8 @@ import me.moros.bending.api.registry.Registries;
 import me.moros.bending.api.temporal.TempLight;
 import me.moros.bending.api.user.User;
 import me.moros.bending.api.util.BendingExplosion;
+import me.moros.bending.api.util.KeyUtil;
+import me.moros.bending.api.util.Tasker;
 import me.moros.bending.api.util.functional.ExpireRemovalPolicy;
 import me.moros.bending.api.util.functional.Policies;
 import me.moros.bending.api.util.functional.RemovalPolicy;
@@ -70,6 +73,7 @@ import me.moros.bending.common.ability.earth.MetalCable;
 import me.moros.math.Rotation;
 import me.moros.math.Vector3d;
 import me.moros.math.VectorUtil;
+import net.kyori.adventure.key.Key;
 import org.jspecify.annotations.Nullable;
 
 public class Lightning extends AbilityInstance {
@@ -257,12 +261,18 @@ public class Lightning extends AbilityInstance {
       if (handleRedirection(entities)) {
         return true;
       }
-      entities.forEach(this::onEntityHit);
+      List<UUID> players = new ArrayList<>(entities.size());
+      for (Entity entityToHit : entities) {
+        if (onEntityHit(entityToHit) && entityToHit instanceof Player) {
+          players.add(entityToHit.uuid());
+        }
+      }
+      sendTempEffect(players, 3);
     }
     return false;
   }
 
-  private void onEntityHit(Entity entity) {
+  private boolean onEntityHit(Entity entity) {
     if (affectedEntities.add(entity.uuid())) {
       entity.setProperty(EntityProperties.CHARGED, true);
       boolean hitWater = entity.inWater();
@@ -275,7 +285,9 @@ public class Lightning extends AbilityInstance {
         canExplode = false;
       }
       Particle.ELECTRIC_SPARK.builder(entity.center()).count(8).offset(0.3).spawn(user.world());
+      return true;
     }
+    return false;
   }
 
   private boolean touchLiquid(Vector3d center, Block block) {
@@ -317,6 +329,9 @@ public class Lightning extends AbilityInstance {
       SoundEffect.LIGHTNING.play(user.world(), user.location());
       user.addCooldown(description(), userConfig.cooldown);
       user.damage(userConfig.overchargeDamage, user, description());
+      if (user instanceof Player) {
+        sendTempEffect(List.of(user.uuid()), 3);
+      }
     }
   }
 
@@ -325,6 +340,13 @@ public class Lightning extends AbilityInstance {
     if (collision.collidedAbility() instanceof MetalCable cable) {
       tryInteractWithCable(collision.colliderSelf().position(), cable, false);
     }
+  }
+
+  private static final Key POST_EFFECT_INVERT = KeyUtil.vanilla("invert");
+
+  private void sendTempEffect(Collection<UUID> uuids, int ticks) {
+    Platform.instance().nativeAdapter().createPostEffects(List.of(POST_EFFECT_INVERT)).send(uuids);
+    Tasker.sync().submit(() -> Platform.instance().nativeAdapter().createPostEffects(List.of()).send(uuids), ticks);
   }
 
   private static final class Arc implements Iterable<LineSegment> {

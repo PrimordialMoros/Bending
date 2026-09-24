@@ -19,6 +19,7 @@
 
 package me.moros.bending.api.adapter;
 
+import java.util.Collection;
 import java.util.UUID;
 
 import me.moros.bending.api.platform.block.BlockState;
@@ -27,6 +28,7 @@ import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.world.World;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 
 /**
@@ -94,6 +96,10 @@ public interface PacketUtil {
    * @return the constructed packet
    */
   default ClientboundPacket updateDisplayPosition(int id, Vector3d position) {
+    return DummyPacket.INSTANCE;
+  }
+
+  default ClientboundPacket createPostEffects(Collection<Key> effects) {
     return DummyPacket.INSTANCE;
   }
 

@@ -35,6 +35,7 @@ import me.moros.bending.api.platform.item.Item;
 import me.moros.bending.api.platform.world.World;
 import me.moros.math.Position;
 import me.moros.math.Vector3d;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
@@ -45,6 +46,7 @@ import net.minecraft.advancements.triggers.ImpossibleTrigger;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.common.ClientboundPostEffectsPacket;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket;
@@ -133,6 +135,13 @@ public abstract class AbstractPacketUtil implements PacketUtil {
   @Override
   public ClientboundPacket updateDisplayPosition(int id, Vector3d position) {
     return wrap(id, teleportEntity(id, position));
+  }
+
+  @Override
+  public ClientboundPacket createPostEffects(Collection<Key> effects) {
+    List<Identifier> effectIds = effects.stream()
+      .map(k -> Identifier.fromNamespaceAndPath(k.namespace(), k.value())).toList();
+    return wrap(new ClientboundPostEffectsPacket(effectIds));
   }
 
   @Override
