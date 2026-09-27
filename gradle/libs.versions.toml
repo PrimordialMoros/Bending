@@ -13,11 +13,11 @@ sponge-api = "17.0.0"
 sponge-common = "1.21.10-17.0.1-SNAPSHOT"
 paper-api = "26.3.build.+"
 minecraft = "26.3"
-fabric-loom = "1.17.21"
-fabric-api = "0.160.7+26.3"
+fabric-loom = "1.18.2"
+fabric-api = "0.161.0+26.3"
 fabric-loader = "0.19.5"
 shadow = "9.6.1"
-flyway = "13.5.0"
+flyway = "13.8.0"
 junit = "6.1.3"
 jspecify = "1.0.0"
 moddevgradle = "2.0.147"
@@ -87,7 +87,7 @@ fabric-permissions = { module = "me.lucko:fabric-permissions-api", version = "0.
 grief-prevention = { module = "com.github.TechFortress:GriefPrevention", version = "16.18.7" }
 towny = { module = "com.palmergames.bukkit.towny:towny", version = "0.103.2.4" }
 bolt = { module = "org.popcraft:bolt-bukkit", version = "1.2.86" }
-worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.18" }
+worldguard = { module = "com.sk89q.worldguard:worldguard-bukkit", version = "7.0.19" }
 papi = { module = "me.clip:placeholderapi", version = "2.12.3" }
 
 # Sponge
@@ -113,6 +113,6 @@ flyway = ["flyway-core", "flyway-mysql", "flyway-pgsql", "flyway-hsqldb"]
 [plugins]
 jmh = { id = "me.champeau.jmh", version = "0.7.3" }
 fabric-loom = { id = "net.fabricmc.fabric-loom", version.ref = "fabric-loom" }
-paperweight-userdev = { id = "io.papermc.paperweight.userdev", version = "2.0.0-beta.23" }
+paperweight-userdev = { id = "io.papermc.paperweight.userdev", version = "2.0.0-beta.24" }
 hangar = { id = "io.papermc.hangar-publish-plugin", version = "0.1.4" }
 run-paper = { id = "xyz.jpenilla.run-paper", version = "3.1.0" }
