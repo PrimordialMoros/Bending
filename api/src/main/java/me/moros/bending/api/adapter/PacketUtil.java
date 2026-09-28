@@ -99,6 +99,11 @@ public interface PacketUtil {
     return DummyPacket.INSTANCE;
   }
 
+  /**
+   * Create a packet to apply/clear post effect shaders.
+   * @param effects the list of post effect ids to apply, pass empty to clear
+   * @return the constructed packet
+   */
   default ClientboundPacket createPostEffects(Collection<Key> effects) {
     return DummyPacket.INSTANCE;
   }
