@@ -8,7 +8,7 @@
   ],
   "ignoreDeps": [
     "com.mojang:minecraft",
-    "com.github.stefvanschie.inventoryframework:IF"
+    "org.jspecify:jspecify"
   ],
   "packageRules": [
     {
@@ -21,8 +21,7 @@
     {
       "description": "Correct version handling for dependencies with format major.minor.patch-prerelease+mcver",
       "matchPackageNames": [
-        "eu.pb4:placeholder-api",
-        "eu.pb4:sgui"
+        "eu.pb4:placeholder-api"
       ],
       "versioning": "regex:^(?<major>\\d+)(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?(?:-(?<prerelease>[A-Za-z0-9.]+))?(?:\\+(?<compatibility>.*))?$"
     },
