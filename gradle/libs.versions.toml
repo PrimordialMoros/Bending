@@ -71,7 +71,7 @@ cloud-sponge = { module = "org.incendo:cloud-sponge", version.ref = "cloud-minec
 
 # Databases
 mysql = { module = "com.mysql:mysql-connector-j", version = "26.7.0" }
-mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.5.10" }
+mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "4.0.0" }
 postgresql = { module = "org.postgresql:postgresql", version = "42.7.13" }
 h2 = { module = "com.h2database:h2", version = "2.5.250" }
 hsql = { module = "org.hsqldb:hsqldb", version = "2.7.4" }
