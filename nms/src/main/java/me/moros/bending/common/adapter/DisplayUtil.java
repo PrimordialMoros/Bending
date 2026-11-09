@@ -108,7 +108,7 @@ final class DisplayUtil {
   }
 
   private static Quaternionf adapt(Quaternion rot) {
-    return new Quaternionf(rot.q1(), rot.q1(), rot.q2(), rot.q0());
+    return new Quaternionf(rot.q1(), rot.q2(), rot.q3(), rot.q0());
   }
 
   private static Vector3f adapt(Position vector) {
